@@ -1,0 +1,15 @@
+{
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:forest": "2023-01-23 17:36:26 +0000"
+    },
+    "done": false
+  },
+  "minecraft:story/root": {
+    "criteria": {
+      "crafting_table": "2023-01-23 17:41:22 +0000"
+    },
+    "done": true
+  },
+  "DataVersion": 3218
+}
