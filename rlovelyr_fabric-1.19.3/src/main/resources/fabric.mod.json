@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "rlovelyr",
+  "version": "${version}",
+
+  "name": "Reboot LovelyRobot",
+  "description": "This is an example description!",
+  "authors": [
+    "MSymbios"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "MIT Licence",
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.msymbios.rlovelyr.LovelyRobotMod"
+    ],
+    "client": [
+      "net.msymbios.rlovelyr.LovelyRobotModClient"
+    ]
+  },
+  "mixins": [
+    "rlovelyr.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.11",
+    "fabric-api": "*",
+    "minecraft": "~1.19.3",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
