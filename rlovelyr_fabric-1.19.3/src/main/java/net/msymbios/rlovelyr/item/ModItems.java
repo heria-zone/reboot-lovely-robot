@@ -10,12 +10,14 @@ import net.minecraft.util.Identifier;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.ModEntities;
 import net.msymbios.rlovelyr.item.custom.RobotSpawnItem;
+import net.msymbios.rlovelyr.item.custom.TestItem;
 
 public class ModItems {
 
     // -- Variables --
     public static final Item VANILLA_SPAWN = registerItem("vanilla_spawn", new RobotSpawnItem(ModEntities.VANILLA, new FabricItemSettings()), ModItemsGroup.LOVELY_ROBOT);
     public static final Item ROBOT_CORE = registerItem("robot_core", new Item(new FabricItemSettings()), ModItemsGroup.LOVELY_ROBOT);
+    public static final Item TEST_ITEM = registerItem("test_item", new TestItem(new FabricItemSettings()), ModItemsGroup.LOVELY_ROBOT);
 
     // -- Methods --
     private static Item registerItem(String name, Item item, ItemGroup tab) {

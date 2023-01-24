@@ -4,7 +4,6 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.util.Identifier;
-import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
@@ -21,7 +20,7 @@ public class VanillaRenderer extends GeoEntityRenderer<VanillaEntity> {
     // -- Methods --
     @Override
     public Identifier getTextureLocation(VanillaEntity instance) {
-        return new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_00.png");
+        return instance.getCurrentTexture();
     } // getTextureLocation ()
 
     @Override
