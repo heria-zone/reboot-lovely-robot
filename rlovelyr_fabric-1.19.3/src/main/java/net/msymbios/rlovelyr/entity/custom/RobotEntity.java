@@ -153,6 +153,21 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
 
                 setColor(itemStack);
                 setModel();
+            }
+        }
+
+        if (!this.world.isClient) {
+            if(hand == Hand.MAIN_HAND) {
+                setSittingState(itemStack);
+                setAutoAttackState(itemStack);
+
+                StandbyMode(itemStack);
+                FollowMode(itemStack);
+                GuardMode(itemStack);
+
+                setColor(itemStack);
+                setModel();
+
 
                 if(getOwner() == null) {
                     this.setTamed(true);
@@ -212,7 +227,7 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     public void setSittingState(ItemStack itemStack) {
         if(!canInteract(itemStack)) return;
         boolean value = invertBoolean(isSitting());
-        this.dataTracker.set(SITTING, value);
+        this.dataTracker.set(SITTING, this.isSitting());
         setSitting(value);
     } // setSittingState ()
 
@@ -263,9 +278,9 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     } // initDataTracker ()
 
     public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
         nbt.putInt("Variant", this.getEntityVariant());
         nbt.putBoolean("Sitting", this.isSitting());
+        super.writeCustomDataToNbt(nbt);
     } // writeCustomDataToNbt ()
 
     public void readCustomDataFromNbt(NbtCompound nbt) {
