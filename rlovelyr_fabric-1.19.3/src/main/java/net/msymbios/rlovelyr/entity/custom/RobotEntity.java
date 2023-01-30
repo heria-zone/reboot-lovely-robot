@@ -133,9 +133,17 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
-        // this.goalSelector.add(3, new WanderAroundFarGoal(this, 1.0));
-        this.goalSelector.add(4, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
-        this.goalSelector.add(4, new LookAroundGoal(this));
+        this.goalSelector.add(3, new PounceAtTargetGoal(this, 0.4F));
+        this.goalSelector.add(4, new MeleeAttackGoal(this, 1.0, true));
+        this.goalSelector.add(5, new FollowOwnerGoal(this, 1.0, 10.0F, 2.0F, false));
+        this.goalSelector.add(6, new AnimalMateGoal(this, 1.0));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
+        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+        this.goalSelector.add(9, new LookAroundGoal(this));
+        this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
+        this.targetSelector.add(2, new AttackWithOwnerGoal(this));
+        this.targetSelector.add(3, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[0]));
+        this.targetSelector.add(4, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
     @Override
