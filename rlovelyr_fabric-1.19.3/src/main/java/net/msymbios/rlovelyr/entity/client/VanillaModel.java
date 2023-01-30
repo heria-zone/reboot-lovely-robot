@@ -19,7 +19,7 @@ public class VanillaModel extends GeoModel<VanillaEntity> {
 
     @Override
     public Identifier getAnimationResource(VanillaEntity animatable) {
-        return animatable.ENTITY_ANIMATION;
+        return animatable.getCurrentAnimator();
     } // getAnimationResource ()
 
 } // Class VanillaModel

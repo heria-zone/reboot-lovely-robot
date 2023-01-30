@@ -32,7 +32,7 @@ public class TestItem extends Item {
             outputText(user, "Resource ID: " + holder);
 
             if(Screen.hasShiftDown())
-                outputText(user, "Texture: " + getEntityTexture(holder));
+                outputText(user, "Texture: " + getTexture(holder));
 
             // user.getItemCooldownManager().set(this, 20); // add a cool down
         }
