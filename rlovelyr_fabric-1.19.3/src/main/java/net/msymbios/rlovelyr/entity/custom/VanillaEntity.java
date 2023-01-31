@@ -3,6 +3,9 @@ package net.msymbios.rlovelyr.entity.custom;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -46,7 +49,7 @@ public class VanillaEntity extends RobotEntity implements GeoEntity{
     } // setAttributes ()
 
     // -- Animations --
-    private PlayState idleAnim(AnimationState animationState) {
+    private PlayState locomotionAnim(AnimationState animationState) {
         if(animationState.isMoving()) {
             animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.walk", Animation.LoopType.LOOP));
             return PlayState.CONTINUE;
@@ -59,8 +62,17 @@ public class VanillaEntity extends RobotEntity implements GeoEntity{
             animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.idle", Animation.LoopType.LOOP));
             return PlayState.CONTINUE;
         }
+    } // locomotionAnim ()
 
-    } // idleAnim ()
+    private PlayState attackAnim(AnimationState state) {
+        if(this.handSwinging && state.getController().getAnimationState().equals(AnimationController.State.STOPPED)) {
+            state.getController().forceAnimationReset();
+            state.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE));
+            this.handSwinging = false;
+        }
+
+        return PlayState.CONTINUE;
+    } // attackAnim ()
 
     // -- Inheritance --
     @Override
@@ -75,7 +87,8 @@ public class VanillaEntity extends RobotEntity implements GeoEntity{
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(new AnimationController(this, "controller", 0, this::idleAnim));
+        controllerRegistrar.add(new AnimationController(this, "locomotionController", 0, this::locomotionAnim));
+        controllerRegistrar.add(new AnimationController(this, "attackController", 0, this::attackAnim));
     } // registerControllers ()
 
     @Override

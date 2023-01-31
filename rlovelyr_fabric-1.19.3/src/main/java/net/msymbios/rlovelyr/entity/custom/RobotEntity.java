@@ -27,7 +27,8 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.entity.varient.RobotVariant;
+import net.msymbios.rlovelyr.entity.utils.RobotMode;
+import net.msymbios.rlovelyr.entity.utils.RobotVariant;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -41,42 +42,46 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
 
     protected static final TrackedData<Integer> VARIANT;
     protected static final TrackedData<Boolean> SITTING;
+    protected static final TrackedData<Integer> MODE;
+
 
     protected static Identifier currentModel;
     protected static Identifier currentAnimator;
 
     public boolean isAutoAttackOn;
-    public RobotMode currentMode = RobotMode.Standby;
+    public RobotMode currentMode;
 
-    public RobotMode debugMode = RobotMode.Standby;
+    public RobotMode debugMode;
     public boolean debugAutoAttackOn;
+
 
     // -- Initialize --
     static {
         VARIANT = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.INTEGER);
         SITTING = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+        MODE = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.INTEGER);
     }
 
-    // -- Properties --
-    public Identifier getCurrentTexture() {
-        return getTexture(getEntityVariant());
-    } // getCurrentTexture ()
 
-    public static Identifier getCurrentModel() {
+    // -- Properties --
+    public Identifier getCurrentModel() {
         return currentModel;
     } // getCurrentTexture ()
+
+    public void setCurrentModel() {
+        if(currentMode == RobotMode.Follow) currentModel = MODELS.get("normal");
+        if(currentMode == RobotMode.Guard) currentModel = MODELS.get("attack");
+        if(currentMode == RobotMode.Standby) currentModel = MODELS.get("normal");
+    } // setCurrentModel ()
 
     public static Identifier getCurrentAnimator() {
         return currentAnimator;
     } // getCurrentAnimator ()
 
-    // -- Constructor --
-    protected RobotEntity(EntityType<? extends TameableEntity> entityType, World world) {
-        super(entityType, world);
-        InitializeEntity();
-    } // Constructor RobotEntity ()
+    public Identifier getCurrentTexture() {
+        return getTexture(getEntityVariant());
+    } // getCurrentTexture ()
 
-    // -- Appearance --
     public static Identifier getTexture() {
         return getTexture(getRandomNumber(TEXTURES.size()));
     } // getTexture ()
@@ -90,6 +95,13 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     public static Integer getTextureId() {
         return getRandomNumber(TEXTURES.size());
     } // getTextureId ()
+
+    public void setTexture(ItemStack itemStack) {
+        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
+        if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotVariant.YELLOW);
+        if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotVariant.LIGHT_BLUE);
+        if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotVariant.BLACK);
+    } // setTexture ()
 
     public void setEntityVariant(int variant) {
         this.dataTracker.set(VARIANT, variant);
@@ -109,18 +121,37 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         return RobotVariant.byId(getEntityVariant());
     } // getVariant ()
 
-    public void setColor(ItemStack itemStack) {
-        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
-        if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotVariant.YELLOW);
-        if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotVariant.LIGHT_BLUE);
-        if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotVariant.BLACK);
-    } // setColor ()
+    public int getCurrentMode() {
+        dataTracker.set(MODE, currentMode.getId());
+        return currentMode.getId();
+    } // getMode ()
 
-    public void setModel() {
-        if(currentMode == RobotMode.Follow) currentModel = MODELS.get("normal");
-        if(currentMode == RobotMode.Guard) currentModel = MODELS.get("attack");
-        if(currentMode == RobotMode.Standby) currentModel = MODELS.get("normal");
-    } // setModel ()
+    public void setCurrentMode(RobotMode value){
+        this.dataTracker.set(MODE, value.getId());
+        currentMode = value;
+    } // setCurrentMode ()
+
+    public void setCurrentMode(int value){
+        this.dataTracker.set(MODE, value);
+        currentMode = RobotMode.byId(value);
+    } // setCurrentMode ()
+
+    public boolean getSit() {
+        dataTracker.set(SITTING, isSitting());
+        return isSitting();
+    } // getSit ()
+
+    public void setSit(boolean value){
+        this.dataTracker.set(SITTING, value);
+        setSitting(value);
+    } // setSit ()
+
+    // -- Constructor --
+    protected RobotEntity(EntityType<? extends TameableEntity> entityType, World world) {
+        super(entityType, world);
+        InitializeEntity();
+    } // Constructor RobotEntity ()
+
 
     // -- Methods --
     @Nullable
@@ -146,6 +177,18 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         this.targetSelector.add(4, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
+    @Nullable @Override
+    public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
+        return null;
+    } // createChild
+
+    protected void InitializeEntity(){
+        currentModel = MODELS.get("normal");
+        currentAnimator = ANIMATIONS.get("locomotion");
+    } // SetupEntity ()
+
+
+    // -- Interact Methods --
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         ItemStack itemStack = player.getStackInHand(hand);
@@ -159,8 +202,8 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
                 FollowMode(itemStack);
                 GuardMode(itemStack);
 
-                setColor(itemStack);
-                setModel();
+                setTexture(itemStack);
+                setCurrentModel();
             }
         }
 
@@ -173,8 +216,8 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
                 FollowMode(itemStack);
                 GuardMode(itemStack);
 
-                setColor(itemStack);
-                setModel();
+                setTexture(itemStack);
+                setCurrentModel();
 
 
                 if(getOwner() == null) {
@@ -199,10 +242,63 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         return ActionResult.SUCCESS;
     } // interactMob ()
 
-    @Nullable @Override
-    public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
-        return null;
-    } // createChild
+    public void setSittingState(ItemStack itemStack) {
+        if(!canInteract(itemStack)) return;
+        setSit(invertBoolean(isSitting()));
+    } // setSittingState ()
+
+    public void setAutoAttackState(ItemStack itemStack){
+        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD))
+            isAutoAttackOn = invertBoolean(isAutoAttackOn);
+    } // setAutoAttackState ()
+
+    public void StandbyMode(ItemStack itemStack){
+        if(!canInteract(itemStack)) return;
+        if(isSitting()) setCurrentMode(RobotMode.Standby);
+    } // StandbyMode ()
+
+    public void FollowMode(ItemStack itemStack){
+        if(!canInteract(itemStack)) return;
+        if(!isSitting()) setCurrentMode(RobotMode.Follow);
+    } // FollowMode ()
+
+    public void GuardMode(ItemStack itemStack){
+        if(!itemStack.isOf(Items.COMPASS) && !itemStack.isOf(Items.RECOVERY_COMPASS)) return;
+        setSitting(false);
+        setCurrentMode(RobotMode.Guard);
+    } // GuardMode ()
+
+    private boolean canInteract(ItemStack itemStack){
+        if(itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) || itemStack.isOf(Items.BLACK_DYE)) return false;
+        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
+        if(itemStack.isOf(Items.COMPASS) || itemStack.isOf(Items.RECOVERY_COMPASS)) return false;
+        return true;
+    } // canInteract ()
+
+
+    // -- Save Methods --
+    @Override
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(VARIANT, 0);
+        this.dataTracker.startTracking(SITTING, false);
+        this.dataTracker.startTracking(MODE, 0);
+    } // initDataTracker ()
+
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        super.writeCustomDataToNbt(nbt);
+        nbt.putInt("Variant", this.getEntityVariant());
+        nbt.putBoolean("Sitting", this.getSit());
+        nbt.putInt("Mode", this.getCurrentMode());
+    } // writeCustomDataToNbt ()
+
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+        super.readCustomDataFromNbt(nbt);
+        this.setEntityVariant(nbt.getInt("Variant"));
+        this.setSit(nbt.getBoolean("Sitting"));
+        this.setCurrentMode(nbt.getInt("Mode"));
+    } // readCustomDataFromNbt ()
+
 
     // -- Sound Methods --
     @Override
@@ -225,50 +321,8 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         this.playSound(SoundEvents.ENTITY_PIG_STEP, 0.15f, 1.0f);
     } // playStepSound ()
 
-    // -- Initialize --
-    protected void InitializeEntity(){
-        currentModel = MODELS.get("normal");
-        currentAnimator = ANIMATIONS.get("locomotion");
-    } // SetupEntity ()
 
-    // -- State --
-    public void setSittingState(ItemStack itemStack) {
-        if(!canInteract(itemStack)) return;
-        boolean value = invertBoolean(isSitting());
-        this.dataTracker.set(SITTING, this.isSitting());
-        setSitting(value);
-    } // setSittingState ()
-
-    public void setAutoAttackState(ItemStack itemStack){
-        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD))
-            isAutoAttackOn = invertBoolean(isAutoAttackOn);
-    } // setAutoAttackState ()
-
-    // -- Mode --
-    public void StandbyMode(ItemStack itemStack){
-        if(!canInteract(itemStack)) return;
-        if(isSitting()) currentMode = RobotMode.Standby;
-    } // StandbyMode ()
-
-    public void FollowMode(ItemStack itemStack){
-        if(!canInteract(itemStack)) return;
-        if(!isSitting()) currentMode = RobotMode.Follow;
-    } // FollowMode ()
-
-    public void GuardMode(ItemStack itemStack){
-        if(!itemStack.isOf(Items.COMPASS) && !itemStack.isOf(Items.RECOVERY_COMPASS)) return;
-        setSitting(false);
-        currentMode = RobotMode.Guard;
-    } // GuardMode ()
-
-    // -- Utilities --
-    private boolean canInteract(ItemStack itemStack){
-        if(itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) || itemStack.isOf(Items.BLACK_DYE)) return false;
-        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
-        if(itemStack.isOf(Items.COMPASS) || itemStack.isOf(Items.RECOVERY_COMPASS)) return false;
-        return true;
-    } // canInteract ()
-
+    // -- Utilities Methods --
     public static int getRandomNumber(int number) {
         return Random.createLocal().nextInt(number);
     } // getRandomNumber ()
@@ -276,32 +330,5 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     public boolean invertBoolean(boolean value) {
         return value = !value;
     } // invertBoolean ()
-
-    // -- Save --
-    @Override
-    protected void initDataTracker() {
-        super.initDataTracker();
-        this.dataTracker.startTracking(VARIANT, 0);
-        this.dataTracker.startTracking(SITTING, false);
-    } // initDataTracker ()
-
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        nbt.putInt("Variant", this.getEntityVariant());
-        nbt.putBoolean("Sitting", this.isSitting());
-        super.writeCustomDataToNbt(nbt);
-    } // writeCustomDataToNbt ()
-
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        this.setEntityVariant(nbt.getInt("Variant"));
-        this.setSitting(nbt.getBoolean("Sitting"));
-    } // readCustomDataFromNbt ()
-
-    // -- Enum --
-    public enum RobotMode {
-        Follow,
-        Guard,
-        Standby
-    } // Enum RobotMode
 
 } // Class RobotEntity

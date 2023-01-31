@@ -1,4 +1,4 @@
-package net.msymbios.rlovelyr.entity.varient;
+package net.msymbios.rlovelyr.entity.utils;
 
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.function.ValueLists;
