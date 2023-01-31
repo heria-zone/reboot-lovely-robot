@@ -41,9 +41,8 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     protected static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>();
 
     protected static final TrackedData<Integer> VARIANT;
-    protected static final TrackedData<Boolean> SITTING;
     protected static final TrackedData<Integer> MODE;
-
+    protected static final TrackedData<Boolean> AUTO_ATTACK;
 
     protected static Identifier currentModel;
     protected static Identifier currentAnimator;
@@ -51,15 +50,12 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     public boolean isAutoAttackOn;
     public RobotMode currentMode;
 
-    public RobotMode debugMode;
-    public boolean debugAutoAttackOn;
-
 
     // -- Initialize --
     static {
         VARIANT = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.INTEGER);
-        SITTING = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
         MODE = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        AUTO_ATTACK = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     }
 
 
@@ -136,15 +132,16 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         currentMode = RobotMode.byId(value);
     } // setCurrentMode ()
 
-    public boolean getSit() {
-        dataTracker.set(SITTING, isSitting());
-        return isSitting();
-    } // getSit ()
+    public boolean getAutoAttack() {
+        dataTracker.set(AUTO_ATTACK, isAutoAttackOn);
+        return isAutoAttackOn;
+    } // getAutoAttack ()
 
-    public void setSit(boolean value){
-        this.dataTracker.set(SITTING, value);
-        setSitting(value);
-    } // setSit ()
+    public void setAutoAttack(boolean value) {
+        this.dataTracker.set(AUTO_ATTACK, value);
+        isAutoAttackOn = value;
+    } // setAutoAttack ()
+
 
     // -- Constructor --
     protected RobotEntity(EntityType<? extends TameableEntity> entityType, World world) {
@@ -185,6 +182,7 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     protected void InitializeEntity(){
         currentModel = MODELS.get("normal");
         currentAnimator = ANIMATIONS.get("locomotion");
+        setCurrentModel();
     } // SetupEntity ()
 
 
@@ -193,64 +191,50 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
         ItemStack itemStack = player.getStackInHand(hand);
 
-        if (this.world.isClient) {
-            if(hand == Hand.MAIN_HAND) {
-                setSittingState(itemStack);
-                setAutoAttackState(itemStack);
+        if(hand == Hand.MAIN_HAND) {
+            setSittingState(itemStack);
 
-                StandbyMode(itemStack);
-                FollowMode(itemStack);
-                GuardMode(itemStack);
-
-                setTexture(itemStack);
-                setCurrentModel();
-            }
-        }
-
-        if (!this.world.isClient) {
-            if(hand == Hand.MAIN_HAND) {
-                setSittingState(itemStack);
-                setAutoAttackState(itemStack);
-
-                StandbyMode(itemStack);
-                FollowMode(itemStack);
-                GuardMode(itemStack);
-
+            if (this.world.isClient) {
+                return ActionResult.PASS;
+            } else {
+                setAutoAttackState(itemStack, player);
+                setMode(itemStack, player);
                 setTexture(itemStack);
                 setCurrentModel();
 
-
-                if(getOwner() == null) {
-                    this.setTamed(true);
-                    setOwner(player);
+                if(getOwner() == null){
+                    this.setOwner(player);
                     player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()));
-                    player.sendMessage(Text.literal("Tame: " + isTamed()));
                 }
 
-                if(debugMode != currentMode) {
-                    player.sendMessage(Text.literal("Mode: " + this.currentMode.toString()));
-                    debugMode = currentMode;
-                }
-
-                if(debugAutoAttackOn != isAutoAttackOn) {
-                    player.sendMessage(Text.literal("Auto Attack: " + this.isAutoAttackOn));
-                    debugAutoAttackOn = isAutoAttackOn;
-                }
+                return ActionResult.SUCCESS;
             }
         }
 
-        return ActionResult.SUCCESS;
+        return super.interactMob(player, hand);
     } // interactMob ()
 
     public void setSittingState(ItemStack itemStack) {
         if(!canInteract(itemStack)) return;
-        setSit(invertBoolean(isSitting()));
+        setSitting(invertBoolean(isSitting()));
     } // setSittingState ()
 
-    public void setAutoAttackState(ItemStack itemStack){
-        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD))
-            isAutoAttackOn = invertBoolean(isAutoAttackOn);
+    public void setAutoAttackState(ItemStack itemStack, PlayerEntity player){
+        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) {
+            setAutoAttack(invertBoolean(isAutoAttackOn));
+            player.sendMessage(Text.literal("Auto Attack: " + this.isAutoAttackOn));
+        }
     } // setAutoAttackState ()
+
+    public void setMode(ItemStack itemStack, PlayerEntity player) {
+        RobotMode debugMode = currentMode;
+
+        StandbyMode(itemStack);
+        FollowMode(itemStack);
+        GuardMode(itemStack);
+
+        if(debugMode != currentMode) player.sendMessage(Text.literal("Mode: " + this.currentMode.toString()));
+    } // setMode
 
     public void StandbyMode(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
@@ -281,24 +265,23 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(VARIANT, 0);
-        this.dataTracker.startTracking(SITTING, false);
         this.dataTracker.startTracking(MODE, 0);
+        this.dataTracker.startTracking(AUTO_ATTACK, false);
     } // initDataTracker ()
 
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
         nbt.putInt("Variant", this.getEntityVariant());
-        nbt.putBoolean("Sitting", this.getSit());
         nbt.putInt("Mode", this.getCurrentMode());
+        nbt.putBoolean("AutoAttack", this.getAutoAttack());
     } // writeCustomDataToNbt ()
 
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         this.setEntityVariant(nbt.getInt("Variant"));
-        this.setSit(nbt.getBoolean("Sitting"));
         this.setCurrentMode(nbt.getInt("Mode"));
+        this.setAutoAttack(nbt.getBoolean("AutoAttack"));
     } // readCustomDataFromNbt ()
-
 
     // -- Sound Methods --
     @Override
