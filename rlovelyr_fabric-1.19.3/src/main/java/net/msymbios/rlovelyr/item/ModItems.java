@@ -15,6 +15,7 @@ public class ModItems {
 
     // -- Variables --
     public static final Item BUNNY_SPAWN = registerItem("bunny_spawn", new RobotSpawnItem(ModEntities.BUNNY, new FabricItemSettings()), ModItemsGroup.LOVELY_ROBOT);
+    public static final Item BUNNY2_SPAWN = registerItem("bunny2_spawn", new RobotSpawnItem(ModEntities.BUNNY2, new FabricItemSettings()), ModItemsGroup.LOVELY_ROBOT);
     public static final Item VANILLA_SPAWN = registerItem("vanilla_spawn", new RobotSpawnItem(ModEntities.VANILLA, new FabricItemSettings()), ModItemsGroup.LOVELY_ROBOT);
     public static final Item ROBOT_CORE = registerItem("robot_core", new Item(new FabricItemSettings()), ModItemsGroup.LOVELY_ROBOT);
 

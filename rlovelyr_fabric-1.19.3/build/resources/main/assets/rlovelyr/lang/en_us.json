@@ -1,10 +1,12 @@
 {
   "item.rlovelyr.bunny_spawn": "Bunny",
+  "item.rlovelyr.bunny2_spawn": "Bunny 2.0",
   "item.rlovelyr.vanilla_spawn": "Vanilla",
   "item.rlovelyr.robot_core": "Robot Core",
 
   "itemGroup.rlovelyr.lovely_robot": "Reboot LovelyRobot",
 
   "entity.rlovelyr.bunny": "Bunny",
+  "entity.rlovelyr.bunny2": "Bunny 2.0",
   "entity.rlovelyr.vanilla": "Vanilla"
 }

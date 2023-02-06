@@ -10,8 +10,10 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.msymbios.rlovelyr.LovelyRobotMod;
+import net.msymbios.rlovelyr.entity.client.Bunny2Renderer;
 import net.msymbios.rlovelyr.entity.client.BunnyRenderer;
 import net.msymbios.rlovelyr.entity.client.VanillaRenderer;
+import net.msymbios.rlovelyr.entity.custom.Bunny2Entity;
 import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
 import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
 
@@ -21,17 +23,22 @@ public class ModEntities {
     public static final EntityType<BunnyEntity> BUNNY = Registry.register(Registries.ENTITY_TYPE, new Identifier(LovelyRobotMod.MODID, "bunny"),
             FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, BunnyEntity::new).dimensions(EntityDimensions.fixed(0.4f, 1.5f)).build());
 
+    public static final EntityType<Bunny2Entity> BUNNY2 = Registry.register(Registries.ENTITY_TYPE, new Identifier(LovelyRobotMod.MODID, "bunny2"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, Bunny2Entity::new).dimensions(EntityDimensions.fixed(0.4f, 1.5f)).build());
+
     public static final EntityType<VanillaEntity> VANILLA = Registry.register(Registries.ENTITY_TYPE, new Identifier(LovelyRobotMod.MODID, "vanilla"),
            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, VanillaEntity::new).dimensions(EntityDimensions.fixed(0.4f, 1.5f)).build());
 
     // -- Methods --
     public static void registerEntityAttribute(){
         FabricDefaultAttributeRegistry.register(BUNNY, BunnyEntity.setAttributes());
+        FabricDefaultAttributeRegistry.register(BUNNY2, Bunny2Entity.setAttributes());
        FabricDefaultAttributeRegistry.register(VANILLA, VanillaEntity.setAttributes());
     } // registerEntityAttribute ()
 
     public static void registerEntityRenderer(){
         EntityRendererRegistry.register(BUNNY, BunnyRenderer::new);
+        EntityRendererRegistry.register(BUNNY2, Bunny2Renderer::new);
         EntityRendererRegistry.register(VANILLA, VanillaRenderer::new);
     } // registerEntityRenderer ()
 

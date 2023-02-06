@@ -22,4 +22,4 @@ public class BunnyModel extends GeoModel<BunnyEntity> {
         return animatable.getCurrentAnimator();
     } // getAnimationResource ()
 
-} // Class VanillaModel
+} // Class BunnyModel

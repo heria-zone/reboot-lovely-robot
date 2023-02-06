@@ -28,4 +28,4 @@ public class BunnyRenderer extends GeoEntityRenderer<BunnyEntity> {
         return super.getRenderType(animatable, texture, bufferSource, partialTick);
     } // getRenderType ()
 
-} // Class VanillaRenderer
+} // Class BunnyRenderer
