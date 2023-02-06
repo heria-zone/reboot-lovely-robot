@@ -10,9 +10,6 @@ public class ModItemsGroup {
 
     // -- Variables --
     public static final ItemGroup LOVELY_ROBOT = FabricItemGroup.builder(new Identifier(LovelyRobotMod.MODID, "lovely_robot"))
-            .icon(() -> new ItemStack(ModItems.VANILLA_SPAWN))
-            .entries((enabledFeatures, entries, operatorEnabled) -> {
-                entries.add(ModItems.VANILLA_SPAWN);
-            }).build();
+            .icon(() -> new ItemStack(ModItems.BUNNY_SPAWN)).build();
 
 } // Class ModItemsGroup

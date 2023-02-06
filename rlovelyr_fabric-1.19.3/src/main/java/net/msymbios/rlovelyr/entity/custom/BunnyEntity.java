@@ -1,16 +1,19 @@
 package net.msymbios.rlovelyr.entity.custom;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.VariantHolder;
 import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.passive.*;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.PassiveEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -22,18 +25,23 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
+import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.utils.RobotMode;
 import net.msymbios.rlovelyr.entity.utils.RobotVariant;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.object.PlayState;
 
 import java.util.HashMap;
 
-public class RobotEntity extends TameableEntity implements VariantHolder<RobotVariant> {
+public class BunnyEntity extends TameableEntity implements VariantHolder<RobotVariant>, GeoEntity {
 
     // -- Variables --
     protected static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>();
@@ -44,18 +52,30 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     protected static final TrackedData<Integer> MODE;
     protected static final TrackedData<Boolean> AUTO_ATTACK;
 
-    protected static Identifier currentModel;
-    protected static Identifier currentAnimator;
+    private static Identifier currentModel;
+    private static Identifier currentAnimator;
 
     public boolean isAutoAttackOn;
     public RobotMode currentMode;
 
+    private AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
+
 
     // -- Initialize --
     static {
-        VARIANT = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.INTEGER);
-        MODE = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.INTEGER);
-        AUTO_ATTACK = DataTracker.registerData(RobotEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+        TEXTURES.put(0, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_00.png"));
+        TEXTURES.put(1, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_01.png"));
+        TEXTURES.put(2, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_02.png"));
+        TEXTURES.put(4, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_03.png"));
+        TEXTURES.put(5, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_04.png"));
+
+        MODELS.put("normal", new Identifier(LovelyRobotMod.MODID, "geo/bunny.geo.json"));
+
+        ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
+
+        VARIANT = DataTracker.registerData(BunnyEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        MODE = DataTracker.registerData(BunnyEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        AUTO_ATTACK = DataTracker.registerData(BunnyEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     }
 
 
@@ -66,7 +86,7 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
 
     public void setCurrentModel() {
         if(currentMode == RobotMode.Follow) currentModel = MODELS.get("normal");
-        if(currentMode == RobotMode.Guard) currentModel = MODELS.get("attack");
+        if(currentMode == RobotMode.Guard) currentModel = MODELS.get("normal");
         if(currentMode == RobotMode.Standby) currentModel = MODELS.get("normal");
     } // setCurrentModel ()
 
@@ -74,7 +94,7 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         currentModel = MODELS.get(model);
     } // setCurrentModel ()
 
-    public static Identifier getCurrentAnimator() {
+    public Identifier getCurrentAnimator() {
         return currentAnimator;
     } // getCurrentAnimator ()
 
@@ -82,21 +102,23 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         return getTexture(getEntityVariant());
     } // getCurrentTexture ()
 
-    public static Identifier getTexture() {
+    public Identifier getTexture() {
         return getTexture(getRandomNumber(TEXTURES.size()));
     } // getTexture ()
 
-    public static Identifier getTexture(int key) {
+    public Identifier getTexture(int key) {
         if(TEXTURES.containsKey(key))
             return TEXTURES.get(key);
         return null;
     } // getTexture ()
 
-    public static Integer getTextureId() {
-        return getRandomNumber(TEXTURES.size());
-    } // getTextureId ()
-
-    public void setTexture(ItemStack itemStack) {} // setTexture ()
+    public void setTexture(ItemStack itemStack) {
+        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
+        if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotVariant.YELLOW);
+        if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotVariant.LIGHT_BLUE);
+        if(itemStack.isOf(Items.PURPLE_DYE)) setVariant(RobotVariant.PURPLE);
+        if(itemStack.isOf(Items.RED_DYE)) setVariant(RobotVariant.RED);
+    } // setTexture ()
 
     public void setEntityVariant(int variant) {
         this.dataTracker.set(VARIANT, variant);
@@ -143,16 +165,64 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
 
 
     // -- Constructor --
-    protected RobotEntity(EntityType<? extends TameableEntity> entityType, World world) {
+    public BunnyEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
         InitializeEntity();
     } // Constructor RobotEntity ()
 
 
+    // -- Animations --
+    private PlayState locomotionAnim(AnimationState animationState) {
+        if(animationState.isMoving()) {
+            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.walk", Animation.LoopType.LOOP));
+            return PlayState.CONTINUE;
+        }
+
+        if(isSitting()) {
+            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.sit", Animation.LoopType.LOOP));
+            return PlayState.CONTINUE;
+        } else {
+            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.idle", Animation.LoopType.LOOP));
+            return PlayState.CONTINUE;
+        }
+    } // locomotionAnim ()
+
+    private PlayState attackAnim(AnimationState state) {
+        if(this.handSwinging && state.getController().getAnimationState().equals(AnimationController.State.STOPPED)) {
+            state.getController().forceAnimationReset();
+            state.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE));
+            this.handSwinging = false;
+        }
+
+        return PlayState.CONTINUE;
+    } // attackAnim ()
+
+    // -- Inheritance --
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController(this, "locomotionController", 0, this::locomotionAnim));
+        controllerRegistrar.add(new AnimationController(this, "attackController", 0, this::attackAnim));
+    } // registerControllers ()
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return factory;
+    } // getAnimatableInstanceCache ()
+
+
     // -- Methods --
+    public static DefaultAttributeContainer.Builder setAttributes() {
+        return MobEntity.createMobAttributes()
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0f)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 2.0f)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
+    } // setAttributes ()
+
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.setEntityVariant(getTextureId());
+        this.setEntityVariant(0);
+
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 
@@ -252,7 +322,7 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     } // GuardMode ()
 
     private boolean canInteract(ItemStack itemStack){
-        if(itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) || itemStack.isOf(Items.BLACK_DYE)) return false;
+        if(itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) || itemStack.isOf(Items.BLACK_DYE) || itemStack.isOf(Items.RED_DYE) || itemStack.isOf(Items.PURPLE_DYE)) return false;
         if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
         if(itemStack.isOf(Items.COMPASS) || itemStack.isOf(Items.RECOVERY_COMPASS)) return false;
         return true;
@@ -282,12 +352,8 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));
     } // readCustomDataFromNbt ()
 
-    // -- Sound Methods --
-    /*@Override
-    protected SoundEvent getAmbientSound() {
-        return SoundEvents.ENTITY_;
-    } // getAmbientSound ()*/
 
+    // -- Sound Methods --
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
         return SoundEvents.ENTITY_GENERIC_HURT;
@@ -297,11 +363,6 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_GENERIC_DEATH;
     } // getDeathSound ()
-
-    /*@Override
-    protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.ENTITY_PIG_STEP, 0.15f, 1.0f);
-    } // playStepSound ()*/
 
 
     // -- Utilities Methods --

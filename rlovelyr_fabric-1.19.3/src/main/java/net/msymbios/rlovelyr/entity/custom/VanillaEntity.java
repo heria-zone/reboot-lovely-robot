@@ -1,28 +1,64 @@
 package net.msymbios.rlovelyr.entity.custom;
 
+import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.VariantHolder;
+import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.*;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.*;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.LocalDifficulty;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.LovelyRobotMod;
+import net.msymbios.rlovelyr.entity.utils.RobotMode;
 import net.msymbios.rlovelyr.entity.utils.RobotVariant;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.object.PlayState;
 
-public class VanillaEntity extends RobotEntity implements GeoEntity{
+import java.util.HashMap;
+
+public class VanillaEntity extends TameableEntity implements VariantHolder<RobotVariant>, GeoEntity {
 
     // -- Variables --
+    protected static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>();
+    protected static final HashMap<String, Identifier> MODELS = new HashMap<>();
+    protected static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>();
+
+    protected static final TrackedData<Integer> VARIANT;
+    protected static final TrackedData<Integer> MODE;
+    protected static final TrackedData<Boolean> AUTO_ATTACK;
+
+    protected static Identifier currentModel;
+    protected static Identifier currentAnimator;
+
+    public boolean isAutoAttackOn;
+    public RobotMode currentMode;
+
     private AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
+
 
     // -- Initialize --
     static {
@@ -32,13 +68,49 @@ public class VanillaEntity extends RobotEntity implements GeoEntity{
         TEXTURES.put(3, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_03.png"));
 
         MODELS.put("normal", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
-        MODELS.put("attack", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.attack.geo.json"));
 
         ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
+
+        VARIANT = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        MODE = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        AUTO_ATTACK = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     }
 
+
     // -- Properties --
-    @Override
+    public Identifier getCurrentModel() {
+        return currentModel;
+    } // getCurrentTexture ()
+
+    public void setCurrentModel() {
+        if(currentMode == RobotMode.Follow) currentModel = MODELS.get("normal");
+        if(currentMode == RobotMode.Guard) currentModel = MODELS.get("normal");
+        if(currentMode == RobotMode.Standby) currentModel = MODELS.get("normal");
+    } // setCurrentModel ()
+
+    public void setModel(String model) {
+        currentModel = MODELS.get(model);
+    } // setCurrentModel ()
+
+    public static Identifier getCurrentAnimator() {
+        return currentAnimator;
+    } // getCurrentAnimator ()
+
+    public Identifier getCurrentTexture() {
+        return getTexture(getEntityVariant());
+    } // getCurrentTexture ()
+
+    public static Identifier getTexture() {
+        return getTexture(getRandomNumber(TEXTURES.size()));
+    } // getTexture ()
+
+    public static Identifier getTexture(int key) {
+        if(TEXTURES.containsKey(key))
+            return TEXTURES.get(key);
+        return null;
+    } // getTexture ()
+
+
     public void setTexture(ItemStack itemStack) {
         if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
         if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotVariant.YELLOW);
@@ -46,19 +118,56 @@ public class VanillaEntity extends RobotEntity implements GeoEntity{
         if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotVariant.BLACK);
     } // setTexture ()
 
-    // -- Constructor --
-    public VanillaEntity(EntityType<? extends RobotEntity> entityType, World world) {
-        super(entityType, world);
-    } // Constructor ModEntities ()
+    public void setEntityVariant(int variant) {
+        this.dataTracker.set(VARIANT, variant);
+    } // setVariant ()
 
-    // -- Methods --
-    public static DefaultAttributeContainer.Builder setAttributes() {
-        return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0f)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 2.0f)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
-    } // setAttributes ()
+    public int getEntityVariant() {
+        return (Integer)this.dataTracker.get(VARIANT);
+    } // getVariant ()
+
+    @Override
+    public void setVariant(RobotVariant variant) {
+        setEntityVariant(variant.getId());
+    } // setVariant ()
+
+    @Override
+    public RobotVariant getVariant() {
+        return RobotVariant.byId(getEntityVariant());
+    } // getVariant ()
+
+    public int getCurrentMode() {
+        dataTracker.set(MODE, currentMode.getId());
+        return currentMode.getId();
+    } // getMode ()
+
+    public void setCurrentMode(RobotMode value){
+        this.dataTracker.set(MODE, value.getId());
+        currentMode = value;
+    } // setCurrentMode ()
+
+    public void setCurrentMode(int value){
+        this.dataTracker.set(MODE, value);
+        currentMode = RobotMode.byId(value);
+    } // setCurrentMode ()
+
+    public boolean getAutoAttack() {
+        dataTracker.set(AUTO_ATTACK, isAutoAttackOn);
+        return isAutoAttackOn;
+    } // getAutoAttack ()
+
+    public void setAutoAttack(boolean value) {
+        this.dataTracker.set(AUTO_ATTACK, value);
+        isAutoAttackOn = value;
+    } // setAutoAttack ()
+
+
+    // -- Constructor --
+    public VanillaEntity(EntityType<? extends TameableEntity> entityType, World world) {
+        super(entityType, world);
+        InitializeEntity();
+    } // Constructor RobotEntity ()
+
 
     // -- Animations --
     private PlayState locomotionAnim(AnimationState animationState) {
@@ -88,16 +197,6 @@ public class VanillaEntity extends RobotEntity implements GeoEntity{
 
     // -- Inheritance --
     @Override
-    protected void InitializeEntity() {
-        super.InitializeEntity();
-    } // InitializeEntity ()
-
-    @Override
-    protected void initGoals() {
-        super.initGoals();
-    } // initGoals ()
-
-    @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(new AnimationController(this, "locomotionController", 0, this::locomotionAnim));
         controllerRegistrar.add(new AnimationController(this, "attackController", 0, this::attackAnim));
@@ -108,4 +207,163 @@ public class VanillaEntity extends RobotEntity implements GeoEntity{
         return factory;
     } // getAnimatableInstanceCache ()
 
-} // Class VanillaEntity
+
+    // -- Methods --
+    public static DefaultAttributeContainer.Builder setAttributes() {
+        return MobEntity.createMobAttributes()
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0f)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 2.0f)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
+    } // setAttributes ()
+
+    @Nullable
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
+        this.setEntityVariant(0);
+        return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
+    } // initialize ()
+
+    @Override
+    protected void initGoals() {
+        this.goalSelector.add(1, new SwimGoal(this));
+        this.goalSelector.add(2, new SitGoal(this));
+        this.goalSelector.add(3, new PounceAtTargetGoal(this, 0.4F));
+        this.goalSelector.add(4, new MeleeAttackGoal(this, 1.0, true));
+        this.goalSelector.add(5, new FollowOwnerGoal(this, 1.0, 10.0F, 2.0F, false));
+        this.goalSelector.add(6, new AnimalMateGoal(this, 1.0));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
+        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+        this.goalSelector.add(9, new LookAroundGoal(this));
+        this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
+        this.targetSelector.add(2, new AttackWithOwnerGoal(this));
+        this.targetSelector.add(3, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[0]));
+        this.targetSelector.add(4, new UniversalAngerGoal(this, true));
+    } // initGoals ()
+
+    @Nullable @Override
+    public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
+        return null;
+    } // createChild
+
+    protected void InitializeEntity(){
+        currentModel = MODELS.get("normal");
+        currentAnimator = ANIMATIONS.get("locomotion");
+        setCurrentModel();
+    } // SetupEntity ()
+
+
+    // -- Interact Methods --
+    @Override
+    public ActionResult interactMob(PlayerEntity player, Hand hand) {
+        ItemStack itemStack = player.getStackInHand(hand);
+
+        if(hand == Hand.MAIN_HAND) {
+            setSittingState(itemStack);
+
+            if (this.world.isClient) {
+                return ActionResult.PASS;
+            } else {
+                setAutoAttackState(itemStack, player);
+                setMode(itemStack, player);
+                setTexture(itemStack);
+                setCurrentModel();
+
+                if(getOwner() == null){
+                    this.setOwner(player);
+                    player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()));
+                }
+
+                return ActionResult.SUCCESS;
+            }
+        }
+
+        return super.interactMob(player, hand);
+    } // interactMob ()
+
+    public void setSittingState(ItemStack itemStack) {
+        if(!canInteract(itemStack)) return;
+        setSitting(invertBoolean(isSitting()));
+    } // setSittingState ()
+
+    public void setAutoAttackState(ItemStack itemStack, PlayerEntity player){
+        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) {
+            setAutoAttack(invertBoolean(isAutoAttackOn));
+            player.sendMessage(Text.literal("Auto Attack: " + this.isAutoAttackOn));
+        }
+    } // setAutoAttackState ()
+
+    public void setMode(ItemStack itemStack, PlayerEntity player) {
+        StandbyMode(itemStack);
+        FollowMode(itemStack);
+        GuardMode(itemStack);
+    } // setMode
+
+    public void StandbyMode(ItemStack itemStack){
+        if(!canInteract(itemStack)) return;
+        if(isSitting()) setCurrentMode(RobotMode.Standby);
+    } // StandbyMode ()
+
+    public void FollowMode(ItemStack itemStack){
+        if(!canInteract(itemStack)) return;
+        if(!isSitting()) setCurrentMode(RobotMode.Follow);
+    } // FollowMode ()
+
+    public void GuardMode(ItemStack itemStack){
+        if(!itemStack.isOf(Items.COMPASS) && !itemStack.isOf(Items.RECOVERY_COMPASS)) return;
+        setSitting(false);
+        setCurrentMode(RobotMode.Guard);
+    } // GuardMode ()
+
+    private boolean canInteract(ItemStack itemStack){
+        if(itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) || itemStack.isOf(Items.BLACK_DYE) || itemStack.isOf(Items.RED_DYE) || itemStack.isOf(Items.PURPLE_DYE)) return false;
+        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
+        if(itemStack.isOf(Items.COMPASS) || itemStack.isOf(Items.RECOVERY_COMPASS)) return false;
+        return true;
+    } // canInteract ()
+
+
+    // -- Save Methods --
+    @Override
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(VARIANT, 0);
+        this.dataTracker.startTracking(MODE, 0);
+        this.dataTracker.startTracking(AUTO_ATTACK, false);
+    } // initDataTracker ()
+
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        super.writeCustomDataToNbt(nbt);
+        nbt.putInt("Variant", this.getEntityVariant());
+        nbt.putInt("Mode", this.getCurrentMode());
+        nbt.putBoolean("AutoAttack", this.getAutoAttack());
+    } // writeCustomDataToNbt ()
+
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+        super.readCustomDataFromNbt(nbt);
+        this.setEntityVariant(nbt.getInt("Variant"));
+        this.setCurrentMode(nbt.getInt("Mode"));
+        this.setAutoAttack(nbt.getBoolean("AutoAttack"));
+    } // readCustomDataFromNbt ()
+
+    // -- Sound Methods --
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SoundEvents.ENTITY_GENERIC_HURT;
+    } // getHurtSound ()
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.ENTITY_GENERIC_DEATH;
+    } // getDeathSound ()
+
+
+    // -- Utilities Methods --
+    public static int getRandomNumber(int number) {
+        return Random.createLocal().nextInt(number);
+    } // getRandomNumber ()
+
+    public boolean invertBoolean(boolean value) {
+        return value = !value;
+    } // invertBoolean ()
+
+} // Class RobotEntity

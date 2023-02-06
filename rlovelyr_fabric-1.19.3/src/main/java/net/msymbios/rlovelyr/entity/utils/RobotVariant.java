@@ -11,7 +11,9 @@ public enum RobotVariant implements StringIdentifiable {
     PINK(0, "pink"),
     YELLOW(1, "yellow"),
     LIGHT_BLUE(2, "light_blue"),
-    BLACK(3, "black");
+    BLACK(3, "black"),
+    PURPLE(4, "purple"),
+    RED(5, "red");
 
     // -- Variables --
     public static final StringIdentifiable.Codec<RobotVariant> CODEC;

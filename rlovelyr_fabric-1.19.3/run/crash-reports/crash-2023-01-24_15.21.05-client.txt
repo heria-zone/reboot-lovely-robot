@@ -63,7 +63,7 @@ Stacktrace:
 
 -- Entity being rendered --
 Details:
-	Entity Type: rlovelyr:vanilla (net.msymbios.rlovelyr.entity.custom.VanillaEntity)
+	Entity Type: rlovelyr:vanilla (net.msymbios.rlovelyr.entity.custom.VanillaEntityToRemove)
 	Entity ID: 36
 	Entity Name: entity.rlovelyr.vanilla
 	Entity's Exact location: 8.97, 86.00, 43.90
