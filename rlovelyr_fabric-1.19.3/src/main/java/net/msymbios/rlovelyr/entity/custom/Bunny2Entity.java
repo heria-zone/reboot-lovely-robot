@@ -68,7 +68,8 @@ public class Bunny2Entity extends TameableEntity implements VariantHolder<RobotV
         TEXTURES.put(8, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_02.png"));
         TEXTURES.put(7, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_03.png"));
 
-        MODELS.put("normal", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
+        MODELS.put("normal", new Identifier(LovelyRobotMod.MODID, "geo/bunny2.geo.json"));
+        //MODELS.put("normal", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
 
         ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
 
