@@ -7,9 +7,12 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.*;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.LovelyRobotMod;
+import net.msymbios.rlovelyr.entity.utils.RobotVariant;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
@@ -33,6 +36,15 @@ public class VanillaEntity extends RobotEntity implements GeoEntity{
 
         ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
     }
+
+    // -- Properties --
+    @Override
+    public void setTexture(ItemStack itemStack) {
+        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
+        if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotVariant.YELLOW);
+        if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotVariant.LIGHT_BLUE);
+        if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotVariant.BLACK);
+    } // setTexture ()
 
     // -- Constructor --
     public VanillaEntity(EntityType<? extends RobotEntity> entityType, World world) {

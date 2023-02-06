@@ -4,8 +4,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.SpawnEggItem;
 
-import java.util.List;
-
 public class RobotSpawnItem extends SpawnEggItem {
 
     // -- Constructor --

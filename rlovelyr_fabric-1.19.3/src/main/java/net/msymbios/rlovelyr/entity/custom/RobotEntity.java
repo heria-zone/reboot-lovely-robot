@@ -70,6 +70,10 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         if(currentMode == RobotMode.Standby) currentModel = MODELS.get("normal");
     } // setCurrentModel ()
 
+    public void setModel(String model) {
+        currentModel = MODELS.get(model);
+    } // setCurrentModel ()
+
     public static Identifier getCurrentAnimator() {
         return currentAnimator;
     } // getCurrentAnimator ()
@@ -92,12 +96,7 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
         return getRandomNumber(TEXTURES.size());
     } // getTextureId ()
 
-    public void setTexture(ItemStack itemStack) {
-        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
-        if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotVariant.YELLOW);
-        if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotVariant.LIGHT_BLUE);
-        if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotVariant.BLACK);
-    } // setTexture ()
+    public void setTexture(ItemStack itemStack) {} // setTexture ()
 
     public void setEntityVariant(int variant) {
         this.dataTracker.set(VARIANT, variant);
@@ -227,13 +226,13 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     } // setAutoAttackState ()
 
     public void setMode(ItemStack itemStack, PlayerEntity player) {
-        RobotMode debugMode = currentMode;
+        // RobotMode debugMode = currentMode;
 
         StandbyMode(itemStack);
         FollowMode(itemStack);
         GuardMode(itemStack);
 
-        if(debugMode != currentMode) player.sendMessage(Text.literal("Mode: " + this.currentMode.toString()));
+        // if(debugMode != currentMode) player.sendMessage(Text.literal("Mode: " + this.currentMode.toString()));
     } // setMode
 
     public void StandbyMode(ItemStack itemStack){
@@ -284,25 +283,25 @@ public class RobotEntity extends TameableEntity implements VariantHolder<RobotVa
     } // readCustomDataFromNbt ()
 
     // -- Sound Methods --
-    @Override
+    /*@Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.ENTITY_DOLPHIN_AMBIENT;
-    } // getAmbientSound ()
+        return SoundEvents.ENTITY_;
+    } // getAmbientSound ()*/
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.ENTITY_DOLPHIN_HURT;
+        return SoundEvents.ENTITY_GENERIC_HURT;
     } // getHurtSound ()
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.ENTITY_PIG_DEATH;
+        return SoundEvents.ENTITY_GENERIC_DEATH;
     } // getDeathSound ()
 
-    @Override
+    /*@Override
     protected void playStepSound(BlockPos pos, BlockState state) {
         this.playSound(SoundEvents.ENTITY_PIG_STEP, 0.15f, 1.0f);
-    } // playStepSound ()
+    } // playStepSound ()*/
 
 
     // -- Utilities Methods --
