@@ -4,17 +4,17 @@
   "version": "0.0.1-1.19.3",
 
   "name": "Reboot LovelyRobot",
-  "description": "This is an example description!",
+  "description": "Add a girls robot to assist in battle.",
   "authors": [
-    "MSymbios"
+    "MSymbios, lilacx02"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "",
+    "sources": ""
   },
 
   "license": "MIT Licence",
-  "icon": "assets/modid/icon.png",
+  "icon": "",
 
   "environment": "*",
   "entrypoints": {
