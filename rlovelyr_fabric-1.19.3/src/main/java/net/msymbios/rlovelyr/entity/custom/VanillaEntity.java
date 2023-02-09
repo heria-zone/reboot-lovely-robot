@@ -63,10 +63,16 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
     // -- Initialize --
     static {
-        TEXTURES.put(0, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_00.png"));
-        TEXTURES.put(1, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_01.png"));
-        TEXTURES.put(2, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_02.png"));
-        TEXTURES.put(3, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_03.png"));
+        TEXTURES.put(7, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_01.png")); // Orange
+        TEXTURES.put(9, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_02.png")); // Magenta
+        TEXTURES.put(1, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_04.png")); // Yellow
+        TEXTURES.put(8, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_05.png")); // Lime
+        TEXTURES.put(0, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_06.png")); // Pink
+        TEXTURES.put(2, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_08.png")); // Light Blue
+        TEXTURES.put(4, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_10.png")); // Purple
+        TEXTURES.put(6, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_11.png")); // Blue
+        TEXTURES.put(5, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_14.png")); // Red
+        TEXTURES.put(3, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_15.png")); // Black
 
         MODELS.put("unarmed", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
         ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
@@ -96,9 +102,15 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     } // getTexture ()
 
     public void setTexture(ItemStack itemStack) {
-        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
+        if(itemStack.isOf(Items.ORANGE_DYE)) setVariant(RobotVariant.ORANGE);
+        if(itemStack.isOf(Items.MAGENTA_DYE)) setVariant(RobotVariant.MAGENTA);
         if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotVariant.YELLOW);
+        if(itemStack.isOf(Items.LIME_DYE)) setVariant(RobotVariant.LIME);
+        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
         if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotVariant.LIGHT_BLUE);
+        if(itemStack.isOf(Items.PURPLE_DYE)) setVariant(RobotVariant.PURPLE);
+        if(itemStack.isOf(Items.BLUE_DYE)) setVariant(RobotVariant.BLUE);
+        if(itemStack.isOf(Items.RED_DYE)) setVariant(RobotVariant.RED);
         if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotVariant.BLACK);
     } // setTexture ()
 
@@ -204,8 +216,7 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.setEntityVariant(0);
-        // this.setEntityVariant(getRandomNumber(TEXTURES.size()));
+        this.setEntityVariant(getRandomNumber(TEXTURES.size()));
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 

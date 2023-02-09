@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "rlovelyr",
-  "version": "0.0.1-1.19.3",
+  "version": "0.0.2-1.19.3",
 
   "name": "Reboot LovelyRobot",
-  "description": "Add a girls robot to assist in battle.",
+  "description": "This mod is a reboot that adds several robots girl to Minecraft as an assistant in battles with various functionalities.",
   "authors": [
     "MSymbios, lilacx02"
   ],
