@@ -29,7 +29,7 @@ displayName="Reboot LovelyRobot" #mandatory
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="examplemod.png" #optional
 # A text field displayed in the mod UI
-credits="Mod orinaly made by lilacx02 | Ported by MSymbios" #optional
+credits="Mod originaly made by lilacx02 | Ported by MSymbios" #optional
 # A text field displayed in the mod UI
 authors="MSymbios" #optional
 # Display Test controls the display for your mod in the server connection screen
