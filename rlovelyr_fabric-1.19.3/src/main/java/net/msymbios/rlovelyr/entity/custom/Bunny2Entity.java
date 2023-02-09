@@ -29,6 +29,7 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.LovelyRobotMod;
+import net.msymbios.rlovelyr.entity.utils.ModMetrics;
 import net.msymbios.rlovelyr.entity.utils.RobotMode;
 import net.msymbios.rlovelyr.entity.utils.RobotVariant;
 import org.jetbrains.annotations.Nullable;
@@ -83,7 +84,7 @@ public class Bunny2Entity extends TameableEntity implements VariantHolder<RobotV
         return currentModel;
     } // getCurrentTexture ()
 
-    public static Identifier getCurrentAnimator() {
+    public Identifier getCurrentAnimator() {
         return currentAnimator;
     } // getCurrentAnimator ()
 
@@ -91,9 +92,8 @@ public class Bunny2Entity extends TameableEntity implements VariantHolder<RobotV
         return getTextureById(getEntityVariant());
     } // getCurrentTexture ()
 
-    public static Identifier getTextureById(int key) {
-        if(TEXTURES.containsKey(key)) return TEXTURES.get(key);
-        return null;
+    public Identifier getTextureById(int key) {
+        return TEXTURES.containsKey(key) ? TEXTURES.get(key) : getCurrentTexture();
     } // getTexture ()
 
     public void setTexture(ItemStack itemStack) {
@@ -197,10 +197,10 @@ public class Bunny2Entity extends TameableEntity implements VariantHolder<RobotV
     // -- Methods --
     public static DefaultAttributeContainer.Builder setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0f)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, 2.0f)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.Bunny2BaseHp)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.Bunny2BaseAttack)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.Bunny2MovementSpeed);
     } // setAttributes ()
 
     @Nullable

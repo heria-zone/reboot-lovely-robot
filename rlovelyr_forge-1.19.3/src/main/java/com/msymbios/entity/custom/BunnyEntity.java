@@ -1,5 +1,6 @@
 package com.msymbios.entity.custom;
 
+import com.msymbios.entity.utils.ModMetrics;
 import com.msymbios.entity.utils.RobotMode;
 import com.msymbios.entity.utils.RobotVariant;
 import com.msymbios.rlovelyr.LovelyRobotMod;
@@ -20,17 +21,16 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.*;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -40,25 +40,29 @@ import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.object.PlayState;
 
 import java.util.HashMap;
+import java.util.UUID;
 
-public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVariant>, GeoEntity {
+import static com.msymbios.entity.utils.ModUtils.*;
+
+public class BunnyEntity extends TamableAnimal implements NeutralMob, VariantHolder<RobotVariant>, GeoEntity {
 
     // -- Variables --
-    protected static final HashMap<Integer, ResourceLocation> TEXTURES = new HashMap<>();
-    protected static final HashMap<String, ResourceLocation> MODELS = new HashMap<>();
-    protected static final HashMap<String, ResourceLocation> ANIMATIONS = new HashMap<>();
+    private static final HashMap<Integer, ResourceLocation> TEXTURES = new HashMap<>();
+    private static final HashMap<String, ResourceLocation> MODELS = new HashMap<>();
+    private static final HashMap<String, ResourceLocation> ANIMATIONS = new HashMap<>();
 
-    protected static final EntityDataAccessor<Integer> VARIANT;
-    protected static final EntityDataAccessor<Integer> MODE;
-    protected static final EntityDataAccessor<Boolean> AUTO_ATTACK;
+    private static final EntityDataAccessor<Integer> VARIANT;
+    private static final EntityDataAccessor<Integer> MODE;
+    private static final EntityDataAccessor<Boolean> AUTO_ATTACK;
 
-    protected static ResourceLocation currentModel;
-    protected static ResourceLocation currentAnimator;
+    private static ResourceLocation currentModel;
+    private static ResourceLocation currentAnimator;
 
     public boolean isAutoAttackOn;
     public RobotMode currentMode;
 
-    private AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
+    private final AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
+
 
     // -- Initialize --
     static {
@@ -68,31 +72,21 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
         TEXTURES.put(4, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_03.png"));
         TEXTURES.put(5, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_04.png"));
 
-        MODELS.put("normal", new ResourceLocation(LovelyRobotMod.MODID, "geo/bunny.geo.json"));
-
+        MODELS.put("unarmed", new ResourceLocation(LovelyRobotMod.MODID, "geo/bunny.geo.json"));
         ANIMATIONS.put("locomotion", new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
 
-        VARIANT = SynchedEntityData.defineId(BunnyEntity.class, EntityDataSerializers.INT);
-        MODE = SynchedEntityData.defineId(BunnyEntity.class, EntityDataSerializers.INT);
-        AUTO_ATTACK = SynchedEntityData.defineId(BunnyEntity.class, EntityDataSerializers.BOOLEAN);
+        VARIANT = SynchedEntityData.defineId(HoneyEntity.class, EntityDataSerializers.INT);
+        MODE = SynchedEntityData.defineId(HoneyEntity.class, EntityDataSerializers.INT);
+        AUTO_ATTACK = SynchedEntityData.defineId(HoneyEntity.class, EntityDataSerializers.BOOLEAN);
     }
+
 
     // -- Properties --
     public ResourceLocation getCurrentModel() {
         return currentModel;
     } // getCurrentTexture ()
 
-    public void setCurrentModel() {
-        if(currentMode == RobotMode.Follow) currentModel = MODELS.get("normal");
-        if(currentMode == RobotMode.Guard) currentModel = MODELS.get("normal");
-        if(currentMode == RobotMode.Standby) currentModel = MODELS.get("normal");
-    } // setCurrentModel ()
-
-    public void setModel(String model) {
-        currentModel = MODELS.get(model);
-    } // setCurrentModel ()
-
-    public static ResourceLocation getCurrentAnimator() {
+    public ResourceLocation getCurrentAnimator() {
         return currentAnimator;
     } // getCurrentAnimator ()
 
@@ -100,11 +94,8 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
         return getTexture(getEntityVariant());
     } // getCurrentTexture ()
 
-
-    public static ResourceLocation getTexture(int key) {
-        if(TEXTURES.containsKey(key))
-            return TEXTURES.get(key);
-        return null;
+    public ResourceLocation getTexture(int key) {
+        return TEXTURES.containsKey(key) ? TEXTURES.get(key) : getCurrentTexture();
     } // getTexture ()
 
     public void setTexture(ItemStack itemStack) {
@@ -129,7 +120,7 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
     } // setVariant ()
 
     @Override
-    public RobotVariant getVariant() {
+    public @NotNull RobotVariant getVariant() {
         return RobotVariant.byId(getEntityVariant());
     } // getVariant ()
 
@@ -158,11 +149,14 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
         isAutoAttackOn = value;
     } // setAutoAttack ()
 
-    // -- Constructors --
+
+    // -- Constructor --
     public BunnyEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
-        InitializeEntity();
-    } // Constructor RobotEntity ()
+        currentModel = MODELS.get("unarmed");
+        currentAnimator = ANIMATIONS.get("locomotion");
+    } // Constructor BunnyEntity ()
+
 
     // -- Animations --
     private PlayState locomotionAnim(AnimationState animationState) {
@@ -171,7 +165,7 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
             return PlayState.CONTINUE;
         }
 
-        if(isInSittingPose()) {
+        if(isOrderedToSit()) {
             animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.sit", Animation.LoopType.LOOP));
             return PlayState.CONTINUE;
         } else {
@@ -190,6 +184,7 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
         return PlayState.CONTINUE;
     } // attackAnim ()
 
+
     // -- Inheritance --
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
@@ -206,51 +201,49 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
     // -- Methods --
     public static AttributeSupplier setAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 20.0D)
-                .add(Attributes.ATTACK_DAMAGE, 3.0f)
-                .add(Attributes.ATTACK_SPEED, 1.0f)
-                .add(Attributes.MOVEMENT_SPEED, 0.4f).build();
+                .add(Attributes.MAX_HEALTH, ModMetrics.BunnyBaseHp)
+                .add(Attributes.ATTACK_DAMAGE, ModMetrics.BunnyBaseAttack)
+                .add(Attributes.ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
+                .add(Attributes.MOVEMENT_SPEED, ModMetrics.BunnyMovementSpeed).build();
     } // setAttributes ()
+
+    @Override
+    public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+        this.setEntityVariant(0);
+        // this.setEntityVariant(getRandomNumber(TEXTURES.size()));
+        return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
+    } // finalizeSpawn ()
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(4, new LeapAtTargetGoal(this, 0.4F));
-        this.goalSelector.addGoal(5, new MeleeAttackGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(6, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
-        this.goalSelector.addGoal(7, new BreedGoal(this, 1.0D));
-        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1.0D));
-        this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Player.class, 8.0F));
-        this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(3, new LeapAtTargetGoal(this, 0.4F));
+        this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0D, true));
+        this.goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
+        this.goalSelector.addGoal(6, new BreedGoal(this, 1.0D));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, (new HurtByTargetGoal(this)).setAlertOthers());
-        this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, AbstractSkeleton.class, false));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt));
+        this.targetSelector.addGoal(5, new NonTameRandomTargetGoal<>(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
+        this.targetSelector.addGoal(6, new NearestAttackableTargetGoal<>(this, AbstractSkeleton.class, false));
+        this.targetSelector.addGoal(7, new ResetUniversalAngerTargetGoal<>(this, true));
     } // registerGoals ()
 
-    @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor levelAccessor, DifficultyInstance instance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setEntityVariant(0);
-        return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
-    } // finalizeSpawn ()
-
-    @Nullable
-    @Override
-    public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
+    @Nullable @Override
+    public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
         return null;
     } // getBreedOffspring ()
 
-    protected void InitializeEntity(){
-        currentModel = MODELS.get("normal");
-        currentAnimator = ANIMATIONS.get("locomotion");
-        setCurrentModel();
-    } // SetupEntity ()
 
     // -- Interact Methods --
     @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        ItemStack itemStack = player.getItemInHand(hand);
+    public @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
+        var itemStack = player.getItemInHand(hand);
 
         if(hand == InteractionHand.MAIN_HAND) {
             setSittingState(itemStack);
@@ -259,9 +252,8 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
                 return InteractionResult.PASS;
             } else {
                 setAutoAttackState(itemStack, player);
-                setMode(itemStack, player);
+                setMode(itemStack);
                 setTexture(itemStack);
-                setCurrentModel();
 
                 if(getOwner() == null){
                     this.setOwnerUUID(player.getUUID());
@@ -277,17 +269,16 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
 
     public void setSittingState(ItemStack itemStack) {
         if(!canInteract(itemStack)) return;
-        setInSittingPose(invertBoolean(isInSittingPose()));
+        setOrderedToSit(invertBoolean(isOrderedToSit()));
     } // setSittingState ()
 
     public void setAutoAttackState(ItemStack itemStack, Player player){
-        if(itemStack.is(Items.WOODEN_SWORD) || itemStack.is(Items.STONE_SWORD) || itemStack.is(Items.IRON_SWORD) || itemStack.is(Items.GOLDEN_SWORD) || itemStack.is(Items.DIAMOND_SWORD) || itemStack.is(Items.NETHERITE_SWORD)) {
-            setAutoAttack(invertBoolean(isAutoAttackOn));
-            player.displayClientMessage(Component.literal("Auto Attack: " + this.isAutoAttackOn), true);
-        }
+        if(!canInteractAutoAttack(itemStack)) return;
+        setAutoAttack(invertBoolean(isAutoAttackOn));
+        player.displayClientMessage(Component.literal("Auto Attack: " + this.isAutoAttackOn), true);
     } // setAutoAttackState ()
 
-    public void setMode(ItemStack itemStack, Player player) {
+    public void setMode(ItemStack itemStack) {
         StandbyMode(itemStack);
         FollowMode(itemStack);
         GuardMode(itemStack);
@@ -295,26 +286,20 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
 
     public void StandbyMode(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
-        if(isInSittingPose()) setCurrentMode(RobotMode.Standby);
+        if(isOrderedToSit()) setCurrentMode(RobotMode.Standby);
     } // StandbyMode ()
 
     public void FollowMode(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
-        if(!isInSittingPose()) setCurrentMode(RobotMode.Follow);
+        if(!isOrderedToSit()) setCurrentMode(RobotMode.Follow);
     } // FollowMode ()
 
     public void GuardMode(ItemStack itemStack){
-        if(!itemStack.is(Items.COMPASS) && !itemStack.is(Items.RECOVERY_COMPASS)) return;
-        setInSittingPose(false);
+        if(!canInteractGuardMode(itemStack)) return;
+        setOrderedToSit(false);
         setCurrentMode(RobotMode.Guard);
     } // GuardMode ()
 
-    private boolean canInteract(ItemStack itemStack){
-        if(itemStack.is(Items.PINK_DYE) || itemStack.is(Items.YELLOW_DYE) || itemStack.is(Items.LIGHT_BLUE_DYE) || itemStack.is(Items.BLACK_DYE) || itemStack.is(Items.RED_DYE) || itemStack.is(Items.PURPLE_DYE) || itemStack.is(Items.BLUE_DYE) || itemStack.is(Items.LIME_DYE) || itemStack.is(Items.ORANGE_DYE)) return false;
-        if(itemStack.is(Items.WOODEN_SWORD) || itemStack.is(Items.STONE_SWORD) || itemStack.is(Items.IRON_SWORD) || itemStack.is(Items.GOLDEN_SWORD) || itemStack.is(Items.DIAMOND_SWORD) || itemStack.is(Items.NETHERITE_SWORD)) return false;
-        if(itemStack.is(Items.COMPASS) || itemStack.is(Items.RECOVERY_COMPASS)) return false;
-        return true;
-    } // canInteract ()
 
     // -- Save Methods --
     @Override
@@ -325,22 +310,23 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
         this.entityData.define(AUTO_ATTACK, false);
     } // defineSynchedData ()
 
-    public void addAdditionalSaveData(CompoundTag compoundTag) {
+    public void addAdditionalSaveData(@NotNull CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
         compoundTag.putInt("Variant", this.getEntityVariant());
         compoundTag.putInt("Mode", this.getCurrentMode());
         compoundTag.putBoolean("AutoAttack", this.getAutoAttack());
     } // addAdditionalSaveData ()
 
-    public void readAdditionalSaveData(CompoundTag compoundTag) {
+    public void readAdditionalSaveData(@NotNull CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         this.setEntityVariant(compoundTag.getInt("Variant"));
         this.setCurrentMode(compoundTag.getInt("Mode"));
         this.setAutoAttack(compoundTag.getBoolean("AutoAttack"));
     } // readAdditionalSaveData ()
 
+
     // -- Sound Methods --
-    protected SoundEvent getHurtSound(DamageSource source) {
+    protected SoundEvent getHurtSound(@NotNull DamageSource source) {
         return SoundEvents.GENERIC_HURT;
     } // getHurtSound ()
 
@@ -348,9 +334,26 @@ public class BunnyEntity extends TamableAnimal implements VariantHolder<RobotVar
         return SoundEvents.GENERIC_DEATH;
     } // getDeathSound ()
 
-    // -- Utilities Methods --
-    public boolean invertBoolean(boolean value) {
-        return value = !value;
-    } // invertBoolean ()
+
+    // -- Inherited --
+    @Override
+    public int getRemainingPersistentAngerTime() {
+        return 0;
+    }
+
+    @Override
+    public void setRemainingPersistentAngerTime(int p_21673_) {}
+
+    @Nullable
+    @Override
+    public UUID getPersistentAngerTarget() {
+        return null;
+    }
+
+    @Override
+    public void setPersistentAngerTarget(@Nullable UUID p_21672_) {}
+
+    @Override
+    public void startPersistentAngerTimer() {}
 
 } // Class BunnyEntity
