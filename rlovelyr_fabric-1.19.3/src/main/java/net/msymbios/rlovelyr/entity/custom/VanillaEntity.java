@@ -24,7 +24,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
@@ -40,24 +39,26 @@ import software.bernie.geckolib.core.object.PlayState;
 
 import java.util.HashMap;
 
+import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
+
 public class VanillaEntity extends TameableEntity implements VariantHolder<RobotVariant>, GeoEntity {
 
     // -- Variables --
-    protected static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>();
-    protected static final HashMap<String, Identifier> MODELS = new HashMap<>();
-    protected static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>();
+    private static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>();
+    private static final HashMap<String, Identifier> MODELS = new HashMap<>();
+    private static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>();
 
-    protected static final TrackedData<Integer> VARIANT;
-    protected static final TrackedData<Integer> MODE;
-    protected static final TrackedData<Boolean> AUTO_ATTACK;
+    private static final TrackedData<Integer> VARIANT;
+    private static final TrackedData<Integer> MODE;
+    private static final TrackedData<Boolean> AUTO_ATTACK;
 
-    protected static Identifier currentModel;
-    protected static Identifier currentAnimator;
+    private static Identifier currentModel;
+    private static Identifier currentAnimator;
 
-    public boolean isAutoAttackOn;
-    public RobotMode currentMode;
+    private boolean isAutoAttackOn;
+    private RobotMode currentMode;
 
-    private AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
+    private final AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
 
 
     // -- Initialize --
@@ -67,13 +68,12 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         TEXTURES.put(2, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_02.png"));
         TEXTURES.put(3, new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_03.png"));
 
-        MODELS.put("normal", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
-
+        MODELS.put("unarmed", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
         ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
 
-        VARIANT = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-        MODE = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-        AUTO_ATTACK = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+        VARIANT = DataTracker.registerData(Bunny2Entity.class, TrackedDataHandlerRegistry.INTEGER);
+        MODE = DataTracker.registerData(Bunny2Entity.class, TrackedDataHandlerRegistry.INTEGER);
+        AUTO_ATTACK = DataTracker.registerData(Bunny2Entity.class, TrackedDataHandlerRegistry.BOOLEAN);
     }
 
 
@@ -82,34 +82,18 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         return currentModel;
     } // getCurrentTexture ()
 
-    public void setCurrentModel() {
-        if(currentMode == RobotMode.Follow) currentModel = MODELS.get("normal");
-        if(currentMode == RobotMode.Guard) currentModel = MODELS.get("normal");
-        if(currentMode == RobotMode.Standby) currentModel = MODELS.get("normal");
-    } // setCurrentModel ()
-
-    public void setModel(String model) {
-        currentModel = MODELS.get(model);
-    } // setCurrentModel ()
-
     public static Identifier getCurrentAnimator() {
         return currentAnimator;
     } // getCurrentAnimator ()
 
     public Identifier getCurrentTexture() {
-        return getTexture(getEntityVariant());
+        return getTextureById(getEntityVariant());
     } // getCurrentTexture ()
 
-    public static Identifier getTexture() {
-        return getTexture(getRandomNumber(TEXTURES.size()));
-    } // getTexture ()
-
-    public static Identifier getTexture(int key) {
-        if(TEXTURES.containsKey(key))
-            return TEXTURES.get(key);
+    public static Identifier getTextureById(int key) {
+        if(TEXTURES.containsKey(key)) return TEXTURES.get(key);
         return null;
     } // getTexture ()
-
 
     public void setTexture(ItemStack itemStack) {
         if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
@@ -123,7 +107,7 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     } // setVariant ()
 
     public int getEntityVariant() {
-        return (Integer)this.dataTracker.get(VARIANT);
+        return this.dataTracker.get(VARIANT);
     } // getVariant ()
 
     @Override
@@ -165,7 +149,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     // -- Constructor --
     public VanillaEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
-        InitializeEntity();
+        currentModel = MODELS.get("unarmed");
+        currentAnimator = ANIMATIONS.get("locomotion");
     } // Constructor RobotEntity ()
 
 
@@ -220,6 +205,7 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setEntityVariant(0);
+        // this.setEntityVariant(getRandomNumber(TEXTURES.size()));
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 
@@ -236,7 +222,7 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         this.goalSelector.add(9, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
-        this.targetSelector.add(3, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[0]));
+        this.targetSelector.add(3, (new RevengeGoal(this)).setGroupRevenge());
         this.targetSelector.add(4, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
@@ -245,17 +231,11 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         return null;
     } // createChild
 
-    protected void InitializeEntity(){
-        currentModel = MODELS.get("normal");
-        currentAnimator = ANIMATIONS.get("locomotion");
-        setCurrentModel();
-    } // SetupEntity ()
-
 
     // -- Interact Methods --
     @Override
     public ActionResult interactMob(PlayerEntity player, Hand hand) {
-        ItemStack itemStack = player.getStackInHand(hand);
+        var itemStack = player.getStackInHand(hand);
 
         if(hand == Hand.MAIN_HAND) {
             setSittingState(itemStack);
@@ -264,9 +244,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
                 return ActionResult.PASS;
             } else {
                 setAutoAttackState(itemStack, player);
-                setMode(itemStack, player);
+                setMode(itemStack);
                 setTexture(itemStack);
-                setCurrentModel();
 
                 if(getOwner() == null){
                     this.setOwner(player);
@@ -286,13 +265,12 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     } // setSittingState ()
 
     public void setAutoAttackState(ItemStack itemStack, PlayerEntity player){
-        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) {
-            setAutoAttack(invertBoolean(isAutoAttackOn));
-            player.sendMessage(Text.literal("Auto Attack: " + this.isAutoAttackOn));
-        }
+        if (!canInteractAutoAttack(itemStack)) return;
+        setAutoAttack(invertBoolean(isAutoAttackOn));
+        player.sendMessage(Text.literal("Auto Attack: " + this.isAutoAttackOn));
     } // setAutoAttackState ()
 
-    public void setMode(ItemStack itemStack, PlayerEntity player) {
+    public void setMode(ItemStack itemStack) {
         StandbyMode(itemStack);
         FollowMode(itemStack);
         GuardMode(itemStack);
@@ -309,17 +287,10 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     } // FollowMode ()
 
     public void GuardMode(ItemStack itemStack){
-        if(!itemStack.isOf(Items.COMPASS) && !itemStack.isOf(Items.RECOVERY_COMPASS)) return;
+        if(!canInteractGuardMode(itemStack)) return;
         setSitting(false);
         setCurrentMode(RobotMode.Guard);
     } // GuardMode ()
-
-    private boolean canInteract(ItemStack itemStack){
-        if(itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) || itemStack.isOf(Items.BLACK_DYE) || itemStack.isOf(Items.RED_DYE) || itemStack.isOf(Items.PURPLE_DYE) || itemStack.isOf(Items.BLUE_DYE) || itemStack.isOf(Items.LIME_DYE) || itemStack.isOf(Items.ORANGE_DYE)) return false;
-        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
-        if(itemStack.isOf(Items.COMPASS) || itemStack.isOf(Items.RECOVERY_COMPASS)) return false;
-        return true;
-    } // canInteract ()
 
 
     // -- Save Methods --
@@ -345,6 +316,7 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));
     } // readCustomDataFromNbt ()
 
+
     // -- Sound Methods --
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
@@ -355,15 +327,5 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_GENERIC_DEATH;
     } // getDeathSound ()
-
-
-    // -- Utilities Methods --
-    public static int getRandomNumber(int number) {
-        return Random.createLocal().nextInt(number);
-    } // getRandomNumber ()
-
-    public boolean invertBoolean(boolean value) {
-        return value = !value;
-    } // invertBoolean ()
 
 } // Class RobotEntity
