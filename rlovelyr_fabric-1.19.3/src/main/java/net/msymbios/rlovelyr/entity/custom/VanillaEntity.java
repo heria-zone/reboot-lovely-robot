@@ -1,11 +1,10 @@
 package net.msymbios.rlovelyr.entity.custom;
 
-import net.minecraft.entity.EntityData;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.VariantHolder;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
@@ -14,6 +13,8 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -31,16 +32,19 @@ import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.utils.ModMetrics;
 import net.msymbios.rlovelyr.entity.utils.RobotState;
 import net.msymbios.rlovelyr.entity.utils.RobotTexture;
+import net.msymbios.rlovelyr.entity.utils.RobotVariant;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.object.PlayState;
 
 import java.util.HashMap;
 
 import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
+import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 
 public class VanillaEntity extends TameableEntity implements VariantHolder<RobotTexture>, GeoEntity {
 
@@ -49,9 +53,16 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     private static final HashMap<String, Identifier> MODELS = new HashMap<>();
     private static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>();
 
+    private static final TrackedData<String> VARIENT;
     private static final TrackedData<Integer> TEXTURE_ID;
+
     private static final TrackedData<Integer> STATE;
     private static final TrackedData<Boolean> AUTO_ATTACK;
+
+    private static final TrackedData<Integer> MAX_LEVEL;
+    private static final TrackedData<Integer> LEVEL;
+    private static final TrackedData<Integer> EXP;
+
 
     private static Identifier currentModel;
     private static Identifier currentAnimator;
@@ -78,9 +89,15 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         MODELS.put("unarmed", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
         ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
 
+        VARIENT = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.STRING);
         TEXTURE_ID = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+
         STATE = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
         AUTO_ATTACK = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+
+        MAX_LEVEL = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        LEVEL = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        EXP = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
     }
 
 
@@ -157,6 +174,100 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         isAutoAttackOn = value;
     } // setAutoAttack ()
 
+    public String getVariantID() {
+        return this.dataTracker.get(VARIENT);
+    } // getVariantID ()
+
+    public void setVariantID(String value) {
+        this.dataTracker.set(VARIENT, value);
+    } // setVariantID ()
+
+    public int getMaxLevel(){
+        return this.dataTracker.get(MAX_LEVEL);
+    } // getMaxLevel ()
+
+    public void setMaxLevel(int value) {
+        this.dataTracker.set(MAX_LEVEL, value);
+    } // setMaxLevel ()
+
+    protected int getNextExp() {
+        return ModMetrics.BaseExp + this.getLevel() * ModMetrics.UpExpValue;
+    } // getNextExp ()
+
+    public int getLevel(){
+        int newLevel = 1;
+        try {newLevel = this.dataTracker.get(LEVEL);}
+        catch (Exception ignored){}
+        return newLevel;
+    } // getLevel ()
+
+    public void setLevel(int value){
+        this.dataTracker.set(LEVEL, value);
+
+        EntityAttributeInstance maxHealthAttribute = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        assert maxHealthAttribute != null;
+        maxHealthAttribute.setBaseValue(getHpValue());
+
+        EntityAttributeInstance damageAttribute = this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        assert damageAttribute != null;
+        damageAttribute.setBaseValue(getAttackValue());
+
+        EntityAttributeInstance armorAttribute = this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
+        assert armorAttribute != null;
+        armorAttribute.setBaseValue(getArmorValue());
+
+        EntityAttributeInstance armorToughnessAttribute = this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
+        assert armorToughnessAttribute != null;
+        armorToughnessAttribute.setBaseValue(getArmorToughnessValue());
+    } // setLevel ()
+
+    public int getExp(){
+        int newExp = 1;
+        try {newExp = this.dataTracker.get(EXP);}
+        catch (Exception ignored){}
+        return newExp;
+    } // getExp ()
+
+    public void setExp(int value){
+        this.dataTracker.set(EXP, value);
+    } // setExp ()
+
+    public int getHpValue() {
+        return (int)(ModMetrics.VanillaBaseHp + this.getLevel() * ModMetrics.VanillaBaseHp / 50);
+    } // getHpValue ()
+
+    public int getAttackValue() {
+        return (int)(ModMetrics.VanillaBaseAttack + this.getLevel() * ModMetrics.VanillaBaseAttack / 50);
+    } // getAttackValue ()
+
+    public int getDefenseValue() {
+        return (int)(ModMetrics.VanillaBaseDefense + this.getLevel() * ModMetrics.VanillaBaseDefense / 50);
+    } // getDefenseValue ()
+
+    public int getLootingLevel() {
+        int level = 0;
+        if (ModMetrics.LootingEnchantment) {
+            level = this.getLevel() / ModMetrics.LootingRequiredLevel;
+            if (level > ModMetrics.MaxLootingLevel) {
+                level = ModMetrics.MaxLootingLevel;
+            }
+        }
+        return level;
+    } // getLootingLevel ()
+
+    public double getArmorValue () {
+        int armor = this.getDefenseValue();
+        if (armor > 30) armor = 30;
+        return armor;
+    } // getArmorValue ()
+
+    public double getArmorToughnessValue () {
+        double armor = getArmorValue();
+        double armor_tou = 0;
+        if (armor > 30) armor_tou = armor - 30;
+        return armor_tou;
+    } // getArmorToughnessValue ()
+
 
     // -- Constructor --
     public VanillaEntity(EntityType<? extends TameableEntity> entityType, World world) {
@@ -211,12 +322,21 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
                 .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.VanillaBaseHp)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.VanillaBaseAttack)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.VanillaMovementSpeed);
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.VanillaMovementSpeed)
+                .add(EntityAttributes.GENERIC_ARMOR, 0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 0);
     } // setAttributes ()
 
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
+        this.setVariantID(RobotVariant.Vanilla.getName());
         this.setEntityVariant(getRandomNumber(TEXTURES.size()));
+        this.setMaxLevel(ModMetrics.MaxLevel);
+
+        EquipmentSlot slot = EquipmentSlot.MAINHAND;
+        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
+        this.equipStack(slot, diamondSword);
+
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 
@@ -237,10 +357,122 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         this.targetSelector.add(4, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
+    @Override
+    public boolean damage(DamageSource source, float amount) {
+        if (this.isInvulnerableTo(source)) return false;
+
+        // ToDo: Add damage protected by getFireProtection
+        // ToDo: Add damage protected by getFallProtection
+        // ToDo: Add damage protected by getBlastProtection
+        // ToDo: Add damage protected by getProjectileProtection
+
+        if (amount < 1.0f) return false;
+
+        if(!world.isClient) {
+            // if(source.isFire()) this.setFireProtection(this.getFireProtection() + 1);
+            // ToDo: Add fire protection
+            // ToDo: Add fall protection
+            // ToDo: Add blast protection
+            // ToDo: Add projectile protection
+        }
+
+        final Entity entity = source.getSource();
+
+        if (this.canUpLevel() && !(entity instanceof PlayerEntity) && entity instanceof LivingEntity && !this.world.isClient) {
+            final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
+            this.addExp(maxHp / 6);
+        }
+
+        if (entity != null && !(entity instanceof PlayerEntity) && !(entity instanceof ArrowEntity)) {
+            amount = (amount + 1.0f) / 2.0f;
+        }
+
+        return super.damage(source, amount);
+    } // damage ()
+
+    @Override
+    public boolean handleAttack(Entity attacker) {
+        if(this.canUpLevel() && !(attacker instanceof PlayerEntity) && attacker instanceof LivingEntity && !this.world.isClient) {
+            final int maxHp = (int)((LivingEntity)attacker).getMaxHealth();
+            this.addExp(maxHp / 4);
+        }
+
+        this.world.sendEntityStatus(this, (byte)4);
+
+        return super.handleAttack(attacker);
+    } // handleAttack ()
+
+    @Override
+    protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean allowDrops) {
+        final ItemStack craftPurchaseOrder = new ItemStack(ROBOT_CORE, 1);
+
+        try {
+            final NbtCompound nbt = new NbtCompound();
+            final String customName = this.getEntityName();
+            if (customName != null && !customName.trim().equals("")) {
+                nbt.putString("CustomName", customName);
+            }
+
+            nbt.putString("Variant", this.getVariantID());
+            nbt.putInt("TextureID", this.getEntityVariant());
+
+            nbt.putInt("State", this.getCurrentState());
+            nbt.putBoolean("AutoAttack", this.getAutoAttack());
+
+            nbt.putInt("MaxLevel", this.getMaxLevel());
+            nbt.putInt("Level", this.getLevel());
+            nbt.putInt("Exp", this.getExp());
+
+            craftPurchaseOrder.setNbt(nbt);
+        } catch (Exception ignored) {}
+        this.dropStack(craftPurchaseOrder, 0.0f);
+    } // dropEquipment ()
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.world.isClient && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
+            final float healValue = this.getHpValue() / 16.0f;
+            this.heal(healValue);
+        }
+    } // tick ()
+
     @Nullable @Override
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
         return null;
     } // createChild
+
+
+    // -- Custom Methods --
+    protected boolean canUpLevel() {
+        return this.getLevel() < getMaxLevel();
+    } // canUpLevel ()
+
+    protected void addExp (int value) {
+        int addExp = value;
+
+        final String customName = this.getEntityName();
+        if(customName != null && !customName.trim().equals(""))
+            addExp = addExp * 3 / 2;
+
+        int exp = this.getExp();
+        exp += addExp;
+
+        while (exp >= this.getNextExp()) {
+            exp -= this.getNextExp();
+            this.setLevel(this.getLevel() + 1);
+
+            if(!world.isClient) {
+                try {
+                    final LivingEntity entity = this.getOwner();
+                    if (entity == null) continue;
+                    this.displayMessage((PlayerEntity)entity);
+                } catch (Exception ignored) {}
+            }
+        }
+
+        this.setExp(exp);
+    } // addExp ()
 
 
     // -- Interact Methods --
@@ -262,6 +494,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
                     this.setOwner(player);
                     player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()));
                 }
+
+                displayMessage(player);
 
                 return ActionResult.SUCCESS;
             }
@@ -303,28 +537,58 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         setCurrentState(RobotState.Defense);
     } // GuardMode ()
 
+    public void displayMessage (PlayerEntity player) {
+        player.sendMessage(Text.literal("|--------------------------"));
+        player.sendMessage(Text.literal("MaxLevel: " + this.getMaxLevel()));
+        player.sendMessage(Text.literal("Model: " + this.getVariantID()));
+        player.sendMessage(Text.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()));
+        player.sendMessage(Text.literal("Attack: " + this.getAttackValue()));
+        player.sendMessage(Text.literal("State: " + RobotState.byId(this.getCurrentState()).toString()));
+        player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
+        player.sendMessage(Text.literal("Level: " + this.getLevel()));
+        player.sendMessage(Text.literal("Exp: " + this.getExp()));
+    } // displayMessage ()
+
 
     // -- Save Methods --
     @Override
     protected void initDataTracker() {
         super.initDataTracker();
+        this.dataTracker.startTracking(VARIENT, RobotVariant.Vanilla.getName());
         this.dataTracker.startTracking(TEXTURE_ID, 0);
+
         this.dataTracker.startTracking(STATE, 0);
         this.dataTracker.startTracking(AUTO_ATTACK, false);
+
+        this.dataTracker.startTracking(MAX_LEVEL, ModMetrics.MaxLevel);
+        this.dataTracker.startTracking(LEVEL, 0);
+        this.dataTracker.startTracking(EXP, 0);
     } // initDataTracker ()
 
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
+        nbt.putString("Variant", this.getVariantID());
         nbt.putInt("TextureID", this.getEntityVariant());
+
         nbt.putInt("State", this.getCurrentState());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
+
+        nbt.putInt("MaxLevel", this.getMaxLevel());
+        nbt.putInt("Level", this.getLevel());
+        nbt.putInt("Exp", this.getExp());
     } // writeCustomDataToNbt ()
 
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
+        this.setVariantID(nbt.getString("Variant"));
         this.setEntityVariant(nbt.getInt("TextureID"));
+
         this.setCurrentState(nbt.getInt("State"));
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));
+
+        this.setMaxLevel(nbt.getInt("MaxLevel"));
+        this.setLevel(nbt.getInt("Level"));
+        this.setExp(nbt.getInt("Exp"));
     } // readCustomDataFromNbt ()
 
 
