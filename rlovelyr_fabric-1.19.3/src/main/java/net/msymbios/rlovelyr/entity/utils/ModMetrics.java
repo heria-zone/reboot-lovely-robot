@@ -57,5 +57,4 @@ public class ModMetrics {
     public static float VanillaBaseDefense = 6;         // Vanilla's basic Defense
     public static float VanillaMovementSpeed = 0.4f;    // Bunny's Movement Speed
 
-
 } // Class ModMetrics

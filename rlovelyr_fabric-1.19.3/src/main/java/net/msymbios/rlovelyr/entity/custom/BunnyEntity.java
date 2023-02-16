@@ -30,8 +30,8 @@ import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.utils.ModMetrics;
-import net.msymbios.rlovelyr.entity.utils.RobotMode;
-import net.msymbios.rlovelyr.entity.utils.RobotVariant;
+import net.msymbios.rlovelyr.entity.utils.RobotState;
+import net.msymbios.rlovelyr.entity.utils.RobotTexture;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -43,40 +43,45 @@ import java.util.HashMap;
 
 import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
 
-public class BunnyEntity extends TameableEntity implements VariantHolder<RobotVariant>, GeoEntity {
+public class BunnyEntity extends TameableEntity implements VariantHolder<RobotTexture>, GeoEntity {
 
     // -- Variables --
     private static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>();
     private static final HashMap<String, Identifier> MODELS = new HashMap<>();
     private static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>();
 
-    private static final TrackedData<Integer> VARIANT;
-    private static final TrackedData<Integer> MODE;
+    private static final TrackedData<Integer> TEXTURE_ID;
+    private static final TrackedData<Integer> STATE;
     private static final TrackedData<Boolean> AUTO_ATTACK;
 
     private static Identifier currentModel;
     private static Identifier currentAnimator;
 
     private boolean isAutoAttackOn;
-    private RobotMode currentMode;
+    private RobotState currentState;
 
     private final AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
 
 
     // -- Initialize --
     static {
-        TEXTURES.put(0, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_00.png"));
-        TEXTURES.put(1, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_01.png"));
-        TEXTURES.put(2, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_02.png"));
-        TEXTURES.put(4, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_03.png"));
-        TEXTURES.put(5, new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_04.png"));
+        TEXTURES.put(RobotTexture.ORANGE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_01.png")); // Orange
+        TEXTURES.put(RobotTexture.MAGENTA.getId(),    new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_02.png")); // Magenta
+        TEXTURES.put(RobotTexture.YELLOW.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_04.png")); // Yellow
+        TEXTURES.put(RobotTexture.LIME.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_05.png")); // Lime
+        TEXTURES.put(RobotTexture.PINK.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_06.png")); // Pink
+        TEXTURES.put(RobotTexture.LIGHT_BLUE.getId(), new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_08.png")); // Light Blue
+        TEXTURES.put(RobotTexture.PURPLE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_10.png")); // Purple
+        TEXTURES.put(RobotTexture.BLUE.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_11.png")); // Blue
+        TEXTURES.put(RobotTexture.RED.getId(),        new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_14.png")); // Red
+        TEXTURES.put(RobotTexture.BLACK.getId(),      new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny/bunny_15.png")); // Black
 
         MODELS.put("unarmed", new Identifier(LovelyRobotMod.MODID, "geo/bunny.geo.json"));
         ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
 
-        VARIANT = DataTracker.registerData(Bunny2Entity.class, TrackedDataHandlerRegistry.INTEGER);
-        MODE = DataTracker.registerData(Bunny2Entity.class, TrackedDataHandlerRegistry.INTEGER);
-        AUTO_ATTACK = DataTracker.registerData(Bunny2Entity.class, TrackedDataHandlerRegistry.BOOLEAN);
+        TEXTURE_ID = DataTracker.registerData(BunnyEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        STATE = DataTracker.registerData(BunnyEntity.class, TrackedDataHandlerRegistry.INTEGER);
+        AUTO_ATTACK = DataTracker.registerData(BunnyEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
     }
 
 
@@ -98,45 +103,50 @@ public class BunnyEntity extends TameableEntity implements VariantHolder<RobotVa
     } // getTexture ()
 
     public void setTexture(ItemStack itemStack) {
-        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotVariant.PINK);
-        if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotVariant.YELLOW);
-        if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotVariant.LIGHT_BLUE);
-        if(itemStack.isOf(Items.PURPLE_DYE)) setVariant(RobotVariant.PURPLE);
-        if(itemStack.isOf(Items.RED_DYE)) setVariant(RobotVariant.RED);
+        if(itemStack.isOf(Items.ORANGE_DYE)) setVariant(RobotTexture.ORANGE);
+        if(itemStack.isOf(Items.MAGENTA_DYE)) setVariant(RobotTexture.MAGENTA);
+        if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotTexture.YELLOW);
+        if(itemStack.isOf(Items.LIME_DYE)) setVariant(RobotTexture.LIME);
+        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotTexture.PINK);
+        if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotTexture.LIGHT_BLUE);
+        if(itemStack.isOf(Items.PURPLE_DYE)) setVariant(RobotTexture.PURPLE);
+        if(itemStack.isOf(Items.BLUE_DYE)) setVariant(RobotTexture.BLUE);
+        if(itemStack.isOf(Items.RED_DYE)) setVariant(RobotTexture.RED);
+        if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotTexture.BLACK);
     } // setTexture ()
 
     public void setEntityVariant(int variant) {
-        this.dataTracker.set(VARIANT, variant);
+        this.dataTracker.set(TEXTURE_ID, variant);
     } // setVariant ()
 
     public int getEntityVariant() {
-        return this.dataTracker.get(VARIANT);
+        return this.dataTracker.get(TEXTURE_ID);
     } // getVariant ()
 
     @Override
-    public void setVariant(RobotVariant variant) {
+    public void setVariant(RobotTexture variant) {
         setEntityVariant(variant.getId());
     } // setVariant ()
 
     @Override
-    public RobotVariant getVariant() {
-        return RobotVariant.byId(getEntityVariant());
+    public RobotTexture getVariant() {
+        return RobotTexture.byId(getEntityVariant());
     } // getVariant ()
 
-    public int getCurrentMode() {
-        dataTracker.set(MODE, currentMode.getId());
-        return currentMode.getId();
+    public int getCurrentState() {
+        dataTracker.set(STATE, currentState.getId());
+        return currentState.getId();
     } // getMode ()
 
-    public void setCurrentMode(RobotMode value){
-        this.dataTracker.set(MODE, value.getId());
-        currentMode = value;
+    public void setCurrentState(RobotState value){
+        this.dataTracker.set(STATE, value.getId());
+        currentState = value;
     } // setCurrentMode ()
 
-    public void setCurrentMode(int value){
-        this.dataTracker.set(MODE, value);
-        currentMode = RobotMode.byId(value);
-    } // setCurrentMode ()
+    public void setCurrentState(int value){
+        this.dataTracker.set(STATE, value);
+        currentState = RobotState.byId(value);
+    } // setCurrentState ()
 
     public boolean getAutoAttack() {
         dataTracker.set(AUTO_ATTACK, isAutoAttackOn);
@@ -208,8 +218,7 @@ public class BunnyEntity extends TameableEntity implements VariantHolder<RobotVa
 
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.setEntityVariant(0);
-        // this.setEntityVariant(getRandomNumber(TEXTURES.size()));
+        this.setEntityVariant(getRandomNumber(TEXTURES.size()));
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 
@@ -282,18 +291,18 @@ public class BunnyEntity extends TameableEntity implements VariantHolder<RobotVa
 
     public void StandbyMode(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
-        if(isSitting()) setCurrentMode(RobotMode.Standby);
+        if(isSitting()) setCurrentState(RobotState.Standby);
     } // StandbyMode ()
 
     public void FollowMode(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
-        if(!isSitting()) setCurrentMode(RobotMode.Follow);
+        if(!isSitting()) setCurrentState(RobotState.Follow);
     } // FollowMode ()
 
     public void GuardMode(ItemStack itemStack){
         if(!canInteractGuardMode(itemStack)) return;
         setSitting(false);
-        setCurrentMode(RobotMode.Guard);
+        setCurrentState(RobotState.Defense);
     } // GuardMode ()
 
 
@@ -301,22 +310,22 @@ public class BunnyEntity extends TameableEntity implements VariantHolder<RobotVa
     @Override
     protected void initDataTracker() {
         super.initDataTracker();
-        this.dataTracker.startTracking(VARIANT, 0);
-        this.dataTracker.startTracking(MODE, 0);
+        this.dataTracker.startTracking(TEXTURE_ID, 0);
+        this.dataTracker.startTracking(STATE, 0);
         this.dataTracker.startTracking(AUTO_ATTACK, false);
     } // initDataTracker ()
 
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.putInt("Variant", this.getEntityVariant());
-        nbt.putInt("Mode", this.getCurrentMode());
+        nbt.putInt("TextureID", this.getEntityVariant());
+        nbt.putInt("State", this.getCurrentState());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
     } // writeCustomDataToNbt ()
 
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        this.setEntityVariant(nbt.getInt("Variant"));
-        this.setCurrentMode(nbt.getInt("Mode"));
+        this.setEntityVariant(nbt.getInt("TextureID"));
+        this.setCurrentState(nbt.getInt("State"));
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));
     } // readCustomDataFromNbt ()
 

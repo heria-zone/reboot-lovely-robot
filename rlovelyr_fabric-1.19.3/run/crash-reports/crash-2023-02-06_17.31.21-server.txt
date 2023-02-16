@@ -4,7 +4,7 @@
 Time: 2023-02-06 17:31:21
 Description: Saving entity NBT
 
-java.lang.NullPointerException: Cannot invoke "net.msymbios.rlovelyr.entity.utils.RobotMode.getId()" because "this.currentMode" is null
+java.lang.NullPointerException: Cannot invoke "net.msymbios.rlovelyr.entity.utils.RobotState.getId()" because "this.currentMode" is null
 	at net.msymbios.rlovelyr.entity.custom.BunnyEntity.getCurrentMode(BunnyEntity.java:158)
 	at net.msymbios.rlovelyr.entity.custom.BunnyEntity.writeCustomDataToNbt(BunnyEntity.java:359)
 	at net.minecraft.entity.Entity.writeNbt(Entity.java:2033)
