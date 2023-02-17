@@ -1,6 +1,5 @@
 package net.msymbios.rlovelyr.entity.custom;
 
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -14,7 +13,6 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -29,10 +27,8 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.LovelyRobotMod;
-import net.msymbios.rlovelyr.entity.utils.ModMetrics;
-import net.msymbios.rlovelyr.entity.utils.RobotState;
-import net.msymbios.rlovelyr.entity.utils.RobotTexture;
-import net.msymbios.rlovelyr.entity.utils.RobotVariant;
+import net.msymbios.rlovelyr.entity.enums.*;
+import net.msymbios.rlovelyr.entity.utils.*;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -49,23 +45,37 @@ import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 public class VanillaEntity extends TameableEntity implements VariantHolder<RobotTexture>, GeoEntity {
 
     // -- Variables --
-    private static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>();
-    private static final HashMap<String, Identifier> MODELS = new HashMap<>();
-    private static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>();
+    private static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>() {{
+        put(RobotTexture.ORANGE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_01.png")); // Orange
+        put(RobotTexture.MAGENTA.getId(),    new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_02.png")); // Magenta
+        put(RobotTexture.YELLOW.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_04.png")); // Yellow
+        put(RobotTexture.LIME.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_05.png")); // Lime
+        put(RobotTexture.PINK.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_06.png")); // Pink
+        put(RobotTexture.LIGHT_BLUE.getId(), new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_08.png")); // Light Blue
+        put(RobotTexture.PURPLE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_10.png")); // Purple
+        put(RobotTexture.BLUE.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_11.png")); // Blue
+        put(RobotTexture.RED.getId(),        new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_14.png")); // Red
+        put(RobotTexture.BLACK.getId(),      new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_15.png")); // Black
+    }};
+    private static final HashMap<String, Identifier> MODELS = new HashMap<>() {{
+        put(RobotModel.Unarmed.getName(), new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
+    }};
+    private static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>() {{
+        put(RobotAnimation.Locomotion.getName(), new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
+    }};
 
-    private static final TrackedData<String> VARIENT;
-    private static final TrackedData<Integer> TEXTURE_ID;
+    private static final TrackedData<String> VARIANT = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.STRING);
+    private static final TrackedData<Integer> TEXTURE_ID = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
-    private static final TrackedData<Integer> STATE;
-    private static final TrackedData<Boolean> AUTO_ATTACK;
+    private static final TrackedData<Integer> STATE = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Boolean> AUTO_ATTACK = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
-    private static final TrackedData<Integer> MAX_LEVEL;
-    private static final TrackedData<Integer> LEVEL;
-    private static final TrackedData<Integer> EXP;
+    private static final TrackedData<Integer> MAX_LEVEL = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> LEVEL = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> EXP = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
-
-    private static Identifier currentModel;
-    private static Identifier currentAnimator;
+    private Identifier currentModel;
+    private Identifier currentAnimator;
 
     private boolean isAutoAttackOn;
     private RobotState currentState;
@@ -73,43 +83,37 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     private final AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
 
 
-    // -- Initialize --
-    static {
-        TEXTURES.put(RobotTexture.ORANGE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_01.png")); // Orange
-        TEXTURES.put(RobotTexture.MAGENTA.getId(),    new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_02.png")); // Magenta
-        TEXTURES.put(RobotTexture.YELLOW.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_04.png")); // Yellow
-        TEXTURES.put(RobotTexture.LIME.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_05.png")); // Lime
-        TEXTURES.put(RobotTexture.PINK.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_06.png")); // Pink
-        TEXTURES.put(RobotTexture.LIGHT_BLUE.getId(), new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_08.png")); // Light Blue
-        TEXTURES.put(RobotTexture.PURPLE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_10.png")); // Purple
-        TEXTURES.put(RobotTexture.BLUE.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_11.png")); // Blue
-        TEXTURES.put(RobotTexture.RED.getId(),        new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_14.png")); // Red
-        TEXTURES.put(RobotTexture.BLACK.getId(),      new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_15.png")); // Black
-
-        MODELS.put("unarmed", new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
-        ANIMATIONS.put("locomotion", new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
-
-        VARIENT = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.STRING);
-        TEXTURE_ID = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-
-        STATE = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-        AUTO_ATTACK = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-
-        MAX_LEVEL = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-        LEVEL = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-        EXP = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    }
-
-
     // -- Properties --
+
+    // -- MODEL --
     public Identifier getCurrentModel() {
         return currentModel;
     } // getCurrentTexture ()
 
-    public static Identifier getCurrentAnimator() {
+    public void setCurrentModel(String value) {
+        currentModel = MODELS.get(value);
+    } // setCurrentAnimator ()
+
+    public void setCurrentModel(RobotModel value) {
+        currentModel = MODELS.get(value.getName());
+    } // setCurrentAnimator ()
+
+
+    // -- ANIMATOR --
+    public Identifier getCurrentAnimator() {
         return currentAnimator;
     } // getCurrentAnimator ()
 
+    public void setCurrentAnimator(String value) {
+        currentAnimator = ANIMATIONS.get(value);
+    } // setCurrentAnimator ()
+
+    public void setCurrentAnimator(RobotAnimation value) {
+        currentAnimator = ANIMATIONS.get(value.getName());
+    } // setCurrentAnimator ()
+
+
+    // -- TEXTURE --
     public Identifier getCurrentTexture() {
         return getTextureById(getEntityVariant());
     } // getCurrentTexture ()
@@ -131,6 +135,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotTexture.BLACK);
     } // setTexture ()
 
+
+    // -- VARIANT --
     public void setEntityVariant(int variant) {
         this.dataTracker.set(TEXTURE_ID, variant);
     } // setVariant ()
@@ -139,16 +145,26 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         return this.dataTracker.get(TEXTURE_ID);
     } // getVariant ()
 
-    @Override
-    public void setVariant(RobotTexture variant) {
-        setEntityVariant(variant.getId());
-    } // setVariant ()
+    public String getVariantID() {
+        return this.dataTracker.get(VARIANT);
+    } // getVariantID ()
 
     @Override
     public RobotTexture getVariant() {
         return RobotTexture.byId(getEntityVariant());
     } // getVariant ()
 
+    public void setVariantID(String value) {
+        this.dataTracker.set(VARIANT, value);
+    } // setVariantID ()
+
+    @Override
+    public void setVariant(RobotTexture variant) {
+        setEntityVariant(variant.getId());
+    } // setVariant ()
+
+
+    // -- STATE --
     public int getCurrentState() {
         dataTracker.set(STATE, currentState.getId());
         return currentState.getId();
@@ -164,6 +180,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         currentState = RobotState.byId(value);
     } // setCurrentState ()
 
+
+    // -- AUTO ATTACK --
     public boolean getAutoAttack() {
         dataTracker.set(AUTO_ATTACK, isAutoAttackOn);
         return isAutoAttackOn;
@@ -174,14 +192,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         isAutoAttackOn = value;
     } // setAutoAttack ()
 
-    public String getVariantID() {
-        return this.dataTracker.get(VARIENT);
-    } // getVariantID ()
 
-    public void setVariantID(String value) {
-        this.dataTracker.set(VARIENT, value);
-    } // setVariantID ()
-
+    // -- STATS --
     public int getMaxLevel(){
         return this.dataTracker.get(MAX_LEVEL);
     } // getMaxLevel ()
@@ -272,8 +284,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     // -- Constructor --
     public VanillaEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
-        currentModel = MODELS.get("unarmed");
-        currentAnimator = ANIMATIONS.get("locomotion");
+        setCurrentModel(RobotModel.Unarmed);
+        setCurrentAnimator(RobotAnimation.Locomotion);
     } // Constructor RobotEntity ()
 
 
@@ -302,6 +314,7 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
         return PlayState.CONTINUE;
     } // attackAnim ()
+
 
     // -- Inheritance --
     @Override
@@ -336,7 +349,6 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
         ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
         this.equipStack(slot, diamondSword);
-
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 
@@ -495,7 +507,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
                     player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()));
                 }
 
-                displayMessage(player);
+                if(itemStack.isOf(Items.STICK))
+                    displayMessage(player);
 
                 return ActionResult.SUCCESS;
             }
@@ -543,7 +556,6 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         player.sendMessage(Text.literal("Model: " + this.getVariantID()));
         player.sendMessage(Text.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()));
         player.sendMessage(Text.literal("Attack: " + this.getAttackValue()));
-        player.sendMessage(Text.literal("State: " + RobotState.byId(this.getCurrentState()).toString()));
         player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
         player.sendMessage(Text.literal("Level: " + this.getLevel()));
         player.sendMessage(Text.literal("Exp: " + this.getExp()));
@@ -554,7 +566,7 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     @Override
     protected void initDataTracker() {
         super.initDataTracker();
-        this.dataTracker.startTracking(VARIENT, RobotVariant.Vanilla.getName());
+        this.dataTracker.startTracking(VARIANT, RobotVariant.Vanilla.getName());
         this.dataTracker.startTracking(TEXTURE_ID, 0);
 
         this.dataTracker.startTracking(STATE, 0);

@@ -21,6 +21,7 @@ public class ModUtils {
         return itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD);
     } // canInteractAutoAttack ()
 
+
     // -- Functions --
     public static int getRandomNumber(int number) {
         return Random.createLocal().nextInt(number);
