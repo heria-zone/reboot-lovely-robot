@@ -423,13 +423,11 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setVariant(RobotVariant.Vanilla.getName());
+        this.setVariant(RobotVariant.Vanilla.name());
         this.setTexture(getRandomNumber(TEXTURES.size()));
         this.setMaxLevel(ModMetrics.MaxLevel);
-
-        EquipmentSlot slot = EquipmentSlot.MAINHAND;
-        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
-        this.setItemSlot(slot, diamondSword);
+        this.equipItemIfPossible(new ItemStack(Items.DIAMOND_SWORD));
+        this.setOrderedToSit(true);
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
 
@@ -457,85 +455,8 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     public void tick() {
         super.tick();
         handleModelTransition();
-        handleAutoHeal();
+        // handleAutoHeal();
     } // tick ()
-
-    @Override
-    public boolean hurt(@NotNull DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) return false;
-
-        if (source.isFire() && amount >= 1.0f && this.getFireProtection() > 0)
-            amount *= (100.0f - this.getFireProtection()) / 100.0f;
-
-        if (source == DamageSource.FALL && amount >= 1.0f && this.getFallProtection() > 0)
-            amount *= (100.0f - this.getFallProtection()) / 100.0f;
-
-        if (source.isExplosion() && amount >= 1.0f && this.getBlastProtection() > 0)
-            amount *= (100.0f - this.getBlastProtection()) / 100.0f;
-
-        if (source.isProjectile() && amount >= 1.0f && this.getProjectileProtection() > 0)
-            amount *= (100.0f - this.getProjectileProtection()) / 100.0f;
-
-        if (amount < 1.0f) return false;
-
-        if(!level.isClientSide) {
-            if(source.isFire() && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
-            if(source == DamageSource.FALL && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
-            if(source.isExplosion() && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
-            if(source.isProjectile() && canLevelUpProjectileProtection()) this.setProjectileProtection(this.getProjectileProtection() + 1);
-        }
-
-        final Entity entity = source.getEntity();
-
-        if (this.canLevelUp() && !(entity instanceof Player) && entity instanceof LivingEntity && !this.level.isClientSide) {
-            final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
-            this.addExp(maxHp / 6);
-        }
-
-        if (entity != null && !(entity instanceof Player) && !(entity instanceof Arrow)) {
-            amount = (amount + 1.0f) / 2.0f;
-        }
-
-        return super.hurt(source, amount);
-    } // hurt ()
-
-    @Override
-    public boolean doHurtTarget(@NotNull Entity attacker) {
-        if(this.canLevelUp() && !(attacker instanceof Player) && attacker instanceof LivingEntity && !this.level.isClientSide) {
-            final int maxHp = (int)((LivingEntity)attacker).getMaxHealth();
-            this.addExp(maxHp / 4);
-        }
-        this.level.broadcastEntityEvent(this, (byte)4);
-        return super.doHurtTarget(attacker);
-    } // doHurtTarget ()
-
-    @Override
-    protected void dropEquipment() {
-        final ItemStack craftPurchaseOrder = new ItemStack(ROBOT_CORE.get(), 1, this.serializeNBT());
-
-        try {
-            final CompoundTag nbt = new CompoundTag();
-            final String customName = Objects.requireNonNull(this.getCustomName()).getString();
-            if (customName != null && !customName.trim().equals("")) {
-                nbt.putString("CustomName", customName);
-            }
-
-            nbt.putString("Variant", this.getVariant());
-            nbt.putInt("TextureID", this.getTextureID());
-
-            nbt.putInt("State", this.getCurrentStateID());
-            nbt.putBoolean("AutoAttack", this.getAutoAttack());
-
-            nbt.putInt("MaxLevel", this.getMaxLevel());
-            nbt.putInt("Level", this.getBaseLevel());
-            nbt.putInt("Exp", this.getExp());
-
-            craftPurchaseOrder.setTag(nbt);
-        } catch (Exception ignored) {}
-        EquipmentSlot newSlot = EquipmentSlot.CHEST;
-        this.setItemSlot(newSlot, craftPurchaseOrder);
-        this.setGuaranteedDrop(newSlot);
-    } // dropEquipment ()
 
     @Nullable @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
@@ -544,6 +465,21 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
 
 
     // -- Custom Methods --
+    private void handleModelTransition () {
+        if(this.swinging) {
+            setCurrentModel(RobotModel.Armed);
+        } else {
+            setCurrentModel(RobotModel.Unarmed);
+        }
+    } // handleModelTransition ()
+
+    private void handleAutoHeal () {
+        if (!this.level.isClientSide && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
+            final float healValue = this.getHpValue() / 16.0f;
+            this.heal(healValue);
+        }
+    } // handleAutoHeal ()
+
     private boolean canLevelUp() {
         return this.getBaseLevel() < getMaxLevel();
     } // canLevelUp ()
@@ -594,21 +530,6 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         this.setExp(exp);
     } // addExp ()
 
-    private void handleModelTransition () {
-        if(this.swinging) {
-            setCurrentModel(RobotModel.Armed);
-        } else {
-            setCurrentModel(RobotModel.Unarmed);
-        }
-    } // handleModelTransition ()
-
-    private void handleAutoHeal () {
-        if (!this.level.isClientSide && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
-            final float healValue = this.getHpValue() / 16.0f;
-            this.heal(healValue);
-        }
-    } // handleAutoHeal ()
-
 
     // -- Interact Methods --
     @Override
@@ -638,6 +559,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     public void handleTame(Player player) {
         this.setOwnerUUID(player.getUUID());
         this.setTame(true);
+        this.setOrderedToSit(true);
         player.displayClientMessage(Component.literal("Owner: " + getOwner().getName().getString()), true);
     } // handleTame ()
 
@@ -689,7 +611,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         player.displayClientMessage(Component.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()), false);
         player.displayClientMessage(Component.literal("Attack: " + this.getAttackValue()), false);
         player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), false);
-        player.displayClientMessage(Component.literal("Level: " + this.getLevel()), false);
+        player.displayClientMessage(Component.literal("Level: " + this.getBaseLevel()), false);
         player.displayClientMessage(Component.literal("Exp: " + this.getExp()), false);
     } // displayMessage ()
 
@@ -706,7 +628,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        //this.entityData.define(VARIANT, RobotVariant.Vanilla.getName());
+        this.entityData.define(VARIANT, RobotVariant.Vanilla.getName());
         this.entityData.define(TEXTURE_ID, 0);
 
         this.entityData.define(STATE, 0);
@@ -728,7 +650,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
 
     public void addAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
-        // nbt.putString("Variant", this.getVariantName());
+        nbt.putString("Variant", this.getVariant());
         nbt.putInt("TextureID", this.getTextureID());
 
         nbt.putInt("State", this.getCurrentStateID());
@@ -750,7 +672,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
 
     public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        //this.setVariant(nbt.getString("Variant"));
+        this.setVariant(nbt.getString("Variant"));
         this.setTexture(nbt.getInt("TextureID"));
 
         this.setCurrentState(nbt.getInt("State"));

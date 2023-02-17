@@ -424,10 +424,8 @@ public class Bunny2Entity extends TamableAnimal implements NeutralMob, GeoEntity
         this.setVariant(RobotVariant.Bunny2.getName());
         this.setTexture(getRandomNumber(TEXTURES.size()));
         this.setMaxLevel(ModMetrics.MaxLevel);
-
-        EquipmentSlot slot = EquipmentSlot.MAINHAND;
-        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
-        this.setItemSlot(slot, diamondSword);
+        this.equipItemIfPossible(new ItemStack(Items.DIAMOND_SWORD));
+        this.setOrderedToSit(true);
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
 
@@ -455,7 +453,7 @@ public class Bunny2Entity extends TamableAnimal implements NeutralMob, GeoEntity
     public void tick() {
         super.tick();
         handleModelTransition();
-        handleAutoHeal();
+        // handleAutoHeal();
     } // tick ()
 
     @Nullable @Override
@@ -487,19 +485,18 @@ public class Bunny2Entity extends TamableAnimal implements NeutralMob, GeoEntity
         var itemStack = player.getItemInHand(hand);
 
         if(hand == InteractionHand.MAIN_HAND) {
-            setSittingState(itemStack);
+            handleSit(itemStack);
 
             if (this.level.isClientSide) {
                 return InteractionResult.PASS;
             } else {
-                setAutoAttackState(itemStack, player);
-                setMode(itemStack);
+                handleAutoAttack(itemStack, player);
+                handleState(itemStack);
                 setTexture(itemStack);
+                if(getOwner() == null) handleTame(player);
 
-                if(getOwner() == null){
-                    this.setOwnerUUID(player.getUUID());
-                    player.displayClientMessage(Component.literal("Owner: " + getOwner().getName()), true);
-                }
+                if(itemStack.is(Items.STICK)) displayMessage(player);
+                if(itemStack.is(Items.BOOK)) displayProtectionMessage(player);
 
                 return InteractionResult.SUCCESS;
             }
@@ -508,62 +505,132 @@ public class Bunny2Entity extends TamableAnimal implements NeutralMob, GeoEntity
         return super.mobInteract(player, hand);
     } // interactMob ()
 
-    public void setSittingState(ItemStack itemStack) {
+    public void handleTame(Player player) {
+        this.setOwnerUUID(player.getUUID());
+        this.setTame(true);
+        this.setOrderedToSit(true);
+        player.displayClientMessage(Component.literal("Owner: " + getOwner().getName().getString()), true);
+    } // handleTame ()
+
+    public void handleSit(ItemStack itemStack) {
         if(!canInteract(itemStack)) return;
         setOrderedToSit(invertBoolean(isOrderedToSit()));
-    } // setSittingState ()
+    } // handleSit ()
 
-    public void setAutoAttackState(ItemStack itemStack, Player player){
+    public void handleAutoAttack(ItemStack itemStack, Player player){
         if(!canInteractAutoAttack(itemStack)) return;
         setAutoAttack(invertBoolean(getAutoAttack()));
         player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), true);
-    } // setAutoAttackState ()
+    } // handleAutoAttack ()
 
-    public void setMode(ItemStack itemStack) {
-        StandbyMode(itemStack);
-        FollowMode(itemStack);
-        GuardMode(itemStack);
-    } // setMode
+    public void handleState(ItemStack itemStack) {
+        StandbyState(itemStack);
+        FollowState(itemStack);
+        BaseDefenseState(itemStack);
+    } // handleState ()
 
-    public void StandbyMode(ItemStack itemStack){
+    public void StandbyState(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
         if(isOrderedToSit()) setCurrentState(RobotState.Standby);
     } // StandbyMode ()
 
-    public void FollowMode(ItemStack itemStack){
+    public void FollowState(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
         if(!isOrderedToSit()) setCurrentState(RobotState.Follow);
-    } // FollowMode ()
+    } // FollowState ()
 
-    public void GuardMode(ItemStack itemStack){
+    public void BaseDefenseState(ItemStack itemStack){
         if(!canInteractGuardMode(itemStack)) return;
         setOrderedToSit(false);
         setCurrentState(RobotState.BaseDefense);
-    } // GuardMode ()
+    } // BaseDefenseState ()
+
+    public void displayMessage (Player player) {
+        player.displayClientMessage(Component.literal("|--------------------------"), false);
+        player.displayClientMessage(Component.literal("MaxLevel: " + this.getMaxLevel()), false);
+        player.displayClientMessage(Component.literal("Model: " + this.getVariant()), false);
+        player.displayClientMessage(Component.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()), false);
+        player.displayClientMessage(Component.literal("Attack: " + this.getAttackValue()), false);
+        player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), false);
+        player.displayClientMessage(Component.literal("Level: " + this.getBaseLevel()), false);
+        player.displayClientMessage(Component.literal("Exp: " + this.getExp()), false);
+    } // displayMessage ()
+
+    public void displayProtectionMessage (Player player) {
+        player.displayClientMessage(Component.literal("|--------------------------"), false);
+        player.displayClientMessage(Component.literal("Fire Protection: " + this.getFireProtection() + "/" + ModMetrics.FireProtectionLimit), false);
+        player.displayClientMessage(Component.literal("Fall Protection: " + this.getFallProtection() + "/" + ModMetrics.FallProtectionLimit), false);
+        player.displayClientMessage(Component.literal("Blast Protection: " + this.getBlastProtection() + "/" + ModMetrics.BlastProtectionLimit), false);
+        player.displayClientMessage(Component.literal("Projectile Protection: " + this.getProjectileProtection() + "/" + ModMetrics.ProjectileProtectionLimit), false);
+    } // displayProtectionMessage ()
 
 
     // -- Save Methods --
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(VARIANT, RobotVariant.Bunny2.getName());
         this.entityData.define(TEXTURE_ID, 0);
 
         this.entityData.define(STATE, 0);
         this.entityData.define(AUTO_ATTACK, false);
+
+        this.entityData.define(MAX_LEVEL, ModMetrics.MaxLevel);
+        this.entityData.define(LEVEL, 0);
+        this.entityData.define(EXP, 0);
+
+        this.entityData.define(FIRE_PROTECTION, 0);
+        this.entityData.define(FALL_PROTECTION, 0);
+        this.entityData.define(BLAST_PROTECTION, 0);
+        this.entityData.define(PROJECTILE_PROTECTION, 0);
+
+        this.entityData.define(BASE_X, 0F);
+        this.entityData.define(BASE_Y, 0F);
+        this.entityData.define(BASE_Z, 0F);
     } // defineSynchedData ()
 
-    public void addAdditionalSaveData(@NotNull CompoundTag compoundTag) {
-        super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("TextureID", this.getTextureID());
-        compoundTag.putInt("State", this.getCurrentStateID());
-        compoundTag.putBoolean("AutoAttack", this.getAutoAttack());
+    public void addAdditionalSaveData(@NotNull CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        nbt.putString("Variant", this.getVariant());
+        nbt.putInt("TextureID", this.getTextureID());
+
+        nbt.putInt("State", this.getCurrentStateID());
+        nbt.putBoolean("AutoAttack", this.getAutoAttack());
+
+        nbt.putInt("MaxLevel", this.getMaxLevel());
+        nbt.putInt("Level", this.getBaseLevel());
+        nbt.putInt("Exp", this.getExp());
+
+        nbt.putInt("FireProtection", this.getFireProtection());
+        nbt.putInt("FallProtection", this.getFallProtection());
+        nbt.putInt("BlastProtection", this.getBlastProtection());
+        nbt.putInt("ProjectileProtection", this.getProjectileProtection());
+
+        nbt.putFloat("BaseX", this.getBaseX());
+        nbt.putFloat("BaseY", this.getBaseY());
+        nbt.putFloat("BaseZ", this.getBaseZ());
     } // addAdditionalSaveData ()
 
-    public void readAdditionalSaveData(@NotNull CompoundTag compoundTag) {
-        super.readAdditionalSaveData(compoundTag);
-        this.setTexture(compoundTag.getInt("TextureID"));
-        this.setCurrentState(compoundTag.getInt("State"));
-        this.setAutoAttack(compoundTag.getBoolean("AutoAttack"));
+    public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        this.setVariant(nbt.getString("Variant"));
+        this.setTexture(nbt.getInt("TextureID"));
+
+        this.setCurrentState(nbt.getInt("State"));
+        this.setAutoAttack(nbt.getBoolean("AutoAttack"));
+
+        this.setMaxLevel(nbt.getInt("MaxLevel"));
+        this.setLevel(nbt.getInt("Level"));
+        this.setExp(nbt.getInt("Exp"));
+
+        this.setFireProtection(nbt.getInt("FireProtection"));
+        this.setFallProtection(nbt.getInt("FallProtection"));
+        this.setBlastProtection(nbt.getInt("BlastProtection"));
+        this.setProjectileProtection(nbt.getInt("ProjectileProtection"));
+
+        this.setBaseY(nbt.getFloat("BaseY"));
+        this.setBaseZ(nbt.getFloat("BaseZ"));
+        this.setBaseX(nbt.getFloat("BaseX"));
     } // readAdditionalSaveData ()
 
 
