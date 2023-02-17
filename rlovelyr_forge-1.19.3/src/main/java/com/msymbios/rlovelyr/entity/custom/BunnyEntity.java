@@ -25,6 +25,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -424,7 +425,6 @@ public class BunnyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         this.setVariant(RobotVariant.Bunny.getName());
         this.setTexture(getRandomNumber(TEXTURES.size()));
         this.setMaxLevel(ModMetrics.MaxLevel);
-        this.equipItemIfPossible(new ItemStack(Items.DIAMOND_SWORD));
         this.setOrderedToSit(true);
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
@@ -449,13 +449,6 @@ public class BunnyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         this.targetSelector.addGoal(7, new ResetUniversalAngerTargetGoal<>(this, true));
     } // registerGoals ()
 
-    @Override
-    public void tick() {
-        super.tick();
-        handleModelTransition();
-        // handleAutoHeal();
-    } // tick ()
-
     @Nullable @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
         return null;
@@ -477,6 +470,56 @@ public class BunnyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
             this.heal(healValue);
         }
     } // handleAutoHeal ()
+
+    private boolean canLevelUp() {
+        return this.getBaseLevel() < getMaxLevel();
+    } // canLevelUp ()
+
+    private boolean canLevelUpFireProtection() {
+        return this.getFireProtection() < ModMetrics.FireProtectionLimit;
+    } // canLevelUpFireProtection ()
+
+    private boolean canLevelUpFallProtection() {
+        return this.getFallProtection() < ModMetrics.FallProtectionLimit;
+    } // canLevelUpFallProtection ()
+
+    private boolean canLevelUpBlastProtection() {
+        return this.getBlastProtection() < ModMetrics.BlastProtectionLimit;
+    } // canLevelUpBlastProtection ()
+
+    private boolean canLevelUpProjectileProtection() {
+        return this.getProjectileProtection() < ModMetrics.ProjectileProtectionLimit;
+    } // canLevelUpProjectileProtection ()
+
+    private int getNextExp() {
+        return ModMetrics.BaseExp + this.getBaseLevel() * ModMetrics.UpExpValue;
+    } // getNextExp ()
+
+    private void addExp (int value) {
+        int addExp = value;
+
+        final String customName = this.getCustomName().getString();
+        if(customName != null && !customName.trim().equals(""))
+            addExp = addExp * 3 / 2;
+
+        int exp = this.getExp();
+        exp += addExp;
+
+        while (exp >= this.getNextExp()) {
+            exp -= this.getNextExp();
+            this.setLevel(this.getBaseLevel() + 1);
+
+            if(!level.isClientSide) {
+                try {
+                    final LivingEntity entity = this.getOwner();
+                    if (entity == null) continue;
+                    this.displayMessage((Player)entity);
+                } catch (Exception ignored) {}
+            }
+        }
+
+        this.setExp(exp);
+    } // addExp ()
 
 
     // -- Interact Methods --

@@ -3,6 +3,7 @@ package com.msymbios.rlovelyr.entity.custom;
 import com.msymbios.rlovelyr.entity.enums.*;
 import com.msymbios.rlovelyr.entity.utils.ModMetrics;
 import com.msymbios.rlovelyr.LovelyRobotMod;
+import com.msymbios.rlovelyr.item.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -426,7 +427,6 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         this.setVariant(RobotVariant.Vanilla.name());
         this.setTexture(getRandomNumber(TEXTURES.size()));
         this.setMaxLevel(ModMetrics.MaxLevel);
-        this.equipItemIfPossible(new ItemStack(Items.DIAMOND_SWORD));
         this.setOrderedToSit(true);
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
@@ -450,13 +450,6 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         this.targetSelector.addGoal(6, new NearestAttackableTargetGoal<>(this, AbstractSkeleton.class, false));
         this.targetSelector.addGoal(7, new ResetUniversalAngerTargetGoal<>(this, true));
     } // registerGoals ()
-
-    @Override
-    public void tick() {
-        super.tick();
-        handleModelTransition();
-        // handleAutoHeal();
-    } // tick ()
 
     @Nullable @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
