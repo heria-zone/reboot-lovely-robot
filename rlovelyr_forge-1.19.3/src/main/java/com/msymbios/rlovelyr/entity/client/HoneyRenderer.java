@@ -20,7 +20,7 @@ public class HoneyRenderer extends GeoEntityRenderer<HoneyEntity>  {
     // -- Methods --
     @Override
     public @NotNull ResourceLocation getTextureLocation(HoneyEntity instance) {
-        return instance.getCurrentTexture();
+        return instance.getTexture();
     } // getTextureLocation ()
 
     @Override

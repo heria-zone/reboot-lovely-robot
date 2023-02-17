@@ -20,7 +20,7 @@ public class VanillaRenderer extends GeoEntityRenderer<VanillaEntity>  {
     // -- Methods --
     @Override
     public @NotNull ResourceLocation getTextureLocation(VanillaEntity instance) {
-        return instance.getCurrentTexture();
+        return instance.getTexture();
     } // getTextureLocation ()
 
     @Override

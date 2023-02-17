@@ -135,53 +135,53 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
 
 
     // -- TEXTURE --
-    public ResourceLocation getTextureById(int key) {
-        return TEXTURES.containsKey(RobotTexture.byId(key)) ? TEXTURES.get(RobotTexture.byId(key)) : getCurrentTexture();
-    } // getTextureById ()
+    public ResourceLocation getTexture() {
+        return getTextureByID(getTextureID());
+    } // getTexture ()
 
-    public ResourceLocation getCurrentTexture() {
-        return getTextureById(getVariantID());
-    } // getCurrentTexture ()
-
-    public void setCurrentTexture(ItemStack itemStack) {
-        if(itemStack.is(Items.ORANGE_DYE)) setVariant(RobotTexture.ORANGE);
-        if(itemStack.is(Items.MAGENTA_DYE)) setVariant(RobotTexture.MAGENTA);
-        if(itemStack.is(Items.YELLOW_DYE)) setVariant(RobotTexture.YELLOW);
-        if(itemStack.is(Items.LIME_DYE)) setVariant(RobotTexture.LIME);
-        if(itemStack.is(Items.PINK_DYE)) setVariant(RobotTexture.PINK);
-        if(itemStack.is(Items.LIGHT_BLUE_DYE)) setVariant(RobotTexture.LIGHT_BLUE);
-        if(itemStack.is(Items.PURPLE_DYE)) setVariant(RobotTexture.PURPLE);
-        if(itemStack.is(Items.BLUE_DYE)) setVariant(RobotTexture.BLUE);
-        if(itemStack.is(Items.RED_DYE)) setVariant(RobotTexture.RED);
-        if(itemStack.is(Items.BLACK_DYE)) setVariant(RobotTexture.BLACK);
-    } // setCurrentTexture ()
-
-
-    // -- VARIANT --
-    public int getVariantID() {
+    public int getTextureID() {
         int value = 0;
         try {value = this.entityData.get(TEXTURE_ID);}
         catch (Exception ignored) {}
         return value;
-    } // getVariantID ()
+    } // getTextureID ()
 
-    public String getVariantName() {
+    public ResourceLocation getTextureByID(int key) {
+        return TEXTURES.containsKey(RobotTexture.byId(key)) ? TEXTURES.get(RobotTexture.byId(key)) : getTexture();
+    } // getTextureByID ()
+
+    public void setTexture(ItemStack itemStack) {
+        if(itemStack.is(Items.ORANGE_DYE)) setTexture(RobotTexture.ORANGE);
+        if(itemStack.is(Items.MAGENTA_DYE)) setTexture(RobotTexture.MAGENTA);
+        if(itemStack.is(Items.YELLOW_DYE)) setTexture(RobotTexture.YELLOW);
+        if(itemStack.is(Items.LIME_DYE)) setTexture(RobotTexture.LIME);
+        if(itemStack.is(Items.PINK_DYE)) setTexture(RobotTexture.PINK);
+        if(itemStack.is(Items.LIGHT_BLUE_DYE)) setTexture(RobotTexture.LIGHT_BLUE);
+        if(itemStack.is(Items.PURPLE_DYE)) setTexture(RobotTexture.PURPLE);
+        if(itemStack.is(Items.BLUE_DYE)) setTexture(RobotTexture.BLUE);
+        if(itemStack.is(Items.RED_DYE)) setTexture(RobotTexture.RED);
+        if(itemStack.is(Items.BLACK_DYE)) setTexture(RobotTexture.BLACK);
+    } // setTexture ()
+
+    public void setTexture(int value) {
+        this.entityData.set(TEXTURE_ID, value);
+    } // setTexture ()
+
+    public void setTexture(RobotTexture value) {
+        setTexture(value.getId());
+    } // setTexture ()
+
+
+    // -- VARIANT --
+    public String getVariant() {
         String value = RobotVariant.Vanilla.getName();
         try {value = this.entityData.get(VARIANT);}
         catch (Exception ignored) {}
         return value;
-    } // getVariantID ()
-
-    public void setVariant(RobotTexture value) {
-        setVariant(value.getId());
-    } // setVariant ()
+    } // getVariant ()
 
     public void setVariant(String value) {
         this.entityData.set(VARIANT, value);
-    } // setVariant ()
-
-    public void setVariant(int value) {
-        this.entityData.set(TEXTURE_ID, value);
     } // setVariant ()
 
 
@@ -424,7 +424,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setVariant(RobotVariant.Vanilla.getName());
-        this.setVariant(getRandomNumber(TEXTURES.size()));
+        this.setTexture(getRandomNumber(TEXTURES.size()));
         this.setMaxLevel(ModMetrics.MaxLevel);
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
@@ -520,8 +520,8 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
                 nbt.putString("CustomName", customName);
             }
 
-            nbt.putString("Variant", this.getVariantName());
-            nbt.putInt("TextureID", this.getVariantID());
+            nbt.putString("Variant", this.getVariant());
+            nbt.putInt("TextureID", this.getTextureID());
 
             nbt.putInt("State", this.getCurrentStateID());
             nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -622,7 +622,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
             } else {
                 handleState(itemStack, player);
                 handleAutoAttack(itemStack, player);
-                setCurrentTexture(itemStack);
+                setTexture(itemStack);
                 if(getOwner() == null) handleTame(player);
 
                 if(itemStack.is(Items.STICK)) displayMessage(player);
@@ -685,7 +685,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     public void displayMessage (Player player) {
         player.displayClientMessage(Component.literal("|--------------------------"), false);
         player.displayClientMessage(Component.literal("MaxLevel: " + this.getMaxLevel()), false);
-        player.displayClientMessage(Component.literal("Model: " + this.getVariantName()), false);
+        player.displayClientMessage(Component.literal("Model: " + this.getVariant()), false);
         player.displayClientMessage(Component.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()), false);
         player.displayClientMessage(Component.literal("Attack: " + this.getAttackValue()), false);
         player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), false);
@@ -706,11 +706,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(TEXTURE_ID, 0);
-        this.entityData.define(STATE, 0);
-        this.entityData.define(AUTO_ATTACK, false);
-
-        this.entityData.define(VARIANT, RobotVariant.Vanilla.getName());
+        //this.entityData.define(VARIANT, RobotVariant.Vanilla.getName());
         this.entityData.define(TEXTURE_ID, 0);
 
         this.entityData.define(STATE, 0);
@@ -732,8 +728,8 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
 
     public void addAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putString("Variant", this.getVariantName());
-        nbt.putInt("TextureID", this.getVariantID());
+        // nbt.putString("Variant", this.getVariantName());
+        nbt.putInt("TextureID", this.getTextureID());
 
         nbt.putInt("State", this.getCurrentStateID());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -754,8 +750,8 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
 
     public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        this.setVariant(nbt.getString("Variant"));
-        this.setVariant(nbt.getInt("TextureID"));
+        //this.setVariant(nbt.getString("Variant"));
+        this.setTexture(nbt.getInt("TextureID"));
 
         this.setCurrentState(nbt.getInt("State"));
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));

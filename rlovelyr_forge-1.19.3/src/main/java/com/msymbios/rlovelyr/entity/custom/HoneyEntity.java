@@ -1,10 +1,7 @@
 package com.msymbios.rlovelyr.entity.custom;
 
-import com.msymbios.rlovelyr.entity.enums.RobotAnimation;
-import com.msymbios.rlovelyr.entity.enums.RobotModel;
+import com.msymbios.rlovelyr.entity.enums.*;
 import com.msymbios.rlovelyr.entity.utils.ModMetrics;
-import com.msymbios.rlovelyr.entity.enums.RobotState;
-import com.msymbios.rlovelyr.entity.enums.RobotTexture;
 import com.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -46,7 +43,7 @@ import java.util.UUID;
 
 import static com.msymbios.rlovelyr.entity.utils.ModUtils.*;
 
-public class HoneyEntity extends TamableAnimal implements NeutralMob, VariantHolder<RobotTexture>, GeoEntity {
+public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity {
 
     // -- Variables --
     private static final HashMap<RobotTexture, ResourceLocation> TEXTURES = new HashMap<>(){{
@@ -69,8 +66,7 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, VariantHol
         put(RobotAnimation.Locomotion, new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
     }};
 
-
-    // private static final EntityDataAccessor<String> VARIANT = SynchedEntityData.defineId(Bunny2Entity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<String> VARIANT = SynchedEntityData.defineId(Bunny2Entity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> TEXTURE_ID = SynchedEntityData.defineId(HoneyEntity.class, EntityDataSerializers.INT);
 
     private static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(HoneyEntity.class, EntityDataSerializers.INT);
@@ -136,52 +132,67 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, VariantHol
 
 
     // -- TEXTURE --
+    public ResourceLocation getTexture() {
+        return getTextureByID(getTextureID());
+    } // getTexture ()
+
+    public int getTextureID() {
+        int value = 0;
+        try {value = this.entityData.get(TEXTURE_ID);}
+        catch (Exception ignored) {}
+        return value;
+    } // getTextureID ()
+
     public ResourceLocation getTextureByID(int key) {
-        return TEXTURES.containsKey(RobotTexture.byId(key)) ? TEXTURES.get(RobotTexture.byId(key)) : getCurrentTexture();
+        return TEXTURES.containsKey(RobotTexture.byId(key)) ? TEXTURES.get(RobotTexture.byId(key)) : getTexture();
     } // getTextureByID ()
 
-    public ResourceLocation getCurrentTexture() {
-        return getTextureByID(getEntityVariant());
-    } // getCurrentTexture ()
-
-    public void setCurrentTexture(ItemStack itemStack) {
-        if(itemStack.is(Items.ORANGE_DYE)) setVariant(RobotTexture.ORANGE);
-        if(itemStack.is(Items.MAGENTA_DYE)) setVariant(RobotTexture.MAGENTA);
-        if(itemStack.is(Items.YELLOW_DYE)) setVariant(RobotTexture.YELLOW);
-        if(itemStack.is(Items.LIME_DYE)) setVariant(RobotTexture.LIME);
-        if(itemStack.is(Items.PINK_DYE)) setVariant(RobotTexture.PINK);
-        if(itemStack.is(Items.LIGHT_BLUE_DYE)) setVariant(RobotTexture.LIGHT_BLUE);
-        if(itemStack.is(Items.PURPLE_DYE)) setVariant(RobotTexture.PURPLE);
-        if(itemStack.is(Items.BLUE_DYE)) setVariant(RobotTexture.BLUE);
-        if(itemStack.is(Items.RED_DYE)) setVariant(RobotTexture.RED);
-        if(itemStack.is(Items.BLACK_DYE)) setVariant(RobotTexture.BLACK);
+    public void setTexture(ItemStack itemStack) {
+        if(itemStack.is(Items.ORANGE_DYE)) setTexture(RobotTexture.ORANGE);
+        if(itemStack.is(Items.MAGENTA_DYE)) setTexture(RobotTexture.MAGENTA);
+        if(itemStack.is(Items.YELLOW_DYE)) setTexture(RobotTexture.YELLOW);
+        if(itemStack.is(Items.LIME_DYE)) setTexture(RobotTexture.LIME);
+        if(itemStack.is(Items.PINK_DYE)) setTexture(RobotTexture.PINK);
+        if(itemStack.is(Items.LIGHT_BLUE_DYE)) setTexture(RobotTexture.LIGHT_BLUE);
+        if(itemStack.is(Items.PURPLE_DYE)) setTexture(RobotTexture.PURPLE);
+        if(itemStack.is(Items.BLUE_DYE)) setTexture(RobotTexture.BLUE);
+        if(itemStack.is(Items.RED_DYE)) setTexture(RobotTexture.RED);
+        if(itemStack.is(Items.BLACK_DYE)) setTexture(RobotTexture.BLACK);
     } // setCurrentTexture ()
 
-
-    // -- VARIANT --
-    public void setEntityVariant(int variant) {
+    public void setTexture(int variant) {
         this.entityData.set(TEXTURE_ID, variant);
     } // setVariant ()
 
-    public int getEntityVariant() {
-        return this.entityData.get(TEXTURE_ID);
-    } // getVariant ()
-
-    @Override
-    public void setVariant(RobotTexture variant) {
-        setEntityVariant(variant.getId());
+    public void setTexture(RobotTexture variant) {
+        setTexture(variant.getId());
     } // setVariant ()
 
-    @Override
-    public @NotNull RobotTexture getVariant() {
-        return RobotTexture.byId(getEntityVariant());
+
+    // -- VARIANT --
+    public String getVariant() {
+        String value = RobotVariant.Honey.getName();
+        try {value = this.entityData.get(VARIANT);}
+        catch (Exception ignored) {}
+        return value;
     } // getVariant ()
+
+    public void setVariant(String value) {
+        this.entityData.set(VARIANT, value);
+    } // setVariant ()
 
 
     // -- STATE --
-    public int getCurrentState() {
-        int value = 0;
+    public int getCurrentStateID() {
+        int value = RobotState.Standby.getId();
         try {value = this.entityData.get(STATE);}
+        catch (Exception ignored) {}
+        return value;
+    } // getCurrentStateID ()
+
+    public RobotState getCurrentState() {
+        RobotState value = RobotState.Standby;
+        try {value = RobotState.byId(this.entityData.get(STATE));}
         catch (Exception ignored) {}
         return value;
     } // getCurrentState ()
@@ -211,8 +222,8 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, VariantHol
     // -- Constructor --
     public HoneyEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
-        currentModel = MODELS.get(RobotModel.Unarmed);
-        currentAnimator = ANIMATIONS.get(RobotAnimation.Locomotion);
+        setCurrentModel(RobotModel.Unarmed);
+        setCurrentAnimator(RobotAnimation.Locomotion);
     } // Constructor HoneyEntity ()
 
 
@@ -259,7 +270,7 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, VariantHol
     // -- Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setEntityVariant(getRandomNumber(TEXTURES.size()));
+        this.setTexture(getRandomNumber(TEXTURES.size()));
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
 
@@ -302,7 +313,7 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, VariantHol
             } else {
                 setAutoAttackState(itemStack, player);
                 setMode(itemStack);
-                setCurrentTexture(itemStack);
+                setTexture(itemStack);
 
                 if(getOwner() == null){
                     this.setOwnerUUID(player.getUUID());
@@ -355,21 +366,22 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, VariantHol
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(TEXTURE_ID, 0);
+
         this.entityData.define(STATE, 0);
         this.entityData.define(AUTO_ATTACK, false);
     } // defineSynchedData ()
 
     public void addAdditionalSaveData(@NotNull CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("Variant", this.getEntityVariant());
-        compoundTag.putInt("Mode", this.getCurrentState());
+        compoundTag.putInt("TextureID", this.getTextureID());
+        compoundTag.putInt("State", this.getCurrentStateID());
         compoundTag.putBoolean("AutoAttack", this.getAutoAttack());
     } // addAdditionalSaveData ()
 
     public void readAdditionalSaveData(@NotNull CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        this.setEntityVariant(compoundTag.getInt("Variant"));
-        this.setCurrentState(compoundTag.getInt("Mode"));
+        this.setTexture(compoundTag.getInt("TextureID"));
+        this.setCurrentState(compoundTag.getInt("State"));
         this.setAutoAttack(compoundTag.getBoolean("AutoAttack"));
     } // readAdditionalSaveData ()
 
