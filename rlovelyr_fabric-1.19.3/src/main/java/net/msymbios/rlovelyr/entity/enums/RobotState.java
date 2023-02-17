@@ -7,7 +7,7 @@ import java.util.function.IntFunction;
 public enum RobotState {
 
     // -- Enum --
-    Follow(0), Defense(1), Standby(2);
+    Follow(0), BaseDefense(1), Standby(2);
 
     // -- Variables --
     private final int id;

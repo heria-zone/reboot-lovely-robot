@@ -301,7 +301,7 @@ public class Bunny2Entity extends TameableEntity implements VariantHolder<RobotT
     public void GuardMode(ItemStack itemStack){
         if(!canInteractGuardMode(itemStack)) return;
         setSitting(false);
-        setCurrentState(RobotState.Defense);
+        setCurrentState(RobotState.BaseDefense);
     } // GuardMode ()
 
 

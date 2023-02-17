@@ -42,7 +42,7 @@ import java.util.HashMap;
 import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
 import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 
-public class VanillaEntity extends TameableEntity implements VariantHolder<RobotTexture>, GeoEntity {
+public class VanillaEntity extends TameableEntity implements GeoEntity {
 
     // -- Variables --
     private static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>() {{
@@ -84,6 +84,16 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
 
     // -- Properties --
+    public static DefaultAttributeContainer.Builder setAttributes() {
+        return MobEntity.createMobAttributes()
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.VanillaBaseHp)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.VanillaBaseAttack)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.VanillaMovementSpeed)
+                .add(EntityAttributes.GENERIC_ARMOR, 0)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 0);
+    } // setAttributes ()
+
 
     // -- MODEL --
     public Identifier getCurrentModel() {
@@ -114,53 +124,47 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
 
     // -- TEXTURE --
+    public Identifier getTextureById(int value) {
+        return TEXTURES.containsKey(value) ? TEXTURES.get(value) : getCurrentTexture();
+    } // getTextureById ()
+
     public Identifier getCurrentTexture() {
-        return getTextureById(getEntityVariant());
+        return getTextureById(getVariantID());
     } // getCurrentTexture ()
 
-    public Identifier getTextureById(int key) {
-        return TEXTURES.containsKey(key) ? TEXTURES.get(key) : getCurrentTexture();
-    } // getTexture ()
-
-    public void setTexture(ItemStack itemStack) {
-        if(itemStack.isOf(Items.ORANGE_DYE)) setVariant(RobotTexture.ORANGE);
-        if(itemStack.isOf(Items.MAGENTA_DYE)) setVariant(RobotTexture.MAGENTA);
-        if(itemStack.isOf(Items.YELLOW_DYE)) setVariant(RobotTexture.YELLOW);
-        if(itemStack.isOf(Items.LIME_DYE)) setVariant(RobotTexture.LIME);
-        if(itemStack.isOf(Items.PINK_DYE)) setVariant(RobotTexture.PINK);
-        if(itemStack.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotTexture.LIGHT_BLUE);
-        if(itemStack.isOf(Items.PURPLE_DYE)) setVariant(RobotTexture.PURPLE);
-        if(itemStack.isOf(Items.BLUE_DYE)) setVariant(RobotTexture.BLUE);
-        if(itemStack.isOf(Items.RED_DYE)) setVariant(RobotTexture.RED);
-        if(itemStack.isOf(Items.BLACK_DYE)) setVariant(RobotTexture.BLACK);
-    } // setTexture ()
+    public void setCurrentTexture(ItemStack item) {
+        if(item.isOf(Items.ORANGE_DYE)) setVariant(RobotTexture.ORANGE);
+        if(item.isOf(Items.MAGENTA_DYE)) setVariant(RobotTexture.MAGENTA);
+        if(item.isOf(Items.YELLOW_DYE)) setVariant(RobotTexture.YELLOW);
+        if(item.isOf(Items.LIME_DYE)) setVariant(RobotTexture.LIME);
+        if(item.isOf(Items.PINK_DYE)) setVariant(RobotTexture.PINK);
+        if(item.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotTexture.LIGHT_BLUE);
+        if(item.isOf(Items.PURPLE_DYE)) setVariant(RobotTexture.PURPLE);
+        if(item.isOf(Items.BLUE_DYE)) setVariant(RobotTexture.BLUE);
+        if(item.isOf(Items.RED_DYE)) setVariant(RobotTexture.RED);
+        if(item.isOf(Items.BLACK_DYE)) setVariant(RobotTexture.BLACK);
+    } // setCurrentTexture ()
 
 
     // -- VARIANT --
-    public void setEntityVariant(int variant) {
-        this.dataTracker.set(TEXTURE_ID, variant);
-    } // setVariant ()
-
-    public int getEntityVariant() {
+    public int getVariantID() {
         return this.dataTracker.get(TEXTURE_ID);
     } // getVariant ()
 
-    public String getVariantID() {
+    public String getVariantName() {
         return this.dataTracker.get(VARIANT);
     } // getVariantID ()
 
-    @Override
-    public RobotTexture getVariant() {
-        return RobotTexture.byId(getEntityVariant());
-    } // getVariant ()
+    public void setVariant(RobotTexture value) {
+        setVariant(value.getId());
+    } // setVariant ()
 
-    public void setVariantID(String value) {
+    public void setVariant(String value) {
         this.dataTracker.set(VARIANT, value);
-    } // setVariantID ()
+    } // setVariant ()
 
-    @Override
-    public void setVariant(RobotTexture variant) {
-        setEntityVariant(variant.getId());
+    public void setVariant(int value) {
+        this.dataTracker.set(TEXTURE_ID, value);
     } // setVariant ()
 
 
@@ -201,10 +205,6 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     public void setMaxLevel(int value) {
         this.dataTracker.set(MAX_LEVEL, value);
     } // setMaxLevel ()
-
-    protected int getNextExp() {
-        return ModMetrics.BaseExp + this.getLevel() * ModMetrics.UpExpValue;
-    } // getNextExp ()
 
     public int getLevel(){
         int newLevel = 1;
@@ -315,8 +315,6 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         return PlayState.CONTINUE;
     } // attackAnim ()
 
-
-    // -- Inheritance --
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(new AnimationController(this, "locomotionController", 0, this::locomotionAnim));
@@ -329,21 +327,11 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     } // getAnimatableInstanceCache ()
 
 
-    // -- Methods --
-    public static DefaultAttributeContainer.Builder setAttributes() {
-        return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.VanillaBaseHp)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.VanillaBaseAttack)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.VanillaMovementSpeed)
-                .add(EntityAttributes.GENERIC_ARMOR, 0)
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 0);
-    } // setAttributes ()
-
+    // -- Inherited Methods --
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.setVariantID(RobotVariant.Vanilla.getName());
-        this.setEntityVariant(getRandomNumber(TEXTURES.size()));
+        this.setVariant(RobotVariant.Vanilla.getName());
+        this.setVariant(getRandomNumber(TEXTURES.size()));
         this.setMaxLevel(ModMetrics.MaxLevel);
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
@@ -370,6 +358,15 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
     } // initGoals ()
 
     @Override
+    public void tick() {
+        super.tick();
+        if (!this.world.isClient && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
+            final float healValue = this.getHpValue() / 16.0f;
+            this.heal(healValue);
+        }
+    } // tick ()
+
+    @Override
     public boolean damage(DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) return false;
 
@@ -390,7 +387,7 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
         final Entity entity = source.getSource();
 
-        if (this.canUpLevel() && !(entity instanceof PlayerEntity) && entity instanceof LivingEntity && !this.world.isClient) {
+        if (this.canLevelUp() && !(entity instanceof PlayerEntity) && entity instanceof LivingEntity && !this.world.isClient) {
             final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
             this.addExp(maxHp / 6);
         }
@@ -404,13 +401,11 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
     @Override
     public boolean handleAttack(Entity attacker) {
-        if(this.canUpLevel() && !(attacker instanceof PlayerEntity) && attacker instanceof LivingEntity && !this.world.isClient) {
+        if(this.canLevelUp() && !(attacker instanceof PlayerEntity) && attacker instanceof LivingEntity && !this.world.isClient) {
             final int maxHp = (int)((LivingEntity)attacker).getMaxHealth();
             this.addExp(maxHp / 4);
         }
-
         this.world.sendEntityStatus(this, (byte)4);
-
         return super.handleAttack(attacker);
     } // handleAttack ()
 
@@ -425,8 +420,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
                 nbt.putString("CustomName", customName);
             }
 
-            nbt.putString("Variant", this.getVariantID());
-            nbt.putInt("TextureID", this.getEntityVariant());
+            nbt.putString("Variant", this.getVariantName());
+            nbt.putInt("TextureID", this.getVariantID());
 
             nbt.putInt("State", this.getCurrentState());
             nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -440,15 +435,6 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         this.dropStack(craftPurchaseOrder, 0.0f);
     } // dropEquipment ()
 
-    @Override
-    public void tick() {
-        super.tick();
-        if (!this.world.isClient && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
-            final float healValue = this.getHpValue() / 16.0f;
-            this.heal(healValue);
-        }
-    } // tick ()
-
     @Nullable @Override
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
         return null;
@@ -456,11 +442,15 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
 
     // -- Custom Methods --
-    protected boolean canUpLevel() {
+    private boolean canLevelUp() {
         return this.getLevel() < getMaxLevel();
-    } // canUpLevel ()
+    } // canLevelUp ()
 
-    protected void addExp (int value) {
+    private int getNextExp() {
+        return ModMetrics.BaseExp + this.getLevel() * ModMetrics.UpExpValue;
+    } // getNextExp ()
+
+    private void addExp (int value) {
         int addExp = value;
 
         final String customName = this.getEntityName();
@@ -493,14 +483,14 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         var itemStack = player.getStackInHand(hand);
 
         if(hand == Hand.MAIN_HAND) {
-            setSittingState(itemStack);
+            handleSit(itemStack);
 
             if (this.world.isClient) {
                 return ActionResult.PASS;
             } else {
-                setAutoAttackState(itemStack, player);
-                setMode(itemStack);
-                setTexture(itemStack);
+                handleAutoAttack(itemStack, player);
+                handleState(itemStack);
+                setCurrentTexture(itemStack);
 
                 if(getOwner() == null){
                     this.setOwner(player);
@@ -517,43 +507,43 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
         return super.interactMob(player, hand);
     } // interactMob ()
 
-    public void setSittingState(ItemStack itemStack) {
+    public void handleSit(ItemStack itemStack) {
         if(!canInteract(itemStack)) return;
         setSitting(invertBoolean(isSitting()));
-    } // setSittingState ()
+    } // handleSit ()
 
-    public void setAutoAttackState(ItemStack itemStack, PlayerEntity player){
+    public void handleAutoAttack(ItemStack itemStack, PlayerEntity player){
         if (!canInteractAutoAttack(itemStack)) return;
         setAutoAttack(invertBoolean(isAutoAttackOn));
         player.sendMessage(Text.literal("Auto Attack: " + this.isAutoAttackOn));
-    } // setAutoAttackState ()
+    } // handleAutoAttack ()
 
-    public void setMode(ItemStack itemStack) {
-        StandbyMode(itemStack);
-        FollowMode(itemStack);
-        GuardMode(itemStack);
-    } // setMode
+    public void handleState(ItemStack itemStack) {
+        StandbyState(itemStack);
+        FollowState(itemStack);
+        BaseDefenseState(itemStack);
+    } // handleState
 
-    public void StandbyMode(ItemStack itemStack){
+    public void StandbyState(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
         if(isSitting()) setCurrentState(RobotState.Standby);
-    } // StandbyMode ()
+    } // StandbyState ()
 
-    public void FollowMode(ItemStack itemStack){
+    public void FollowState(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
         if(!isSitting()) setCurrentState(RobotState.Follow);
-    } // FollowMode ()
+    } // FollowState ()
 
-    public void GuardMode(ItemStack itemStack){
+    public void BaseDefenseState(ItemStack itemStack){
         if(!canInteractGuardMode(itemStack)) return;
         setSitting(false);
-        setCurrentState(RobotState.Defense);
-    } // GuardMode ()
+        setCurrentState(RobotState.BaseDefense);
+    } // BaseDefenseState ()
 
     public void displayMessage (PlayerEntity player) {
         player.sendMessage(Text.literal("|--------------------------"));
         player.sendMessage(Text.literal("MaxLevel: " + this.getMaxLevel()));
-        player.sendMessage(Text.literal("Model: " + this.getVariantID()));
+        player.sendMessage(Text.literal("Model: " + this.getVariantName()));
         player.sendMessage(Text.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()));
         player.sendMessage(Text.literal("Attack: " + this.getAttackValue()));
         player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
@@ -579,8 +569,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.putString("Variant", this.getVariantID());
-        nbt.putInt("TextureID", this.getEntityVariant());
+        nbt.putString("Variant", this.getVariantName());
+        nbt.putInt("TextureID", this.getVariantID());
 
         nbt.putInt("State", this.getCurrentState());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -592,8 +582,8 @@ public class VanillaEntity extends TameableEntity implements VariantHolder<Robot
 
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        this.setVariantID(nbt.getString("Variant"));
-        this.setEntityVariant(nbt.getInt("TextureID"));
+        this.setVariant(nbt.getString("Variant"));
+        this.setVariant(nbt.getInt("TextureID"));
 
         this.setCurrentState(nbt.getInt("State"));
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));
