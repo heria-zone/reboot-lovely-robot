@@ -59,6 +59,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     }};
     private static final HashMap<String, Identifier> MODELS = new HashMap<>() {{
         put(RobotModel.Unarmed.getName(), new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
+        put(RobotModel.Armed.getName(), new Identifier(LovelyRobotMod.MODID, "geo/vanilla.attack.geo.json"));
     }};
     private static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>() {{
         put(RobotAnimation.Locomotion.getName(), new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
@@ -74,11 +75,17 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     private static final TrackedData<Integer> LEVEL = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Integer> EXP = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
+    private static final TrackedData<Integer> FIRE_PROTECTION = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> FALL_PROTECTION = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> BLAST_PROTECTION = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final TrackedData<Integer> PROJECTILE_PROTECTION = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
+
+    private static final TrackedData<Float> BASE_X = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Float> BASE_Y = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    private static final TrackedData<Float> BASE_Z = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.FLOAT);;
+
     private Identifier currentModel;
     private Identifier currentAnimator;
-
-    private boolean isAutoAttackOn;
-    private RobotState currentState;
 
     private final AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
 
@@ -148,11 +155,17 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
     // -- VARIANT --
     public int getVariantID() {
-        return this.dataTracker.get(TEXTURE_ID);
+        int value = 0;
+        try {value = this.dataTracker.get(TEXTURE_ID);}
+        catch (Exception ignored) {}
+        return value;
     } // getVariant ()
 
     public String getVariantName() {
-        return this.dataTracker.get(VARIANT);
+        String value = RobotVariant.Vanilla.getName();
+        try {value = this.dataTracker.get(VARIANT);}
+        catch (Exception ignored) {}
+        return value;
     } // getVariantID ()
 
     public void setVariant(RobotTexture value) {
@@ -169,37 +182,48 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
 
     // -- STATE --
-    public int getCurrentState() {
-        dataTracker.set(STATE, currentState.getId());
-        return currentState.getId();
-    } // getMode ()
+    public int getCurrentStateID() {
+        int value = RobotState.Standby.getId();
+        try {value = this.dataTracker.get(STATE);}
+        catch (Exception ignored) {}
+        return value;
+    } // getCurrentStateID ()
+
+    public RobotState getCurrentState() {
+        RobotState value = RobotState.Standby;
+        try {value = RobotState.byId(this.dataTracker.get(STATE));}
+        catch (Exception ignored) {}
+        return value;
+    } // getCurrentState ()
 
     public void setCurrentState(RobotState value){
         this.dataTracker.set(STATE, value.getId());
-        currentState = value;
     } // setCurrentMode ()
 
     public void setCurrentState(int value){
         this.dataTracker.set(STATE, value);
-        currentState = RobotState.byId(value);
     } // setCurrentState ()
 
 
     // -- AUTO ATTACK --
     public boolean getAutoAttack() {
-        dataTracker.set(AUTO_ATTACK, isAutoAttackOn);
-        return isAutoAttackOn;
+        boolean value = false;
+        try {value = this.dataTracker.get(AUTO_ATTACK);}
+        catch (Exception ignored) {}
+        return value;
     } // getAutoAttack ()
 
     public void setAutoAttack(boolean value) {
         this.dataTracker.set(AUTO_ATTACK, value);
-        isAutoAttackOn = value;
     } // setAutoAttack ()
 
 
     // -- STATS --
     public int getMaxLevel(){
-        return this.dataTracker.get(MAX_LEVEL);
+        int value = ModMetrics.MaxLevel;
+        try {value = this.dataTracker.get(MAX_LEVEL);}
+        catch (Exception ignored) {}
+        return value;
     } // getMaxLevel ()
 
     public void setMaxLevel(int value) {
@@ -207,10 +231,10 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // setMaxLevel ()
 
     public int getLevel(){
-        int newLevel = 1;
-        try {newLevel = this.dataTracker.get(LEVEL);}
+        int value = 1;
+        try {value = this.dataTracker.get(LEVEL);}
         catch (Exception ignored){}
-        return newLevel;
+        return value;
     } // getLevel ()
 
     public void setLevel(int value){
@@ -234,10 +258,10 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // setLevel ()
 
     public int getExp(){
-        int newExp = 1;
-        try {newExp = this.dataTracker.get(EXP);}
+        int value = 1;
+        try {value = this.dataTracker.get(EXP);}
         catch (Exception ignored){}
-        return newExp;
+        return value;
     } // getExp ()
 
     public void setExp(int value){
@@ -279,6 +303,83 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         if (armor > 30) armor_tou = armor - 30;
         return armor_tou;
     } // getArmorToughnessValue ()
+
+    public int getFireProtection() {
+        int value = 0;
+        try {value = this.dataTracker.get(FIRE_PROTECTION);}
+        catch (Exception ignored) {}
+        return value;
+    } // getFireProtection ()
+
+    public void setFireProtection(int value) {
+        this.dataTracker.set(FIRE_PROTECTION, value);
+    } // setFireProtection ()
+
+    public int getFallProtection() {
+        int retValue = 0;
+        try {retValue = this.dataTracker.get(FALL_PROTECTION);}
+        catch (Exception ignored) {}
+        return retValue;
+    } // getFallProtection ()
+
+    public void setFallProtection(int value) {
+        this.dataTracker.set(FALL_PROTECTION, value);
+    } // setFallProtection ()
+
+    public int getBlastProtection() {
+        int value = 0;
+        try {value = this.dataTracker.get(BLAST_PROTECTION);}
+        catch (Exception ignored) {}
+        return value;
+    } // getBlastProtection ()
+
+    public void setBlastProtection(int value) {
+        this.dataTracker.set(BLAST_PROTECTION, value);
+    } // setBlastProtection ()
+
+    public int getProjectileProtection() {
+        int value = 0;
+        try {value = this.dataTracker.get(PROJECTILE_PROTECTION);}
+        catch (Exception ignored) {}
+        return value;
+    } // getProjectileProtection ()
+
+    public void setProjectileProtection(int value) {
+        this.dataTracker.set(PROJECTILE_PROTECTION, value);
+    } // setProjectileProtection ()
+
+    public float getBaseX() {
+        float value = 0;
+        try {value = this.dataTracker.get(BASE_X);}
+        catch (Exception ignored) {}
+        return value;
+    } // getBaseX ()
+
+    public void setBaseX(float value) {
+        this.dataTracker.set(BASE_X, value);
+    } // setBaseX ()
+
+    public float getBaseY() {
+        float value = 0;
+        try {value = this.dataTracker.get(BASE_Y);}
+        catch (Exception ignored) {}
+        return value;
+    } // getBaseY ()
+
+    public void setBaseY(float value) {
+        this.dataTracker.set(BASE_Y, value);
+    } // setBaseY ()
+
+    public float getBaseZ() {
+        float value = 0;
+        try {value = this.dataTracker.get(BASE_Z);}
+        catch (Exception ignored) {}
+        return value;
+    } // getBaseZ ()
+
+    public void setBaseZ(float value) {
+        this.dataTracker.set(BASE_Z, value);
+    } // setBaseZ ()
 
 
     // -- Constructor --
@@ -360,29 +461,33 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-        if (!this.world.isClient && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
-            final float healValue = this.getHpValue() / 16.0f;
-            this.heal(healValue);
-        }
+        handleModelTransition();
+        handleAutoHeal();
     } // tick ()
 
     @Override
     public boolean damage(DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) return false;
 
-        // ToDo: Add damage protected by getFireProtection
-        // ToDo: Add damage protected by getFallProtection
-        // ToDo: Add damage protected by getBlastProtection
-        // ToDo: Add damage protected by getProjectileProtection
+        if (source.isFire() && amount >= 1.0f && this.getFireProtection() > 0)
+            amount *= (100.0f - this.getFireProtection()) / 100.0f;
+
+        if (source == DamageSource.FALL && amount >= 1.0f && this.getFallProtection() > 0)
+            amount *= (100.0f - this.getFallProtection()) / 100.0f;
+
+        if (source.isExplosive() && amount >= 1.0f && this.getBlastProtection() > 0)
+            amount *= (100.0f - this.getBlastProtection()) / 100.0f;
+
+        if (source.isProjectile() && amount >= 1.0f && this.getProjectileProtection() > 0)
+            amount *= (100.0f - this.getProjectileProtection()) / 100.0f;
 
         if (amount < 1.0f) return false;
 
         if(!world.isClient) {
-            // if(source.isFire()) this.setFireProtection(this.getFireProtection() + 1);
-            // ToDo: Add fire protection
-            // ToDo: Add fall protection
-            // ToDo: Add blast protection
-            // ToDo: Add projectile protection
+            if(source.isFire() && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
+            if(source == DamageSource.FALL && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
+            if(source.isExplosive() && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
+            if(source.isProjectile() && canLevelUpProjectileProtection()) this.setProjectileProtection(this.getProjectileProtection() + 1);
         }
 
         final Entity entity = source.getSource();
@@ -423,7 +528,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
             nbt.putString("Variant", this.getVariantName());
             nbt.putInt("TextureID", this.getVariantID());
 
-            nbt.putInt("State", this.getCurrentState());
+            nbt.putInt("State", this.getCurrentStateID());
             nbt.putBoolean("AutoAttack", this.getAutoAttack());
 
             nbt.putInt("MaxLevel", this.getMaxLevel());
@@ -445,6 +550,22 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     private boolean canLevelUp() {
         return this.getLevel() < getMaxLevel();
     } // canLevelUp ()
+
+    private boolean canLevelUpFireProtection() {
+        return this.getFireProtection() < ModMetrics.FireProtectionLimit;
+    } // canLevelUpFireProtection ()
+
+    private boolean canLevelUpFallProtection() {
+        return this.getFallProtection() < ModMetrics.FallProtectionLimit;
+    } // canLevelUpFallProtection ()
+
+    private boolean canLevelUpBlastProtection() {
+        return this.getBlastProtection() < ModMetrics.BlastProtectionLimit;
+    } // canLevelUpBlastProtection ()
+
+    private boolean canLevelUpProjectileProtection() {
+        return this.getProjectileProtection() < ModMetrics.ProjectileProtectionLimit;
+    } // canLevelUpProjectileProtection ()
 
     private int getNextExp() {
         return ModMetrics.BaseExp + this.getLevel() * ModMetrics.UpExpValue;
@@ -476,6 +597,21 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         this.setExp(exp);
     } // addExp ()
 
+    private void handleModelTransition () {
+        if(this.isAttacking()) {
+            setCurrentModel(RobotModel.Armed);
+        } else {
+            setCurrentModel(RobotModel.Unarmed);
+        }
+    } // handleModelTransition ()
+
+    private void handleAutoHeal () {
+        if (!this.world.isClient && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
+            final float healValue = this.getHpValue() / 16.0f;
+            this.heal(healValue);
+        }
+    } // handleAutoHeal ()
+
 
     // -- Interact Methods --
     @Override
@@ -484,21 +620,16 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
         if(hand == Hand.MAIN_HAND) {
             handleSit(itemStack);
-
-            if (this.world.isClient) {
+            if(this.world.isClient) {
                 return ActionResult.PASS;
             } else {
+                handleState(itemStack, player);
                 handleAutoAttack(itemStack, player);
-                handleState(itemStack);
                 setCurrentTexture(itemStack);
+                if(getOwner() == null) handleTame(player);
 
-                if(getOwner() == null){
-                    this.setOwner(player);
-                    player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()));
-                }
-
-                if(itemStack.isOf(Items.STICK))
-                    displayMessage(player);
+                if(itemStack.isOf(Items.STICK)) displayMessage(player);
+                if(itemStack.isOf(Items.BOOK)) displayProtectionMessage(player);
 
                 return ActionResult.SUCCESS;
             }
@@ -507,6 +638,12 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         return super.interactMob(player, hand);
     } // interactMob ()
 
+    public void handleTame(PlayerEntity player) {
+        this.setOwner(player);
+        this.setTamed(true);
+        player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()));
+    } // handleTame ()
+
     public void handleSit(ItemStack itemStack) {
         if(!canInteract(itemStack)) return;
         setSitting(invertBoolean(isSitting()));
@@ -514,14 +651,16 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
     public void handleAutoAttack(ItemStack itemStack, PlayerEntity player){
         if (!canInteractAutoAttack(itemStack)) return;
-        setAutoAttack(invertBoolean(isAutoAttackOn));
-        player.sendMessage(Text.literal("Auto Attack: " + this.isAutoAttackOn));
+        setAutoAttack(invertBoolean(getAutoAttack()));
+        player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
     } // handleAutoAttack ()
 
-    public void handleState(ItemStack itemStack) {
+    public void handleState(ItemStack itemStack, PlayerEntity player) {
+        var previousState = getCurrentState();
         StandbyState(itemStack);
         FollowState(itemStack);
         BaseDefenseState(itemStack);
+        if(previousState != getCurrentState()) player.sendMessage(Text.literal("State: " + getCurrentState().name()));
     } // handleState
 
     public void StandbyState(ItemStack itemStack){
@@ -537,6 +676,12 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     public void BaseDefenseState(ItemStack itemStack){
         if(!canInteractGuardMode(itemStack)) return;
         setSitting(false);
+        setAutoAttack(true);
+
+        var currentPosition = this.getPos();
+        this.setBaseX((float)currentPosition.x);
+        this.setBaseY((float)currentPosition.y);
+        this.setBaseZ((float)currentPosition.z);
         setCurrentState(RobotState.BaseDefense);
     } // BaseDefenseState ()
 
@@ -550,6 +695,14 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         player.sendMessage(Text.literal("Level: " + this.getLevel()));
         player.sendMessage(Text.literal("Exp: " + this.getExp()));
     } // displayMessage ()
+
+    public void displayProtectionMessage (PlayerEntity player) {
+        player.sendMessage(Text.literal("|--------------------------"));
+        player.sendMessage(Text.literal("Fire Protection: " + this.getFireProtection() + "/" + ModMetrics.FireProtectionLimit));
+        player.sendMessage(Text.literal("Fall Protection: " + this.getFallProtection() + "/" + ModMetrics.FallProtectionLimit));
+        player.sendMessage(Text.literal("Blast Protection: " + this.getBlastProtection() + "/" + ModMetrics.BlastProtectionLimit));
+        player.sendMessage(Text.literal("Projectile Protection: " + this.getProjectileProtection() + "/" + ModMetrics.ProjectileProtectionLimit));
+    } // displayProtectionMessage ()
 
 
     // -- Save Methods --
@@ -565,6 +718,15 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         this.dataTracker.startTracking(MAX_LEVEL, ModMetrics.MaxLevel);
         this.dataTracker.startTracking(LEVEL, 0);
         this.dataTracker.startTracking(EXP, 0);
+
+        this.dataTracker.startTracking(FIRE_PROTECTION, 0);
+        this.dataTracker.startTracking(FALL_PROTECTION, 0);
+        this.dataTracker.startTracking(BLAST_PROTECTION, 0);
+        this.dataTracker.startTracking(PROJECTILE_PROTECTION, 0);
+
+        this.dataTracker.startTracking(BASE_X, 0F);
+        this.dataTracker.startTracking(BASE_Y, 0F);
+        this.dataTracker.startTracking(BASE_Z, 0F);
     } // initDataTracker ()
 
     public void writeCustomDataToNbt(NbtCompound nbt) {
@@ -572,12 +734,21 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         nbt.putString("Variant", this.getVariantName());
         nbt.putInt("TextureID", this.getVariantID());
 
-        nbt.putInt("State", this.getCurrentState());
+        nbt.putInt("State", this.getCurrentStateID());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
 
         nbt.putInt("MaxLevel", this.getMaxLevel());
         nbt.putInt("Level", this.getLevel());
         nbt.putInt("Exp", this.getExp());
+
+        nbt.putInt("FireProtection", this.getFireProtection());
+        nbt.putInt("FallProtection", this.getFallProtection());
+        nbt.putInt("BlastProtection", this.getBlastProtection());
+        nbt.putInt("ProjectileProtection", this.getProjectileProtection());
+
+        nbt.putFloat("BaseX", this.getBaseX());
+        nbt.putFloat("BaseY", this.getBaseY());
+        nbt.putFloat("BaseZ", this.getBaseZ());
     } // writeCustomDataToNbt ()
 
     public void readCustomDataFromNbt(NbtCompound nbt) {
@@ -591,6 +762,15 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         this.setMaxLevel(nbt.getInt("MaxLevel"));
         this.setLevel(nbt.getInt("Level"));
         this.setExp(nbt.getInt("Exp"));
+
+        this.setFireProtection(nbt.getInt("FireProtection"));
+        this.setFallProtection(nbt.getInt("FallProtection"));
+        this.setBlastProtection(nbt.getInt("BlastProtection"));
+        this.setProjectileProtection(nbt.getInt("ProjectileProtection"));
+
+        this.setBaseY(nbt.getFloat("BaseY"));
+        this.setBaseZ(nbt.getFloat("BaseZ"));
+        this.setBaseX(nbt.getFloat("BaseX"));
     } // readCustomDataFromNbt ()
 
 

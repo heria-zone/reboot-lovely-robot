@@ -10,7 +10,7 @@ public class ModUtils {
     public static boolean canInteract(ItemStack itemStack){
         if(itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.MAGENTA_DYE) || itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) || itemStack.isOf(Items.BLACK_DYE) || itemStack.isOf(Items.RED_DYE) || itemStack.isOf(Items.PURPLE_DYE) || itemStack.isOf(Items.BLUE_DYE) || itemStack.isOf(Items.LIME_DYE) || itemStack.isOf(Items.ORANGE_DYE)) return false;
         if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
-        if(itemStack.isOf(Items.STICK)) return false;
+        if(itemStack.isOf(Items.STICK) || itemStack.isOf(Items.BOOK)) return false;
         return !itemStack.isOf(Items.COMPASS) && !itemStack.isOf(Items.RECOVERY_COMPASS);
     } // canInteract ()
 
