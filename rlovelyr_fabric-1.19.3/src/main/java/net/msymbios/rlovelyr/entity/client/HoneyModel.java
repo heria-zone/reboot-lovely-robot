@@ -14,7 +14,7 @@ public class HoneyModel extends GeoModel<HoneyEntity> {
 
     @Override
     public Identifier getTextureResource(HoneyEntity animatable) {
-        return animatable.getCurrentTexture();
+        return animatable.getTexture();
     } // getTextureResource ()
 
     @Override

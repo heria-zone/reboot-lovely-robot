@@ -131,53 +131,40 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
 
 
     // -- TEXTURE --
-    public Identifier getTextureById(int value) {
-        return TEXTURES.containsKey(value) ? TEXTURES.get(value) : getCurrentTexture();
-    } // getTextureById ()
+    public Identifier getTexture() {
+        return getTextureByID(getTextureID());
+    } // getTexture ()
 
-    public Identifier getCurrentTexture() {
-        return getTextureById(getVariantID());
-    } // getCurrentTexture ()
-
-    public void setCurrentTexture(ItemStack item) {
-        if(item.isOf(Items.ORANGE_DYE)) setVariant(RobotTexture.ORANGE);
-        if(item.isOf(Items.MAGENTA_DYE)) setVariant(RobotTexture.MAGENTA);
-        if(item.isOf(Items.YELLOW_DYE)) setVariant(RobotTexture.YELLOW);
-        if(item.isOf(Items.LIME_DYE)) setVariant(RobotTexture.LIME);
-        if(item.isOf(Items.PINK_DYE)) setVariant(RobotTexture.PINK);
-        if(item.isOf(Items.LIGHT_BLUE_DYE)) setVariant(RobotTexture.LIGHT_BLUE);
-        if(item.isOf(Items.PURPLE_DYE)) setVariant(RobotTexture.PURPLE);
-        if(item.isOf(Items.BLUE_DYE)) setVariant(RobotTexture.BLUE);
-        if(item.isOf(Items.RED_DYE)) setVariant(RobotTexture.RED);
-        if(item.isOf(Items.BLACK_DYE)) setVariant(RobotTexture.BLACK);
-    } // setCurrentTexture ()
-
-
-    // -- VARIANT --
-    public int getVariantID() {
+    public int getTextureID() {
         int value = 0;
         try {value = this.dataTracker.get(TEXTURE_ID);}
         catch (Exception ignored) {}
         return value;
-    } // getVariant ()
+    } // getTextureID ()
 
-    public String getVariantName() {
+    public Identifier getTextureByID(int value) {
+        return TEXTURES.containsKey(value) ? TEXTURES.get(value) : getTexture();
+    } // getTextureByID ()
+
+    public void setTexture(RobotTexture value) {
+        setTexture(value.getId());
+    } // setTexture ()
+
+    public void setTexture(int value) {
+        this.dataTracker.set(TEXTURE_ID, value);
+    } // setTexture ()
+
+
+    // -- VARIANT --
+    public String getVariant() {
         String value = RobotVariant.Bunny.getName();
         try {value = this.dataTracker.get(VARIANT);}
         catch (Exception ignored) {}
         return value;
-    } // getVariantID ()
-
-    public void setVariant(RobotTexture value) {
-        setVariant(value.getId());
-    } // setVariant ()
+    } // getVariant ()
 
     public void setVariant(String value) {
         this.dataTracker.set(VARIANT, value);
-    } // setVariant ()
-
-    public void setVariant(int value) {
-        this.dataTracker.set(TEXTURE_ID, value);
     } // setVariant ()
 
 
@@ -432,7 +419,7 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setVariant(RobotVariant.Bunny.getName());
-        this.setVariant(getRandomNumber(TEXTURES.size()));
+        this.setTexture(getRandomNumber(TEXTURES.size()));
         this.setMaxLevel(ModMetrics.MaxLevel);
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
@@ -525,8 +512,8 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
                 nbt.putString("CustomName", customName);
             }
 
-            nbt.putString("Variant", this.getVariantName());
-            nbt.putInt("TextureID", this.getVariantID());
+            nbt.putString("Variant", this.getVariant());
+            nbt.putInt("TextureID", this.getTextureID());
 
             nbt.putInt("State", this.getCurrentStateID());
             nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -625,7 +612,7 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
             } else {
                 handleState(itemStack, player);
                 handleAutoAttack(itemStack, player);
-                setCurrentTexture(itemStack);
+                handleTexture(itemStack);
                 if(getOwner() == null) handleTame(player);
 
                 if(itemStack.isOf(Items.STICK)) displayMessage(player);
@@ -643,6 +630,19 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
         this.setTamed(true);
         player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()));
     } // handleTame ()
+
+    public void handleTexture(ItemStack item) {
+        if(item.isOf(Items.ORANGE_DYE)) setTexture(RobotTexture.ORANGE);
+        if(item.isOf(Items.MAGENTA_DYE)) setTexture(RobotTexture.MAGENTA);
+        if(item.isOf(Items.YELLOW_DYE)) setTexture(RobotTexture.YELLOW);
+        if(item.isOf(Items.LIME_DYE)) setTexture(RobotTexture.LIME);
+        if(item.isOf(Items.PINK_DYE)) setTexture(RobotTexture.PINK);
+        if(item.isOf(Items.LIGHT_BLUE_DYE)) setTexture(RobotTexture.LIGHT_BLUE);
+        if(item.isOf(Items.PURPLE_DYE)) setTexture(RobotTexture.PURPLE);
+        if(item.isOf(Items.BLUE_DYE)) setTexture(RobotTexture.BLUE);
+        if(item.isOf(Items.RED_DYE)) setTexture(RobotTexture.RED);
+        if(item.isOf(Items.BLACK_DYE)) setTexture(RobotTexture.BLACK);
+    } // handleTexture ()
 
     public void handleSit(ItemStack itemStack) {
         if(!canInteract(itemStack)) return;
@@ -688,7 +688,7 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
     public void displayMessage (PlayerEntity player) {
         player.sendMessage(Text.literal("|--------------------------"));
         player.sendMessage(Text.literal("MaxLevel: " + this.getMaxLevel()));
-        player.sendMessage(Text.literal("Model: " + this.getVariantName()));
+        player.sendMessage(Text.literal("Model: " + this.getVariant()));
         player.sendMessage(Text.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()));
         player.sendMessage(Text.literal("Attack: " + this.getAttackValue()));
         player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
@@ -731,8 +731,8 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
 
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
-        nbt.putString("Variant", this.getVariantName());
-        nbt.putInt("TextureID", this.getVariantID());
+        nbt.putString("Variant", this.getVariant());
+        nbt.putInt("TextureID", this.getTextureID());
 
         nbt.putInt("State", this.getCurrentStateID());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -754,7 +754,7 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         this.setVariant(nbt.getString("Variant"));
-        this.setVariant(nbt.getInt("TextureID"));
+        this.setTexture(nbt.getInt("TextureID"));
 
         this.setCurrentState(nbt.getInt("State"));
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));

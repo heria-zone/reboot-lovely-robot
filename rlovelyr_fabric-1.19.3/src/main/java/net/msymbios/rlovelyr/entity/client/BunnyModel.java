@@ -14,7 +14,7 @@ public class BunnyModel extends GeoModel<BunnyEntity> {
 
     @Override
     public Identifier getTextureResource(BunnyEntity animatable) {
-        return animatable.getCurrentTexture();
+        return animatable.getTexture();
     } // getTextureResource ()
 
     @Override

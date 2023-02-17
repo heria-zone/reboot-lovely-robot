@@ -14,7 +14,7 @@ public class VanillaModel extends GeoModel<VanillaEntity> {
 
     @Override
     public Identifier getTextureResource(VanillaEntity animatable) {
-        return animatable.getCurrentTexture();
+        return animatable.getTexture();
     } // getTextureResource ()
 
     @Override

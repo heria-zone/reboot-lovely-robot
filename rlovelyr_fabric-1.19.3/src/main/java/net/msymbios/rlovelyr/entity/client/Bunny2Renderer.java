@@ -20,7 +20,7 @@ public class Bunny2Renderer extends GeoEntityRenderer<Bunny2Entity> {
     // -- Methods --
     @Override
     public Identifier getTextureLocation(Bunny2Entity instance) {
-        return instance.getCurrentTexture();
+        return instance.getTexture();
     } // getTextureLocation ()
 
     @Override
