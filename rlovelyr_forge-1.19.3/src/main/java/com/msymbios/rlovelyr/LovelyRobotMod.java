@@ -1,12 +1,12 @@
 package com.msymbios.rlovelyr;
 
 import com.mojang.logging.LogUtils;
-import com.msymbios.entity.ModEntities;
-import com.msymbios.entity.client.BunnyRenderer;
-import com.msymbios.entity.client.Bunny2Renderer;
-import com.msymbios.entity.client.HoneyRenderer;
-import com.msymbios.entity.client.VanillaRenderer;
-import com.msymbios.item.ModItems;
+import com.msymbios.rlovelyr.entity.ModEntities;
+import com.msymbios.rlovelyr.entity.client.BunnyRenderer;
+import com.msymbios.rlovelyr.entity.client.Bunny2Renderer;
+import com.msymbios.rlovelyr.entity.client.HoneyRenderer;
+import com.msymbios.rlovelyr.entity.client.VanillaRenderer;
+import com.msymbios.rlovelyr.item.ModItems;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
