@@ -421,7 +421,13 @@ public class Bunny2Entity extends TamableAnimal implements NeutralMob, GeoEntity
     // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+        this.setVariant(RobotVariant.Bunny2.getName());
         this.setTexture(getRandomNumber(TEXTURES.size()));
+        this.setMaxLevel(ModMetrics.MaxLevel);
+
+        EquipmentSlot slot = EquipmentSlot.MAINHAND;
+        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
+        this.setItemSlot(slot, diamondSword);
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
 
@@ -445,10 +451,34 @@ public class Bunny2Entity extends TamableAnimal implements NeutralMob, GeoEntity
         this.targetSelector.addGoal(7, new ResetUniversalAngerTargetGoal<>(this, true));
     } // registerGoals ()
 
+    @Override
+    public void tick() {
+        super.tick();
+        handleModelTransition();
+        handleAutoHeal();
+    } // tick ()
+
     @Nullable @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
         return null;
     } // getBreedOffspring ()
+
+
+    // -- Custom Methods --
+    private void handleModelTransition () {
+        if(this.swinging) {
+            setCurrentModel(RobotModel.Armed);
+        } else {
+            setCurrentModel(RobotModel.Unarmed);
+        }
+    } // handleModelTransition ()
+
+    private void handleAutoHeal () {
+        if (!this.level.isClientSide && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
+            final float healValue = this.getHpValue() / 16.0f;
+            this.heal(healValue);
+        }
+    } // handleAutoHeal ()
 
 
     // -- Interact Methods --

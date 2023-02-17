@@ -595,7 +595,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     } // addExp ()
 
     private void handleModelTransition () {
-        if(this.attackable()) {
+        if(this.swinging) {
             setCurrentModel(RobotModel.Armed);
         } else {
             setCurrentModel(RobotModel.Unarmed);
