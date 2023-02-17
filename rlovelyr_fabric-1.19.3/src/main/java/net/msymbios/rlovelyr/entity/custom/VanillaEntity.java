@@ -785,4 +785,4 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         return SoundEvents.ENTITY_GENERIC_DEATH;
     } // getDeathSound ()
 
-} // Class RobotEntity
+} // Class VanillaEntity
