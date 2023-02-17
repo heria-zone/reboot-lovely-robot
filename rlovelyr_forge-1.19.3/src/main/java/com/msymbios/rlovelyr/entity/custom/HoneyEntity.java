@@ -39,6 +39,7 @@ import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.object.PlayState;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.msymbios.rlovelyr.entity.utils.ModUtils.*;
@@ -219,6 +220,158 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     } // setAutoAttack ()
 
 
+    // -- STATS --
+    public int getMaxLevel(){
+        int value = ModMetrics.MaxLevel;
+        try {value = this.entityData.get(MAX_LEVEL);}
+        catch (Exception ignored) {}
+        return value;
+    } // getMaxLevel ()
+
+    public void setMaxLevel(int value) {
+        this.entityData.set(MAX_LEVEL, value);
+    } // setMaxLevel ()
+
+    public int getBaseLevel(){
+        int value = 0;
+        try {value = this.entityData.get(LEVEL);}
+        catch (Exception ignored){}
+        return value;
+    } // getLevel ()
+
+    public void setLevel(int value){
+        this.entityData.set(LEVEL, value);
+        Objects.requireNonNull(this.getAttribute(Attributes.MAX_HEALTH)).setBaseValue(getHpValue());
+        Objects.requireNonNull(this.getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(getAttackValue());
+        Objects.requireNonNull(this.getAttribute(Attributes.ARMOR)).setBaseValue(getBaseArmorValue());
+        Objects.requireNonNull(this.getAttribute(Attributes.ARMOR_TOUGHNESS)).setBaseValue(getArmorToughnessValue());
+    } // setLevel ()
+
+    public int getExp(){
+        int value = 1;
+        try {value = this.entityData.get(EXP);}
+        catch (Exception ignored){}
+        return value;
+    } // getExp ()
+
+    public void setExp(int value){
+        this.entityData.set(EXP, value);
+    } // setExp ()
+
+    public int getHpValue() {
+        return (int)(ModMetrics.HoneyBaseHp + this.getBaseLevel() * ModMetrics.HoneyBaseHp / 50);
+    } // getHpValue ()
+
+    public int getAttackValue() {
+        return (int)(ModMetrics.HoneyBaseAttack + this.getBaseLevel() * ModMetrics.HoneyBaseAttack / 50);
+    } // getAttackValue ()
+
+    public int getDefenseValue() {
+        return (int)(ModMetrics.HoneyBaseDefense + this.getBaseLevel() * ModMetrics.HoneyBaseDefense / 50);
+    } // getDefenseValue ()
+
+    public int getLootingLevel() {
+        int level = 0;
+        if (ModMetrics.LootingEnchantment) {
+            level = this.getBaseLevel() / ModMetrics.LootingRequiredLevel;
+            if (level > ModMetrics.MaxLootingLevel) {
+                level = ModMetrics.MaxLootingLevel;
+            }
+        }
+        return level;
+    } // getLootingLevel ()
+
+    public double getBaseArmorValue () {
+        int armor = this.getDefenseValue();
+        if (armor > 30) armor = 30;
+        return armor;
+    } // getArmorValue ()
+
+    public double getArmorToughnessValue () {
+        double armor = getArmorValue();
+        double armor_tou = 0;
+        if (armor > 30) armor_tou = armor - 30;
+        return armor_tou;
+    } // getArmorToughnessValue ()
+
+    public int getFireProtection() {
+        int value = 0;
+        try {value = this.entityData.get(FIRE_PROTECTION);}
+        catch (Exception ignored) {}
+        return value;
+    } // getFireProtection ()
+
+    public void setFireProtection(int value) {
+        this.entityData.set(FIRE_PROTECTION, value);
+    } // setFireProtection ()
+
+    public int getFallProtection() {
+        int retValue = 0;
+        try {retValue = this.entityData.get(FALL_PROTECTION);}
+        catch (Exception ignored) {}
+        return retValue;
+    } // getFallProtection ()
+
+    public void setFallProtection(int value) {
+        this.entityData.set(FALL_PROTECTION, value);
+    } // setFallProtection ()
+
+    public int getBlastProtection() {
+        int value = 0;
+        try {value = this.entityData.get(BLAST_PROTECTION);}
+        catch (Exception ignored) {}
+        return value;
+    } // getBlastProtection ()
+
+    public void setBlastProtection(int value) {
+        this.entityData.set(BLAST_PROTECTION, value);
+    } // setBlastProtection ()
+
+    public int getProjectileProtection() {
+        int value = 0;
+        try {value = this.entityData.get(PROJECTILE_PROTECTION);}
+        catch (Exception ignored) {}
+        return value;
+    } // getProjectileProtection ()
+
+    public void setProjectileProtection(int value) {
+        this.entityData.set(PROJECTILE_PROTECTION, value);
+    } // setProjectileProtection ()
+
+    public float getBaseX() {
+        float value = 0;
+        try {value = this.entityData.get(BASE_X);}
+        catch (Exception ignored) {}
+        return value;
+    } // getBaseX ()
+
+    public void setBaseX(float value) {
+        this.entityData.set(BASE_X, value);
+    } // setBaseX ()
+
+    public float getBaseY() {
+        float value = 0;
+        try {value = this.entityData.get(BASE_Y);}
+        catch (Exception ignored) {}
+        return value;
+    } // getBaseY ()
+
+    public void setBaseY(float value) {
+        this.entityData.set(BASE_Y, value);
+    } // setBaseY ()
+
+    public float getBaseZ() {
+        float value = 0;
+        try {value = this.entityData.get(BASE_Z);}
+        catch (Exception ignored) {}
+        return value;
+    } // getBaseZ ()
+
+    public void setBaseZ(float value) {
+        this.entityData.set(BASE_Z, value);
+    } // setBaseZ ()
+
+
     // -- Constructor --
     public HoneyEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
@@ -253,8 +406,6 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         return PlayState.CONTINUE;
     } // attackAnim ()
 
-
-    // -- Inheritance --
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(new AnimationController(this, "locomotionController", 0, this::locomotionAnim));
@@ -267,7 +418,7 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     } // getAnimatableInstanceCache ()
 
 
-    // -- Methods --
+    // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setTexture(getRandomNumber(TEXTURES.size()));
