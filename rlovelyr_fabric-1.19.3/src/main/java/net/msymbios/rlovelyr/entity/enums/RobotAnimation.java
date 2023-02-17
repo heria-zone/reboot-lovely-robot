@@ -18,7 +18,14 @@ public enum RobotAnimation implements StringIdentifiable {
     private final String name;
 
 
-    // -- Properties --
+    // -- Constructor --
+    RobotAnimation(int id, String name) {
+        this.id = id;
+        this.name = name;
+    } // Constructor RobotAnimation
+
+
+    // -- Methods --
     public int getId() {
         return this.id;
     } // getId ()
@@ -35,18 +42,9 @@ public enum RobotAnimation implements StringIdentifiable {
         return CODEC.byId(name);
     } // byId ()
 
-
-    // -- Constructor --
-    RobotAnimation(int id, String name) {
-        this.id = id;
-        this.name = name;
-    } // Constructor RobotAnimation
-
-
-    // -- Methods --
     @Override
     public String asString() {
         return this.name;
     } // asString ()
 
-} // Enum RobotTexture
+} // Enum RobotAnimation

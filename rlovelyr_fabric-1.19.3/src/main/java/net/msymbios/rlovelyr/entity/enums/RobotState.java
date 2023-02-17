@@ -14,7 +14,13 @@ public enum RobotState {
     private static final IntFunction<RobotState> BY_ID = ValueLists.createIdToValueFunction(RobotState::getId, RobotState.values(), ValueLists.OutOfBoundsHandling.WRAP);;
 
 
-    // -- Properties --
+    // -- Constructor --
+    RobotState(int id) {
+        this.id = id;
+    } // Constructor RobotMode
+
+
+    // -- Methods --
     public int getId() {
         return this.id;
     } // getId ()
@@ -22,11 +28,5 @@ public enum RobotState {
     public static RobotState byId(int id) {
         return BY_ID.apply(id);
     } // byId ()
-
-
-    // -- Constructor --
-    RobotState(int id) {
-        this.id = id;
-    } // Constructor RobotMode
 
 } // Enum RobotState

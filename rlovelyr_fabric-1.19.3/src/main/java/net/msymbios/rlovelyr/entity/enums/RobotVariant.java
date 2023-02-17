@@ -21,7 +21,14 @@ public enum RobotVariant implements StringIdentifiable {
     private final String name;
 
 
-    // -- Properties --
+    // -- Constructor --
+    RobotVariant(int id, String name) {
+        this.id = id;
+        this.name = name;
+    } // Constructor VanillaVariant
+
+
+    // -- Methods --
     public int getId() {
         return this.id;
     } // getId ()
@@ -38,18 +45,9 @@ public enum RobotVariant implements StringIdentifiable {
         return CODEC.byId(name);
     } // byId ()
 
-
-    // -- Constructor --
-    RobotVariant(int id, String name) {
-        this.id = id;
-        this.name = name;
-    } // Constructor VanillaVariant
-
-
-    // -- Methods --
     @Override
     public String asString() {
         return this.name;
     } // asString ()
 
-} // Enum RobotTexture
+} // Enum RobotVariant

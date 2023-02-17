@@ -231,7 +231,7 @@ public class BunnyEntity extends TameableEntity implements GeoEntity {
     } // setMaxLevel ()
 
     public int getLevel(){
-        int value = 1;
+        int value = 0;
         try {value = this.dataTracker.get(LEVEL);}
         catch (Exception ignored){}
         return value;

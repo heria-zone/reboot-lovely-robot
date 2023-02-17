@@ -19,7 +19,14 @@ public enum RobotModel implements StringIdentifiable {
     private final String name;
 
 
-    // -- Properties --
+    // -- Constructor --
+    RobotModel(int id, String name) {
+        this.id = id;
+        this.name = name;
+    } // Constructor RobotModel
+
+
+    // -- Methods --
     public int getId() {
         return this.id;
     } // getId ()
@@ -36,18 +43,9 @@ public enum RobotModel implements StringIdentifiable {
         return CODEC.byId(name);
     } // byId ()
 
-
-    // -- Constructor --
-    RobotModel(int id, String name) {
-        this.id = id;
-        this.name = name;
-    } // Constructor RobotModel
-
-
-    // -- Methods --
     @Override
     public String asString() {
         return this.name;
     } // asString ()
 
-} // Enum RobotTexture
+} // Enum RobotModel

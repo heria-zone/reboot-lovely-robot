@@ -27,7 +27,14 @@ public enum RobotTexture implements StringIdentifiable {
     private final String name;
 
 
-    // -- Properties --
+    // -- Constructor --
+    RobotTexture(int id, String name) {
+        this.id = id;
+        this.name = name;
+    } // Constructor RobotTexture
+
+
+    // -- Methods --
     public int getId() {
         return this.id;
     } // getId ()
@@ -44,15 +51,6 @@ public enum RobotTexture implements StringIdentifiable {
         return CODEC.byId(name);
     } // byId ()
 
-
-    // -- Constructor --
-    RobotTexture(int id, String name) {
-        this.id = id;
-        this.name = name;
-    } // Constructor VanillaVariant
-
-
-    // -- Methods --
     @Override
     public String asString() {
         return this.name;
