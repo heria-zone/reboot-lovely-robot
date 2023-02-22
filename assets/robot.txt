@@ -1,0 +1,72 @@
+Leveling and experience:
+- boolean LevelUpLog
+- int MaxLevel
+- int BaseExp
+- int UpExpValue
+
+Healing:
+- boolean AutoHeal
+- int AutoHealInterval
+
+Attack and movement:
+- double AttackMoveSpeed
+
+Looting and enchantments:
+- boolean LootingEnchantment
+- int LootingRequiredLevel
+- int MaxLootingLevel
+
+Defense:
+- float BaseDefenseRange
+- float BaseDefenseWarpRange
+
+Specific entities:
+- int BunnyEntityId
+- int BunnyBaseHp
+- int BunnyBaseAttack
+- int BunnyBaseDefense
+- int BunnySwingTimer
+- int BunnyArmsTimer
+- int VanillaEntityId
+- int VanillaBaseHp
+- int VanillaBaseAttack
+- int VanillaBaseDefense
+- int VanillaSwingTimer
+- int VanillaArmsTimer
+- int HoneyEntityId
+- int HoneyBaseHp
+- int HoneyBaseAttack
+- int HoneyBaseDefense
+- int HoneySwingTimer
+- int HoneyArmsTimer
+- int Bunny2EntityId
+- int Bunny2BaseHp
+- int Bunny2BaseAttack
+- int Bunny2BaseDefense
+- int Bunny2SwingTimer
+- int Bunny2ArmsTimer
+
+Protection:
+- int FireProtectionLimit
+- int FallProtectionLimit
+- int BlastProtectionLimit
+- int ProjectileProtectionLimit
+
+Items:
+- Item lovelyRobot
+- Item robotCore
+
+
+Items
+- BunnySpawn
+- Bunny2Spawn
+- HoneySpawn
+- VanillaSpawn
+- RobotCore
+Entities
+- Bunny
+- Bunny2
+- Honey
+- Vanilla
+Creative Tab
+- LovelyRobot

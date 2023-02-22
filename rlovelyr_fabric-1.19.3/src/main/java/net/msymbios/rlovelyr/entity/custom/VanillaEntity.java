@@ -26,7 +26,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.enums.*;
 import net.msymbios.rlovelyr.entity.utils.*;
 import org.jetbrains.annotations.Nullable;
@@ -37,34 +36,12 @@ import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.object.PlayState;
 
-import java.util.HashMap;
-
 import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
 import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 
 public class VanillaEntity extends TameableEntity implements GeoEntity {
 
     // -- Variables --
-    private static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>() {{
-        put(RobotTexture.ORANGE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_01.png")); // Orange
-        put(RobotTexture.MAGENTA.getId(),    new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_02.png")); // Magenta
-        put(RobotTexture.YELLOW.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_04.png")); // Yellow
-        put(RobotTexture.LIME.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_05.png")); // Lime
-        put(RobotTexture.PINK.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_06.png")); // Pink
-        put(RobotTexture.LIGHT_BLUE.getId(), new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_08.png")); // Light Blue
-        put(RobotTexture.PURPLE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_10.png")); // Purple
-        put(RobotTexture.BLUE.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_11.png")); // Blue
-        put(RobotTexture.RED.getId(),        new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_14.png")); // Red
-        put(RobotTexture.BLACK.getId(),      new Identifier(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_15.png")); // Black
-    }};
-    private static final HashMap<String, Identifier> MODELS = new HashMap<>() {{
-        put(RobotModel.Unarmed.getName(), new Identifier(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
-        put(RobotModel.Armed.getName(), new Identifier(LovelyRobotMod.MODID, "geo/vanilla.attack.geo.json"));
-    }};
-    private static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>() {{
-        put(RobotAnimation.Locomotion.getName(), new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
-    }};
-
     private static final TrackedData<String> VARIANT = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.STRING);
     private static final TrackedData<Integer> TEXTURE_ID = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
@@ -93,12 +70,12 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     // -- Properties --
     public static DefaultAttributeContainer.Builder setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.VanillaBaseHp)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.VanillaBaseAttack)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.VanillaMovementSpeed)
-                .add(EntityAttributes.GENERIC_ARMOR, 0)
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 0);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_HEALTH))
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ATTACK_DAMAGE))
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ATTACK_SPEED))
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MOVEMENT_SPEED))
+                .add(EntityAttributes.GENERIC_ARMOR, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ARMOR))
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ARMOR_TOUGHNESS));
     } // setAttributes ()
 
 
@@ -108,11 +85,11 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // getCurrentTexture ()
 
     public void setCurrentModel(String value) {
-        currentModel = MODELS.get(value);
+        currentModel = ModMetrics.getModel(RobotVariant.Vanilla, RobotModel.byName(value));
     } // setCurrentAnimator ()
 
     public void setCurrentModel(RobotModel value) {
-        currentModel = MODELS.get(value.getName());
+        currentModel = ModMetrics.getModel(RobotVariant.Vanilla, value);
     } // setCurrentAnimator ()
 
 
@@ -122,11 +99,11 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // getCurrentAnimator ()
 
     public void setCurrentAnimator(String value) {
-        currentAnimator = ANIMATIONS.get(value);
+        currentAnimator = ModMetrics.ANIMATIONS.get(value);
     } // setCurrentAnimator ()
 
     public void setCurrentAnimator(RobotAnimation value) {
-        currentAnimator = ANIMATIONS.get(value.getName());
+        currentAnimator = ModMetrics.ANIMATIONS.get(value.getName());
     } // setCurrentAnimator ()
 
 
@@ -143,7 +120,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // getTextureID ()
 
     public Identifier getTextureByID(int value) {
-        return TEXTURES.containsKey(value) ? TEXTURES.get(value) : getTexture();
+        return ModMetrics.getTexture(RobotVariant.Vanilla, RobotTexture.byId(value));
     } // getTextureByID ()
 
     public void setTexture(RobotTexture value) {
@@ -207,9 +184,11 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
     // -- STATS --
     public int getMaxLevel(){
-        int value = ModMetrics.MaxLevel;
+        var value = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_LEVEL);
+        var oldValue = value;
         try {value = this.dataTracker.get(MAX_LEVEL);}
         catch (Exception ignored) {}
+        if(value != oldValue) setMaxLevel(oldValue);
         return value;
     } // getMaxLevel ()
 
@@ -218,6 +197,9 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // setMaxLevel ()
 
     public int getLevel(){
+        var level = (int)(ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_LEVEL));
+        if(level != getMaxLevel()) setMaxLevel(level);
+
         int value = 0;
         try {value = this.dataTracker.get(LEVEL);}
         catch (Exception ignored){}
@@ -256,15 +238,18 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // setExp ()
 
     public int getHpValue() {
-        return (int)(ModMetrics.VanillaBaseHp + this.getLevel() * ModMetrics.VanillaBaseHp / 50);
+        var hp = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_HEALTH);
+        return (hp + this.getLevel() * hp / 50);
     } // getHpValue ()
 
     public int getAttackValue() {
-        return (int)(ModMetrics.VanillaBaseAttack + this.getLevel() * ModMetrics.VanillaBaseAttack / 50);
+        var attack = ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ATTACK_DAMAGE);
+        return (int)(attack + this.getLevel() * attack / 50);
     } // getAttackValue ()
 
     public int getDefenseValue() {
-        return (int)(ModMetrics.VanillaBaseDefense + this.getLevel() * ModMetrics.VanillaBaseDefense / 50);
+        var defense = ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.DEFENSE);
+        return (int)(defense + this.getLevel() * defense / 50);
     } // getDefenseValue ()
 
     public int getLootingLevel() {
@@ -419,8 +404,8 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setVariant(RobotVariant.Vanilla.getName());
-        this.setTexture(getRandomNumber(TEXTURES.size()));
-        this.setMaxLevel(ModMetrics.MaxLevel);
+        this.setTexture(getRandomNumber(ModMetrics.getTextureCount(RobotVariant.Vanilla)));
+        this.setMaxLevel((int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_LEVEL));
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
         ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
@@ -492,14 +477,14 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // damage ()
 
     @Override
-    public boolean handleAttack(Entity attacker) {
-        if(this.canLevelUp() && !(attacker instanceof PlayerEntity) && attacker instanceof LivingEntity && !this.world.isClient) {
-            final int maxHp = (int)((LivingEntity)attacker).getMaxHealth();
+    public void onAttacking(Entity target) {
+        if(this.canLevelUp() && !(target instanceof PlayerEntity) && target != null && !this.world.isClient) {
+            final int maxHp = (int)((LivingEntity)target).getMaxHealth();
             this.addExp(maxHp / 4);
         }
         this.world.sendEntityStatus(this, (byte)4);
-        return super.handleAttack(attacker);
-    } // handleAttack ()
+        super.onAttacking(target);
+    }
 
     @Override
     protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean allowDrops) {
@@ -559,7 +544,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // getNextExp ()
 
     private void addExp (int value) {
-        int addExp = value;
+        var addExp = value;
 
         final String customName = this.getEntityName();
         if(customName != null && !customName.trim().equals(""))
@@ -568,20 +553,23 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         int exp = this.getExp();
         exp += addExp;
 
+        var oldLevel = getLevel();
         while (exp >= this.getNextExp()) {
             exp -= this.getNextExp();
             this.setLevel(this.getLevel() + 1);
+        }
 
+        this.setExp(exp);
+
+        if(oldLevel != getLevel()) {
             if(!world.isClient) {
                 try {
                     final LivingEntity entity = this.getOwner();
-                    if (entity == null) continue;
+                    if (entity == null) return;
                     this.displayMessage((PlayerEntity)entity);
                 } catch (Exception ignored) {}
             }
         }
-
-        this.setExp(exp);
     } // addExp ()
 
     private void handleModelTransition () {
