@@ -1,7 +1,5 @@
 package net.msymbios.rlovelyr.entity.utils;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.enums.*;
@@ -15,7 +13,6 @@ public class ModMetrics {
 
 
     // - Level & Experience --
-    public static int MaxLevel = 200;                   // Maximum level
     public static int BaseExp = 50;                     // Basic experience required to level up
     public static int UpExpValue = 2;                   // Increase value for each level
 
@@ -26,7 +23,6 @@ public class ModMetrics {
 
 
     // -- Combat --
-    public static float AttackMoveSpeed = 1.2f;         // Movement speed when attacking
     public static boolean LootingEnchantment = true;    // Enable looting enchantments
     public static int LootingRequiredLevel = 10;        // Levels required for looting enchantments
     public static int MaxLootingLevel = 3;              // Maximum level of looting enchantments
@@ -39,49 +35,32 @@ public class ModMetrics {
     public static int ProjectileProtectionLimit = 80;   // Projectile Protection upper limit
 
 
-    // -- Defense --
-    public static float BaseDefenseRange = 15f;         // Base defense range
-    public static float BaseDefenseWarpRange = 10f;     // Base defense warp range
-
-
-    // -- Entity Stats --
-    public static double BunnyBaseHp = 30.0D;           // Bunny's basic Hp
-    public static float BunnyBaseAttack = 5f;           // Bunny's basic Attack
-    public static float BunnyBaseDefense = 5f;          // Bunny's basic Defense
-    public static float BunnyMovementSpeed = 0.4f;      // Bunny's Movement Speed
-
-    public static double Bunny2BaseHp = 30.0D;          // Bunny2's basic Hp
-    public static float Bunny2BaseAttack = 5;           // Bunny2's basic Attack
-    public static float Bunny2BaseDefense = 6;          // Bunny2's basic Defense
-    public static float Bunny2MovementSpeed = 0.4f;     // Bunny's Movement Speed
-
-    public static double HoneyBaseHp = 30.0D;           // Honey's basic Hp
-    public static float HoneyBaseAttack = 6;            // Honey's basic Attack
-    public static float HoneyBaseDefense = 5;           // Honey's basic Defense
-    public static float HoneyMovementSpeed = 0.4f;      // Bunny's Movement Speed
-
-
+    // Proprieties --
     public static HashMap<String, Identifier> ANIMATIONS = new HashMap<>() {{
         put(RobotAnimation.Locomotion.getName(), new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
     }};
+
     public static HashMap<RobotVariant, HashMap<RobotTexture, Identifier>> ALL_TEXTURES = new HashMap<>(){{
         put(RobotVariant.Bunny, setTexture(RobotVariant.Bunny));
         put(RobotVariant.Bunny2, setTexture(RobotVariant.Bunny2));
         put(RobotVariant.Honey, setTexture(RobotVariant.Honey));
         put(RobotVariant.Vanilla, setTexture(RobotVariant.Vanilla));
     }};
+
     public static HashMap<RobotVariant, HashMap<RobotModel, Identifier>> ALL_MODELS = new HashMap<>(){{
         put(RobotVariant.Bunny, setModel(RobotVariant.Bunny));
         put(RobotVariant.Bunny2, setModel(RobotVariant.Bunny2));
         put(RobotVariant.Honey, setModel(RobotVariant.Honey));
         put(RobotVariant.Vanilla, setModel(RobotVariant.Vanilla));
     }};
-    public static HashMap<RobotVariant, HashMap<RobotStat, RobotAttribute>> ALL_ATTRIBUTES = new HashMap<>(){{
+
+    public static HashMap<RobotVariant, HashMap<RobotAttribute, RobotAttributeInstance>> ALL_ATTRIBUTES = new HashMap<>(){{
         put(RobotVariant.Bunny, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
         put(RobotVariant.Bunny2, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 6F));
         put(RobotVariant.Honey, setAttribute(200F, 30F, 6F, 1.2F, 0.4F, 5F));
         put(RobotVariant.Vanilla, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 6F));
     }};
+
 
     // -- Methods --
     public static Identifier getTexture(RobotVariant variant, RobotTexture texture) {
@@ -122,21 +101,23 @@ public class ModMetrics {
     } // setTexture ()
 
 
-    public static float getAttributeValue(RobotVariant variant, RobotStat attribute) {
-        RobotAttribute robotAttribute = ALL_ATTRIBUTES.get(variant).get(attribute);
+    public static float getAttributeValue(RobotVariant variant, RobotAttribute attribute) {
+        RobotAttributeInstance robotAttribute = ALL_ATTRIBUTES.get(variant).get(attribute);
         return robotAttribute == null ? 0F : robotAttribute.value;
     } // getAttributeValue ()
 
-    private static HashMap<RobotStat, RobotAttribute> setAttribute(float maxLevel, float maxHealth, float attackDamage, float attackSpeed, float movementSpeed, float defense){
+    private static HashMap<RobotAttribute, RobotAttributeInstance> setAttribute(float maxLevel, float maxHealth, float attackDamage, float attackSpeed, float movementSpeed, float defense){
         return new HashMap<>(){{
-            put(RobotStat.MAX_LEVEL, new RobotAttribute(RobotStat.MAX_LEVEL, maxLevel));                // Max Level
-            put(RobotStat.MAX_HEALTH, new RobotAttribute(RobotStat.MAX_HEALTH, maxHealth));             // Max Health
-            put(RobotStat.ATTACK_DAMAGE, new RobotAttribute(RobotStat.ATTACK_DAMAGE, attackDamage));    // Attack Damage
-            put(RobotStat.ATTACK_SPEED, new RobotAttribute(RobotStat.ATTACK_SPEED, attackSpeed));       // Attack Speed
-            put(RobotStat.MOVEMENT_SPEED, new RobotAttribute(RobotStat.MOVEMENT_SPEED, movementSpeed)); // Movement Speed
-            put(RobotStat.DEFENSE, new RobotAttribute(RobotStat.DEFENSE, defense));                     // Defense
-            put(RobotStat.ARMOR, new RobotAttribute(RobotStat.ARMOR, 0F));
-            put(RobotStat.ARMOR_TOUGHNESS, new RobotAttribute(RobotStat.ARMOR_TOUGHNESS, 0F));
+            put(RobotAttribute.MAX_LEVEL, new RobotAttributeInstance(RobotAttribute.MAX_LEVEL, maxLevel));                // Max Level
+            put(RobotAttribute.MAX_HEALTH, new RobotAttributeInstance(RobotAttribute.MAX_HEALTH, maxHealth));             // Max Health
+            put(RobotAttribute.ATTACK_DAMAGE, new RobotAttributeInstance(RobotAttribute.ATTACK_DAMAGE, attackDamage));    // Attack Damage
+            put(RobotAttribute.ATTACK_SPEED, new RobotAttributeInstance(RobotAttribute.ATTACK_SPEED, attackSpeed));       // Attack Speed
+            put(RobotAttribute.MOVEMENT_SPEED, new RobotAttributeInstance(RobotAttribute.MOVEMENT_SPEED, movementSpeed)); // Movement Speed
+            put(RobotAttribute.DEFENSE, new RobotAttributeInstance(RobotAttribute.DEFENSE, defense));                     // Defense
+            put(RobotAttribute.ARMOR, new RobotAttributeInstance(RobotAttribute.ARMOR, 0F));
+            put(RobotAttribute.ARMOR_TOUGHNESS, new RobotAttributeInstance(RobotAttribute.ARMOR_TOUGHNESS, 0F));
+            put(RobotAttribute.BASE_DEFENSE_RANGE, new RobotAttributeInstance(RobotAttribute.BASE_DEFENSE_RANGE, 15F));
+            put(RobotAttribute.BASE_DEFENSE_WARP_RANGE, new RobotAttributeInstance(RobotAttribute.BASE_DEFENSE_WARP_RANGE, 10F));
         }};
     } // setAttribute ()
 

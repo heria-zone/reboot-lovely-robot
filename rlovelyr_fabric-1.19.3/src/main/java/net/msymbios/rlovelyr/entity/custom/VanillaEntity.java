@@ -70,12 +70,12 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     // -- Properties --
     public static DefaultAttributeContainer.Builder setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_HEALTH))
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ATTACK_DAMAGE))
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ATTACK_SPEED))
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MOVEMENT_SPEED))
-                .add(EntityAttributes.GENERIC_ARMOR, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ARMOR))
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ARMOR_TOUGHNESS));
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MAX_HEALTH))
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ATTACK_DAMAGE))
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ATTACK_SPEED))
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MOVEMENT_SPEED))
+                .add(EntityAttributes.GENERIC_ARMOR, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ARMOR))
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ARMOR_TOUGHNESS));
     } // setAttributes ()
 
 
@@ -184,7 +184,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
     // -- STATS --
     public int getMaxLevel(){
-        var value = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_LEVEL);
+        var value = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MAX_LEVEL);
         var oldValue = value;
         try {value = this.dataTracker.get(MAX_LEVEL);}
         catch (Exception ignored) {}
@@ -197,7 +197,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // setMaxLevel ()
 
     public int getLevel(){
-        var level = (int)(ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_LEVEL));
+        var level = (int)(ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MAX_LEVEL));
         if(level != getMaxLevel()) setMaxLevel(level);
 
         int value = 0;
@@ -238,17 +238,17 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     } // setExp ()
 
     public int getHpValue() {
-        var hp = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_HEALTH);
+        var hp = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MAX_HEALTH);
         return (hp + this.getLevel() * hp / 50);
     } // getHpValue ()
 
     public int getAttackValue() {
-        var attack = ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.ATTACK_DAMAGE);
+        var attack = ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ATTACK_DAMAGE);
         return (int)(attack + this.getLevel() * attack / 50);
     } // getAttackValue ()
 
     public int getDefenseValue() {
-        var defense = ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.DEFENSE);
+        var defense = ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.DEFENSE);
         return (int)(defense + this.getLevel() * defense / 50);
     } // getDefenseValue ()
 
@@ -405,7 +405,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setVariant(RobotVariant.Vanilla.getName());
         this.setTexture(getRandomNumber(ModMetrics.getTextureCount(RobotVariant.Vanilla)));
-        this.setMaxLevel((int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotStat.MAX_LEVEL));
+        this.setMaxLevel((int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MAX_LEVEL));
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
         ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
@@ -703,7 +703,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         this.dataTracker.startTracking(STATE, 0);
         this.dataTracker.startTracking(AUTO_ATTACK, false);
 
-        this.dataTracker.startTracking(MAX_LEVEL, ModMetrics.MaxLevel);
+        this.dataTracker.startTracking(MAX_LEVEL, (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MAX_LEVEL));
         this.dataTracker.startTracking(LEVEL, 0);
         this.dataTracker.startTracking(EXP, 0);
 

@@ -10,7 +10,8 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.*;
+import net.minecraft.entity.passive.PassiveEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
@@ -26,18 +27,15 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.enums.*;
-import net.msymbios.rlovelyr.entity.utils.*;
+import net.msymbios.rlovelyr.entity.utils.ModMetrics;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.object.PlayState;
-
-import java.util.HashMap;
 
 import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
 import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
@@ -45,26 +43,6 @@ import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 public class Bunny2Entity extends TameableEntity implements GeoEntity {
 
     // -- Variables --
-    private static final HashMap<Integer, Identifier> TEXTURES = new HashMap<>() {{
-        put(RobotTexture.ORANGE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_01.png")); // Orange
-        put(RobotTexture.MAGENTA.getId(),    new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_02.png")); // Magenta
-        put(RobotTexture.YELLOW.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_04.png")); // Yellow
-        put(RobotTexture.LIME.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_05.png")); // Lime
-        put(RobotTexture.PINK.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_06.png")); // Pink
-        put(RobotTexture.LIGHT_BLUE.getId(), new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_08.png")); // Light Blue
-        put(RobotTexture.PURPLE.getId(),     new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_10.png")); // Purple
-        put(RobotTexture.BLUE.getId(),       new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_11.png")); // Blue
-        put(RobotTexture.RED.getId(),        new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_14.png")); // Red
-        put(RobotTexture.BLACK.getId(),      new Identifier(LovelyRobotMod.MODID, "textures/entity/bunny2/bunny2_15.png")); // Black
-    }};
-    private static final HashMap<String, Identifier> MODELS = new HashMap<>(){{
-        put(RobotModel.Unarmed.getName(), new Identifier(LovelyRobotMod.MODID, "geo/bunny2.geo.json"));
-        put(RobotModel.Armed.getName(), new Identifier(LovelyRobotMod.MODID, "geo/bunny2.attack.geo.json"));
-    }};
-    private static final HashMap<String, Identifier> ANIMATIONS = new HashMap<>() {{
-        put(RobotAnimation.Locomotion.getName(), new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
-    }};
-
     private static final TrackedData<String> VARIANT = DataTracker.registerData(Bunny2Entity.class, TrackedDataHandlerRegistry.STRING);
     private static final TrackedData<Integer> TEXTURE_ID = DataTracker.registerData(Bunny2Entity.class, TrackedDataHandlerRegistry.INTEGER);
 
@@ -93,12 +71,12 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     // -- Properties --
     public static DefaultAttributeContainer.Builder setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.Bunny2BaseHp)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.Bunny2BaseAttack)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.Bunny2MovementSpeed)
-                .add(EntityAttributes.GENERIC_ARMOR, 0)
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, 0);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.MAX_HEALTH))
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.ATTACK_DAMAGE))
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.ATTACK_SPEED))
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.MOVEMENT_SPEED))
+                .add(EntityAttributes.GENERIC_ARMOR, ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.ARMOR))
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.ARMOR_TOUGHNESS));
     } // setAttributes ()
 
 
@@ -108,11 +86,11 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     } // getCurrentTexture ()
 
     public void setCurrentModel(String value) {
-        currentModel = MODELS.get(value);
+        currentModel = ModMetrics.getModel(RobotVariant.Bunny2, RobotModel.byName(value));
     } // setCurrentAnimator ()
 
     public void setCurrentModel(RobotModel value) {
-        currentModel = MODELS.get(value.getName());
+        currentModel = ModMetrics.getModel(RobotVariant.Bunny2, value);
     } // setCurrentAnimator ()
 
 
@@ -122,11 +100,11 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     } // getCurrentAnimator ()
 
     public void setCurrentAnimator(String value) {
-        currentAnimator = ANIMATIONS.get(value);
+        currentAnimator = ModMetrics.ANIMATIONS.get(value);
     } // setCurrentAnimator ()
 
     public void setCurrentAnimator(RobotAnimation value) {
-        currentAnimator = ANIMATIONS.get(value.getName());
+        currentAnimator = ModMetrics.ANIMATIONS.get(value.getName());
     } // setCurrentAnimator ()
 
 
@@ -143,7 +121,7 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     } // getTextureID ()
 
     public Identifier getTextureByID(int value) {
-        return TEXTURES.containsKey(value) ? TEXTURES.get(value) : getTexture();
+        return ModMetrics.getTexture(RobotVariant.Bunny2, RobotTexture.byId(value));
     } // getTextureByID ()
 
     public void setTexture(RobotTexture value) {
@@ -207,9 +185,11 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
 
     // -- STATS --
     public int getMaxLevel(){
-        int value = ModMetrics.MaxLevel;
+        var value = (int)ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.MAX_LEVEL);
+        var oldValue = value;
         try {value = this.dataTracker.get(MAX_LEVEL);}
         catch (Exception ignored) {}
+        if(value != oldValue) setMaxLevel(oldValue);
         return value;
     } // getMaxLevel ()
 
@@ -218,6 +198,9 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     } // setMaxLevel ()
 
     public int getLevel(){
+        var level = (int)(ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.MAX_LEVEL));
+        if(level != getMaxLevel()) setMaxLevel(level);
+
         int value = 0;
         try {value = this.dataTracker.get(LEVEL);}
         catch (Exception ignored){}
@@ -256,15 +239,18 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     } // setExp ()
 
     public int getHpValue() {
-        return (int)(ModMetrics.Bunny2BaseHp + this.getLevel() * ModMetrics.Bunny2BaseHp / 50);
+        var hp = (int)ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.MAX_HEALTH);
+        return (hp + this.getLevel() * hp / 50);
     } // getHpValue ()
 
     public int getAttackValue() {
-        return (int)(ModMetrics.Bunny2BaseAttack + this.getLevel() * ModMetrics.Bunny2BaseAttack / 50);
+        var attack = ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.ATTACK_DAMAGE);
+        return (int)(attack + this.getLevel() * attack / 50);
     } // getAttackValue ()
 
     public int getDefenseValue() {
-        return (int)(ModMetrics.Bunny2BaseDefense + this.getLevel() * ModMetrics.Bunny2BaseDefense / 50);
+        var defense = ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.DEFENSE);
+        return (int)(defense + this.getLevel() * defense / 50);
     } // getDefenseValue ()
 
     public int getLootingLevel() {
@@ -419,8 +405,8 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setVariant(RobotVariant.Bunny2.getName());
-        this.setTexture(getRandomNumber(TEXTURES.size()));
-        this.setMaxLevel(ModMetrics.MaxLevel);
+        this.setTexture(getRandomNumber(ModMetrics.getTextureCount(RobotVariant.Bunny2)));
+        this.setMaxLevel((int)ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.MAX_LEVEL));
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
         ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
@@ -492,14 +478,14 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     } // damage ()
 
     @Override
-    public boolean handleAttack(Entity attacker) {
-        if(this.canLevelUp() && !(attacker instanceof PlayerEntity) && attacker instanceof LivingEntity && !this.world.isClient) {
-            final int maxHp = (int)((LivingEntity)attacker).getMaxHealth();
+    public void onAttacking(Entity target) {
+        if(this.canLevelUp() && !(target instanceof PlayerEntity) && target != null && !this.world.isClient) {
+            final int maxHp = (int)((LivingEntity)target).getMaxHealth();
             this.addExp(maxHp / 4);
         }
         this.world.sendEntityStatus(this, (byte)4);
-        return super.handleAttack(attacker);
-    } // handleAttack ()
+        super.onAttacking(target);
+    }
 
     @Override
     protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean allowDrops) {
@@ -559,7 +545,7 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     } // getNextExp ()
 
     private void addExp (int value) {
-        int addExp = value;
+        var addExp = value;
 
         final String customName = this.getEntityName();
         if(customName != null && !customName.trim().equals(""))
@@ -568,20 +554,23 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
         int exp = this.getExp();
         exp += addExp;
 
+        var oldLevel = getLevel();
         while (exp >= this.getNextExp()) {
             exp -= this.getNextExp();
             this.setLevel(this.getLevel() + 1);
+        }
 
+        this.setExp(exp);
+
+        if(oldLevel != getLevel()) {
             if(!world.isClient) {
                 try {
                     final LivingEntity entity = this.getOwner();
-                    if (entity == null) continue;
+                    if (entity == null) return;
                     this.displayMessage((PlayerEntity)entity);
                 } catch (Exception ignored) {}
             }
         }
-
-        this.setExp(exp);
     } // addExp ()
 
     private void handleModelTransition () {
@@ -715,7 +704,7 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
         this.dataTracker.startTracking(STATE, 0);
         this.dataTracker.startTracking(AUTO_ATTACK, false);
 
-        this.dataTracker.startTracking(MAX_LEVEL, ModMetrics.MaxLevel);
+        this.dataTracker.startTracking(MAX_LEVEL, (int)ModMetrics.getAttributeValue(RobotVariant.Bunny2, RobotAttribute.MAX_LEVEL));
         this.dataTracker.startTracking(LEVEL, 0);
         this.dataTracker.startTracking(EXP, 0);
 
