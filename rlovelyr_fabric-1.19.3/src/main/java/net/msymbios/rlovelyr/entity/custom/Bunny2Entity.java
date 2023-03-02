@@ -1,5 +1,6 @@
 package net.msymbios.rlovelyr.entity.custom;
 
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -513,6 +514,23 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
         this.dropStack(craftPurchaseOrder, 0.0f);
     } // dropEquipment ()
 
+    @Override
+    public ItemStack getEquippedStack(EquipmentSlot slot) {
+        switch (slot.getType()){
+            case HAND: {
+                final ItemStack tempSword = new ItemStack(Items.DIAMOND_SWORD,1);
+                final int lootingLevel = this.getLootingLevel();
+                if(lootingLevel > 0) {
+                    tempSword.addEnchantment(Enchantment.byRawId(21), lootingLevel);
+                }
+                return tempSword;
+            }
+            default: {
+                return super.getEquippedStack(slot);
+            }
+        }
+    } // getEquippedStack ()
+
     @Nullable @Override
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
         return null;
@@ -617,18 +635,24 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     public void handleTame(PlayerEntity player) {
         this.setOwner(player);
         this.setTamed(true);
-        player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()));
+        player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()), true);
     } // handleTame ()
 
     public void handleTexture(ItemStack item) {
+        if(item.isOf(Items.WHITE_DYE)) setTexture(RobotTexture.WHITE);
         if(item.isOf(Items.ORANGE_DYE)) setTexture(RobotTexture.ORANGE);
         if(item.isOf(Items.MAGENTA_DYE)) setTexture(RobotTexture.MAGENTA);
+        if(item.isOf(Items.LIGHT_BLUE_DYE)) setTexture(RobotTexture.LIGHT_BLUE);
         if(item.isOf(Items.YELLOW_DYE)) setTexture(RobotTexture.YELLOW);
         if(item.isOf(Items.LIME_DYE)) setTexture(RobotTexture.LIME);
         if(item.isOf(Items.PINK_DYE)) setTexture(RobotTexture.PINK);
-        if(item.isOf(Items.LIGHT_BLUE_DYE)) setTexture(RobotTexture.LIGHT_BLUE);
+        if(item.isOf(Items.GRAY_DYE)) setTexture(RobotTexture.GRAY);
+        if(item.isOf(Items.LIGHT_GRAY_DYE)) setTexture(RobotTexture.LIGHT_GRAY);
+        if(item.isOf(Items.CYAN_DYE)) setTexture(RobotTexture.CYAN);
         if(item.isOf(Items.PURPLE_DYE)) setTexture(RobotTexture.PURPLE);
         if(item.isOf(Items.BLUE_DYE)) setTexture(RobotTexture.BLUE);
+        if(item.isOf(Items.BROWN_DYE)) setTexture(RobotTexture.BROWN);
+        if(item.isOf(Items.GREEN_DYE)) setTexture(RobotTexture.GREEN);
         if(item.isOf(Items.RED_DYE)) setTexture(RobotTexture.RED);
         if(item.isOf(Items.BLACK_DYE)) setTexture(RobotTexture.BLACK);
     } // handleTexture ()
@@ -641,7 +665,7 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
     public void handleAutoAttack(ItemStack itemStack, PlayerEntity player){
         if (!canInteractAutoAttack(itemStack)) return;
         setAutoAttack(invertBoolean(getAutoAttack()));
-        player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
+        player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()), true);
     } // handleAutoAttack ()
 
     public void handleState(ItemStack itemStack, PlayerEntity player) {
@@ -649,7 +673,7 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
         StandbyState(itemStack);
         FollowState(itemStack);
         BaseDefenseState(itemStack);
-        if(previousState != getCurrentState()) player.sendMessage(Text.literal("State: " + getCurrentState().name()));
+        if(previousState != getCurrentState()) player.sendMessage(Text.literal("State: " + getCurrentState().name()), true);
     } // handleState
 
     public void StandbyState(ItemStack itemStack){
@@ -683,6 +707,7 @@ public class Bunny2Entity extends TameableEntity implements GeoEntity {
         player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
         player.sendMessage(Text.literal("Level: " + this.getLevel()));
         player.sendMessage(Text.literal("Exp: " + this.getExp()));
+        player.sendMessage(Text.literal("Looting: " + this.getLootingLevel()));
     } // displayMessage ()
 
     public void displayProtectionMessage (PlayerEntity player) {

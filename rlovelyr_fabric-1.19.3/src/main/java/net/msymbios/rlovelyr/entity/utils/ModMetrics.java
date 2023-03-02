@@ -74,16 +74,22 @@ public class ModMetrics {
     private static HashMap<RobotTexture, Identifier> setTexture(RobotVariant variant){
         var path = variant.getName() + "/" + variant.getName();
         return new HashMap<>() {{
-            put(RobotTexture.ORANGE,     new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_01.png")); // Orange
-            put(RobotTexture.MAGENTA,    new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_02.png")); // Magenta
-            put(RobotTexture.YELLOW,     new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_04.png")); // Yellow
-            put(RobotTexture.LIME,       new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_05.png")); // Lime
-            put(RobotTexture.PINK,       new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_06.png")); // Pink
-            put(RobotTexture.LIGHT_BLUE, new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_08.png")); // Light Blue
-            put(RobotTexture.PURPLE,     new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_10.png")); // Purple
-            put(RobotTexture.BLUE,       new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_11.png")); // Blue
-            put(RobotTexture.RED,        new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_14.png")); // Red
-            put(RobotTexture.BLACK,      new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_15.png")); // Black
+            put(RobotTexture.WHITE,         new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_00.png")); // White
+            put(RobotTexture.ORANGE,        new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_01.png")); // Orange
+            put(RobotTexture.MAGENTA,       new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_02.png")); // Magenta
+            put(RobotTexture.LIGHT_BLUE,    new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_03.png")); // Light Blue
+            put(RobotTexture.YELLOW,        new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_04.png")); // Yellow
+            put(RobotTexture.LIME,          new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_05.png")); // Lime
+            put(RobotTexture.PINK,          new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_06.png")); // Pink
+            put(RobotTexture.GRAY,          new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_07.png")); // Gray
+            put(RobotTexture.LIGHT_GRAY,    new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_08.png")); // Light Gray
+            put(RobotTexture.CYAN,          new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_09.png")); // Cyan
+            put(RobotTexture.PURPLE,        new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_10.png")); // Purple
+            put(RobotTexture.BLUE,          new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_11.png")); // Blue
+            put(RobotTexture.BROWN,         new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_12.png")); // Brown
+            put(RobotTexture.GREEN,         new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_13.png")); // Green
+            put(RobotTexture.RED,           new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_14.png")); // Red
+            put(RobotTexture.BLACK,         new Identifier(LovelyRobotMod.MODID, "textures/entity/" + path + "_15.png")); // Black
         }};
     } // setTexture ()
 
