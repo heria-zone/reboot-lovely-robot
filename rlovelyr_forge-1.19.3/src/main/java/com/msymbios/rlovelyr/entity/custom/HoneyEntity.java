@@ -2,7 +2,6 @@ package com.msymbios.rlovelyr.entity.custom;
 
 import com.msymbios.rlovelyr.entity.enums.*;
 import com.msymbios.rlovelyr.entity.utils.ModMetrics;
-import com.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -28,6 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,6 @@ import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.object.PlayState;
 
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -48,27 +47,7 @@ import static com.msymbios.rlovelyr.entity.utils.ModUtils.*;
 public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity {
 
     // -- Variables --
-    private static final HashMap<RobotTexture, ResourceLocation> TEXTURES = new HashMap<>(){{
-        put(RobotTexture.ORANGE, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_01.png")); // Orange
-        put(RobotTexture.MAGENTA, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_02.png")); // Magenta
-        put(RobotTexture.YELLOW, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_04.png")); // Yellow
-        put(RobotTexture.LIME, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_05.png")); // Lime
-        put(RobotTexture.PINK, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_06.png")); // Pink
-        put(RobotTexture.LIGHT_BLUE, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_08.png")); // Light Blue
-        put(RobotTexture.PURPLE, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_10.png")); // Purple
-        put(RobotTexture.BLUE, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_11.png")); // Blue
-        put(RobotTexture.RED, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_14.png")); // Red
-        put(RobotTexture.BLACK, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/honey/honey_15.png")); // Black
-    }};
-    private static final HashMap<RobotModel, ResourceLocation> MODELS = new HashMap<>(){{
-        put(RobotModel.Unarmed, new ResourceLocation(LovelyRobotMod.MODID, "geo/honey.geo.json"));
-        put(RobotModel.Armed, new ResourceLocation(LovelyRobotMod.MODID, "geo/honey.attack.geo.json"));
-    }};
-    private static final HashMap<RobotAnimation, ResourceLocation> ANIMATIONS = new HashMap<>(){{
-        put(RobotAnimation.Locomotion, new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
-    }};
-
-    private static final EntityDataAccessor<String> VARIANT = SynchedEntityData.defineId(Bunny2Entity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<String> VARIANT = SynchedEntityData.defineId(HoneyEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> TEXTURE_ID = SynchedEntityData.defineId(HoneyEntity.class, EntityDataSerializers.INT);
 
     private static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(HoneyEntity.class, EntityDataSerializers.INT);
@@ -92,16 +71,17 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
 
     private final AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
 
+    private int autoHealCounter = 0;
 
     // -- Properties --
     public static AttributeSupplier setAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, ModMetrics.HoneyBaseHp)
-                .add(Attributes.ATTACK_DAMAGE, ModMetrics.HoneyBaseAttack)
-                .add(Attributes.ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
-                .add(Attributes.MOVEMENT_SPEED, ModMetrics.HoneyMovementSpeed)
-                .add(Attributes.ARMOR, 0F)
-                .add(Attributes.ARMOR_TOUGHNESS, 0F).build();
+                .add(Attributes.MAX_HEALTH, ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.MAX_HEALTH))
+                .add(Attributes.ATTACK_DAMAGE, ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.ATTACK_DAMAGE))
+                .add(Attributes.ATTACK_SPEED, ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.ATTACK_SPEED))
+                .add(Attributes.MOVEMENT_SPEED, ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.MOVEMENT_SPEED))
+                .add(Attributes.ARMOR, ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.ARMOR))
+                .add(Attributes.ARMOR_TOUGHNESS, ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
 
@@ -111,25 +91,25 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     } // getCurrentModel ()
 
     public void setCurrentModel(String value) {
-        currentModel = MODELS.get(RobotModel.byName(value));
+        currentModel = ModMetrics.getModel(RobotVariant.Honey, RobotModel.byName(value));
     } // setCurrentModel ()
 
     public void setCurrentModel(RobotModel value) {
-        currentModel = MODELS.get(value);
+        currentModel = ModMetrics.getModel(RobotVariant.Honey, value);
     } // setCurrentModel ()
 
 
-    // -- ANIMATION --
+    // -- ANIMATOR --
     public ResourceLocation getCurrentAnimator() {
         return currentAnimator;
     } // getCurrentAnimator ()
 
     public void setCurrentAnimator(String value) {
-        currentAnimator = ANIMATIONS.get(RobotAnimation.byName(value));
+        currentAnimator = ModMetrics.ANIMATIONS.get(value);
     } // setCurrentAnimator ()
 
     public void setCurrentAnimator(RobotAnimation value) {
-        currentAnimator = ANIMATIONS.get(value);
+        currentAnimator = ModMetrics.ANIMATIONS.get(value.getName());
     } // setCurrentAnimator ()
 
 
@@ -145,8 +125,8 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         return value;
     } // getTextureID ()
 
-    public ResourceLocation getTextureByID(int key) {
-        return TEXTURES.containsKey(RobotTexture.byId(key)) ? TEXTURES.get(RobotTexture.byId(key)) : getTexture();
+    public ResourceLocation getTextureByID(int value) {
+        return ModMetrics.getTexture(RobotVariant.Honey, RobotTexture.byId(value));
     } // getTextureByID ()
 
     public void setTexture(ItemStack itemStack) {
@@ -160,15 +140,15 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         if(itemStack.is(Items.BLUE_DYE)) setTexture(RobotTexture.BLUE);
         if(itemStack.is(Items.RED_DYE)) setTexture(RobotTexture.RED);
         if(itemStack.is(Items.BLACK_DYE)) setTexture(RobotTexture.BLACK);
-    } // setCurrentTexture ()
+    } // setTexture ()
 
-    public void setTexture(int variant) {
-        this.entityData.set(TEXTURE_ID, variant);
-    } // setVariant ()
+    public void setTexture(int value) {
+        this.entityData.set(TEXTURE_ID, value);
+    } // setTexture ()
 
-    public void setTexture(RobotTexture variant) {
-        setTexture(variant.getId());
-    } // setVariant ()
+    public void setTexture(RobotTexture value) {
+        setTexture(value.getId());
+    } // setTexture ()
 
 
     // -- VARIANT --
@@ -233,7 +213,7 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         this.entityData.set(MAX_LEVEL, value);
     } // setMaxLevel ()
 
-    public int getBaseLevel(){
+    public int getCurrentLevel(){
         int value = 0;
         try {value = this.entityData.get(LEVEL);}
         catch (Exception ignored){}
@@ -260,21 +240,24 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     } // setExp ()
 
     public int getHpValue() {
-        return (int)(ModMetrics.HoneyBaseHp + this.getBaseLevel() * ModMetrics.HoneyBaseHp / 50);
+        var hp = (int)ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.MAX_HEALTH);
+        return (hp + this.getCurrentLevel() * hp / 50);
     } // getHpValue ()
 
     public int getAttackValue() {
-        return (int)(ModMetrics.HoneyBaseAttack + this.getBaseLevel() * ModMetrics.HoneyBaseAttack / 50);
+        var attack = (int)ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.ATTACK_DAMAGE);
+        return (attack + this.getCurrentLevel() * attack / 50);
     } // getAttackValue ()
 
     public int getDefenseValue() {
-        return (int)(ModMetrics.HoneyBaseDefense + this.getBaseLevel() * ModMetrics.HoneyBaseDefense / 50);
+        var defense = (int)ModMetrics.getAttributeValue(RobotVariant.Honey, RobotAttribute.DEFENSE);
+        return (defense + this.getCurrentLevel() * defense / 50);
     } // getDefenseValue ()
 
     public int getLootingLevel() {
         int level = 0;
         if (ModMetrics.LootingEnchantment) {
-            level = this.getBaseLevel() / ModMetrics.LootingRequiredLevel;
+            level = this.getCurrentLevel() / ModMetrics.LootingRequiredLevel;
             if (level > ModMetrics.MaxLootingLevel) {
                 level = ModMetrics.MaxLootingLevel;
             }
@@ -422,8 +405,8 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setVariant(RobotVariant.Honey.getName());
-        this.setTexture(getRandomNumber(TEXTURES.size()));
+        this.setVariant(RobotVariant.Honey.name());
+        this.setTexture(getRandomNumber(ModMetrics.getTextureCount(RobotVariant.Honey)));
         this.setMaxLevel(ModMetrics.MaxLevel);
         this.setOrderedToSit(true);
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
@@ -449,30 +432,113 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         this.targetSelector.addGoal(7, new ResetUniversalAngerTargetGoal<>(this, true));
     } // registerGoals ()
 
+    @Override
+    public void tick() {
+        super.tick();
+        handleAutoHeal();
+    } // tick ()
+
+
+    @Override
+    public boolean hurt(@NotNull DamageSource source, float amount) {
+        if (this.isInvulnerableTo(source)) return false;
+
+        if (source.isFire() && amount >= 1.0f && this.getFireProtection() > 0)
+            amount *= (100.0f - this.getFireProtection()) / 100.0f;
+
+        if (source == DamageSource.FALL && amount >= 1.0f && this.getFallProtection() > 0)
+            amount *= (100.0f - this.getFallProtection()) / 100.0f;
+
+        if (source.isExplosion() && amount >= 1.0f && this.getBlastProtection() > 0)
+            amount *= (100.0f - this.getBlastProtection()) / 100.0f;
+
+        if (source.isProjectile() && amount >= 1.0f && this.getProjectileProtection() > 0)
+            amount *= (100.0f - this.getProjectileProtection()) / 100.0f;
+
+        if (amount < 1.0f) return false;
+
+        if(!level.isClientSide) {
+            if(source.isFire() && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
+            if(source == DamageSource.FALL && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
+            if(source.isExplosion() && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
+            if(source.isProjectile() && canLevelUpProjectileProtection()) this.setProjectileProtection(this.getProjectileProtection() + 1);
+        }
+
+        final Entity entity = source.getEntity();
+
+        if (this.canLevelUp() && !(entity instanceof Player) && entity instanceof LivingEntity && !this.level.isClientSide) {
+            final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
+            this.addExp(maxHp / 6);
+        }
+
+        if (entity != null && !(entity instanceof Player) && !(entity instanceof Arrow)) {
+            amount = (amount + 1.0f) / 2.0f;
+        }
+
+        return super.hurt(source, amount);
+    } // hurt ()
+
+    @Override
+    public boolean doHurtTarget(@NotNull Entity target) {
+        if(this.canLevelUp() && !(target instanceof Player) && !this.level.isClientSide) {
+            final int maxHp = (int)((LivingEntity)target).getMaxHealth();
+            this.addExp(maxHp / 4);
+        }
+        this.level.broadcastEntityEvent(this, (byte)4);
+        return super.doHurtTarget(target);
+    } // doHurtTarget ()
+
     @Nullable @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
         return null;
     } // getBreedOffspring ()
 
 
-    // -- Custom Methods --
-    private void handleModelTransition () {
-        if(this.swinging) {
-            setCurrentModel(RobotModel.Armed);
-        } else {
-            setCurrentModel(RobotModel.Unarmed);
-        }
-    } // handleModelTransition ()
+    @Override
+    public void onEnterCombat() {
+        setCurrentModel(RobotModel.Armed);
+        super.onEnterCombat();
+    } // onEnterCombat ()
 
+    @Override
+    public void onLeaveCombat() {
+        setCurrentModel(RobotModel.Unarmed);
+        super.onLeaveCombat();
+    } // onLeaveCombat ()
+
+    @Override
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
+        switch (slot.getType()){
+            case HAND: {
+                final ItemStack tempSword = new ItemStack(Items.DIAMOND_SWORD,1);
+                final int lootingLevel = this.getLootingLevel();
+                if(lootingLevel > 0) {
+                    tempSword.enchant(Enchantment.byId(21), lootingLevel);
+                }
+                return tempSword;
+            }
+            default: {
+                return super.getItemBySlot(slot);
+            }
+        }
+    } // getItemBySlot ()
+
+
+    // -- Custom Methods --
     private void handleAutoHeal () {
-        if (!this.level.isClientSide && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
+        if(this.level.isClientSide && !ModMetrics.AutoHeal) return;
+        if(this.getHealth() == this.getHpValue()) return;
+
+        if(autoHealCounter >= ModMetrics.AutoHealInterval) {
             final float healValue = this.getHpValue() / 16.0f;
             this.heal(healValue);
+            autoHealCounter = 0;
         }
+        autoHealCounter++;
     } // handleAutoHeal ()
 
     private boolean canLevelUp() {
-        return this.getBaseLevel() < getMaxLevel();
+        return this.getCurrentLevel() < getMaxLevel();
     } // canLevelUp ()
 
     private boolean canLevelUpFireProtection() {
@@ -492,33 +558,32 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     } // canLevelUpProjectileProtection ()
 
     private int getNextExp() {
-        return ModMetrics.BaseExp + this.getBaseLevel() * ModMetrics.UpExpValue;
+        return ModMetrics.BaseExp + this.getCurrentLevel() * ModMetrics.UpExpValue;
     } // getNextExp ()
 
     private void addExp (int value) {
         int addExp = value;
-
-        final String customName = this.getCustomName().getString();
-        if(customName != null && !customName.trim().equals(""))
-            addExp = addExp * 3 / 2;
+        if(this.hasCustomName()) addExp = addExp * 3 / 2;
 
         int exp = this.getExp();
         exp += addExp;
 
+        var oldLevel = getCurrentLevel();
         while (exp >= this.getNextExp()) {
             exp -= this.getNextExp();
-            this.setLevel(this.getBaseLevel() + 1);
+            this.setLevel(this.getCurrentLevel() + 1);
+        }
 
+        this.setExp(exp);
+        if(oldLevel != getCurrentLevel()) {
             if(!level.isClientSide) {
                 try {
                     final LivingEntity entity = this.getOwner();
-                    if (entity == null) continue;
+                    if (entity == null) return;
                     this.displayMessage((Player)entity);
                 } catch (Exception ignored) {}
             }
         }
-
-        this.setExp(exp);
     } // addExp ()
 
 
@@ -529,12 +594,11 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
 
         if(hand == InteractionHand.MAIN_HAND) {
             handleSit(itemStack);
-
             if (this.level.isClientSide) {
                 return InteractionResult.PASS;
             } else {
+                handleState(itemStack, player);
                 handleAutoAttack(itemStack, player);
-                handleState(itemStack);
                 setTexture(itemStack);
                 if(getOwner() == null) handleTame(player);
 
@@ -561,16 +625,18 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     } // handleSit ()
 
     public void handleAutoAttack(ItemStack itemStack, Player player){
-        if(!canInteractAutoAttack(itemStack)) return;
+        if (!canInteractAutoAttack(itemStack)) return;
         setAutoAttack(invertBoolean(getAutoAttack()));
         player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), true);
     } // handleAutoAttack ()
 
-    public void handleState(ItemStack itemStack) {
+    public void handleState(ItemStack itemStack, Player player) {
+        var previousState = getCurrentState();
         StandbyState(itemStack);
         FollowState(itemStack);
         BaseDefenseState(itemStack);
-    } // handleState ()
+        if(previousState != getCurrentState()) player.displayClientMessage(Component.literal("State: " + getCurrentState().name()), true);
+    } // handleState
 
     public void StandbyState(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
@@ -585,6 +651,12 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     public void BaseDefenseState(ItemStack itemStack){
         if(!canInteractGuardMode(itemStack)) return;
         setOrderedToSit(false);
+        setAutoAttack(true);
+
+        var currentPosition = this.position();
+        this.setBaseX((float)currentPosition.x);
+        this.setBaseY((float)currentPosition.y);
+        this.setBaseZ((float)currentPosition.z);
         setCurrentState(RobotState.BaseDefense);
     } // BaseDefenseState ()
 
@@ -595,8 +667,9 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         player.displayClientMessage(Component.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()), false);
         player.displayClientMessage(Component.literal("Attack: " + this.getAttackValue()), false);
         player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), false);
-        player.displayClientMessage(Component.literal("Level: " + this.getBaseLevel()), false);
+        player.displayClientMessage(Component.literal("Level: " + this.getCurrentLevel()), false);
         player.displayClientMessage(Component.literal("Exp: " + this.getExp()), false);
+        player.displayClientMessage(Component.literal("Looting: " + this.getLootingLevel()), false);
     } // displayMessage ()
 
     public void displayProtectionMessage (Player player) {
@@ -641,7 +714,7 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
 
         nbt.putInt("MaxLevel", this.getMaxLevel());
-        nbt.putInt("Level", this.getBaseLevel());
+        nbt.putInt("Level", this.getCurrentLevel());
         nbt.putInt("Exp", this.getExp());
 
         nbt.putInt("FireProtection", this.getFireProtection());
@@ -691,21 +764,20 @@ public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity 
     @Override
     public int getRemainingPersistentAngerTime() {
         return 0;
-    }
+    } // getRemainingPersistentAngerTime ()
 
     @Override
-    public void setRemainingPersistentAngerTime(int p_21673_) {}
+    public void setRemainingPersistentAngerTime(int p_21673_) {} // setRemainingPersistentAngerTime ()
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public UUID getPersistentAngerTarget() {
         return null;
-    }
+    } // getPersistentAngerTarget ()
 
     @Override
-    public void setPersistentAngerTarget(@Nullable UUID p_21672_) {}
+    public void setPersistentAngerTarget(@Nullable UUID p_21672_) {} // setPersistentAngerTarget ()
 
     @Override
-    public void startPersistentAngerTimer() {}
+    public void startPersistentAngerTimer() {} // startPersistentAngerTimer ()
 
 } // Class HoneyEntity
