@@ -22,7 +22,7 @@ public enum RobotTexture implements StringRepresentable {
 
     // -- Variables --
     public static final StringRepresentable.EnumCodec<RobotTexture> CODEC = StringRepresentable.fromEnum(RobotTexture::values);
-    private static final IntFunction<RobotTexture> BY_ID = ByIdMap.continuous(RobotTexture::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+    private static final IntFunction<RobotTexture> BY_ID = ByIdMap.continuous(RobotTexture::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
     private final int id;
     private final String name;
 

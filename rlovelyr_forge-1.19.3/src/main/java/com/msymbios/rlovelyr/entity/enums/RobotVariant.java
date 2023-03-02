@@ -16,7 +16,7 @@ public enum RobotVariant implements StringRepresentable {
 
     // -- Variables --
     public static final StringRepresentable.EnumCodec<RobotVariant> CODEC = StringRepresentable.fromEnum(RobotVariant::values);
-    private static final IntFunction<RobotVariant> BY_ID = ByIdMap.continuous(RobotVariant::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+    private static final IntFunction<RobotVariant> BY_ID = ByIdMap.continuous(RobotVariant::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
     private final int id;
     private final String name;
 

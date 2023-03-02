@@ -11,7 +11,7 @@ public enum RobotState {
 
     // -- Variables --
     private final int id;
-    private static final IntFunction<RobotState> BY_ID = ByIdMap.continuous(RobotState::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);;
+    private static final IntFunction<RobotState> BY_ID = ByIdMap.continuous(RobotState::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);;
 
 
     // -- Properties --

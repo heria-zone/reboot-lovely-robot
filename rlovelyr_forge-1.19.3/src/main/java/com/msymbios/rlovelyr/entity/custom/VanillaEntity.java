@@ -2,7 +2,6 @@ package com.msymbios.rlovelyr.entity.custom;
 
 import com.msymbios.rlovelyr.entity.enums.*;
 import com.msymbios.rlovelyr.entity.utils.ModMetrics;
-import com.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -40,7 +39,6 @@ import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.object.PlayState;
 
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -49,26 +47,6 @@ import static com.msymbios.rlovelyr.entity.utils.ModUtils.*;
 public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntity {
 
     // -- Variables --
-    private static final HashMap<RobotTexture, ResourceLocation> TEXTURES = new HashMap<>(){{
-        put(RobotTexture.ORANGE, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_01.png")); // Orange
-        put(RobotTexture.MAGENTA, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_02.png")); // Magenta
-        put(RobotTexture.YELLOW, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_04.png")); // Yellow
-        put(RobotTexture.LIME, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_05.png")); // Lime
-        put(RobotTexture.PINK, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_06.png")); // Pink
-        put(RobotTexture.LIGHT_BLUE, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_08.png")); // Light Blue
-        put(RobotTexture.PURPLE, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_10.png")); // Purple
-        put(RobotTexture.BLUE, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_11.png")); // Blue
-        put(RobotTexture.RED, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_14.png")); // Red
-        put(RobotTexture.BLACK, new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/vanilla/vanilla_15.png")); // Black
-    }};
-    private static final HashMap<RobotModel, ResourceLocation> MODELS = new HashMap<>(){{
-        put(RobotModel.Unarmed, new ResourceLocation(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
-        put(RobotModel.Armed, new ResourceLocation(LovelyRobotMod.MODID, "geo/vanilla.attack.geo.json"));
-    }};
-    private static final HashMap<RobotAnimation, ResourceLocation> ANIMATIONS = new HashMap<>(){{
-        put(RobotAnimation.Locomotion, new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
-    }};
-
     private static final EntityDataAccessor<String> VARIANT = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> TEXTURE_ID = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.INT);
 
@@ -98,12 +76,12 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     // -- Properties --
     public static AttributeSupplier setAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, ModMetrics.VanillaBaseHp)
-                .add(Attributes.ATTACK_DAMAGE, ModMetrics.VanillaBaseAttack)
-                .add(Attributes.ATTACK_SPEED, ModMetrics.AttackMoveSpeed)
-                .add(Attributes.MOVEMENT_SPEED, ModMetrics.VanillaMovementSpeed)
-                .add(Attributes.ARMOR, 0F)
-                .add(Attributes.ARMOR_TOUGHNESS, 0F).build();
+                .add(Attributes.MAX_HEALTH, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MAX_HEALTH))
+                .add(Attributes.ATTACK_DAMAGE, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ATTACK_DAMAGE))
+                .add(Attributes.ATTACK_SPEED, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ATTACK_SPEED))
+                .add(Attributes.MOVEMENT_SPEED, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MOVEMENT_SPEED))
+                .add(Attributes.ARMOR, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ARMOR))
+                .add(Attributes.ARMOR_TOUGHNESS, ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
 
@@ -113,11 +91,11 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     } // getCurrentModel ()
 
     public void setCurrentModel(String value) {
-        currentModel = MODELS.get(RobotModel.byName(value));
+        currentModel = ModMetrics.getModel(RobotVariant.Vanilla, RobotModel.byName(value));
     } // setCurrentModel ()
 
     public void setCurrentModel(RobotModel value) {
-        currentModel = MODELS.get(value);
+        currentModel = ModMetrics.getModel(RobotVariant.Vanilla, value);
     } // setCurrentModel ()
 
 
@@ -127,11 +105,11 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     } // getCurrentAnimator ()
 
     public void setCurrentAnimator(String value) {
-        currentAnimator = ANIMATIONS.get(RobotAnimation.byName(value));
+        currentAnimator = ModMetrics.ANIMATIONS.get(value);
     } // setCurrentAnimator ()
 
     public void setCurrentAnimator(RobotAnimation value) {
-        currentAnimator = ANIMATIONS.get(value);
+        currentAnimator = ModMetrics.ANIMATIONS.get(value.getName());
     } // setCurrentAnimator ()
 
 
@@ -147,8 +125,8 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         return value;
     } // getTextureID ()
 
-    public ResourceLocation getTextureByID(int key) {
-        return TEXTURES.containsKey(RobotTexture.byId(key)) ? TEXTURES.get(RobotTexture.byId(key)) : getTexture();
+    public ResourceLocation getTextureByID(int value) {
+        return ModMetrics.getTexture(RobotVariant.Vanilla, RobotTexture.byId(value));
     } // getTextureByID ()
 
     public void setTexture(ItemStack itemStack) {
@@ -262,15 +240,18 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     } // setExp ()
 
     public int getHpValue() {
-        return (int)(ModMetrics.VanillaBaseHp + this.getCurrentLevel() * ModMetrics.VanillaBaseHp / 50);
+        var hp = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MAX_HEALTH);
+        return (hp + this.getCurrentLevel() * hp / 50);
     } // getHpValue ()
 
     public int getAttackValue() {
-        return (int)(ModMetrics.VanillaBaseAttack + this.getCurrentLevel() * ModMetrics.VanillaBaseAttack / 50);
+        var attack = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ATTACK_DAMAGE);
+        return (attack + this.getCurrentLevel() * attack / 50);
     } // getAttackValue ()
 
     public int getDefenseValue() {
-        return (int)(ModMetrics.VanillaBaseDefense + this.getCurrentLevel() * ModMetrics.VanillaBaseDefense / 50);
+        var defense = (int)ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.DEFENSE);
+        return (defense + this.getCurrentLevel() * defense / 50);
     } // getDefenseValue ()
 
     public int getLootingLevel() {
@@ -425,7 +406,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setVariant(RobotVariant.Vanilla.name());
-        this.setTexture(getRandomNumber(TEXTURES.size()));
+        this.setTexture(getRandomNumber(ModMetrics.getTextureCount(RobotVariant.Vanilla)));
         this.setMaxLevel(ModMetrics.MaxLevel);
         this.setOrderedToSit(true);
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
@@ -683,11 +664,11 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         player.displayClientMessage(Component.literal("|--------------------------"), false);
         player.displayClientMessage(Component.literal("MaxLevel: " + this.getMaxLevel()), false);
         player.displayClientMessage(Component.literal("Model: " + this.getVariant()), false);
-        player.displayClientMessage(Component.literal("Level: " + this.getCurrentLevel()), false);
-        player.displayClientMessage(Component.literal("Exp: " + this.getExp()), false);
         player.displayClientMessage(Component.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()), false);
         player.displayClientMessage(Component.literal("Attack: " + this.getAttackValue()), false);
         player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), false);
+        player.displayClientMessage(Component.literal("Level: " + this.getCurrentLevel()), false);
+        player.displayClientMessage(Component.literal("Exp: " + this.getExp()), false);
         player.displayClientMessage(Component.literal("Looting: " + this.getLootingLevel()), false);
     } // displayMessage ()
 
@@ -783,21 +764,20 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     @Override
     public int getRemainingPersistentAngerTime() {
         return 0;
-    }
+    } // getRemainingPersistentAngerTime ()
 
     @Override
-    public void setRemainingPersistentAngerTime(int p_21673_) {}
+    public void setRemainingPersistentAngerTime(int p_21673_) {} // setRemainingPersistentAngerTime ()
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public UUID getPersistentAngerTarget() {
         return null;
-    }
+    } // getPersistentAngerTarget ()
 
     @Override
-    public void setPersistentAngerTarget(@Nullable UUID p_21672_) {}
+    public void setPersistentAngerTarget(@Nullable UUID p_21672_) {} // setPersistentAngerTarget ()
 
     @Override
-    public void startPersistentAngerTimer() {}
+    public void startPersistentAngerTimer() {} // startPersistentAngerTimer ()
 
 } // Class VanillaEntity

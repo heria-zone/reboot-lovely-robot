@@ -13,7 +13,7 @@ public enum RobotAnimation implements StringRepresentable {
 
     // -- Variables --
     public static final StringRepresentable.EnumCodec<RobotAnimation> CODEC = StringRepresentable.fromEnum(RobotAnimation::values);
-    private static final IntFunction<RobotAnimation> BY_ID = ByIdMap.continuous(RobotAnimation::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+    private static final IntFunction<RobotAnimation> BY_ID = ByIdMap.continuous(RobotAnimation::getId, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
     private final int id;
     private final String name;
 
