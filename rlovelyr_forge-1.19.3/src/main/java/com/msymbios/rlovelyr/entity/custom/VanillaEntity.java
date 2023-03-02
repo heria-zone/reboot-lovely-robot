@@ -3,7 +3,6 @@ package com.msymbios.rlovelyr.entity.custom;
 import com.msymbios.rlovelyr.entity.enums.*;
 import com.msymbios.rlovelyr.entity.utils.ModMetrics;
 import com.msymbios.rlovelyr.LovelyRobotMod;
-import com.msymbios.rlovelyr.item.ModItems;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -29,6 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +45,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.msymbios.rlovelyr.entity.utils.ModUtils.*;
-import static com.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 
 public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntity {
 
@@ -94,6 +93,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
 
     private final AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
 
+    private int autoHealCounter = 0;
 
     // -- Properties --
     public static AttributeSupplier setAttributes() {
@@ -235,7 +235,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         this.entityData.set(MAX_LEVEL, value);
     } // setMaxLevel ()
 
-    public int getBaseLevel(){
+    public int getCurrentLevel(){
         int value = 0;
         try {value = this.entityData.get(LEVEL);}
         catch (Exception ignored){}
@@ -262,21 +262,21 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     } // setExp ()
 
     public int getHpValue() {
-        return (int)(ModMetrics.VanillaBaseHp + this.getBaseLevel() * ModMetrics.VanillaBaseHp / 50);
+        return (int)(ModMetrics.VanillaBaseHp + this.getCurrentLevel() * ModMetrics.VanillaBaseHp / 50);
     } // getHpValue ()
 
     public int getAttackValue() {
-        return (int)(ModMetrics.VanillaBaseAttack + this.getBaseLevel() * ModMetrics.VanillaBaseAttack / 50);
+        return (int)(ModMetrics.VanillaBaseAttack + this.getCurrentLevel() * ModMetrics.VanillaBaseAttack / 50);
     } // getAttackValue ()
 
     public int getDefenseValue() {
-        return (int)(ModMetrics.VanillaBaseDefense + this.getBaseLevel() * ModMetrics.VanillaBaseDefense / 50);
+        return (int)(ModMetrics.VanillaBaseDefense + this.getCurrentLevel() * ModMetrics.VanillaBaseDefense / 50);
     } // getDefenseValue ()
 
     public int getLootingLevel() {
         int level = 0;
         if (ModMetrics.LootingEnchantment) {
-            level = this.getBaseLevel() / ModMetrics.LootingRequiredLevel;
+            level = this.getCurrentLevel() / ModMetrics.LootingRequiredLevel;
             if (level > ModMetrics.MaxLootingLevel) {
                 level = ModMetrics.MaxLootingLevel;
             }
@@ -451,30 +451,113 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         this.targetSelector.addGoal(7, new ResetUniversalAngerTargetGoal<>(this, true));
     } // registerGoals ()
 
+    @Override
+    public void tick() {
+        super.tick();
+        handleAutoHeal();
+    } // tick ()
+
+
+    @Override
+    public boolean hurt(@NotNull DamageSource source, float amount) {
+        if (this.isInvulnerableTo(source)) return false;
+
+        if (source.isFire() && amount >= 1.0f && this.getFireProtection() > 0)
+            amount *= (100.0f - this.getFireProtection()) / 100.0f;
+
+        if (source == DamageSource.FALL && amount >= 1.0f && this.getFallProtection() > 0)
+            amount *= (100.0f - this.getFallProtection()) / 100.0f;
+
+        if (source.isExplosion() && amount >= 1.0f && this.getBlastProtection() > 0)
+            amount *= (100.0f - this.getBlastProtection()) / 100.0f;
+
+        if (source.isProjectile() && amount >= 1.0f && this.getProjectileProtection() > 0)
+            amount *= (100.0f - this.getProjectileProtection()) / 100.0f;
+
+        if (amount < 1.0f) return false;
+
+        if(!level.isClientSide) {
+            if(source.isFire() && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
+            if(source == DamageSource.FALL && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
+            if(source.isExplosion() && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
+            if(source.isProjectile() && canLevelUpProjectileProtection()) this.setProjectileProtection(this.getProjectileProtection() + 1);
+        }
+
+        final Entity entity = source.getEntity();
+
+        if (this.canLevelUp() && !(entity instanceof Player) && entity instanceof LivingEntity && !this.level.isClientSide) {
+            final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
+            this.addExp(maxHp / 6);
+        }
+
+        if (entity != null && !(entity instanceof Player) && !(entity instanceof Arrow)) {
+            amount = (amount + 1.0f) / 2.0f;
+        }
+
+        return super.hurt(source, amount);
+    } // hurt ()
+
+    @Override
+    public boolean doHurtTarget(@NotNull Entity target) {
+        if(this.canLevelUp() && !(target instanceof Player) && !this.level.isClientSide) {
+            final int maxHp = (int)((LivingEntity)target).getMaxHealth();
+            this.addExp(maxHp / 4);
+        }
+        this.level.broadcastEntityEvent(this, (byte)4);
+        return super.doHurtTarget(target);
+    } // doHurtTarget ()
+
     @Nullable @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
         return null;
     } // getBreedOffspring ()
 
 
-    // -- Custom Methods --
-    private void handleModelTransition () {
-        if(this.swinging) {
-            setCurrentModel(RobotModel.Armed);
-        } else {
-            setCurrentModel(RobotModel.Unarmed);
-        }
-    } // handleModelTransition ()
+    @Override
+    public void onEnterCombat() {
+        setCurrentModel(RobotModel.Armed);
+        super.onEnterCombat();
+    } // onEnterCombat ()
 
+    @Override
+    public void onLeaveCombat() {
+        setCurrentModel(RobotModel.Unarmed);
+        super.onLeaveCombat();
+    } // onLeaveCombat ()
+
+    @Override
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
+        switch (slot.getType()){
+            case HAND: {
+                final ItemStack tempSword = new ItemStack(Items.DIAMOND_SWORD,1);
+                final int lootingLevel = this.getLootingLevel();
+                if(lootingLevel > 0) {
+                    tempSword.enchant(Enchantment.byId(21), lootingLevel);
+                }
+                return tempSword;
+            }
+            default: {
+                return super.getItemBySlot(slot);
+            }
+        }
+    } // getItemBySlot ()
+
+
+    // -- Custom Methods --
     private void handleAutoHeal () {
-        if (!this.level.isClientSide && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
+        if(this.level.isClientSide && !ModMetrics.AutoHeal) return;
+        if(this.getHealth() == this.getHpValue()) return;
+
+        if(autoHealCounter >= ModMetrics.AutoHealInterval) {
             final float healValue = this.getHpValue() / 16.0f;
             this.heal(healValue);
+            autoHealCounter = 0;
         }
+        autoHealCounter++;
     } // handleAutoHeal ()
 
     private boolean canLevelUp() {
-        return this.getBaseLevel() < getMaxLevel();
+        return this.getCurrentLevel() < getMaxLevel();
     } // canLevelUp ()
 
     private boolean canLevelUpFireProtection() {
@@ -494,33 +577,32 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
     } // canLevelUpProjectileProtection ()
 
     private int getNextExp() {
-        return ModMetrics.BaseExp + this.getBaseLevel() * ModMetrics.UpExpValue;
+        return ModMetrics.BaseExp + this.getCurrentLevel() * ModMetrics.UpExpValue;
     } // getNextExp ()
 
     private void addExp (int value) {
         int addExp = value;
-
-        final String customName = this.getCustomName().getString();
-        if(customName != null && !customName.trim().equals(""))
-            addExp = addExp * 3 / 2;
+        if(this.hasCustomName()) addExp = addExp * 3 / 2;
 
         int exp = this.getExp();
         exp += addExp;
 
+        var oldLevel = getCurrentLevel();
         while (exp >= this.getNextExp()) {
             exp -= this.getNextExp();
-            this.setLevel(this.getBaseLevel() + 1);
+            this.setLevel(this.getCurrentLevel() + 1);
+        }
 
+        this.setExp(exp);
+        if(oldLevel != getCurrentLevel()) {
             if(!level.isClientSide) {
                 try {
                     final LivingEntity entity = this.getOwner();
-                    if (entity == null) continue;
+                    if (entity == null) return;
                     this.displayMessage((Player)entity);
                 } catch (Exception ignored) {}
             }
         }
-
-        this.setExp(exp);
     } // addExp ()
 
 
@@ -601,11 +683,12 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         player.displayClientMessage(Component.literal("|--------------------------"), false);
         player.displayClientMessage(Component.literal("MaxLevel: " + this.getMaxLevel()), false);
         player.displayClientMessage(Component.literal("Model: " + this.getVariant()), false);
+        player.displayClientMessage(Component.literal("Level: " + this.getCurrentLevel()), false);
+        player.displayClientMessage(Component.literal("Exp: " + this.getExp()), false);
         player.displayClientMessage(Component.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()), false);
         player.displayClientMessage(Component.literal("Attack: " + this.getAttackValue()), false);
         player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), false);
-        player.displayClientMessage(Component.literal("Level: " + this.getBaseLevel()), false);
-        player.displayClientMessage(Component.literal("Exp: " + this.getExp()), false);
+        player.displayClientMessage(Component.literal("Looting: " + this.getLootingLevel()), false);
     } // displayMessage ()
 
     public void displayProtectionMessage (Player player) {
@@ -650,7 +733,7 @@ public class VanillaEntity extends TamableAnimal implements NeutralMob, GeoEntit
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
 
         nbt.putInt("MaxLevel", this.getMaxLevel());
-        nbt.putInt("Level", this.getBaseLevel());
+        nbt.putInt("Level", this.getCurrentLevel());
         nbt.putInt("Exp", this.getExp());
 
         nbt.putInt("FireProtection", this.getFireProtection());
