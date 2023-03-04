@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "rlovelyr",
+  "version": "${version}",
+
+  "name": "Reboot LovelyRobot",
+  "description": "This mod is a reboot that adds several robots girl to Minecraft as an assistant in battles with various functionalities.",
+  "authors": [
+    "MSymbios, lilacx02"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+
+  "license": "MIT License",
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.msymbios.rlovelyr.LovelyRobotMod"
+    ],
+    "client": [
+      "net.msymbios.rlovelyr.LovelyRobotModClient"
+    ]
+  },
+  "mixins": [
+    "rlovelyr.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.14",
+    "fabric-api": "*",
+    "minecraft": "~1.18.2",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
