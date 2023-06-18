@@ -47,10 +47,10 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
 import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 
-public class VanillaEntity extends TameableEntity implements GeoEntity {
+public class VanillaEntity extends InternalRobot implements GeoEntity {
 
     // -- Variables --
-    private static final TrackedData<String> VARIANT = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.STRING);
+    /*private static final TrackedData<String> VARIANT = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.STRING);
     private static final TrackedData<Integer> TEXTURE_ID = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     private static final TrackedData<Integer> STATE = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.INTEGER);
@@ -67,7 +67,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
     private static final TrackedData<Float> BASE_X = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<Float> BASE_Y = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.FLOAT);
-    private static final TrackedData<Float> BASE_Z = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.FLOAT);;
+    private static final TrackedData<Float> BASE_Z = DataTracker.registerData(VanillaEntity.class, TrackedDataHandlerRegistry.FLOAT);*/
 
     private Identifier currentModel;
     private Identifier currentAnimator;
@@ -418,7 +418,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, (new RevengeGoal(this)).setGroupRevenge());
-        this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, (entity) -> entity instanceof Monster && !(entity instanceof CreeperEntity)));
+        this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, (entity) -> entity instanceof Monster && !(entity instanceof CreeperEntity) && !(entity instanceof InternalRobot)));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
@@ -779,7 +779,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
 
     // -- Sound Methods --
-    @Override
+    /*@Override
     protected SoundEvent getHurtSound(DamageSource source) {
         return SoundEvents.ENTITY_GENERIC_HURT;
     } // getHurtSound ()
@@ -787,6 +787,6 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_GENERIC_DEATH;
-    } // getDeathSound ()
+    } // getDeathSound ()*/
 
 } // Class VanillaEntity
