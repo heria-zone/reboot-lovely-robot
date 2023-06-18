@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NNN",
+    "NRN",
+    "NNN"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "R": {
+      "item": "rlovelyr:robot_core"
+    }
+  },
+  "result": {
+    "item": "rlovelyr:bunny2_spawn",
+    "count": 1
+  }
+}
