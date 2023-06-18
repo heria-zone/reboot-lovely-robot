@@ -34,11 +34,15 @@ import net.msymbios.rlovelyr.entity.goal.AutoAttackGoal;
 import net.msymbios.rlovelyr.entity.utils.*;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
+import software.bernie.geckolib.constant.DataTickets;
+import software.bernie.geckolib.constant.DefaultAnimations;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
 import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
@@ -68,7 +72,7 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     private Identifier currentModel;
     private Identifier currentAnimator;
 
-    private final AnimatableInstanceCache factory = new SingletonAnimatableInstanceCache(this);
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
 
     // -- Properties --
@@ -375,40 +379,17 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
 
 
     // -- Animations --
-    private PlayState locomotionAnim(AnimationState animationState) {
-        if(animationState.isMoving()) {
-            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.walk", Animation.LoopType.LOOP));
-            return PlayState.CONTINUE;
-        }
-
-        if(isSitting()) {
-            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.sit", Animation.LoopType.LOOP));
-            return PlayState.CONTINUE;
-        } else {
-            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.idle", Animation.LoopType.LOOP));
-            return PlayState.CONTINUE;
-        }
-    } // locomotionAnim ()
-
-    private PlayState attackAnim(AnimationState state) {
-        if(this.handSwinging && state.getController().getAnimationState().equals(AnimationController.State.STOPPED)) {
-            state.getController().forceAnimationReset();
-            state.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE));
-            this.handSwinging = false;
-        }
-
-        return PlayState.CONTINUE;
-    } // attackAnim ()
-
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(new AnimationController(this, "locomotionController", 0, this::locomotionAnim));
-        controllerRegistrar.add(new AnimationController(this, "attackController", 0, this::attackAnim));
+        controllerRegistrar.add(
+                InternalAnimation.locomotionController(this),
+                InternalAnimation.attackAnimation(this)
+        );
     } // registerControllers ()
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return factory;
+        return cache;
     } // getAnimatableInstanceCache ()
 
 

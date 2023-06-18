@@ -15,7 +15,7 @@ public class ModMetrics {
     // -- Goal Attribute --
     public static float MeleeAttackMovement = 1.0F;                   // Movement speed when it is melee attacking
     public static float FollowOwnerMovement = 1.0F;                   // Movement speed when following player
-    public static float WanderAroundMovement = 0.4F;                  // Movement speed while it is wandering around
+    public static float WanderAroundMovement = 0.6F;                  // Movement speed while it is wandering around
     public static float FollowBehindDistance = 10.0F;
     public static float FollowCloseDistance= 2.0F;
     public static float LookAtRange = 8.0F;

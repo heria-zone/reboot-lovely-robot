@@ -10,7 +10,9 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,6 +31,7 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.entity.enums.*;
+import net.msymbios.rlovelyr.entity.utils.InternalAnimation;
 import net.msymbios.rlovelyr.entity.utils.ModMetrics;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -365,35 +368,12 @@ public class HoneyEntity extends TameableEntity implements GeoEntity {
 
 
     // -- Animations --
-    private PlayState locomotionAnim(AnimationState animationState) {
-        if(animationState.isMoving()) {
-            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.walk", Animation.LoopType.LOOP));
-            return PlayState.CONTINUE;
-        }
-
-        if(isSitting()) {
-            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.sit", Animation.LoopType.LOOP));
-            return PlayState.CONTINUE;
-        } else {
-            animationState.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.idle", Animation.LoopType.LOOP));
-            return PlayState.CONTINUE;
-        }
-    } // locomotionAnim ()
-
-    private PlayState attackAnim(AnimationState state) {
-        if(this.handSwinging && state.getController().getAnimationState().equals(AnimationController.State.STOPPED)) {
-            state.getController().forceAnimationReset();
-            state.getController().setAnimation(RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE));
-            this.handSwinging = false;
-        }
-
-        return PlayState.CONTINUE;
-    } // attackAnim ()
-
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(new AnimationController(this, "locomotionController", 0, this::locomotionAnim));
-        controllerRegistrar.add(new AnimationController(this, "attackController", 0, this::attackAnim));
+        controllerRegistrar.add(
+                InternalAnimation.locomotionController(this),
+                InternalAnimation.attackAnimation(this)
+        );
     } // registerControllers ()
 
     @Override
@@ -419,17 +399,16 @@ public class HoneyEntity extends TameableEntity implements GeoEntity {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new PounceAtTargetGoal(this, 0.4F));
-        this.goalSelector.add(4, new MeleeAttackGoal(this, 1.0, true));
-        this.goalSelector.add(5, new FollowOwnerGoal(this, 1.0, 10.0F, 2.0F, false));
-        this.goalSelector.add(6, new AnimalMateGoal(this, 1.0));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
-        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
-        this.goalSelector.add(9, new LookAroundGoal(this));
+        this.goalSelector.add(3, new MeleeAttackGoal(this, ModMetrics.MeleeAttackMovement, true));
+        this.goalSelector.add(4, new FollowOwnerGoal(this, ModMetrics.FollowOwnerMovement, ModMetrics.FollowBehindDistance, ModMetrics.FollowCloseDistance, false));
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, ModMetrics.WanderAroundMovement));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, ModMetrics.LookAtRange));
+        this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, (new RevengeGoal(this)).setGroupRevenge());
-        this.targetSelector.add(4, new UniversalAngerGoal(this, true));
+        this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, (entity) -> entity instanceof Monster && !(entity instanceof CreeperEntity)));
+        this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
     @Override
