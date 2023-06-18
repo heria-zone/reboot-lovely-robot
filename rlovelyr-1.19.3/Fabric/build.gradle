@@ -6,7 +6,7 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = "${mod_id}-fabric-${minecraft_version}"
+archivesBaseName = "${mod_id}-fabric-${mod_version}-${minecraft_version}"
 version = "${mod_version}"
 group = "${mod_group}"
 

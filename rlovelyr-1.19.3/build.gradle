@@ -33,6 +33,10 @@ subprojects {
         it.options.release = 17
     }
 
+    task wrapper(type: Wrapper) {
+        gradleVersion = "${gradle_version}"
+    }
+
     tasks.withType(GenerateModuleMetadata) {
         enabled = false
     }
