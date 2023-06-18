@@ -12,6 +12,15 @@ public class ModMetrics {
     public static boolean LevelUpLog = true;            // Show log when level up
 
 
+    // -- Goal Attribute --
+    public static float MeleeAttackMovement = 1.0F;                   // Movement speed when it is melee attacking
+    public static float FollowOwnerMovement = 1.0F;                   // Movement speed when following player
+    public static float WanderAroundMovement = 0.4F;                  // Movement speed while it is wandering around
+    public static float FollowBehindDistance = 10.0F;
+    public static float FollowCloseDistance= 2.0F;
+    public static float LookAtRange = 8.0F;
+
+
     // - Level & Experience --
     public static int BaseExp = 50;                     // Basic experience required to level up
     public static int UpExpValue = 2;                   // Increase value for each level

@@ -10,7 +10,9 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
@@ -28,6 +30,7 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.entity.enums.*;
+import net.msymbios.rlovelyr.entity.goal.AutoAttackGoal;
 import net.msymbios.rlovelyr.entity.utils.*;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -248,6 +251,14 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
         return (attack + this.getLevel() * attack / 50);
     } // getAttackValue ()
 
+    public float getAttackSpeed() {
+        return ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.ATTACK_SPEED);
+    } // getAttackSpeed ()
+
+    public float getMovementSpeed() {
+        return ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.MOVEMENT_SPEED);
+    } // getMovementSpeed ()
+
     public int getDefenseValue() {
         var defense = ModMetrics.getAttributeValue(RobotVariant.Vanilla, RobotAttribute.DEFENSE);
         return (int)(defense + this.getLevel() * defense / 50);
@@ -418,17 +429,16 @@ public class VanillaEntity extends TameableEntity implements GeoEntity {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new PounceAtTargetGoal(this, 0.4F));
-        this.goalSelector.add(4, new MeleeAttackGoal(this, 1.0, true));
-        this.goalSelector.add(5, new FollowOwnerGoal(this, 1.0, 10.0F, 2.0F, false));
-        this.goalSelector.add(6, new AnimalMateGoal(this, 1.0));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
-        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
-        this.goalSelector.add(9, new LookAroundGoal(this));
+        this.goalSelector.add(3, new MeleeAttackGoal(this, ModMetrics.MeleeAttackMovement, true));
+        this.goalSelector.add(4, new FollowOwnerGoal(this, ModMetrics.FollowOwnerMovement, ModMetrics.FollowBehindDistance, ModMetrics.FollowCloseDistance, false));
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, ModMetrics.WanderAroundMovement));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, ModMetrics.LookAtRange));
+        this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, (new RevengeGoal(this)).setGroupRevenge());
-        this.targetSelector.add(4, new UniversalAngerGoal(this, true));
+        this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, (entity) -> entity instanceof Monster && !(entity instanceof CreeperEntity)));
+        this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
     @Override
