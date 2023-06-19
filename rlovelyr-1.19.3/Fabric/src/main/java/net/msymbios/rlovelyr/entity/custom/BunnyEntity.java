@@ -17,17 +17,18 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.entity.enums.*;
-import net.msymbios.rlovelyr.entity.utils.InternalAnimation;
-import net.msymbios.rlovelyr.entity.utils.ModMetrics;
+import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
+import net.msymbios.rlovelyr.entity.internal.InternalEntity;
+import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.*;
 
-import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
+import static net.msymbios.rlovelyr.entity.internal.Utility.*;
 
-public class BunnyEntity extends InternalRobot implements GeoEntity {
+public class BunnyEntity extends InternalEntity implements GeoEntity {
 
     // -- Variables --
     private Identifier currentModel;
@@ -37,12 +38,12 @@ public class BunnyEntity extends InternalRobot implements GeoEntity {
     // -- Properties --
     public static DefaultAttributeContainer.Builder setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.MAX_HEALTH))
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.ATTACK_DAMAGE))
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.ATTACK_SPEED))
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.MOVEMENT_SPEED))
-                .add(EntityAttributes.GENERIC_ARMOR, ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.ARMOR))
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.ARMOR_TOUGHNESS));
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_HEALTH))
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ATTACK_DAMAGE))
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ATTACK_SPEED))
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MOVEMENT_SPEED))
+                .add(EntityAttributes.GENERIC_ARMOR, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ARMOR))
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ARMOR_TOUGHNESS));
     } // setAttributes ()
 
     // -- MODEL --
@@ -50,12 +51,8 @@ public class BunnyEntity extends InternalRobot implements GeoEntity {
         return currentModel;
     } // getCurrentTexture ()
 
-    public void setCurrentModel(String value) {
-        currentModel = ModMetrics.getModel(RobotVariant.Bunny, RobotModel.byName(value));
-    } // setCurrentAnimator ()
-
-    public void setCurrentModel(RobotModel value) {
-        currentModel = ModMetrics.getModel(RobotVariant.Bunny, value);
+    public void setCurrentModel(EntityModel value) {
+        currentModel = InternalMetric.getModel(EntityVariant.Bunny, value);
     } // setCurrentAnimator ()
 
     // -- ANIMATOR --
@@ -64,54 +61,54 @@ public class BunnyEntity extends InternalRobot implements GeoEntity {
     } // getCurrentAnimator ()
 
     public void setCurrentAnimator(String value) {
-        currentAnimator = ModMetrics.ANIMATIONS.get(value);
+        currentAnimator = InternalMetric.ANIMATIONS.get(value);
     } // setCurrentAnimator ()
 
-    public void setCurrentAnimator(RobotAnimation value) {
-        currentAnimator = ModMetrics.ANIMATIONS.get(value.getName());
+    public void setCurrentAnimator(EntityAnimation value) {
+        currentAnimator = InternalMetric.ANIMATIONS.get(value.getName());
     } // setCurrentAnimator ()
 
     // TEXTURE
     @Override
-    public Identifier getTextureByID(int value) { return ModMetrics.getTexture(RobotVariant.Bunny, RobotTexture.byId(value)); } // getTextureByID ()
+    public Identifier getTextureByID(int value) { return InternalMetric.getTexture(EntityVariant.Bunny, EntityTexture.byId(value)); } // getTextureByID ()
 
     // VARIANT
     @Override
     public String getVariant() {
-        return this.getVariant(RobotVariant.Bunny.getName());
+        return this.getVariant(EntityVariant.Bunny.getName());
     } // getVariant ()
 
     // STATS
     @Override
-    public int getMaxLevel(){ return getMaxLevel ((int)ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.MAX_LEVEL)); } // getMaxLevel ()
+    public int getMaxLevel(){ return getMaxLevel ((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
 
     @Override
     public int getLevel(){
-        var level = (int)(ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.MAX_LEVEL));
+        var level = (int)(InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_LEVEL));
         if(level != getMaxLevel()) setMaxLevel(level);
         return super.getLevel();
     } // getLevel ()
 
     @Override
     public int getHpValue() {
-        return getHpValue((int)ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.MAX_HEALTH));
+        return getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_HEALTH));
     } // getHpValue ()
 
     @Override
     public int getAttackValue() {
-        return getAttackValue((int)ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.ATTACK_DAMAGE));
+        return getAttackValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ATTACK_DAMAGE));
     } // getAttackValue ()
 
     @Override
     public int getDefenseValue() {
-        return getDefenseValue((int)ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.DEFENSE));
+        return getDefenseValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.DEFENSE));
     } // getDefenseValue ()
 
     // -- Constructor --
     public BunnyEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
-        setCurrentModel(RobotModel.Unarmed);
-        setCurrentAnimator(RobotAnimation.Locomotion);
+        setCurrentModel(EntityModel.Unarmed);
+        setCurrentAnimator(EntityAnimation.Locomotion);
     } // Constructor RobotEntity ()
 
     // -- Animations --
@@ -131,9 +128,9 @@ public class BunnyEntity extends InternalRobot implements GeoEntity {
     // -- Inherited Methods --
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.setVariant(RobotVariant.Bunny.getName());
-        this.setTexture(getRandomNumber(ModMetrics.getTextureCount(RobotVariant.Bunny)));
-        this.setMaxLevel((int)ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.MAX_LEVEL));
+        this.setVariant(EntityVariant.Bunny.getName());
+        this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Bunny)));
+        this.setMaxLevel((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_LEVEL));
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
         ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
@@ -145,15 +142,16 @@ public class BunnyEntity extends InternalRobot implements GeoEntity {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new MeleeAttackGoal(this, ModMetrics.MeleeAttackMovement, true));
-        this.goalSelector.add(4, new FollowOwnerGoal(this, ModMetrics.FollowOwnerMovement, ModMetrics.FollowBehindDistance, ModMetrics.FollowCloseDistance, false));
-        this.goalSelector.add(5, new WanderAroundFarGoal(this, ModMetrics.WanderAroundMovement));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, ModMetrics.LookAtRange));
+        this.goalSelector.add(3, new MeleeAttackGoal(this, InternalMetric.MeleeAttackMovement, true));
+        this.goalSelector.add(4, new FollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, InternalMetric.WanderAroundMovement));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, InternalMetric.LookAtRange));
         this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, (new RevengeGoal(this)).setGroupRevenge());
-        this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, (entity) -> entity instanceof Monster && !(entity instanceof CreeperEntity) && !(entity instanceof InternalRobot)));
+        this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, (entity) -> entity instanceof Monster && !(entity instanceof CreeperEntity) &&
+                !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity) && !(entity instanceof VanillaEntity)));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
@@ -166,21 +164,21 @@ public class BunnyEntity extends InternalRobot implements GeoEntity {
 
     // -- Custom Methods --
     private void handleModelTransition () {
-        if(this.isAttacking()) setCurrentModel(RobotModel.Armed);
-        else setCurrentModel(RobotModel.Unarmed);
+        if(this.isAttacking()) setCurrentModel(EntityModel.Armed);
+        else setCurrentModel(EntityModel.Unarmed);
     } // handleModelTransition ()
 
     // -- Save Methods --
     @Override
     protected void initDataTracker() {
         super.initDataTracker();
-        this.dataTracker.startTracking(VARIANT, RobotVariant.Bunny.getName());
+        this.dataTracker.startTracking(VARIANT, EntityVariant.Bunny.getName());
         this.dataTracker.startTracking(TEXTURE_ID, 0);
 
         this.dataTracker.startTracking(STATE, 0);
         this.dataTracker.startTracking(AUTO_ATTACK, false);
 
-        this.dataTracker.startTracking(MAX_LEVEL, (int)ModMetrics.getAttributeValue(RobotVariant.Bunny, RobotAttribute.MAX_LEVEL));
+        this.dataTracker.startTracking(MAX_LEVEL, (int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_LEVEL));
         this.dataTracker.startTracking(LEVEL, 0);
         this.dataTracker.startTracking(EXP, 0);
 

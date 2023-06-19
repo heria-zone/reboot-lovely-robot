@@ -1,4 +1,4 @@
-package net.msymbios.rlovelyr.entity.custom;
+package net.msymbios.rlovelyr.entity.internal;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
@@ -26,37 +26,34 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.entity.enums.RobotAttribute;
-import net.msymbios.rlovelyr.entity.enums.RobotState;
-import net.msymbios.rlovelyr.entity.enums.RobotTexture;
-import net.msymbios.rlovelyr.entity.enums.RobotVariant;
-import net.msymbios.rlovelyr.entity.utils.ModMetrics;
+import net.msymbios.rlovelyr.entity.enums.EntityState;
+import net.msymbios.rlovelyr.entity.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
-import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
+import static net.msymbios.rlovelyr.entity.internal.Utility.*;
 import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 
-public abstract class InternalRobot extends TameableEntity {
+public abstract class InternalEntity extends TameableEntity {
 
     // -- Variables --
-    protected static final TrackedData<String> VARIANT = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.STRING);
-    protected static final TrackedData<Integer> TEXTURE_ID = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<String> VARIANT = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.STRING);
+    protected static final TrackedData<Integer> TEXTURE_ID = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
-    protected static final TrackedData<Integer> STATE = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Boolean> AUTO_ATTACK = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.BOOLEAN);
+    protected static final TrackedData<Integer> STATE = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Boolean> AUTO_ATTACK = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
-    protected static final TrackedData<Integer> MAX_LEVEL = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> LEVEL = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> EXP = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> MAX_LEVEL = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> LEVEL = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> EXP = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
-    protected static final TrackedData<Integer> FIRE_PROTECTION = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> FALL_PROTECTION = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> BLAST_PROTECTION = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> PROJECTILE_PROTECTION = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> FIRE_PROTECTION = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> FALL_PROTECTION = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> BLAST_PROTECTION = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> PROJECTILE_PROTECTION = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
-    protected static final TrackedData<Float> BASE_X = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.FLOAT);
-    protected static final TrackedData<Float> BASE_Y = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.FLOAT);
-    protected static final TrackedData<Float> BASE_Z = DataTracker.registerData(InternalRobot.class, TrackedDataHandlerRegistry.FLOAT);;
+    protected static final TrackedData<Float> BASE_X = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    protected static final TrackedData<Float> BASE_Y = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);
+    protected static final TrackedData<Float> BASE_Z = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);;
 
     // -- Properties --
 
@@ -87,7 +84,7 @@ public abstract class InternalRobot extends TameableEntity {
 
     public abstract Identifier getTextureByID(int value);
 
-    public void setTexture(RobotTexture value) {
+    public void setTexture(EntityTexture value) {
         setTexture(value.getId());
     } // setTexture ()
 
@@ -97,20 +94,20 @@ public abstract class InternalRobot extends TameableEntity {
 
     // STATE
     public int getCurrentStateID() {
-        int value = RobotState.Standby.getId();
+        int value = EntityState.Standby.getId();
         try {value = this.dataTracker.get(STATE);}
         catch (Exception ignored) {}
         return value;
     } // getCurrentStateID ()
 
-    public RobotState getCurrentState() {
-        RobotState value = RobotState.Standby;
-        try {value = RobotState.byId(this.dataTracker.get(STATE));}
+    public EntityState getCurrentState() {
+        EntityState value = EntityState.Standby;
+        try {value = EntityState.byId(this.dataTracker.get(STATE));}
         catch (Exception ignored) {}
         return value;
     } // getCurrentState ()
 
-    public void setCurrentState(RobotState value){
+    public void setCurrentState(EntityState value){
         this.dataTracker.set(STATE, value.getId());
     } // setCurrentMode ()
 
@@ -201,10 +198,10 @@ public abstract class InternalRobot extends TameableEntity {
 
     public int getLootingLevel() {
         int level = 0;
-        if (ModMetrics.LootingEnchantment) {
-            level = this.getLevel() / ModMetrics.LootingRequiredLevel;
-            if (level > ModMetrics.MaxLootingLevel) {
-                level = ModMetrics.MaxLootingLevel;
+        if (InternalMetric.LootingEnchantment) {
+            level = this.getLevel() / InternalMetric.LootingRequiredLevel;
+            if (level > InternalMetric.MaxLootingLevel) {
+                level = InternalMetric.MaxLootingLevel;
             }
         }
         return level;
@@ -303,7 +300,7 @@ public abstract class InternalRobot extends TameableEntity {
     } // setBaseZ ()
 
     // -- Construct --
-    protected InternalRobot(EntityType<? extends TameableEntity> entityType, World world) {
+    protected InternalEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
     } // Construct InternalRobot
 
@@ -448,23 +445,23 @@ public abstract class InternalRobot extends TameableEntity {
     } // canLevelUp ()
 
     protected boolean canLevelUpFireProtection() {
-        return this.getFireProtection() < ModMetrics.FireProtectionLimit;
+        return this.getFireProtection() < InternalMetric.FireProtectionLimit;
     } // canLevelUpFireProtection ()
 
     protected boolean canLevelUpFallProtection() {
-        return this.getFallProtection() < ModMetrics.FallProtectionLimit;
+        return this.getFallProtection() < InternalMetric.FallProtectionLimit;
     } // canLevelUpFallProtection ()
 
     protected boolean canLevelUpBlastProtection() {
-        return this.getBlastProtection() < ModMetrics.BlastProtectionLimit;
+        return this.getBlastProtection() < InternalMetric.BlastProtectionLimit;
     } // canLevelUpBlastProtection ()
 
     protected boolean canLevelUpProjectileProtection() {
-        return this.getProjectileProtection() < ModMetrics.ProjectileProtectionLimit;
+        return this.getProjectileProtection() < InternalMetric.ProjectileProtectionLimit;
     } // canLevelUpProjectileProtection ()
 
     protected int getNextExp() {
-        return ModMetrics.BaseExp + this.getLevel() * ModMetrics.UpExpValue;
+        return InternalMetric.BaseExp + this.getLevel() * InternalMetric.UpExpValue;
     } // getNextExp ()
 
     protected void addExp (int value) {
@@ -496,8 +493,26 @@ public abstract class InternalRobot extends TameableEntity {
         }
     } // addExp ()
 
+    public boolean canInteract(ItemStack itemStack){
+        if(itemStack.isOf(Items.WHITE_DYE) ||itemStack.isOf(Items.ORANGE_DYE) || itemStack.isOf(Items.MAGENTA_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) ||
+                itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIME_DYE) || itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.GRAY_DYE) ||
+                itemStack.isOf(Items.LIGHT_GRAY_DYE) || itemStack.isOf(Items.CYAN_DYE) || itemStack.isOf(Items.PURPLE_DYE) || itemStack.isOf(Items.BLUE_DYE) ||
+                itemStack.isOf(Items.BROWN_DYE) || itemStack.isOf(Items.GREEN_DYE) || itemStack.isOf(Items.RED_DYE) || itemStack.isOf(Items.BLACK_DYE)) return false;
+        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
+        if(itemStack.isOf(Items.STICK) || itemStack.isOf(Items.BOOK)) return false;
+        return !itemStack.isOf(Items.COMPASS) && !itemStack.isOf(Items.RECOVERY_COMPASS);
+    } // canInteract ()
+
+    public boolean canInteractGuardMode(ItemStack itemStack){
+        return itemStack.isOf(Items.COMPASS) || itemStack.isOf(Items.RECOVERY_COMPASS);
+    } // canInteractGuardMode ()
+
+    public boolean canInteractAutoAttack(ItemStack itemStack) {
+        return itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD);
+    } // canInteractAutoAttack ()
+
     protected void handleAutoHeal () {
-        if (!this.world.isClient && ModMetrics.AutoHeal && this.age % ModMetrics.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
+        if (!this.world.isClient && InternalMetric.AutoHeal && this.age % InternalMetric.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
             final float healValue = this.getHpValue() / 16.0f;
             this.heal(healValue);
         }
@@ -510,22 +525,22 @@ public abstract class InternalRobot extends TameableEntity {
     } // handleTame ()
 
     public void handleTexture(ItemStack item) {
-        if(item.isOf(Items.WHITE_DYE)) setTexture(RobotTexture.WHITE);
-        if(item.isOf(Items.ORANGE_DYE)) setTexture(RobotTexture.ORANGE);
-        if(item.isOf(Items.MAGENTA_DYE)) setTexture(RobotTexture.MAGENTA);
-        if(item.isOf(Items.LIGHT_BLUE_DYE)) setTexture(RobotTexture.LIGHT_BLUE);
-        if(item.isOf(Items.YELLOW_DYE)) setTexture(RobotTexture.YELLOW);
-        if(item.isOf(Items.LIME_DYE)) setTexture(RobotTexture.LIME);
-        if(item.isOf(Items.PINK_DYE)) setTexture(RobotTexture.PINK);
-        if(item.isOf(Items.GRAY_DYE)) setTexture(RobotTexture.GRAY);
-        if(item.isOf(Items.LIGHT_GRAY_DYE)) setTexture(RobotTexture.LIGHT_GRAY);
-        if(item.isOf(Items.CYAN_DYE)) setTexture(RobotTexture.CYAN);
-        if(item.isOf(Items.PURPLE_DYE)) setTexture(RobotTexture.PURPLE);
-        if(item.isOf(Items.BLUE_DYE)) setTexture(RobotTexture.BLUE);
-        if(item.isOf(Items.BROWN_DYE)) setTexture(RobotTexture.BROWN);
-        if(item.isOf(Items.GREEN_DYE)) setTexture(RobotTexture.GREEN);
-        if(item.isOf(Items.RED_DYE)) setTexture(RobotTexture.RED);
-        if(item.isOf(Items.BLACK_DYE)) setTexture(RobotTexture.BLACK);
+        if(item.isOf(Items.WHITE_DYE)) setTexture(EntityTexture.WHITE);
+        if(item.isOf(Items.ORANGE_DYE)) setTexture(EntityTexture.ORANGE);
+        if(item.isOf(Items.MAGENTA_DYE)) setTexture(EntityTexture.MAGENTA);
+        if(item.isOf(Items.LIGHT_BLUE_DYE)) setTexture(EntityTexture.LIGHT_BLUE);
+        if(item.isOf(Items.YELLOW_DYE)) setTexture(EntityTexture.YELLOW);
+        if(item.isOf(Items.LIME_DYE)) setTexture(EntityTexture.LIME);
+        if(item.isOf(Items.PINK_DYE)) setTexture(EntityTexture.PINK);
+        if(item.isOf(Items.GRAY_DYE)) setTexture(EntityTexture.GRAY);
+        if(item.isOf(Items.LIGHT_GRAY_DYE)) setTexture(EntityTexture.LIGHT_GRAY);
+        if(item.isOf(Items.CYAN_DYE)) setTexture(EntityTexture.CYAN);
+        if(item.isOf(Items.PURPLE_DYE)) setTexture(EntityTexture.PURPLE);
+        if(item.isOf(Items.BLUE_DYE)) setTexture(EntityTexture.BLUE);
+        if(item.isOf(Items.BROWN_DYE)) setTexture(EntityTexture.BROWN);
+        if(item.isOf(Items.GREEN_DYE)) setTexture(EntityTexture.GREEN);
+        if(item.isOf(Items.RED_DYE)) setTexture(EntityTexture.RED);
+        if(item.isOf(Items.BLACK_DYE)) setTexture(EntityTexture.BLACK);
     } // handleTexture ()
 
     public void handleSit(ItemStack itemStack) {
@@ -549,12 +564,12 @@ public abstract class InternalRobot extends TameableEntity {
 
     public void StandbyState(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
-        if(isSitting()) setCurrentState(RobotState.Standby);
+        if(isSitting()) setCurrentState(EntityState.Standby);
     } // StandbyState ()
 
     public void FollowState(ItemStack itemStack){
         if(!canInteract(itemStack)) return;
-        if(!isSitting()) setCurrentState(RobotState.Follow);
+        if(!isSitting()) setCurrentState(EntityState.Follow);
     } // FollowState ()
 
     public void BaseDefenseState(ItemStack itemStack){
@@ -566,10 +581,11 @@ public abstract class InternalRobot extends TameableEntity {
         this.setBaseX((float)currentPosition.x);
         this.setBaseY((float)currentPosition.y);
         this.setBaseZ((float)currentPosition.z);
-        setCurrentState(RobotState.BaseDefense);
+        setCurrentState(EntityState.BaseDefense);
     } // BaseDefenseState ()
 
     public void displayMessage (PlayerEntity player) {
+        if(!InternalMetric.LevelUpLog) return;
         player.sendMessage(Text.literal("|--------------------------"));
         player.sendMessage(Text.literal("MaxLevel: " + this.getMaxLevel()));
         player.sendMessage(Text.literal("Model: " + this.getVariant()));
@@ -582,11 +598,12 @@ public abstract class InternalRobot extends TameableEntity {
     } // displayMessage ()
 
     public void displayProtectionMessage (PlayerEntity player) {
+        if(!InternalMetric.LevelUpLog) return;
         player.sendMessage(Text.literal("|--------------------------"));
-        player.sendMessage(Text.literal("Fire Protection: " + this.getFireProtection() + "/" + ModMetrics.FireProtectionLimit));
-        player.sendMessage(Text.literal("Fall Protection: " + this.getFallProtection() + "/" + ModMetrics.FallProtectionLimit));
-        player.sendMessage(Text.literal("Blast Protection: " + this.getBlastProtection() + "/" + ModMetrics.BlastProtectionLimit));
-        player.sendMessage(Text.literal("Projectile Protection: " + this.getProjectileProtection() + "/" + ModMetrics.ProjectileProtectionLimit));
+        player.sendMessage(Text.literal("Fire Protection: " + this.getFireProtection() + "/" + InternalMetric.FireProtectionLimit));
+        player.sendMessage(Text.literal("Fall Protection: " + this.getFallProtection() + "/" + InternalMetric.FallProtectionLimit));
+        player.sendMessage(Text.literal("Blast Protection: " + this.getBlastProtection() + "/" + InternalMetric.BlastProtectionLimit));
+        player.sendMessage(Text.literal("Projectile Protection: " + this.getProjectileProtection() + "/" + InternalMetric.ProjectileProtectionLimit));
     } // displayProtectionMessage ()
 
 } // Class InternalRobot

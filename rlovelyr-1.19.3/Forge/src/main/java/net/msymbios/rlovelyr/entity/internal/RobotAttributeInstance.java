@@ -1,4 +1,4 @@
-package net.msymbios.rlovelyr.entity.utils;
+package net.msymbios.rlovelyr.entity.internal;
 
 import net.msymbios.rlovelyr.entity.enums.RobotAttribute;
 

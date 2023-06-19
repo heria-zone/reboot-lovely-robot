@@ -1,7 +1,7 @@
 package net.msymbios.rlovelyr.entity.custom;
 
 import net.msymbios.rlovelyr.entity.enums.*;
-import net.msymbios.rlovelyr.entity.utils.ModMetrics;
+import net.msymbios.rlovelyr.entity.internal.ModMetrics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -42,7 +42,7 @@ import software.bernie.geckolib.core.object.PlayState;
 import java.util.Objects;
 import java.util.UUID;
 
-import static net.msymbios.rlovelyr.entity.utils.ModUtils.*;
+import static net.msymbios.rlovelyr.entity.internal.ModUtils.*;
 
 public class HoneyEntity extends TamableAnimal implements NeutralMob, GeoEntity {
 
