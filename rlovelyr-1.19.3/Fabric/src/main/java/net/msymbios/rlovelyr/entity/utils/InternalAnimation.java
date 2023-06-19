@@ -16,7 +16,6 @@ public final class InternalAnimation {
     public static final RawAnimation SIT = RawAnimation.begin().thenPlayAndHold("animation.lovelyrobot.sit");
     public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE);
 
-
     // -- Methods --
     public static <T extends LivingEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable, RawAnimation attackAnimation) {
         return new AnimationController<>(animatable, "Attack", 5, state -> {
@@ -30,7 +29,6 @@ public final class InternalAnimation {
         return new AnimationController<>(animatable, "Attack", 5, state -> {
             if (animatable.handSwinging) return state.setAndContinue(ATTACK_SWING);
             state.getController().forceAnimationReset();
-            animatable.handSwinging = false;
             return PlayState.STOP;
         });
     } // attackAnimation ()
