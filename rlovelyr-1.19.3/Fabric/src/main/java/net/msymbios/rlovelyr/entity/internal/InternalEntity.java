@@ -57,6 +57,28 @@ public abstract class InternalEntity extends TameableEntity {
 
     // -- Properties --
 
+    // TEXTURE
+    public abstract Identifier getTextureByID(int value);
+
+    public Identifier getTexture() {
+        return getTextureByID(getTextureID());
+    } // getTexture ()
+
+    public int getTextureID() {
+        int value = 0;
+        try {value = this.dataTracker.get(TEXTURE_ID);}
+        catch (Exception ignored) {}
+        return value;
+    } // getTextureID ()
+
+    public void setTexture(EntityTexture value) {
+        setTexture(value.getId());
+    } // setTexture ()
+
+    public void setTexture(int value) {
+        this.dataTracker.set(TEXTURE_ID, value);
+    } // setTexture ()
+
     // VARIANT
     public abstract String getVariant();
 
@@ -69,28 +91,6 @@ public abstract class InternalEntity extends TameableEntity {
     public void setVariant(String value) {
         this.dataTracker.set(VARIANT, value);
     } // setVariant ()
-
-    // TEXTURE
-    public Identifier getTexture() {
-        return getTextureByID(getTextureID());
-    } // getTexture ()
-
-    public int getTextureID() {
-        int value = 0;
-        try {value = this.dataTracker.get(TEXTURE_ID);}
-        catch (Exception ignored) {}
-        return value;
-    } // getTextureID ()
-
-    public abstract Identifier getTextureByID(int value);
-
-    public void setTexture(EntityTexture value) {
-        setTexture(value.getId());
-    } // setTexture ()
-
-    public void setTexture(int value) {
-        this.dataTracker.set(TEXTURE_ID, value);
-    } // setTexture ()
 
     // STATE
     public int getCurrentStateID() {
@@ -142,14 +142,14 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.set(MAX_LEVEL, value);
     } // setMaxLevel ()
 
-    public int getLevel() {
+    public int getCurrentLevel() {
         int value = 0;
         try {value = this.dataTracker.get(LEVEL);}
         catch (Exception ignored){}
         return value;
-    } // getLevel ()
+    } // getCurrentLevel ()
 
-    public void setLevel(int value){
+    public void setCurrentLevel(int value){
         this.dataTracker.set(LEVEL, value);
 
         EntityAttributeInstance maxHealthAttribute = this.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
@@ -167,7 +167,7 @@ public abstract class InternalEntity extends TameableEntity {
         EntityAttributeInstance armorToughnessAttribute = this.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
         assert armorToughnessAttribute != null;
         armorToughnessAttribute.setBaseValue(getArmorToughnessValue());
-    } // setLevel ()
+    } // setCurrentLevel ()
 
     public int getExp(){
         int value = 1;
@@ -182,24 +182,24 @@ public abstract class InternalEntity extends TameableEntity {
 
     public abstract int getHpValue();
     public int getHpValue(int value) {
-        return (value + this.getLevel() * value / 50);
+        return (value + this.getCurrentLevel() * value / 50);
     } // getHpValue ()
 
     public abstract int getAttackValue();
     public int getAttackValue(int value) {
-        return (value + this.getLevel() * value / 50);
+        return (value + this.getCurrentLevel() * value / 50);
     } // getAttackValue ()
 
     public abstract int getDefenseValue();
 
     public int getDefenseValue(int value) {
-        return (value + this.getLevel() * value / 50);
+        return (value + this.getCurrentLevel() * value / 50);
     } // getDefenseValue ()
 
     public int getLootingLevel() {
         int level = 0;
         if (InternalMetric.LootingEnchantment) {
-            level = this.getLevel() / InternalMetric.LootingRequiredLevel;
+            level = this.getCurrentLevel() / InternalMetric.LootingRequiredLevel;
             if (level > InternalMetric.MaxLootingLevel) {
                 level = InternalMetric.MaxLootingLevel;
             }
@@ -383,7 +383,7 @@ public abstract class InternalEntity extends TameableEntity {
             nbt.putBoolean("AutoAttack", this.getAutoAttack());
 
             nbt.putInt("MaxLevel", this.getMaxLevel());
-            nbt.putInt("Level", this.getLevel());
+            nbt.putInt("Level", this.getCurrentLevel());
             nbt.putInt("Exp", this.getExp());
 
             craftPurchaseOrder.setNbt(nbt);
@@ -441,7 +441,7 @@ public abstract class InternalEntity extends TameableEntity {
 
     // -- Custom Methods --
     protected boolean canLevelUp() {
-        return this.getLevel() < getMaxLevel();
+        return this.getCurrentLevel() < getMaxLevel();
     } // canLevelUp ()
 
     protected boolean canLevelUpFireProtection() {
@@ -461,7 +461,7 @@ public abstract class InternalEntity extends TameableEntity {
     } // canLevelUpProjectileProtection ()
 
     protected int getNextExp() {
-        return InternalMetric.BaseExp + this.getLevel() * InternalMetric.UpExpValue;
+        return InternalMetric.BaseExp + this.getCurrentLevel() * InternalMetric.UpExpValue;
     } // getNextExp ()
 
     protected void addExp (int value) {
@@ -474,15 +474,15 @@ public abstract class InternalEntity extends TameableEntity {
         int exp = this.getExp();
         exp += addExp;
 
-        var oldLevel = getLevel();
+        var oldLevel = getCurrentLevel();
         while (exp >= this.getNextExp()) {
             exp -= this.getNextExp();
-            this.setLevel(this.getLevel() + 1);
+            this.setCurrentLevel(this.getCurrentLevel() + 1);
         }
 
         this.setExp(exp);
 
-        if(oldLevel != getLevel()) {
+        if(oldLevel != getCurrentLevel()) {
             if(!world.isClient) {
                 try {
                     final LivingEntity entity = this.getOwner();
@@ -592,7 +592,7 @@ public abstract class InternalEntity extends TameableEntity {
         player.sendMessage(Text.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()));
         player.sendMessage(Text.literal("Attack: " + this.getAttackValue()));
         player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
-        player.sendMessage(Text.literal("Level: " + this.getLevel()));
+        player.sendMessage(Text.literal("Level: " + this.getCurrentLevel()));
         player.sendMessage(Text.literal("Exp: " + this.getExp()));
         player.sendMessage(Text.literal("Looting: " + this.getLootingLevel()));
     } // displayMessage ()
@@ -606,4 +606,4 @@ public abstract class InternalEntity extends TameableEntity {
         player.sendMessage(Text.literal("Projectile Protection: " + this.getProjectileProtection() + "/" + InternalMetric.ProjectileProtectionLimit));
     } // displayProtectionMessage ()
 
-} // Class InternalRobot
+} // Class InternalEntity

@@ -58,12 +58,8 @@ public class VanillaEntity extends InternalEntity implements GeoEntity {
         return currentAnimator;
     } // getCurrentAnimator ()
 
-    public void setCurrentAnimator(String value) {
-        currentAnimator = InternalMetric.ANIMATIONS.get(value);
-    } // setCurrentAnimator ()
-
     public void setCurrentAnimator(EntityAnimation value) {
-        currentAnimator = InternalMetric.ANIMATIONS.get(value.getName());
+        currentAnimator = InternalMetric.ANIMATIONS.get(value);
     } // setCurrentAnimator ()
 
     // TEXTURE
@@ -81,10 +77,10 @@ public class VanillaEntity extends InternalEntity implements GeoEntity {
     public int getMaxLevel(){ return getMaxLevel ((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
 
     @Override
-    public int getLevel(){
+    public int getCurrentLevel(){
         var level = (int)(InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
         if(level != getMaxLevel()) setMaxLevel(level);
-        return super.getLevel();
+        return super.getCurrentLevel();
     } // getLevel ()
 
     @Override
@@ -113,7 +109,7 @@ public class VanillaEntity extends InternalEntity implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(
-                InternalAnimation.locomotionController(this),
+                InternalAnimation.locomotionAnimation(this),
                 InternalAnimation.attackAnimation(this)
         );
     } // registerControllers ()
@@ -147,9 +143,8 @@ public class VanillaEntity extends InternalEntity implements GeoEntity {
         this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
-        this.targetSelector.add(3, (new RevengeGoal(this)).setGroupRevenge());
-        this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, (entity) -> entity instanceof Monster && !(entity instanceof CreeperEntity) &&
-                !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity) && !(entity instanceof VanillaEntity)));
+        this.targetSelector.add(3, new RevengeGoal(this));
+        this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
@@ -199,7 +194,7 @@ public class VanillaEntity extends InternalEntity implements GeoEntity {
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
 
         nbt.putInt("MaxLevel", this.getMaxLevel());
-        nbt.putInt("Level", this.getLevel());
+        nbt.putInt("Level", this.getCurrentLevel());
         nbt.putInt("Exp", this.getExp());
 
         nbt.putInt("FireProtection", this.getFireProtection());
@@ -221,7 +216,7 @@ public class VanillaEntity extends InternalEntity implements GeoEntity {
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));
 
         this.setMaxLevel(nbt.getInt("MaxLevel"));
-        this.setLevel(nbt.getInt("Level"));
+        this.setCurrentLevel(nbt.getInt("Level"));
         this.setExp(nbt.getInt("Exp"));
 
         this.setFireProtection(nbt.getInt("FireProtection"));

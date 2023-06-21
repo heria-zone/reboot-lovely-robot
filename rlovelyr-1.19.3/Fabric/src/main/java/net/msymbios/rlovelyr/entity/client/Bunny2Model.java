@@ -3,7 +3,6 @@ package net.msymbios.rlovelyr.entity.client;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.msymbios.rlovelyr.entity.custom.Bunny2Entity;
-import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
 import software.bernie.geckolib.core.animation.AnimationState;

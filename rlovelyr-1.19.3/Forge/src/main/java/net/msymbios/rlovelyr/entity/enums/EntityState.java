@@ -8,7 +8,6 @@ public enum EntityState {
     // -- Enum --
     Follow(0), BaseDefense(1), Standby(2);
 
-
     // -- Variables --
     private static final EntityState[] CODEC = Arrays.stream(values()).sorted(Comparator.comparingInt(EntityState::getId)).toArray(EntityState[]::new);
 
@@ -31,4 +30,4 @@ public enum EntityState {
         return this.m_id;
     } // getId ()
 
-} // Enum EntityState
+} // enum EntityState

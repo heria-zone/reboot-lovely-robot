@@ -6,11 +6,11 @@ import net.minecraftforge.common.ForgeSpawnEggItem;
 
 import java.util.function.Supplier;
 
-public class RobotSpawnItem extends ForgeSpawnEggItem {
+public class EntityItemSpawn extends ForgeSpawnEggItem {
 
     // -- Constructor --
-    public RobotSpawnItem(Supplier<? extends EntityType<? extends Mob>> type, Properties props) {
+    public EntityItemSpawn(Supplier<? extends EntityType<? extends Mob>> type, Properties props) {
         super(type, 0xFFFFFF, 0xFFFFFF, props);
     } // Constructor RobotSpawnItem ()
 
-} // Class RobotSpawnItem
+} // Class EntityItemSpawn

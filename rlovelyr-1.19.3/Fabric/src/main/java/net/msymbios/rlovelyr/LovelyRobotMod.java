@@ -1,7 +1,7 @@
 package net.msymbios.rlovelyr;
 
 import net.fabricmc.api.ModInitializer;
-import net.msymbios.rlovelyr.entity.ModEntity;
+import net.msymbios.rlovelyr.entity.ModEntities;
 import net.msymbios.rlovelyr.item.ModItems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class LovelyRobotMod implements ModInitializer {
 
 		GeckoLib.initialize();
 
-		ModEntity.registerEntityAttribute();
+		ModEntities.registerEntityAttribute();
 	} // onInitialize ()
 
 } // Class LovelyRobotMod

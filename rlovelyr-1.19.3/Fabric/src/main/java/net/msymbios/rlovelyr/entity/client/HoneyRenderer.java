@@ -28,4 +28,4 @@ public class HoneyRenderer extends GeoEntityRenderer<HoneyEntity> {
         return super.getRenderType(animatable, texture, bufferSource, partialTick);
     } // getRenderType ()
 
-} // Class VanillaRenderer
+} // Class HoneyRenderer

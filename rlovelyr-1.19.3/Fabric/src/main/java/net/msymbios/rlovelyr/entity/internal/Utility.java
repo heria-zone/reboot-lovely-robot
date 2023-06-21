@@ -13,4 +13,4 @@ public class Utility {
         return value = !value;
     } // invertBoolean ()
 
-} // Class ModUtils
+} // Class Utility

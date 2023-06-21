@@ -19,7 +19,7 @@ import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
 import net.msymbios.rlovelyr.entity.custom.HoneyEntity;
 import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
 
-public class ModEntity {
+public class ModEntities {
 
     // -- Variables --
     public static final EntityType<BunnyEntity> BUNNY = Registry.register(Registries.ENTITY_TYPE, new Identifier(LovelyRobotMod.MODID, "bunny"),
