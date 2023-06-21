@@ -26,8 +26,10 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
+import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
 import net.msymbios.rlovelyr.entity.enums.EntityState;
 import net.msymbios.rlovelyr.entity.enums.EntityTexture;
+import net.msymbios.rlovelyr.entity.enums.EntityVariant;
 import org.jetbrains.annotations.Nullable;
 
 import static net.msymbios.rlovelyr.entity.internal.Utility.*;
@@ -605,5 +607,71 @@ public abstract class InternalEntity extends TameableEntity {
         player.sendMessage(Text.literal("Blast Protection: " + this.getBlastProtection() + "/" + InternalMetric.BlastProtectionLimit));
         player.sendMessage(Text.literal("Projectile Protection: " + this.getProjectileProtection() + "/" + InternalMetric.ProjectileProtectionLimit));
     } // displayProtectionMessage ()
+
+    // -- Save Methods --
+    @Override
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(TEXTURE_ID, 0);
+
+        this.dataTracker.startTracking(STATE, 0);
+        this.dataTracker.startTracking(AUTO_ATTACK, false);
+
+        this.dataTracker.startTracking(LEVEL, 0);
+        this.dataTracker.startTracking(EXP, 0);
+
+        this.dataTracker.startTracking(FIRE_PROTECTION, 0);
+        this.dataTracker.startTracking(FALL_PROTECTION, 0);
+        this.dataTracker.startTracking(BLAST_PROTECTION, 0);
+        this.dataTracker.startTracking(PROJECTILE_PROTECTION, 0);
+
+        this.dataTracker.startTracking(BASE_X, 0F);
+        this.dataTracker.startTracking(BASE_Y, 0F);
+        this.dataTracker.startTracking(BASE_Z, 0F);
+    } // initDataTracker ()
+
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        super.writeCustomDataToNbt(nbt);
+        nbt.putString("Variant", this.getVariant());
+        nbt.putInt("TextureID", this.getTextureID());
+
+        nbt.putInt("State", this.getCurrentStateID());
+        nbt.putBoolean("AutoAttack", this.getAutoAttack());
+
+        nbt.putInt("MaxLevel", this.getMaxLevel());
+        nbt.putInt("Level", this.getCurrentLevel());
+        nbt.putInt("Exp", this.getExp());
+
+        nbt.putInt("FireProtection", this.getFireProtection());
+        nbt.putInt("FallProtection", this.getFallProtection());
+        nbt.putInt("BlastProtection", this.getBlastProtection());
+        nbt.putInt("ProjectileProtection", this.getProjectileProtection());
+
+        nbt.putFloat("BaseX", this.getBaseX());
+        nbt.putFloat("BaseY", this.getBaseY());
+        nbt.putFloat("BaseZ", this.getBaseZ());
+    } // writeCustomDataToNbt ()
+
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+        super.readCustomDataFromNbt(nbt);
+        this.setVariant(nbt.getString("Variant"));
+        this.setTexture(nbt.getInt("TextureID"));
+
+        this.setCurrentState(nbt.getInt("State"));
+        this.setAutoAttack(nbt.getBoolean("AutoAttack"));
+
+        this.setMaxLevel(nbt.getInt("MaxLevel"));
+        this.setCurrentLevel(nbt.getInt("Level"));
+        this.setExp(nbt.getInt("Exp"));
+
+        this.setFireProtection(nbt.getInt("FireProtection"));
+        this.setFallProtection(nbt.getInt("FallProtection"));
+        this.setBlastProtection(nbt.getInt("BlastProtection"));
+        this.setProjectileProtection(nbt.getInt("ProjectileProtection"));
+
+        this.setBaseY(nbt.getFloat("BaseY"));
+        this.setBaseZ(nbt.getFloat("BaseZ"));
+        this.setBaseX(nbt.getFloat("BaseX"));
+    } // readCustomDataFromNbt ()
 
 } // Class InternalEntity

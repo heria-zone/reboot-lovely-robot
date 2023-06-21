@@ -130,7 +130,6 @@ public class VanillaEntity extends InternalEntity implements NeutralMob, GeoEnti
         this.setVariant(EntityVariant.Vanilla.name());
         this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Vanilla)));
         this.setMaxLevel((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
-        this.setOrderedToSit(true);
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
 
@@ -146,8 +145,8 @@ public class VanillaEntity extends InternalEntity implements NeutralMob, GeoEnti
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Animal.class, 5, true, false, InternalMetric.AvoidAttackingEntities));
-        this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, true));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Mob.class, 5, true, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
     } // registerGoals ()
 
     @Override

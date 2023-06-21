@@ -145,7 +145,7 @@ public class HoneyEntity extends InternalEntity implements GeoEntity {
         this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
-        this.targetSelector.add(3, (new RevengeGoal(this)).setGroupRevenge());
+        this.targetSelector.add(3, new RevengeGoal(this));
         this.targetSelector.add(4, new ActiveTargetGoal(this, MobEntity.class, 5, false, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
@@ -168,67 +168,7 @@ public class HoneyEntity extends InternalEntity implements GeoEntity {
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(VARIANT, EntityVariant.Honey.getName());
-        this.dataTracker.startTracking(TEXTURE_ID, 0);
-
-        this.dataTracker.startTracking(STATE, 0);
-        this.dataTracker.startTracking(AUTO_ATTACK, false);
-
         this.dataTracker.startTracking(MAX_LEVEL, (int) InternalMetric.getAttributeValue(EntityVariant.Honey, EntityAttribute.MAX_LEVEL));
-        this.dataTracker.startTracking(LEVEL, 0);
-        this.dataTracker.startTracking(EXP, 0);
-
-        this.dataTracker.startTracking(FIRE_PROTECTION, 0);
-        this.dataTracker.startTracking(FALL_PROTECTION, 0);
-        this.dataTracker.startTracking(BLAST_PROTECTION, 0);
-        this.dataTracker.startTracking(PROJECTILE_PROTECTION, 0);
-
-        this.dataTracker.startTracking(BASE_X, 0F);
-        this.dataTracker.startTracking(BASE_Y, 0F);
-        this.dataTracker.startTracking(BASE_Z, 0F);
     } // initDataTracker ()
-
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        nbt.putString("Variant", this.getVariant());
-        nbt.putInt("TextureID", this.getTextureID());
-
-        nbt.putInt("State", this.getCurrentStateID());
-        nbt.putBoolean("AutoAttack", this.getAutoAttack());
-
-        nbt.putInt("MaxLevel", this.getMaxLevel());
-        nbt.putInt("Level", this.getCurrentLevel());
-        nbt.putInt("Exp", this.getExp());
-
-        nbt.putInt("FireProtection", this.getFireProtection());
-        nbt.putInt("FallProtection", this.getFallProtection());
-        nbt.putInt("BlastProtection", this.getBlastProtection());
-        nbt.putInt("ProjectileProtection", this.getProjectileProtection());
-
-        nbt.putFloat("BaseX", this.getBaseX());
-        nbt.putFloat("BaseY", this.getBaseY());
-        nbt.putFloat("BaseZ", this.getBaseZ());
-    } // writeCustomDataToNbt ()
-
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        this.setVariant(nbt.getString("Variant"));
-        this.setTexture(nbt.getInt("TextureID"));
-
-        this.setCurrentState(nbt.getInt("State"));
-        this.setAutoAttack(nbt.getBoolean("AutoAttack"));
-
-        this.setMaxLevel(nbt.getInt("MaxLevel"));
-        this.setCurrentLevel(nbt.getInt("Level"));
-        this.setExp(nbt.getInt("Exp"));
-
-        this.setFireProtection(nbt.getInt("FireProtection"));
-        this.setFallProtection(nbt.getInt("FallProtection"));
-        this.setBlastProtection(nbt.getInt("BlastProtection"));
-        this.setProjectileProtection(nbt.getInt("ProjectileProtection"));
-
-        this.setBaseY(nbt.getFloat("BaseY"));
-        this.setBaseZ(nbt.getFloat("BaseZ"));
-        this.setBaseX(nbt.getFloat("BaseX"));
-    } // readCustomDataFromNbt ()
 
 } // Class HoneyEntity

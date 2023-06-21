@@ -2,12 +2,9 @@ package net.msymbios.rlovelyr.entity.internal;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Enemy;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraft.resources.ResourceLocation;
-import net.msymbios.rlovelyr.entity.custom.Bunny2Entity;
-import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
-import net.msymbios.rlovelyr.entity.custom.HoneyEntity;
 import net.msymbios.rlovelyr.entity.enums.*;
 
 import java.util.HashMap;
@@ -25,7 +22,7 @@ public class InternalMetric {
     public static float FollowBehindDistance = 10.0F;
     public static float FollowCloseDistance= 2.0F;
     public static float LookAtRange = 8.0F;
-    public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof Monster && !(entity instanceof Creeper) && !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity);
+    public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof Enemy && !(entity instanceof Creeper); //&& !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity);
 
     // - Level & Experience --
     public static int BaseExp = 50;                     // Basic experience required to level up
