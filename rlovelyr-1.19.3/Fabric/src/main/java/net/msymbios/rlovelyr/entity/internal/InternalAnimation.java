@@ -34,7 +34,7 @@ public final class InternalAnimation {
     } // attackAnimation ()
 
     public static <T extends TameableEntity & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
-        return new AnimationController<T>(entity, "Walk/Run/Idle", 0, state -> {
+        return new AnimationController<T>(entity, "Walk/Idle/Sit", 0, state -> {
             if (state.isMoving()) return state.setAndContinue(WALK);
             else if(entity.isSitting()) return state.setAndContinue(SIT);
             else return state.setAndContinue(IDLE);

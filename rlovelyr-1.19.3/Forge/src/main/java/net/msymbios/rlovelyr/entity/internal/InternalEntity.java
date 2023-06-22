@@ -381,11 +381,12 @@ public abstract class InternalEntity extends TamableAnimal {
         if(hand == InteractionHand.MAIN_HAND) {
             handleSit(itemStack);
             if (this.level.isClientSide) {
-                return InteractionResult.PASS;
+                boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame();
+                return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
             } else {
                 handleState(itemStack, player);
                 handleAutoAttack(itemStack, player);
-                handleTexture(itemStack);
+                handleTexture(itemStack, player);
                 if(getOwner() == null) handleTame(player);
 
                 if(itemStack.is(Items.STICK)) displayMessage(player);
@@ -467,7 +468,8 @@ public abstract class InternalEntity extends TamableAnimal {
         player.displayClientMessage(Component.literal("Owner: " + getOwner().getName().getString()), true);
     } // handleTame ()
 
-    public void handleTexture(ItemStack item) {
+    public void handleTexture(ItemStack item, Player player) {
+        var oldTexture = getTextureID();
         if(item.is(Items.WHITE_DYE)) setTexture(EntityTexture.WHITE);
         if(item.is(Items.ORANGE_DYE)) setTexture(EntityTexture.ORANGE);
         if(item.is(Items.MAGENTA_DYE)) setTexture(EntityTexture.MAGENTA);
@@ -484,6 +486,10 @@ public abstract class InternalEntity extends TamableAnimal {
         if(item.is(Items.GREEN_DYE)) setTexture(EntityTexture.GREEN);
         if(item.is(Items.RED_DYE)) setTexture(EntityTexture.RED);
         if(item.is(Items.BLACK_DYE)) setTexture(EntityTexture.BLACK);
+        if(oldTexture != getTextureID()) {
+            if (!player.getAbilities().instabuild)
+                item.shrink(1);
+        }
     } // handleTexture ()
 
     public void handleSit(ItemStack itemStack) {

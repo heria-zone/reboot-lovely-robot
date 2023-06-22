@@ -43,6 +43,10 @@ public class InternalMetric {
     public static int BlastProtectionLimit = 80;        // Blast Protection upper limit
     public static int ProjectileProtectionLimit = 80;   // Projectile Protection upper limit
 
+    // -- Base --
+    public static float BaseDefenseRange = 15;
+    public static float BaseDefenseWarpRange = 10;
+
     // -- Properties --
     public static HashMap<EntityAnimation, ResourceLocation> ANIMATIONS = new HashMap<>() {{
         put(EntityAnimation.Locomotion, new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));

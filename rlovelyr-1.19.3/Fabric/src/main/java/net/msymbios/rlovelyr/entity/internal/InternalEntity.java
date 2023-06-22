@@ -15,6 +15,8 @@ import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.item.DyeItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -23,6 +25,7 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
@@ -269,7 +272,7 @@ public abstract class InternalEntity extends TameableEntity {
 
     // BASE
     public float getBaseX() {
-        float value = 0;
+        float value = this.getBlockX();
         try {value = this.dataTracker.get(BASE_X);}
         catch (Exception ignored) {}
         return value;
@@ -280,7 +283,7 @@ public abstract class InternalEntity extends TameableEntity {
     } // setBaseX ()
 
     public float getBaseY() {
-        float value = 0;
+        float value = this.getBlockY();
         try {value = this.dataTracker.get(BASE_Y);}
         catch (Exception ignored) {}
         return value;
@@ -291,7 +294,7 @@ public abstract class InternalEntity extends TameableEntity {
     } // setBaseY ()
 
     public float getBaseZ() {
-        float value = 0;
+        float value = this.getBlockZ();
         try {value = this.dataTracker.get(BASE_Z);}
         catch (Exception ignored) {}
         return value;
@@ -424,11 +427,12 @@ public abstract class InternalEntity extends TameableEntity {
         if(hand == Hand.MAIN_HAND) {
             handleSit(itemStack);
             if(this.world.isClient) {
-                return ActionResult.PASS;
+                boolean bl = this.isOwner(player) || this.isTamed() || itemStack.isOf(Items.BONE) && !this.isTamed();
+                return bl ? ActionResult.CONSUME : ActionResult.PASS;
             } else {
                 handleState(itemStack, player);
                 handleAutoAttack(itemStack, player);
-                handleTexture(itemStack);
+                handleTexture(itemStack, player);
                 if(getOwner() == null) handleTame(player);
 
                 if(itemStack.isOf(Items.STICK)) displayMessage(player);
@@ -526,23 +530,29 @@ public abstract class InternalEntity extends TameableEntity {
         player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()), true);
     } // handleTame ()
 
-    public void handleTexture(ItemStack item) {
-        if(item.isOf(Items.WHITE_DYE)) setTexture(EntityTexture.WHITE);
-        if(item.isOf(Items.ORANGE_DYE)) setTexture(EntityTexture.ORANGE);
-        if(item.isOf(Items.MAGENTA_DYE)) setTexture(EntityTexture.MAGENTA);
-        if(item.isOf(Items.LIGHT_BLUE_DYE)) setTexture(EntityTexture.LIGHT_BLUE);
-        if(item.isOf(Items.YELLOW_DYE)) setTexture(EntityTexture.YELLOW);
-        if(item.isOf(Items.LIME_DYE)) setTexture(EntityTexture.LIME);
-        if(item.isOf(Items.PINK_DYE)) setTexture(EntityTexture.PINK);
-        if(item.isOf(Items.GRAY_DYE)) setTexture(EntityTexture.GRAY);
-        if(item.isOf(Items.LIGHT_GRAY_DYE)) setTexture(EntityTexture.LIGHT_GRAY);
-        if(item.isOf(Items.CYAN_DYE)) setTexture(EntityTexture.CYAN);
-        if(item.isOf(Items.PURPLE_DYE)) setTexture(EntityTexture.PURPLE);
-        if(item.isOf(Items.BLUE_DYE)) setTexture(EntityTexture.BLUE);
-        if(item.isOf(Items.BROWN_DYE)) setTexture(EntityTexture.BROWN);
-        if(item.isOf(Items.GREEN_DYE)) setTexture(EntityTexture.GREEN);
-        if(item.isOf(Items.RED_DYE)) setTexture(EntityTexture.RED);
-        if(item.isOf(Items.BLACK_DYE)) setTexture(EntityTexture.BLACK);
+    public void handleTexture(ItemStack items, PlayerEntity player) {
+        var oldTexture = getTextureID();
+        if(items.isOf(Items.WHITE_DYE)) setTexture(EntityTexture.WHITE);
+        if(items.isOf(Items.ORANGE_DYE)) setTexture(EntityTexture.ORANGE);
+        if(items.isOf(Items.MAGENTA_DYE)) setTexture(EntityTexture.MAGENTA);
+        if(items.isOf(Items.LIGHT_BLUE_DYE)) setTexture(EntityTexture.LIGHT_BLUE);
+        if(items.isOf(Items.YELLOW_DYE)) setTexture(EntityTexture.YELLOW);
+        if(items.isOf(Items.LIME_DYE)) setTexture(EntityTexture.LIME);
+        if(items.isOf(Items.PINK_DYE)) setTexture(EntityTexture.PINK);
+        if(items.isOf(Items.GRAY_DYE)) setTexture(EntityTexture.GRAY);
+        if(items.isOf(Items.LIGHT_GRAY_DYE)) setTexture(EntityTexture.LIGHT_GRAY);
+        if(items.isOf(Items.CYAN_DYE)) setTexture(EntityTexture.CYAN);
+        if(items.isOf(Items.PURPLE_DYE)) setTexture(EntityTexture.PURPLE);
+        if(items.isOf(Items.BLUE_DYE)) setTexture(EntityTexture.BLUE);
+        if(items.isOf(Items.BROWN_DYE)) setTexture(EntityTexture.BROWN);
+        if(items.isOf(Items.GREEN_DYE)) setTexture(EntityTexture.GREEN);
+        if(items.isOf(Items.RED_DYE)) setTexture(EntityTexture.RED);
+        if(items.isOf(Items.BLACK_DYE)) setTexture(EntityTexture.BLACK);
+
+        if(oldTexture != getTextureID()) {
+            if (!player.getAbilities().creativeMode)
+                items.decrement(1);
+        }
     } // handleTexture ()
 
     public void handleSit(ItemStack itemStack) {

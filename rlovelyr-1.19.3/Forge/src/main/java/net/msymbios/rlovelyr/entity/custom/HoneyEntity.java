@@ -1,6 +1,9 @@
 package net.msymbios.rlovelyr.entity.custom;
 
 import net.msymbios.rlovelyr.entity.enums.*;
+import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
+import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
+import net.msymbios.rlovelyr.entity.goal.AiFollowOwnerGoal;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import net.msymbios.rlovelyr.entity.internal.InternalEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
@@ -138,14 +141,15 @@ public class HoneyEntity extends InternalEntity implements NeutralMob, GeoEntity
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new MeleeAttackGoal(this, InternalMetric.MeleeAttackMovement, true));
-        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
+        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
+        this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, InternalMetric.WanderAroundMovement));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, InternalMetric.LookAtRange));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Mob.class, 5, true, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, 5, true, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
     } // registerGoals ()
 
