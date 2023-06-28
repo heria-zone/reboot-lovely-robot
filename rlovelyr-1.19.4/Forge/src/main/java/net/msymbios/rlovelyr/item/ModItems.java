@@ -1,7 +1,7 @@
 package net.msymbios.rlovelyr.item;
 
 import net.msymbios.rlovelyr.entity.ModEntities;
-import net.msymbios.rlovelyr.item.custom.RobotSpawnItem;
+import net.msymbios.rlovelyr.item.custom.EntityItemSpawn;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -15,10 +15,10 @@ public class ModItems {
 
     // -- Variables --
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, LovelyRobotMod.MODID);
-    public static final RegistryObject<Item> BUNNY_SPAWN = ITEMS.register("bunny_spawn", () -> new RobotSpawnItem(ModEntities.BUNNY, new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> BUNNY2_SPAWN = ITEMS.register("bunny2_spawn", () -> new RobotSpawnItem(ModEntities.BUNNY2, new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> HONEY_SPAWN = ITEMS.register("honey_spawn", () -> new RobotSpawnItem(ModEntities.HONEY, new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> VANILLA_SPAWN = ITEMS.register("vanilla_spawn", () -> new RobotSpawnItem(ModEntities.VANILLA, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> BUNNY_SPAWN = ITEMS.register("bunny_spawn", () -> new EntityItemSpawn(ModEntities.BUNNY, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> BUNNY2_SPAWN = ITEMS.register("bunny2_spawn", () -> new EntityItemSpawn(ModEntities.BUNNY2, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> HONEY_SPAWN = ITEMS.register("honey_spawn", () -> new EntityItemSpawn(ModEntities.HONEY, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> VANILLA_SPAWN = ITEMS.register("vanilla_spawn", () -> new EntityItemSpawn(ModEntities.VANILLA, new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ROBOT_CORE = ITEMS.register("robot_core", () -> new Item(new Item.Properties()));
 
     // -- Methods --
@@ -27,7 +27,7 @@ public class ModItems {
     } // register ()
 
     public static void addCreativeModeTab(CreativeModeTabEvent.BuildContents event) {
-        if(event.getTab() == ModCreativeModeTab.LOVELY_ROBOT){
+        if(event.getTab() == ModItemsTab.LOVELY_ROBOT){
             event.accept(ModItems.BUNNY_SPAWN);
             event.accept(ModItems.BUNNY2_SPAWN);
             event.accept(ModItems.HONEY_SPAWN);

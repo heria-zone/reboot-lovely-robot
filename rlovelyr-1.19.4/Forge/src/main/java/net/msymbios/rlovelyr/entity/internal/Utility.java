@@ -1,11 +1,11 @@
-package net.msymbios.rlovelyr.entity.utils;
+package net.msymbios.rlovelyr.entity.internal;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.Random;
 
-public class ModUtils {
+public class Utility {
 
     // -- Variables --
     private static final Random rand = new Random();
@@ -38,4 +38,4 @@ public class ModUtils {
         return value = !value;
     } // invertBoolean ()
 
-} // Class ModUtils
+} // Class Utility
