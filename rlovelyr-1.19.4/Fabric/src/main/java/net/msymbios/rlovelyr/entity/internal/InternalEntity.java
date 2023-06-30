@@ -336,7 +336,7 @@ public abstract class InternalEntity extends TameableEntity {
     public boolean damage(DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) return false;
 
-        if (source.isOf(DamageTypes.ON_FIRE) && amount >= 1.0f && this.getFireProtection() > 0)
+        if ((source.isOf(DamageTypes.ON_FIRE) || source.isOf(DamageTypes.IN_FIRE) || source.isOf(DamageTypes.LAVA)) && amount >= 1.0f && this.getFireProtection() > 0)
             amount *= (100.0f - this.getFireProtection()) / 100.0f;
 
         if (source.isOf(DamageTypes.FALL) && amount >= 1.0f && this.getFallProtection() > 0)
@@ -351,7 +351,7 @@ public abstract class InternalEntity extends TameableEntity {
         if (amount < 1.0f) return false;
 
         if(!world.isClient) {
-            if(source.isOf(DamageTypes.ON_FIRE) && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
+            if((source.isOf(DamageTypes.ON_FIRE) || source.isOf(DamageTypes.IN_FIRE) || source.isOf(DamageTypes.LAVA)) && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
             if(source.isOf(DamageTypes.FALL) && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
             if(source.isOf(DamageTypes.EXPLOSION) && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
             if(source.isOf(DamageTypes.ARROW) && canLevelUpProjectileProtection()) this.setProjectileProtection(this.getProjectileProtection() + 1);

@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -305,25 +306,25 @@ public abstract class InternalEntity extends TamableAnimal {
     public boolean hurt(@NotNull DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) return false;
 
-        if (source.isFire() && amount >= 1.0f && this.getFireProtection() > 0)
+        if ((source.is(DamageTypes.ON_FIRE) || source.is(DamageTypes.IN_FIRE) || source.is(DamageTypes.LAVA)) && amount >= 1.0f && this.getFireProtection() > 0)
             amount *= (100.0f - this.getFireProtection()) / 100.0f;
 
-        if (source == DamageSource.FALL && amount >= 1.0f && this.getFallProtection() > 0)
+        if (source.is(DamageTypes.FALL) && amount >= 1.0f && this.getFallProtection() > 0)
             amount *= (100.0f - this.getFallProtection()) / 100.0f;
 
-        if (source.isExplosion() && amount >= 1.0f && this.getBlastProtection() > 0)
+        if (source.is(DamageTypes.EXPLOSION) && amount >= 1.0f && this.getBlastProtection() > 0)
             amount *= (100.0f - this.getBlastProtection()) / 100.0f;
 
-        if (source.isProjectile() && amount >= 1.0f && this.getProjectileProtection() > 0)
+        if (source.is(DamageTypes.ARROW) && amount >= 1.0f && this.getProjectileProtection() > 0)
             amount *= (100.0f - this.getProjectileProtection()) / 100.0f;
 
         if (amount < 1.0f) return false;
 
         if(!level.isClientSide) {
-            if(source.isFire() && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
-            if(source == DamageSource.FALL && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
-            if(source.isExplosion() && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
-            if(source.isProjectile() && canLevelUpProjectileProtection()) this.setProjectileProtection(this.getProjectileProtection() + 1);
+            if((source.is(DamageTypes.ON_FIRE) || source.is(DamageTypes.IN_FIRE) || source.is(DamageTypes.LAVA)) && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
+            if(source.is(DamageTypes.FALL) && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
+            if(source.is(DamageTypes.EXPLOSION) && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
+            if(source.is(DamageTypes.ARROW) && canLevelUpProjectileProtection()) this.setProjectileProtection(this.getProjectileProtection() + 1);
         }
 
         final Entity entity = source.getEntity();
