@@ -5,7 +5,7 @@
   "item.rlovelyr.vanilla_spawn": "Vanilla",
   "item.rlovelyr.robot_core": "Robot Core",
 
-  "tab.rlovelyr.lovely_robot_tab": "Reboot LovelyRobot",
+  "itemGroup.lovely_robot_tab": "Reboot LovelyRobot",
 
   "entity.rlovelyr.bunny": "Bunny",
   "entity.rlovelyr.bunny2": "Bunny 2.0",

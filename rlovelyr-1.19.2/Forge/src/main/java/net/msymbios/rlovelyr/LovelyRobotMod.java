@@ -17,7 +17,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
-import software.bernie.geckolib.GeckoLib;
+import software.bernie.geckolib3.GeckoLib;
 
 @Mod(LovelyRobotMod.MODID)
 public class LovelyRobotMod {
@@ -39,14 +39,10 @@ public class LovelyRobotMod {
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
-
-        modEventBus.addListener(ModItems::addCreativeModeTab);
     } // Constructor RLovelyRobotMod ()
 
     // -- Methods --
-    private void commonSetup(final FMLCommonSetupEvent event) {
-
-    } // commonSetup ()
+    private void commonSetup(final FMLCommonSetupEvent event) { } // commonSetup ()
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {

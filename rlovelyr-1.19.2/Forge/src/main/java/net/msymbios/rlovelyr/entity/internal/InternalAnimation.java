@@ -1,42 +1,39 @@
 package net.msymbios.rlovelyr.entity.internal;
 
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
-import software.bernie.geckolib.core.animation.Animation;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
+import software.bernie.geckolib3.core.controller.AnimationController;
 
 public final class InternalAnimation {
 
     // -- Variables --
-    public static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.lovelyrobot.idle");
-    public static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.lovelyrobot.walk");
-    public static final RawAnimation SIT = RawAnimation.begin().thenPlayAndHold("animation.lovelyrobot.sit");
-    public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE);
+    public static final AnimationBuilder IDLE = new AnimationBuilder().addAnimation("animation.lovelyrobot.idle", ILoopType.EDefaultLoopTypes.LOOP);
+    public static final AnimationBuilder WALK = new AnimationBuilder().addAnimation("animation.lovelyrobot.walk", ILoopType.EDefaultLoopTypes.LOOP);
+    public static final AnimationBuilder SIT = new AnimationBuilder().addAnimation ("animation.lovelyrobot.sit", ILoopType.EDefaultLoopTypes.LOOP);
+    public static final AnimationBuilder ATTACK_SWING = new AnimationBuilder().addAnimation ("animation.lovelyrobot.attack", ILoopType.EDefaultLoopTypes.PLAY_ONCE);
 
     // -- Methods --
-    public static <T extends TamableAnimal & GeoAnimatable> AnimationController<T> attackAnimation(T animatable, RawAnimation attackAnimation) {
-        return new AnimationController<>(animatable, "Attack", 5, state -> {
-            if (animatable.swinging && state.getController().getAnimationState().equals(AnimationController.State.STOPPED)) return state.setAndContinue(attackAnimation);
-            state.getController().forceAnimationReset();
+    public static <T extends LivingEntity & IAnimatable> AnimationController<T> attackAnimation(T animatable) {
+        return new AnimationController<>(animatable, "Attack", 5, event -> {
+            if (animatable.swinging) {
+                event.getController().setAnimation(ATTACK_SWING);
+                return PlayState.CONTINUE;
+            }
+            event.getController().clearAnimationCache();
             return PlayState.STOP;
         });
     } // attackAnimation ()
 
-    public static <T extends TamableAnimal & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
-        return new AnimationController<>(animatable, "Attack", 5, state -> {
-            if (animatable.swinging) return state.setAndContinue(ATTACK_SWING);
-            state.getController().forceAnimationReset();
-            return PlayState.STOP;
-        });
-    } // attackAnimation ()
-
-    public static <T extends TamableAnimal & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
-        return new AnimationController<T>(entity, "Walk/Run/Idle", 0, state -> {
-            if (state.isMoving()) return state.setAndContinue(WALK);
-            else if(entity.isOrderedToSit()) return state.setAndContinue(SIT);
-            else return state.setAndContinue(IDLE);
+    public static <T extends TamableAnimal & IAnimatable> AnimationController<T> locomotionAnimation(T entity) {
+        return new AnimationController<T>(entity, "Walk/Idle/Sit", 0, event -> {
+            if (event.isMoving()) event.getController().setAnimation(WALK);
+            else if(entity.isOrderedToSit()) event.getController().setAnimation(SIT);
+            else event.getController().setAnimation(IDLE);
+            return PlayState.CONTINUE;
         });
     } // locomotionAnimation ()
 

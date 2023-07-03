@@ -21,21 +21,21 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.manager.AnimationData;
+import software.bernie.geckolib3.core.manager.AnimationFactory;
+import software.bernie.geckolib3.core.manager.SingletonAnimationFactory;
 
 import java.util.UUID;
 
 import static net.msymbios.rlovelyr.entity.internal.Utility.*;
 
-public class Bunny2Entity extends InternalEntity implements NeutralMob, GeoEntity {
+public class Bunny2Entity extends InternalEntity implements NeutralMob, IAnimatable {
 
     // -- Variables --
     private static ResourceLocation currentModel;
     private static ResourceLocation currentAnimator;
-    private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
+    private final AnimationFactory cache = new SingletonAnimationFactory(this);
 
     // -- Properties --
     public static AttributeSupplier setAttributes() {
@@ -115,17 +115,13 @@ public class Bunny2Entity extends InternalEntity implements NeutralMob, GeoEntit
 
     // -- Animations --
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(
-                InternalAnimation.locomotionAnimation(this),
-                InternalAnimation.attackAnimation(this)
-        );
+    public void registerControllers(AnimationData controllerRegister) {
+        controllerRegister.addAnimationController(InternalAnimation.locomotionAnimation(this));
+        controllerRegister.addAnimationController(InternalAnimation.attackAnimation(this));
     } // registerControllers ()
 
     @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
-    } // getAnimatableInstanceCache ()
+    public AnimationFactory getFactory() { return cache; } // getFactory ()
 
     // -- Inherited Methods --
     @Override

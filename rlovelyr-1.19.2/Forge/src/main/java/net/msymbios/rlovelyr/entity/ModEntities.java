@@ -19,16 +19,16 @@ public class ModEntities {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, LovelyRobotMod.MODID);
 
     public static final RegistryObject<EntityType<BunnyEntity>> BUNNY = ENTITY_TYPES.register("bunny",
-            () -> EntityType.Builder.of(BunnyEntity::new, MobCategory.CREATURE).sized(0.4f, 2F)
+            () -> EntityType.Builder.of(BunnyEntity::new, MobCategory.CREATURE).sized(0.4F, 2F)
                     .build(new ResourceLocation(LovelyRobotMod.MODID, "bunny").toString()));
     public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = ENTITY_TYPES.register("bunny2",
-            () -> EntityType.Builder.of(Bunny2Entity::new, MobCategory.CREATURE).sized(0.4f, 2F)
+            () -> EntityType.Builder.of(Bunny2Entity::new, MobCategory.CREATURE).sized(0.4F, 2F)
                     .build(new ResourceLocation(LovelyRobotMod.MODID, "bunny2").toString()));
     public static final RegistryObject<EntityType<HoneyEntity>> HONEY = ENTITY_TYPES.register("honey",
-            () -> EntityType.Builder.of(HoneyEntity::new, MobCategory.CREATURE).sized(0.4f, 2F)
+            () -> EntityType.Builder.of(HoneyEntity::new, MobCategory.CREATURE).sized(0.4F, 2F)
                     .build(new ResourceLocation(LovelyRobotMod.MODID, "honey").toString()));
     public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = ENTITY_TYPES.register("vanilla",
-            () -> EntityType.Builder.of(VanillaEntity::new, MobCategory.CREATURE).sized(0.4f, 2F)
+            () -> EntityType.Builder.of(VanillaEntity::new, MobCategory.CREATURE).sized(0.4F, 2F)
                     .build(new ResourceLocation(LovelyRobotMod.MODID, "vanilla").toString()));
 
     // -- Methods --
