@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "PSP",
+    " P "
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:glass_pane"
+    },
+    "S": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "item": "rlovelyr:robot_core",
+    "count": 1
+  }
+}

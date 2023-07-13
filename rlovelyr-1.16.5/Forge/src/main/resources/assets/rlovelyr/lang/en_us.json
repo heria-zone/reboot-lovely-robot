@@ -1,0 +1,14 @@
+{
+  "item.rlovelyr.bunny_spawn": "Bunny",
+  "item.rlovelyr.bunny2_spawn": "Bunny 2.0",
+  "item.rlovelyr.honey_spawn": "Honey",
+  "item.rlovelyr.vanilla_spawn": "Vanilla",
+  "item.rlovelyr.robot_core": "Robot Core",
+
+  "itemGroup.lovely_robot_tab": "Reboot LovelyRobot",
+
+  "entity.rlovelyr.bunny": "Bunny",
+  "entity.rlovelyr.bunny2": "Bunny 2.0",
+  "entity.rlovelyr.honey": "Honey",
+  "entity.rlovelyr.vanilla": "Vanilla"
+}
