@@ -15,8 +15,6 @@ import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.item.DyeItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -25,14 +23,10 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
-import net.msymbios.rlovelyr.entity.enums.EntityState;
-import net.msymbios.rlovelyr.entity.enums.EntityTexture;
-import net.msymbios.rlovelyr.entity.enums.EntityVariant;
+import net.msymbios.rlovelyr.entity.enums.*;
 import org.jetbrains.annotations.Nullable;
 
 import static net.msymbios.rlovelyr.entity.internal.Utility.*;
@@ -43,6 +37,8 @@ public abstract class InternalEntity extends TameableEntity {
     // -- Variables --
     protected static final TrackedData<String> VARIANT = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.STRING);
     protected static final TrackedData<Integer> TEXTURE_ID = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> MODEL_ID = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    protected static final TrackedData<Integer> ANIMATOR_ID = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     protected static final TrackedData<Integer> STATE = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
     protected static final TrackedData<Boolean> AUTO_ATTACK = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
@@ -61,6 +57,59 @@ public abstract class InternalEntity extends TameableEntity {
     protected static final TrackedData<Float> BASE_Z = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);;
 
     // -- Properties --
+
+    // ANIMATOR
+    public Identifier getAnimatorByID(int value) {
+        return InternalMetric.ANIMATORS.get(EntityAnimator.byId(value));
+    } // getAnimatorByID ()
+
+    public int getAnimatorID() {
+        int value = 0;
+        try {value = this.dataTracker.get(ANIMATOR_ID);}
+        catch (Exception ignored) {}
+        return value;
+    } // getAnimatorID ()
+
+    public Identifier getAnimator() {
+        return getAnimatorByID(getAnimatorID());
+    } // getAnimator ()
+
+    public void setAnimator(EntityAnimator value) {
+        setAnimator(value.getId());
+    } // setAnimator ()
+
+    public void setAnimator(int value) {
+        this.dataTracker.set(ANIMATOR_ID, value);
+    } // setAnimator ()
+
+    // MODEL
+    public abstract Identifier getCurrentModelByID(int value);
+
+    public Identifier getCurrentModel() {
+        return getCurrentModelByID(getModelID());
+    } // getCurrentModel ()
+
+    public int getModelID() {
+        int value = 0;
+        try {value = this.dataTracker.get(MODEL_ID);}
+        catch (Exception ignored) {}
+        return value;
+    } // getModelID ()
+
+    public EntityModel getModel() {
+        int value = 0;
+        try {value = this.dataTracker.get(MODEL_ID);}
+        catch (Exception ignored) {}
+        return EntityModel.byId(value);
+    } // getModel ()
+
+    public void setModel(EntityModel value) {
+        setModel(value.getId());
+    } // setModel ()
+
+    public void setModel(int value) {
+        this.dataTracker.set(MODEL_ID, value);
+    } // setModel ()
 
     // TEXTURE
     public abstract Identifier getTextureByID(int value);
@@ -133,7 +182,13 @@ public abstract class InternalEntity extends TameableEntity {
     } // setAutoAttack ()
 
     // STATS
-    public abstract int getMaxLevel();
+    public abstract float getRawAttribute(EntityAttribute attribute);
+
+    public int getAttribute(EntityAttribute attribute) {
+        return (int) getRawAttribute(attribute);
+    } // getAttribute ()
+
+    public int getMaxLevel() { return getMaxLevel (getAttribute(EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
 
     public int getMaxLevel(int value){
         var oldValue = value;
@@ -148,10 +203,11 @@ public abstract class InternalEntity extends TameableEntity {
     } // setMaxLevel ()
 
     public int getCurrentLevel() {
-        int value = 0;
-        try {value = this.dataTracker.get(LEVEL);}
+        var level = getAttribute(EntityAttribute.MAX_LEVEL);
+        if(level != getMaxLevel()) setMaxLevel(level);
+        try {level = this.dataTracker.get(LEVEL);}
         catch (Exception ignored){}
-        return value;
+        return level;
     } // getCurrentLevel ()
 
     public void setCurrentLevel(int value){
@@ -185,17 +241,19 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.set(EXP, value);
     } // setExp ()
 
-    public abstract int getHpValue();
+    public int getHpValue() { return getHpValue(getAttribute(EntityAttribute.MAX_HEALTH)); } // getHpValue ()
+
     public int getHpValue(int value) {
         return (value + this.getCurrentLevel() * value / 50);
     } // getHpValue ()
 
-    public abstract int getAttackValue();
+    public int getAttackValue() { return getAttackValue(getAttribute(EntityAttribute.ATTACK_DAMAGE)); } // getAttackValue ()
+
     public int getAttackValue(int value) {
         return (value + this.getCurrentLevel() * value / 50);
     } // getAttackValue ()
 
-    public abstract int getDefenseValue();
+    public int getDefenseValue() { return getDefenseValue(getAttribute(EntityAttribute.DEFENSE)); } // getDefenseValue ()
 
     public int getDefenseValue(int value) {
         return (value + this.getCurrentLevel() * value / 50);
@@ -322,6 +380,13 @@ public abstract class InternalEntity extends TameableEntity {
 
     // -- Built-In Methods --
     @Override
+    public void tick() {
+        super.tick();
+        handleModelTransition();
+        handleAutoHeal();
+    } // tick ()
+
+    @Override
     public void onAttacking(Entity target) {
         if(this.canLevelUp() && !(target instanceof PlayerEntity) && target != null && !this.world.isClient) {
             final int maxHp = (int)((LivingEntity)target).getMaxHealth();
@@ -329,7 +394,7 @@ public abstract class InternalEntity extends TameableEntity {
         }
         this.world.sendEntityStatus(this, (byte)4);
         super.onAttacking(target);
-    }
+    } // onAttacking ()
 
     @Override
     public boolean damage(DamageSource source, float amount) {
@@ -499,6 +564,7 @@ public abstract class InternalEntity extends TameableEntity {
         }
     } // addExp ()
 
+    // -- Interaction Methods --
     public boolean canInteract(ItemStack itemStack){
         if(itemStack.isOf(Items.WHITE_DYE) ||itemStack.isOf(Items.ORANGE_DYE) || itemStack.isOf(Items.MAGENTA_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) ||
                 itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIME_DYE) || itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.GRAY_DYE) ||
@@ -517,12 +583,18 @@ public abstract class InternalEntity extends TameableEntity {
         return itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD);
     } // canInteractAutoAttack ()
 
+    // -- Logic Methods --
     protected void handleAutoHeal () {
         if (!this.world.isClient && InternalMetric.AutoHeal && this.age % InternalMetric.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
             final float healValue = this.getHpValue() / 16.0f;
             this.heal(healValue);
         }
     } // handleAutoHeal ()
+
+    protected void handleModelTransition () {
+        if(this.isAttacking()) setModel(EntityModel.Armed);
+        else setModel(EntityModel.Unarmed);
+    } // handleModelTransition ()
 
     public void handleTame(PlayerEntity player) {
         this.setOwner(player);
@@ -596,6 +668,7 @@ public abstract class InternalEntity extends TameableEntity {
         setCurrentState(EntityState.BaseDefense);
     } // BaseDefenseState ()
 
+    // -- Debug Methods --
     public void displayMessage (PlayerEntity player) {
         if(!InternalMetric.LevelUpLog) return;
         player.sendMessage(Text.literal("|--------------------------"));
@@ -622,11 +695,14 @@ public abstract class InternalEntity extends TameableEntity {
     @Override
     protected void initDataTracker() {
         super.initDataTracker();
-        this.dataTracker.startTracking(TEXTURE_ID, 0);
+        this.dataTracker.startTracking(TEXTURE_ID, EntityTexture.PINK.getId());
+        this.dataTracker.startTracking(MODEL_ID, EntityModel.Unarmed.getId());
+        this.dataTracker.startTracking(ANIMATOR_ID, EntityAnimator.Locomotion.getId());
 
-        this.dataTracker.startTracking(STATE, 0);
-        this.dataTracker.startTracking(AUTO_ATTACK, false);
+        this.dataTracker.startTracking(STATE, EntityState.Standby.getId());
+        this.dataTracker.startTracking(AUTO_ATTACK, true);
 
+        this.dataTracker.startTracking(MAX_LEVEL, getAttribute(EntityAttribute.MAX_LEVEL));
         this.dataTracker.startTracking(LEVEL, 0);
         this.dataTracker.startTracking(EXP, 0);
 
@@ -644,6 +720,8 @@ public abstract class InternalEntity extends TameableEntity {
         super.writeCustomDataToNbt(nbt);
         nbt.putString("Variant", this.getVariant());
         nbt.putInt("TextureID", this.getTextureID());
+        nbt.putInt("ModelID", this.getModelID());
+        nbt.putInt("AnimatorID", this.getAnimatorID());
 
         nbt.putInt("State", this.getCurrentStateID());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -666,6 +744,8 @@ public abstract class InternalEntity extends TameableEntity {
         super.readCustomDataFromNbt(nbt);
         this.setVariant(nbt.getString("Variant"));
         this.setTexture(nbt.getInt("TextureID"));
+        this.setModel(nbt.getInt("ModelID"));
+        this.setAnimator(nbt.getInt("AnimatorID"));
 
         this.setCurrentState(nbt.getInt("State"));
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));

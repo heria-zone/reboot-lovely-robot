@@ -5,7 +5,7 @@ import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.*;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -15,10 +15,12 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.entity.enums.*;
-import net.msymbios.rlovelyr.entity.goal.AiFollowOwnerGoal;
 import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
 import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
-import net.msymbios.rlovelyr.entity.internal.*;
+import net.msymbios.rlovelyr.entity.goal.AiFollowOwnerGoal;
+import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
+import net.msymbios.rlovelyr.entity.internal.InternalEntity;
+import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -30,8 +32,6 @@ import static net.msymbios.rlovelyr.entity.internal.Utility.*;
 public class VanillaEntity extends InternalEntity implements IAnimatable {
 
     // -- Variables --
-    private Identifier currentModel;
-    private Identifier currentAnimator;
     private final AnimationFactory cache = new SingletonAnimationFactory(this);
 
     // -- Properties --
@@ -46,22 +46,8 @@ public class VanillaEntity extends InternalEntity implements IAnimatable {
     } // setAttributes ()
 
     // -- MODEL --
-    public Identifier getCurrentModel() {
-        return currentModel;
-    } // getCurrentTexture ()
-
-    public void setCurrentModel(EntityModel value) {
-        currentModel = InternalMetric.getModel(EntityVariant.Vanilla, value);
-    } // setCurrentAnimator ()
-
-    // -- ANIMATOR --
-    public Identifier getCurrentAnimator() {
-        return currentAnimator;
-    } // getCurrentAnimator ()
-
-    public void setCurrentAnimator(EntityAnimation value) {
-        currentAnimator = InternalMetric.ANIMATIONS.get(value);
-    } // setCurrentAnimator ()
+    @Override
+    public Identifier getCurrentModelByID(int value) { return InternalMetric.getModel(EntityVariant.Vanilla, EntityModel.byId(value)); } // getCurrentModelByID ()
 
     // TEXTURE
     @Override
@@ -74,36 +60,13 @@ public class VanillaEntity extends InternalEntity implements IAnimatable {
     } // getVariant ()
 
     // STATS
-    @Override
-    public int getMaxLevel(){ return getMaxLevel ((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
-
-    @Override
-    public int getCurrentLevel(){
-        var level = (int)(InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
-        if(level != getMaxLevel()) setMaxLevel(level);
-        return super.getCurrentLevel();
-    } // getLevel ()
-
-    @Override
-    public int getHpValue() {
-        return getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_HEALTH));
-    } // getHpValue ()
-
-    @Override
-    public int getAttackValue() {
-        return getAttackValue((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ATTACK_DAMAGE));
-    } // getAttackValue ()
-
-    @Override
-    public int getDefenseValue() {
-        return getDefenseValue((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.DEFENSE));
-    } // getDefenseValue ()
+    public float getRawAttribute(EntityAttribute attribute) {
+        return InternalMetric.getAttributeValue(EntityVariant.Vanilla, attribute);
+    } // getRawAttribute ()
 
     // -- Constructor --
     public VanillaEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
-        setCurrentModel(EntityModel.Unarmed);
-        setCurrentAnimator(EntityAnimation.Locomotion);
     } // Constructor RobotEntity ()
 
     // -- Animations --
@@ -123,7 +86,7 @@ public class VanillaEntity extends InternalEntity implements IAnimatable {
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setVariant(EntityVariant.Vanilla.getName());
         this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Vanilla)));
-        this.setMaxLevel((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
+        this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
         ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
@@ -144,29 +107,15 @@ public class VanillaEntity extends InternalEntity implements IAnimatable {
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, new RevengeGoal(this));
-        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, 5, false, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetric.AttackChance, false, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
-
-    @Override
-    public void tick() {
-        super.tick();
-        handleModelTransition();
-        handleAutoHeal();
-    } // tick ()
-
-    // -- Custom Methods --
-    private void handleModelTransition () {
-        if(this.isAttacking()) setCurrentModel(EntityModel.Armed);
-        else setCurrentModel(EntityModel.Unarmed);
-    } // handleModelTransition ()
 
     // -- Save Methods --
     @Override
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(VARIANT, EntityVariant.Vanilla.getName());
-        this.dataTracker.startTracking(MAX_LEVEL, (int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
     } // initDataTracker ()
 
 } // Class VanillaEntity

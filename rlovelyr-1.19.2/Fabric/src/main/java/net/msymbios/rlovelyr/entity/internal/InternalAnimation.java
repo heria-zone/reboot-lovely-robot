@@ -1,12 +1,15 @@
 package net.msymbios.rlovelyr.entity.internal;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.TameableEntity;
+import net.msymbios.rlovelyr.entity.enums.EntityState;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.processor.IBone;
+import software.bernie.geckolib3.model.AnimatedGeoModel;
+import software.bernie.geckolib3.model.provider.data.EntityModelData;
 
 public final class InternalAnimation {
 
@@ -17,9 +20,10 @@ public final class InternalAnimation {
     public static final AnimationBuilder ATTACK_SWING = new AnimationBuilder().addAnimation ("animation.lovelyrobot.attack", ILoopType.EDefaultLoopTypes.PLAY_ONCE);
 
     // -- Methods --
-    public static <T extends LivingEntity & IAnimatable> AnimationController<T> attackAnimation(T animatable) {
+    public static <T extends InternalEntity & IAnimatable> AnimationController<T> attackAnimation(T animatable) {
         return new AnimationController<>(animatable, "Attack", 5, event -> {
             if (animatable.handSwinging) {
+                //if(animatable.getModel() != EntityModel.Armed) animatable.setModel(EntityModel.Armed);
                 event.getController().setAnimation(ATTACK_SWING);
                 return PlayState.CONTINUE;
             }
@@ -28,13 +32,23 @@ public final class InternalAnimation {
         });
     } // attackAnimation ()
 
-    public static <T extends TameableEntity & IAnimatable> AnimationController<T> locomotionAnimation(T entity) {
-        return new AnimationController<T>(entity, "Walk/Idle/Sit", 0, event -> {
+    public static <T extends InternalEntity & IAnimatable> AnimationController<T> locomotionAnimation(T entity) {
+        return new AnimationController<T>(entity, "Locomotion", 0, event -> {
             if (event.isMoving()) event.getController().setAnimation(WALK);
-            else if(entity.isSitting()) event.getController().setAnimation(SIT);
+            else if(entity.getCurrentState() == EntityState.Standby) event.getController().setAnimation(SIT);
             else event.getController().setAnimation(IDLE);
             return PlayState.CONTINUE;
         });
     } // locomotionAnimation ()
+
+
+    public static void headAnimation (AnimatedGeoModel renderer, AnimationEvent event) {
+        IBone head = renderer.getAnimationProcessor().getBone("head");
+        EntityModelData extraData = (EntityModelData) event.getExtraDataOfType(EntityModelData.class).get(0);
+        if (head != null) {
+            head.setRotationX(extraData.headPitch * ((float) Math.PI / 180F));
+            head.setRotationY(extraData.netHeadYaw * ((float) Math.PI / 180F));
+        }
+    } // headAnimation ()
 
 } // Class InternalAnimation
