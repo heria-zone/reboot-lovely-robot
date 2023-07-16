@@ -29,7 +29,7 @@ public class InternalMetric {
     public static float FollowCloseDistance= 2.0F;
     public static float LookAtRange = 8.0F;
     public static int AttackChance = 5;
-    public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof Monster && !(entity instanceof CreeperEntity);// && !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity);
+    public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof Monster && !(entity instanceof CreeperEntity);
 
 
     // - Level & Experience --
@@ -44,6 +44,8 @@ public class InternalMetric {
     public static boolean LootingEnchantment = true;    // Enable looting enchantments
     public static int LootingRequiredLevel = 10;        // Levels required for looting enchantments
     public static int MaxLootingLevel = 3;              // Maximum level of looting enchantments
+    public static int WaryTime = 50;            // Time while being in combat mode
+    public static boolean CombatMode = false;            // Time while being in combat mode
 
     // -- Protection --
     public static int FireProtectionLimit = 80;         // Fire Protection upper limit

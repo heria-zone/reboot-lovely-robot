@@ -60,9 +60,9 @@ public class HoneyEntity extends InternalEntity implements IAnimatable {
     } // getVariant ()
 
     // STATS
-    public float getRawAttribute(EntityAttribute attribute) {
+    public float getAttributeRaw(EntityAttribute attribute) {
         return InternalMetric.getAttributeValue(EntityVariant.Honey, attribute);
-    } // getRawAttribute ()
+    } // getAttributeRaw ()
 
     // -- Constructor --
     public HoneyEntity(EntityType<? extends TameableEntity> entityType, World world) {

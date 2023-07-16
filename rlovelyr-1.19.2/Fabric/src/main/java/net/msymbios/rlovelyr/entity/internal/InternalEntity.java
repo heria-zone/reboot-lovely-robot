@@ -56,6 +56,10 @@ public abstract class InternalEntity extends TameableEntity {
     protected static final TrackedData<Float> BASE_Y = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);
     protected static final TrackedData<Float> BASE_Z = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);;
 
+    protected int autoHealTimer = 0;
+    protected int waryTimer = 0;
+    protected boolean combatMode = false;
+
     // -- Properties --
 
     // ANIMATOR
@@ -182,10 +186,10 @@ public abstract class InternalEntity extends TameableEntity {
     } // setAutoAttack ()
 
     // STATS
-    public abstract float getRawAttribute(EntityAttribute attribute);
+    public abstract float getAttributeRaw(EntityAttribute attribute);
 
     public int getAttribute(EntityAttribute attribute) {
-        return (int) getRawAttribute(attribute);
+        return (int) getAttributeRaw(attribute);
     } // getAttribute ()
 
     public int getMaxLevel() { return getMaxLevel (getAttribute(EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
@@ -382,12 +386,13 @@ public abstract class InternalEntity extends TameableEntity {
     @Override
     public void tick() {
         super.tick();
-        handleModelTransition();
+        handleCombatMode();
         handleAutoHeal();
     } // tick ()
 
     @Override
     public void onAttacking(Entity target) {
+        handleActivateCombatMode();
         if(this.canLevelUp() && !(target instanceof PlayerEntity) && target != null && !this.world.isClient) {
             final int maxHp = (int)((LivingEntity)target).getMaxHealth();
             this.addExp(maxHp / 4);
@@ -399,6 +404,7 @@ public abstract class InternalEntity extends TameableEntity {
     @Override
     public boolean damage(DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) return false;
+        handleActivateCombatMode();
 
         if (source.isFire() && amount >= 1.0f && this.getFireProtection() > 0)
             amount *= (100.0f - this.getFireProtection()) / 100.0f;
@@ -585,16 +591,39 @@ public abstract class InternalEntity extends TameableEntity {
 
     // -- Logic Methods --
     protected void handleAutoHeal () {
-        if (!this.world.isClient && InternalMetric.AutoHeal && this.age % InternalMetric.AutoHealInterval == 0 && this.getHealth() < this.getHpValue()) {
-            final float healValue = this.getHpValue() / 16.0f;
+        if(this.world.isClient && !InternalMetric.AutoHeal) return;
+        if(this.getHealth() == this.getHpValue()) return;
+
+        if(autoHealTimer != 0) {
+            autoHealTimer--;
+        } else {
+            final float healValue = this.getHpValue() / 16.0F;
             this.heal(healValue);
+            autoHealTimer = InternalMetric.AutoHealInterval;
         }
+
+        commandDebug("Heal: " + InternalMetric.AutoHeal + " | Timer: " + autoHealTimer, true);
     } // handleAutoHeal ()
 
-    protected void handleModelTransition () {
-        if(this.isAttacking()) setModel(EntityModel.Armed);
-        else setModel(EntityModel.Unarmed);
-    } // handleModelTransition ()
+    protected void handleActivateCombatMode () {
+        if(!combatMode) combatMode = true;
+        waryTimer = InternalMetric.WaryTime;
+    } // handleActivateCombatMode ()
+
+    protected void handleCombatMode() {
+        if(this.isAttacking()) handleActivateCombatMode();
+        if(this.world.isClient && !combatMode) return;
+
+        if(waryTimer != 0) {
+            if(getModel() != EntityModel.Armed) setModel(EntityModel.Armed);
+            waryTimer--;
+        } else {
+            if(getModel() != EntityModel.Unarmed) setModel(EntityModel.Unarmed);
+            combatMode = false;
+        }
+
+        //commandDebug("Combat: " + combatMode + " | Wary: " + waryTimer, true);
+    } // handleCombatMode ()
 
     public void handleTame(PlayerEntity player) {
         this.setOwner(player);
@@ -669,6 +698,13 @@ public abstract class InternalEntity extends TameableEntity {
     } // BaseDefenseState ()
 
     // -- Debug Methods --
+    public void commandDebug(String message, boolean overlay) {
+        if(this.getOwner() != null) {
+            PlayerEntity player = (PlayerEntity)this.getOwner();
+            player.sendMessage(Text.literal(message), overlay);
+        }
+    } // commandDebug ()
+
     public void displayMessage (PlayerEntity player) {
         if(!InternalMetric.LevelUpLog) return;
         player.sendMessage(Text.literal("|--------------------------"));
