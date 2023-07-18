@@ -6,6 +6,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.msymbios.rlovelyr.entity.ModEntities;
+import net.msymbios.rlovelyr.item.custom.EntityItemRobotCore;
 import net.msymbios.rlovelyr.item.custom.EntityItemSpawn;
 
 public class ModItems {
@@ -15,7 +16,7 @@ public class ModItems {
     public static final Item BUNNY2_SPAWN = registerItem("bunny2_spawn", new EntityItemSpawn(ModEntities.BUNNY2, new FabricItemSettings().group(ModItemsGroup.LOVELY_ROBOT)));
     public static final Item HONEY_SPAWN = registerItem("honey_spawn", new EntityItemSpawn(ModEntities.HONEY, new FabricItemSettings().group(ModItemsGroup.LOVELY_ROBOT)));
     public static final Item VANILLA_SPAWN = registerItem("vanilla_spawn", new EntityItemSpawn(ModEntities.VANILLA, new FabricItemSettings().group(ModItemsGroup.LOVELY_ROBOT)));
-    public static final Item ROBOT_CORE = registerItem("robot_core", new Item(new FabricItemSettings().group(ModItemsGroup.LOVELY_ROBOT)));
+    public static final Item ROBOT_CORE = registerItem("robot_core", new EntityItemRobotCore(new FabricItemSettings().group(ModItemsGroup.LOVELY_ROBOT)));
 
     // -- Methods --
     private static Item registerItem(String name, Item item) {
