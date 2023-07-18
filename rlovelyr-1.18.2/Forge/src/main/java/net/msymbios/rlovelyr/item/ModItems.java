@@ -1,6 +1,7 @@
 package net.msymbios.rlovelyr.item;
 
 import net.msymbios.rlovelyr.entity.ModEntities;
+import net.msymbios.rlovelyr.item.custom.EntityItemRobotCore;
 import net.msymbios.rlovelyr.item.custom.EntityItemSpawn;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraft.world.item.Item;
@@ -17,7 +18,7 @@ public class ModItems {
     public static final RegistryObject<Item> BUNNY2_SPAWN = ITEMS.register("bunny2_spawn", () -> new EntityItemSpawn(ModEntities.BUNNY2, new Item.Properties().tab(ModItemsTab.LOVELY_ROBOT).stacksTo(1)));
     public static final RegistryObject<Item> HONEY_SPAWN = ITEMS.register("honey_spawn", () -> new EntityItemSpawn(ModEntities.HONEY, new Item.Properties().tab(ModItemsTab.LOVELY_ROBOT).stacksTo(1)));
     public static final RegistryObject<Item> VANILLA_SPAWN = ITEMS.register("vanilla_spawn", () -> new EntityItemSpawn(ModEntities.VANILLA, new Item.Properties().tab(ModItemsTab.LOVELY_ROBOT).stacksTo(1)));
-    public static final RegistryObject<Item> ROBOT_CORE = ITEMS.register("robot_core", () -> new Item(new Item.Properties().tab(ModItemsTab.LOVELY_ROBOT)));
+    public static final RegistryObject<Item> ROBOT_CORE = ITEMS.register("robot_core", () -> new EntityItemRobotCore(new Item.Properties().tab(ModItemsTab.LOVELY_ROBOT)));
 
     // -- Methods --
     public static void register(IEventBus eventBus) {
