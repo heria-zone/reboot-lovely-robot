@@ -30,12 +30,10 @@ import static net.msymbios.rlovelyr.entity.internal.Utility.*;
 public class VanillaEntity extends InternalEntity implements IAngerable, IAnimatable {
 
     // -- Variables --
-    private static ResourceLocation currentModel;
-    private static ResourceLocation currentAnimator;
     private final AnimationFactory cache = new AnimationFactory(this);
 
     // -- Properties --
-    public static AttributeModifierMap setAttributes() {
+    public static AttributeModifierMap  setAttributes() {
         return MobEntity.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_HEALTH))
                 .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ATTACK_DAMAGE))
@@ -46,28 +44,12 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
     } // setAttributes ()
 
     // -- MODEL --
-    public ResourceLocation getCurrentModel() {
-        return currentModel;
-    } // getCurrentModel ()
-
-    public void setCurrentModel(EntityModel value) {
-        currentModel = InternalMetric.getModel(EntityVariant.Vanilla, value);
-    } // setCurrentModel ()
-
-    // -- ANIMATOR --
-    public ResourceLocation getCurrentAnimator() {
-        return currentAnimator;
-    } // getCurrentAnimator ()
-
-    public void setCurrentAnimator(EntityAnimation value) {
-        currentAnimator = InternalMetric.ANIMATIONS.get(value);
-    } // setCurrentAnimator ()
+    @Override
+    public ResourceLocation getCurrentModelByID(int value) { return InternalMetric.getModel(EntityVariant.Vanilla, EntityModel.byId(value)); } // getCurrentModelByID ()
 
     // TEXTURE
     @Override
-    public ResourceLocation getTextureByID(int value) {
-        return InternalMetric.getTexture(EntityVariant.Vanilla, EntityTexture.byId(value));
-    } // getTextureByID ()
+    public ResourceLocation getTextureByID(int value) { return InternalMetric.getTexture(EntityVariant.Vanilla, EntityTexture.byId(value)); } // getTextureByID ()
 
     // VARIANT
     @Override
@@ -76,38 +58,14 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
     } // getVariant ()
 
     // STATS
-    @Override
-    public int getMaxLevel() {
-        return this.getMaxLevel((int)InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
-    } // getMaxLevel ()
+    public float getAttributeRaw(EntityAttribute attribute) {
+        return InternalMetric.getAttributeValue(EntityVariant.Vanilla, attribute);
+    } // getAttributeRaw ()
 
-    @Override
-    public int getCurrentLevel() {
-        int level = (int)(InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
-        if(level != getMaxLevel()) setMaxLevel(level);
-        return super.getCurrentLevel();
-    } // getCurrentLevel ()
-
-    @Override
-    public int getHpValue() {
-        return this.getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_HEALTH));
-    } // getHpValue ()
-
-    @Override
-    public int getAttackValue() {
-        return this.getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ATTACK_DAMAGE));
-    } // getAttackValue ()
-
-    @Override
-    public int getDefenseValue() {
-        return this.getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.DEFENSE));
-    } // getDefenseValue ()
 
     // -- Constructor --
     public VanillaEntity(EntityType<? extends TameableEntity> entityType, World level) {
         super(entityType, level);
-        setCurrentModel(EntityModel.Unarmed);
-        setCurrentAnimator(EntityAnimation.Locomotion);
     } // Constructor VanillaEntity ()
 
     // -- Animations --
@@ -121,12 +79,13 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
     public AnimationFactory getFactory() { return cache; } // getFactory ()
 
     // -- Inherited Methods --
+
     @Override
-    public ILivingEntityData finalizeSpawn(IServerWorld levelAccessor, DifficultyInstance instance, SpawnReason mobSpawnType, @Nullable ILivingEntityData spawnGroupData, @Nullable CompoundNBT compoundTag) {
-        this.setVariant(EntityVariant.Vanilla.name());
+    public ILivingEntityData finalizeSpawn(IServerWorld levelAccessor, DifficultyInstance instance, SpawnReason spawnReason, @Nullable ILivingEntityData entityData, @Nullable CompoundNBT compoundTag) {
+        this.setVariant(EntityVariant.Vanilla.getName());
         this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Vanilla)));
-        this.setMaxLevel((int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
-        return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
+        this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
+        return super.finalizeSpawn(levelAccessor, instance, spawnReason, entityData, compoundTag);
     } // finalizeSpawn ()
 
     @Override
@@ -141,41 +100,20 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, MobEntity.class, 5, true, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, MobEntity.class, InternalMetric.AttackChance, true, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.addGoal(5, new ResetAngerGoal<>(this, false));
     } // registerGoals ()
-
-    @Override
-    public void tick() {
-        super.tick();
-        handleAutoHeal();
-    } // tick ()
-
-    @Override
-    public void onEnterCombat() {
-        setCurrentModel(EntityModel.Armed);
-        super.onEnterCombat();
-    } // onEnterCombat ()
-
-    @Override
-    public void onLeaveCombat() {
-        setCurrentModel(EntityModel.Unarmed);
-        super.onLeaveCombat();
-    } // onLeaveCombat ()
 
     // -- Save Methods --
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(VARIANT, EntityVariant.Vanilla.getName());
-        this.entityData.define(MAX_LEVEL, (int) InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_LEVEL));
     } // defineSynchedData ()
 
     // -- Inherited --
     @Override
-    public int getRemainingPersistentAngerTime() {
-        return 0;
-    } // getRemainingPersistentAngerTime ()
+    public int getRemainingPersistentAngerTime() { return 0; } // getRemainingPersistentAngerTime ()
 
     @Override
     public void setRemainingPersistentAngerTime(int p_21673_) {} // setRemainingPersistentAngerTime ()

@@ -1,6 +1,5 @@
 package net.msymbios.rlovelyr;
 
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.msymbios.rlovelyr.entity.ModEntities;
 import net.msymbios.rlovelyr.entity.client.BunnyRenderer;

@@ -2,6 +2,8 @@ package net.msymbios.rlovelyr.entity.client;
 
 import net.minecraft.util.ResourceLocation;
 import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
+import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class VanillaModel extends AnimatedGeoModel<VanillaEntity> {
@@ -19,7 +21,13 @@ public class VanillaModel extends AnimatedGeoModel<VanillaEntity> {
 
     @Override
     public ResourceLocation getAnimationFileLocation(VanillaEntity animatable) {
-        return animatable.getCurrentAnimator();
+        return animatable.getAnimator();
     } // getAnimationFileLocation ()
+
+    @Override
+    public void setLivingAnimations(VanillaEntity animatable, Integer uniqueID, AnimationEvent event){
+        super.setLivingAnimations(animatable, uniqueID, event);
+        InternalAnimation.headAnimation(this, event);
+    } // setLivingAnimations ()
 
 } // Class VanillaModel

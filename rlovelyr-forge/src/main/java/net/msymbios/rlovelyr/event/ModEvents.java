@@ -1,7 +1,5 @@
 package net.msymbios.rlovelyr.event;
 
-import net.minecraft.entity.EntityType;
-import net.minecraftforge.event.RegistryEvent;
 import net.msymbios.rlovelyr.entity.ModEntities;
 import net.msymbios.rlovelyr.entity.custom.Bunny2Entity;
 import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
