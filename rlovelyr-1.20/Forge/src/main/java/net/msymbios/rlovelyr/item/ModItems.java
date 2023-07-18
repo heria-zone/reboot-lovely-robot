@@ -2,6 +2,7 @@ package net.msymbios.rlovelyr.item;
 
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.msymbios.rlovelyr.entity.ModEntities;
+import net.msymbios.rlovelyr.item.custom.EntityItemRobotCore;
 import net.msymbios.rlovelyr.item.custom.EntityItemSpawn;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -19,7 +20,7 @@ public class ModItems {
     public static final RegistryObject<Item> BUNNY2_SPAWN = ITEMS.register("bunny2_spawn", () -> new EntityItemSpawn(ModEntities.BUNNY2, new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> HONEY_SPAWN = ITEMS.register("honey_spawn", () -> new EntityItemSpawn(ModEntities.HONEY, new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> VANILLA_SPAWN = ITEMS.register("vanilla_spawn", () -> new EntityItemSpawn(ModEntities.VANILLA, new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> ROBOT_CORE = ITEMS.register("robot_core", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> ROBOT_CORE = ITEMS.register("robot_core", () -> new EntityItemRobotCore(new Item.Properties()));
 
     // -- Methods --
     public static void register(IEventBus eventBus) {
@@ -27,7 +28,7 @@ public class ModItems {
     } // register ()
 
     public static void addCreativeModeTab(BuildCreativeModeTabContentsEvent event) {
-        if(event.getTab() == ModItemsTab.LOVELY_ROBOT.get()){
+        if(event.getTab() == ModItemsGroup.LOVELY_ROBOT.get()){
             event.accept(ModItems.BUNNY_SPAWN);
             event.accept(ModItems.BUNNY2_SPAWN);
             event.accept(ModItems.HONEY_SPAWN);

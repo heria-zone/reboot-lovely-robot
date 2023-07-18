@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -21,21 +22,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
-import net.msymbios.rlovelyr.entity.enums.EntityState;
-import net.msymbios.rlovelyr.entity.enums.EntityTexture;
+import net.msymbios.rlovelyr.entity.enums.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-import static net.msymbios.rlovelyr.entity.internal.Utility.*;
+import static net.msymbios.rlovelyr.entity.internal.Utility.invertBoolean;
 
 public abstract class InternalEntity extends TamableAnimal {
 
     // -- Variables --
     protected static final EntityDataAccessor<String> VARIANT = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.STRING);
     protected static final EntityDataAccessor<Integer> TEXTURE_ID = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.INT);
+    protected static final EntityDataAccessor<Integer> MODEL_ID = SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.INT);
+    protected static final EntityDataAccessor<Integer> ANIMATOR_ID = SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.INT);
 
     protected static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Boolean> AUTO_ATTACK = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.BOOLEAN);
@@ -53,9 +56,25 @@ public abstract class InternalEntity extends TamableAnimal {
     protected static final EntityDataAccessor<Float> BASE_Y = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.FLOAT);
     protected static final EntityDataAccessor<Float> BASE_Z = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.FLOAT);
 
-    protected int autoHealCounter = 0;
+    protected static final EntityDataAccessor<Boolean> LOG = SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.BOOLEAN);
+
+    protected int waryTimer = 0, autoHealTimer = 0;
+    protected boolean combatMode = false, autoHeal = false;
 
     // -- Properties --
+
+    // VARIANT
+    public abstract String getVariant();
+
+    public String getVariant(String value ) {
+        try {value = this.entityData.get(VARIANT);}
+        catch (Exception ignored) {}
+        return value;
+    } // getVariant ()
+
+    public void setVariant(String value) {
+        this.entityData.set(VARIANT, value);
+    } // setVariant ()
 
     // TEXTURE
     public abstract ResourceLocation getTextureByID(int value);
@@ -79,18 +98,54 @@ public abstract class InternalEntity extends TamableAnimal {
         setTexture(value.getId());
     } // setTexture ()
 
-    // VARIANT
-    public abstract String getVariant();
+    // MODEL
+    public abstract ResourceLocation getCurrentModelByID(int value);
 
-    public String getVariant(String value ) {
-        try {value = this.entityData.get(VARIANT);}
+    public ResourceLocation getCurrentModel() {
+        return getCurrentModelByID(getModelID());
+    } // getCurrentModel ()
+
+    public int getModelID() {
+        int value = 0;
+        try {value = this.entityData.get(MODEL_ID);}
         catch (Exception ignored) {}
         return value;
-    } // getVariant ()
+    } // getModelID ()
 
-    public void setVariant(String value) {
-        this.entityData.set(VARIANT, value);
-    } // setVariant ()
+    public EntityModel getModel() {
+        int value = 0;
+        try {value = this.entityData.get(MODEL_ID);}
+        catch (Exception ignored) {}
+        return EntityModel.byId(value);
+    } // getModel ()
+
+    public void setModel(EntityModel value) {
+        setModel(value.getId());
+    } // setModel ()
+
+    public void setModel(int value) {
+        this.entityData.set(MODEL_ID, value);
+    } // setModel ()
+
+    // ANIMATOR
+    public ResourceLocation getAnimatorByID(int value) {
+        return InternalMetric.ANIMATORS.get(EntityAnimator.byId(value));
+    } // getAnimatorByID ()
+
+    public int getAnimatorID() {
+        int value = 0;
+        try {value = this.entityData.get(ANIMATOR_ID);}
+        catch (Exception ignored) {}
+        return value;
+    } // getAnimatorID ()
+
+    public ResourceLocation getAnimator() {
+        return getAnimatorByID(getAnimatorID());
+    } // getAnimator ()
+
+    public void setAnimator(int value) {
+        this.entityData.set(ANIMATOR_ID, value);
+    } // setAnimator ()
 
     // STATE
     public int getCurrentStateID() {
@@ -128,7 +183,13 @@ public abstract class InternalEntity extends TamableAnimal {
     } // setAutoAttack ()
 
     // STATS
-    public abstract int getMaxLevel();
+    public abstract float getAttributeRaw(EntityAttribute attribute);
+
+    public int getAttribute(EntityAttribute attribute) {
+        return (int) getAttributeRaw(attribute);
+    } // getAttribute ()
+
+    public int getMaxLevel() { return getMaxLevel (getAttribute(EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
 
     public int getMaxLevel(int value) {
         try {value = this.entityData.get(MAX_LEVEL);}
@@ -166,19 +227,19 @@ public abstract class InternalEntity extends TamableAnimal {
         this.entityData.set(EXP, value);
     } // setExp ()
 
-    public abstract int getHpValue();
+    public int getHpValue() { return getHpValue(getAttribute(EntityAttribute.MAX_HEALTH)); } // getHpValue ()
 
     public int getHpValue(int value) {
         return (value + this.getCurrentLevel() * value / 50);
     } // getHpValue ()
 
-    public abstract int getAttackValue();
+    public int getAttackValue() { return getAttackValue(getAttribute(EntityAttribute.ATTACK_DAMAGE)); } // getAttackValue ()
 
     public int getAttackValue(int value) {
         return (value + this.getCurrentLevel() * value / 50);
     } // getAttackValue ()
 
-    public abstract int getDefenseValue();
+    public int getDefenseValue() { return getDefenseValue(getAttribute(EntityAttribute.DEFENSE)); } // getDefenseValue ()
 
     public int getDefenseValue(int value) {
         return (value + this.getCurrentLevel() * value / 50);
@@ -287,6 +348,18 @@ public abstract class InternalEntity extends TamableAnimal {
         this.entityData.set(BASE_Z, value);
     } // setBaseZ ()
 
+    // INFO
+    public boolean getLog() {
+        boolean value = true;
+        try {value = this.entityData.get(LOG);}
+        catch (Exception ignored) {}
+        return value;
+    } // getLog ()
+
+    public void setLog(boolean value) {
+        this.entityData.set(LOG, value);
+    } // setLog ()
+
     // -- Constructor --
     protected InternalEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
@@ -303,8 +376,35 @@ public abstract class InternalEntity extends TamableAnimal {
 
     // -- Built-In Methods --
     @Override
+    public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+        this.setOrderedToSit(true);
+        this.setCurrentState(EntityState.Standby);
+        return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
+    } // finalizeSpawn ()
+
+    @Override
+    public void tick() {
+        super.tick();
+        handleCombatMode();
+        handleAutoHeal();
+        commandDebugExtra();
+    } // tick ()
+
+    @Override
+    public boolean doHurtTarget(@NotNull Entity target) {
+        handleActivateCombatMode();
+        if(this.canLevelUp() && !(target instanceof Player) && !this.level().isClientSide) {
+            final int maxHp = (int)((LivingEntity)target).getMaxHealth();
+            this.addExp(maxHp / 4);
+        }
+        this.level().broadcastEntityEvent(this, (byte)4);
+        return super.doHurtTarget(target);
+    } // doHurtTarget ()
+
+    @Override
     public boolean hurt(@NotNull DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) return false;
+        handleActivateCombatMode();
 
         if ((source.is(DamageTypes.ON_FIRE) || source.is(DamageTypes.IN_FIRE) || source.is(DamageTypes.LAVA)) && amount >= 1.0f && this.getFireProtection() > 0)
             amount *= (100.0f - this.getFireProtection()) / 100.0f;
@@ -320,7 +420,7 @@ public abstract class InternalEntity extends TamableAnimal {
 
         if (amount < 1.0f) return false;
 
-        if(!this.level().isClientSide) {
+        if(!level().isClientSide) {
             if((source.is(DamageTypes.ON_FIRE) || source.is(DamageTypes.IN_FIRE) || source.is(DamageTypes.LAVA)) && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
             if(source.is(DamageTypes.FALL) && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
             if(source.is(DamageTypes.EXPLOSION) && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
@@ -341,18 +441,7 @@ public abstract class InternalEntity extends TamableAnimal {
         return super.hurt(source, amount);
     } // hurt ()
 
-    @Override
-    public boolean doHurtTarget(@NotNull Entity target) {
-        if(this.canLevelUp() && !(target instanceof Player) && !this.level().isClientSide) {
-            final int maxHp = (int)((LivingEntity)target).getMaxHealth();
-            this.addExp(maxHp / 4);
-        }
-        this.level().broadcastEntityEvent(this, (byte)4);
-        return super.doHurtTarget(target);
-    } // doHurtTarget ()
-
-    @Nullable
-    @Override
+    @Nullable @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
         return null;
     } // getBreedOffspring ()
@@ -374,6 +463,12 @@ public abstract class InternalEntity extends TamableAnimal {
         }
     } // getItemBySlot ()
 
+    @Override
+    public void onEnterCombat() {
+        handleActivateCombatMode();
+        super.onEnterCombat();
+    } // onEnterCombat ()
+
     // -- Interact Methods --
     @Override
     public @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
@@ -390,8 +485,14 @@ public abstract class InternalEntity extends TamableAnimal {
                 handleTexture(itemStack, player);
                 if(getOwner() == null) handleTame(player);
 
-                if(itemStack.is(Items.STICK)) displayMessage(player);
-                if(itemStack.is(Items.BOOK)) displayProtectionMessage(player);
+                if(itemStack.is(Items.OAK_BUTTON)) {
+                    this.setLog(Utility.invertBoolean(getLog()));
+                    if(getLog()) commandDebug("InfoLog ON", true);
+                    else commandDebug("InfoLog Log OFF", true);
+                }
+
+                if(itemStack.is(Items.BOOK)) displayMessage(player, true);
+                if(itemStack.is(Items.WRITABLE_BOOK)) displayProtectionMessage(player);
 
                 return InteractionResult.SUCCESS;
             }
@@ -400,19 +501,25 @@ public abstract class InternalEntity extends TamableAnimal {
         return super.mobInteract(player, hand);
     } // interactMob ()
 
+    public static boolean canInteract(ItemStack itemStack){
+        if(itemStack.is(Items.WHITE_DYE) ||itemStack.is(Items.ORANGE_DYE) || itemStack.is(Items.MAGENTA_DYE) || itemStack.is(Items.LIGHT_BLUE_DYE) ||
+                itemStack.is(Items.YELLOW_DYE) || itemStack.is(Items.LIME_DYE) || itemStack.is(Items.PINK_DYE) || itemStack.is(Items.GRAY_DYE) ||
+                itemStack.is(Items.LIGHT_GRAY_DYE) || itemStack.is(Items.CYAN_DYE) || itemStack.is(Items.PURPLE_DYE) || itemStack.is(Items.BLUE_DYE) ||
+                itemStack.is(Items.BROWN_DYE) || itemStack.is(Items.GREEN_DYE) || itemStack.is(Items.RED_DYE) || itemStack.is(Items.BLACK_DYE)) return false;
+        if(itemStack.is(Items.WOODEN_SWORD) || itemStack.is(Items.STONE_SWORD) || itemStack.is(Items.IRON_SWORD) || itemStack.is(Items.GOLDEN_SWORD) || itemStack.is(Items.DIAMOND_SWORD) || itemStack.is(Items.NETHERITE_SWORD)) return false;
+        if(itemStack.is(Items.STICK) || itemStack.is(Items.BOOK) || itemStack.is(Items.WRITABLE_BOOK) || itemStack.is(Items.OAK_BUTTON)) return false;
+        return !itemStack.is(Items.COMPASS) && !itemStack.is(Items.RECOVERY_COMPASS);
+    } // canInteract ()
+
+    public static boolean canInteractGuardMode(ItemStack itemStack){
+        return itemStack.is(Items.COMPASS) || itemStack.is(Items.RECOVERY_COMPASS);
+    } // canInteractGuardMode ()
+
+    public static boolean canInteractAutoAttack(ItemStack itemStack) {
+        return itemStack.is(Items.WOODEN_SWORD) || itemStack.is(Items.STONE_SWORD) || itemStack.is(Items.IRON_SWORD) || itemStack.is(Items.GOLDEN_SWORD) || itemStack.is(Items.DIAMOND_SWORD) || itemStack.is(Items.NETHERITE_SWORD);
+    } // canInteractAutoAttack ()
+
     // -- Custom Methods --
-    protected void handleAutoHeal () {
-        if(this.level().isClientSide && !InternalMetric.AutoHeal) return;
-        if(this.getHealth() == this.getHpValue()) return;
-
-        if(autoHealCounter >= InternalMetric.AutoHealInterval) {
-            final float healValue = this.getHpValue() / 16.0f;
-            this.heal(healValue);
-            autoHealCounter = 0;
-        }
-        autoHealCounter++;
-    } // handleAutoHeal ()
-
     protected boolean canLevelUp() {
         return this.getCurrentLevel() < getMaxLevel();
     } // canLevelUp ()
@@ -456,11 +563,44 @@ public abstract class InternalEntity extends TamableAnimal {
                 try {
                     final LivingEntity entity = this.getOwner();
                     if (entity == null) return;
-                    this.displayMessage((Player)entity);
+                    this.displayMessage((Player)entity, getLog());
                 } catch (Exception ignored) {}
             }
         }
     } // addExp ()
+
+    // -- Logic Methods --
+    protected void handleAutoHeal () {
+        if(this.getHealth() < this.getHpValue()) autoHeal = true;
+        if(this.level().isClientSide && !autoHeal) return;
+
+        if(autoHealTimer != 0) {
+            autoHealTimer--;
+        } else {
+            final float healValue = this.getHpValue() / 16.0F;
+            this.heal(healValue);
+            autoHeal = false;
+            autoHealTimer = InternalMetric.AutoHealInterval;
+        }
+    } // handleAutoHeal ()
+
+    protected void handleActivateCombatMode () {
+        if(!combatMode) combatMode = true;
+        waryTimer = InternalMetric.WaryTime;
+    } // handleActivateCombatMode ()
+
+    protected void handleCombatMode() {
+        //if(this.attackable()) handleActivateCombatMode();
+        if(this.level().isClientSide && !combatMode) return;
+
+        if(waryTimer != 0) {
+            if(getModel() != EntityModel.Armed) setModel(EntityModel.Armed);
+            waryTimer--;
+        } else {
+            if(getModel() != EntityModel.Unarmed) setModel(EntityModel.Unarmed);
+            combatMode = false;
+        }
+    } // handleCombatMode ()
 
     public void handleTame(Player player) {
         this.setOwnerUUID(player.getUUID());
@@ -534,22 +674,46 @@ public abstract class InternalEntity extends TamableAnimal {
         setCurrentState(EntityState.BaseDefense);
     } // BaseDefenseState ()
 
-    public void displayMessage (Player player) {
-        if(!InternalMetric.LevelUpLog) return;
+    // -- Debug Methods --
+    public void commandDebug(String message, boolean overlay) {
+        if(this.getOwner() != null) {
+            Player player = (Player)this.getOwner();
+            player.displayClientMessage(Component.literal(message), overlay);
+        }
+    } // commandDebug ()
+
+    public void commandDebugExtra() {
+        String debug = "";
+        if(combatMode && getLog()) {
+            if(waryTimer < 10) debug += "Wary: 0" + waryTimer + " ";
+            else debug += "Wary: " + waryTimer + " ";
+        }
+
+        if(autoHeal && getLog()) {
+            if(autoHealTimer < 10) debug += "Heal: 0" + autoHealTimer + " ";
+            else debug += "Heal: " + autoHealTimer + " ";
+            if(this.getHealth() < 10) debug += "| 0" + this.getHealth();
+            else debug += "| " + (int)Math.floor(this.getHealth());
+        }
+        if(!debug.equals("")) commandDebug(debug, true);
+    } // commandDebugExtra ()
+
+    public void displayMessage (Player player, boolean canShow) {
+        if(!canShow) return;
         player.displayClientMessage(Component.literal("|--------------------------"), false);
-        player.displayClientMessage(Component.literal("MaxLevel: " + this.getMaxLevel()), false);
-        player.displayClientMessage(Component.literal("Model: " + this.getVariant()), false);
-        player.displayClientMessage(Component.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()), false);
+        player.displayClientMessage(Component.literal("[LevelUp]"), false);
+        if(this.getCustomName() != null) player.displayClientMessage(Component.literal(Utility.FirstToUpperCase (this.getVariant()) + ": " + this.getCustomName().getString()), false);
+        else player.displayClientMessage(Component.literal(Utility.FirstToUpperCase (this.getVariant())), false);
+        player.displayClientMessage(Component.literal("Level: " + this.getCurrentLevel() + "/" + this.getMaxLevel()), false);
+        player.displayClientMessage(Component.literal("Exp: " + this.getExp() + "/" + this.getNextExp()), false);
+        player.displayClientMessage(Component.literal("HP: " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
         player.displayClientMessage(Component.literal("Attack: " + this.getAttackValue()), false);
-        player.displayClientMessage(Component.literal("Auto Attack: " + this.getAutoAttack()), false);
-        player.displayClientMessage(Component.literal("Level: " + this.getCurrentLevel()), false);
-        player.displayClientMessage(Component.literal("Exp: " + this.getExp()), false);
-        player.displayClientMessage(Component.literal("Looting: " + this.getLootingLevel()), false);
+        player.displayClientMessage(Component.literal("Defense: " + this.getDefenseValue()), false);
     } // displayMessage ()
 
     public void displayProtectionMessage (Player player) {
-        if(!InternalMetric.LevelUpLog) return;
         player.displayClientMessage(Component.literal("|--------------------------"), false);
+        player.displayClientMessage(Component.literal("[Enchantment]"), false);
         player.displayClientMessage(Component.literal("Fire Protection: " + this.getFireProtection() + "/" + InternalMetric.FireProtectionLimit), false);
         player.displayClientMessage(Component.literal("Fall Protection: " + this.getFallProtection() + "/" + InternalMetric.FallProtectionLimit), false);
         player.displayClientMessage(Component.literal("Blast Protection: " + this.getBlastProtection() + "/" + InternalMetric.BlastProtectionLimit), false);
@@ -560,11 +724,14 @@ public abstract class InternalEntity extends TamableAnimal {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(TEXTURE_ID, 0);
+        this.entityData.define(TEXTURE_ID, EntityTexture.PINK.getId());
+        this.entityData.define(MODEL_ID, EntityModel.Unarmed.getId());
+        this.entityData.define(ANIMATOR_ID, EntityAnimator.Locomotion.getId());
 
-        this.entityData.define(STATE, 0);
+        this.entityData.define(STATE, EntityState.Follow.getId());
         this.entityData.define(AUTO_ATTACK, false);
 
+        this.entityData.define(MAX_LEVEL, getAttribute(EntityAttribute.MAX_LEVEL));
         this.entityData.define(LEVEL, 0);
         this.entityData.define(EXP, 0);
 
@@ -576,12 +743,16 @@ public abstract class InternalEntity extends TamableAnimal {
         this.entityData.define(BASE_X, 0F);
         this.entityData.define(BASE_Y, 0F);
         this.entityData.define(BASE_Z, 0F);
+
+        this.entityData.define(LOG, true);
     } // defineSynchedData ()
 
     public void addAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putString("Variant", this.getVariant());
         nbt.putInt("TextureID", this.getTextureID());
+        nbt.putInt("ModelID", this.getModelID());
+        nbt.putInt("AnimatorID", this.getAnimatorID());
 
         nbt.putInt("State", this.getCurrentStateID());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -598,12 +769,16 @@ public abstract class InternalEntity extends TamableAnimal {
         nbt.putFloat("BaseX", this.getBaseX());
         nbt.putFloat("BaseY", this.getBaseY());
         nbt.putFloat("BaseZ", this.getBaseZ());
+
+        nbt.putBoolean("Log", this.getLog());
     } // addAdditionalSaveData ()
 
     public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
         this.setVariant(nbt.getString("Variant"));
         this.setTexture(nbt.getInt("TextureID"));
+        this.setModel(nbt.getInt("ModelID"));
+        this.setAnimator(nbt.getInt("AnimatorID"));
 
         this.setCurrentState(nbt.getInt("State"));
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));
@@ -620,6 +795,8 @@ public abstract class InternalEntity extends TamableAnimal {
         this.setBaseY(nbt.getFloat("BaseY"));
         this.setBaseZ(nbt.getFloat("BaseZ"));
         this.setBaseX(nbt.getFloat("BaseX"));
+
+        this.setLog(nbt.getBoolean("Log"));
     } // readAdditionalSaveData ()
 
 } // Class InternalEntity

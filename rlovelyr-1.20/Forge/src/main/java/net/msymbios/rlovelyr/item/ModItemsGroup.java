@@ -11,13 +11,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = LovelyRobotMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ModItemsTab {
+public class ModItemsGroup {
 
     // -- Variables --
     public static DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LovelyRobotMod.MODID);
 
-    public static RegistryObject<CreativeModeTab> LOVELY_ROBOT = CREATIVE_MODE_TABS.register("lovely_robot_tab", () ->
-            CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.BUNNY2_SPAWN.get())).title(Component.translatable("tab.rlovelyr.lovely_robot_tab")).build());
+    public static RegistryObject<CreativeModeTab> LOVELY_ROBOT = CREATIVE_MODE_TABS.register("lovely_robot", () ->
+            CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.BUNNY2_SPAWN.get())).title(Component.translatable("itemGroup.lovely_robot")).build());
 
     // -- Methods --
     public static void register(IEventBus eventBus) {
