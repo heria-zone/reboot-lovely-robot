@@ -87,10 +87,6 @@ public class VanillaEntity extends InternalEntity implements IAnimatable {
         this.setVariant(EntityVariant.Vanilla.getName());
         this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Vanilla)));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
-
-        EquipmentSlot slot = EquipmentSlot.MAINHAND;
-        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
-        this.equipStack(slot, diamondSword);
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 

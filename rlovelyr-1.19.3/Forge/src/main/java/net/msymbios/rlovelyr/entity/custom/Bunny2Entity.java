@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.animation.AnimatableManager;
 
 import java.util.UUID;
 
@@ -33,8 +33,6 @@ import static net.msymbios.rlovelyr.entity.internal.Utility.*;
 public class Bunny2Entity extends InternalEntity implements NeutralMob, GeoEntity {
 
     // -- Variables --
-    private static ResourceLocation currentModel;
-    private static ResourceLocation currentAnimator;
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
     // -- Properties --
@@ -49,28 +47,12 @@ public class Bunny2Entity extends InternalEntity implements NeutralMob, GeoEntit
     } // setAttributes ()
 
     // -- MODEL --
-    public ResourceLocation getCurrentModel() {
-        return currentModel;
-    } // getCurrentModel ()
-
-    public void setCurrentModel(EntityModel value) {
-        currentModel = InternalMetric.getModel(EntityVariant.Bunny2, value);
-    } // setCurrentModel ()
-
-    // -- ANIMATOR --
-    public ResourceLocation getCurrentAnimator() {
-        return currentAnimator;
-    } // getCurrentAnimator ()
-
-    public void setCurrentAnimator(EntityAnimation value) {
-        currentAnimator = InternalMetric.ANIMATIONS.get(value);
-    } // setCurrentAnimator ()
+    @Override
+    public ResourceLocation getCurrentModelByID(int value) { return InternalMetric.getModel(EntityVariant.Bunny2, EntityModel.byId(value)); } // getCurrentModelByID ()
 
     // TEXTURE
     @Override
-    public ResourceLocation getTextureByID(int value) {
-        return InternalMetric.getTexture(EntityVariant.Bunny2, EntityTexture.byId(value));
-    } // getTextureByID ()
+    public ResourceLocation getTextureByID(int value) { return InternalMetric.getTexture(EntityVariant.Bunny2, EntityTexture.byId(value)); } // getTextureByID ()
 
     // VARIANT
     @Override
@@ -79,47 +61,21 @@ public class Bunny2Entity extends InternalEntity implements NeutralMob, GeoEntit
     } // getVariant ()
 
     // STATS
-    @Override
-    public int getMaxLevel() {
-        return this.getMaxLevel((int)InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MAX_LEVEL));
-    } // getMaxLevel ()
+    public float getAttributeRaw(EntityAttribute attribute) {
+        return InternalMetric.getAttributeValue(EntityVariant.Bunny2, attribute);
+    } // getAttributeRaw ()
 
-    @Override
-    public int getCurrentLevel() {
-        var level = (int)(InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MAX_LEVEL));
-        if(level != getMaxLevel()) setMaxLevel(level);
-        return super.getCurrentLevel();
-    } // getCurrentLevel ()
-
-    @Override
-    public int getHpValue() {
-        return this.getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MAX_HEALTH));
-    } // getHpValue ()
-
-    @Override
-    public int getAttackValue() {
-        return this.getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ATTACK_DAMAGE));
-    } // getAttackValue ()
-
-    @Override
-    public int getDefenseValue() {
-        return this.getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.DEFENSE));
-    } // getDefenseValue ()
 
     // -- Constructor --
     public Bunny2Entity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
-        setCurrentModel(EntityModel.Unarmed);
-        setCurrentAnimator(EntityAnimation.Locomotion);
     } // Constructor Bunny2Entity ()
 
     // -- Animations --
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(
-                InternalAnimation.locomotionAnimation(this),
-                InternalAnimation.attackAnimation(this)
-        );
+        controllerRegistrar.add(InternalAnimation.locomotionAnimation(this));
+        controllerRegistrar.add(InternalAnimation.attackAnimation(this));
     } // registerControllers ()
 
     @Override
@@ -130,9 +86,9 @@ public class Bunny2Entity extends InternalEntity implements NeutralMob, GeoEntit
     // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setVariant(EntityVariant.Bunny2.name());
+        this.setVariant(EntityVariant.Bunny2.getName());
         this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Bunny2)));
-        this.setMaxLevel((int) InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MAX_LEVEL));
+        this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
 
@@ -149,41 +105,20 @@ public class Bunny2Entity extends InternalEntity implements NeutralMob, GeoEntit
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, 5, true, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, InternalMetric.AttackChance, true, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
     } // registerGoals ()
-
-    @Override
-    public void tick() {
-        super.tick();
-        handleAutoHeal();
-    } // tick ()
-
-    @Override
-    public void onEnterCombat() {
-        setCurrentModel(EntityModel.Armed);
-        super.onEnterCombat();
-    } // onEnterCombat ()
-
-    @Override
-    public void onLeaveCombat() {
-        setCurrentModel(EntityModel.Unarmed);
-        super.onLeaveCombat();
-    } // onLeaveCombat ()
 
     // -- Save Methods --
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(VARIANT, EntityVariant.Vanilla.getName());
-        this.entityData.define(MAX_LEVEL, (int) InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MAX_LEVEL));
+        this.entityData.define(VARIANT, EntityVariant.Bunny2.getName());
     } // defineSynchedData ()
 
     // -- Inherited --
     @Override
-    public int getRemainingPersistentAngerTime() {
-        return 0;
-    } // getRemainingPersistentAngerTime ()
+    public int getRemainingPersistentAngerTime() { return 0; } // getRemainingPersistentAngerTime ()
 
     @Override
     public void setRemainingPersistentAngerTime(int p_21673_) {} // setRemainingPersistentAngerTime ()

@@ -1,6 +1,5 @@
 package net.msymbios.rlovelyr;
 
-import com.mojang.logging.LogUtils;
 import net.msymbios.rlovelyr.entity.ModEntities;
 import net.msymbios.rlovelyr.entity.client.BunnyRenderer;
 import net.msymbios.rlovelyr.entity.client.Bunny2Renderer;
@@ -16,7 +15,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.slf4j.Logger;
 import software.bernie.geckolib3.GeckoLib;
 
 @Mod(LovelyRobotMod.MODID)
@@ -24,7 +22,6 @@ public class LovelyRobotMod {
 
     // -- Variables --
     public static final String MODID = "rlovelyr";
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     // -- Constructor --
     public LovelyRobotMod() {

@@ -23,7 +23,6 @@ public final class InternalAnimation {
     public static <T extends InternalEntity & IAnimatable> AnimationController<T> attackAnimation(T animatable) {
         return new AnimationController<>(animatable, "Attack", 5, event -> {
             if (animatable.handSwinging) {
-                //if(animatable.getModel() != EntityModel.Armed) animatable.setModel(EntityModel.Armed);
                 event.getController().setAnimation(ATTACK_SWING);
                 return PlayState.CONTINUE;
             }
@@ -41,13 +40,12 @@ public final class InternalAnimation {
         });
     } // locomotionAnimation ()
 
-
     public static void headAnimation (AnimatedGeoModel renderer, AnimationEvent event) {
         IBone head = renderer.getAnimationProcessor().getBone("head");
         EntityModelData extraData = (EntityModelData) event.getExtraDataOfType(EntityModelData.class).get(0);
         if (head != null) {
-            head.setRotationX(extraData.headPitch * ((float) Math.PI / 180F));
-            head.setRotationY(extraData.netHeadYaw * ((float) Math.PI / 180F));
+            head.setRotationX(extraData.headPitch * ((float) Utility.PI / 180F));
+            head.setRotationY(extraData.netHeadYaw * ((float) Utility.PI / 180F));
         }
     } // headAnimation ()
 

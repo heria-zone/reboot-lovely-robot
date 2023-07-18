@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = LovelyRobotMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ModItemsTab {
+public class ModItemsGroup {
 
     // -- Variables --
     public static CreativeModeTab LOVELY_ROBOT;
@@ -18,8 +18,8 @@ public class ModItemsTab {
     // -- Methods --
     @SubscribeEvent
     public static void registerCreativeModeTab(CreativeModeTabEvent.Register event) {
-        LOVELY_ROBOT = event.registerCreativeModeTab(new ResourceLocation(LovelyRobotMod.MODID, "lovely_robot_tab"),
-                builder -> builder.icon(() -> new ItemStack(ModItems.BUNNY2_SPAWN.get())).title(Component.translatable("tab.rlovelyr.lovely_robot_tab")).build());
+        LOVELY_ROBOT = event.registerCreativeModeTab(new ResourceLocation(LovelyRobotMod.MODID, "lovely_robot"),
+                builder -> builder.icon(() -> new ItemStack(ModItems.BUNNY2_SPAWN.get())).title(Component.translatable("itemGroup.lovely_robot")).build());
     } // registerCreativeModeTab
 
 } // Class ModItemsTab

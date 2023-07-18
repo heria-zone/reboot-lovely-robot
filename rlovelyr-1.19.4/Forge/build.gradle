@@ -86,8 +86,8 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
+    minecraft "net.minecraftforge:forge:${forge_version}"
+    implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
 }
 
 tasks.withType(JavaCompile).configureEach {

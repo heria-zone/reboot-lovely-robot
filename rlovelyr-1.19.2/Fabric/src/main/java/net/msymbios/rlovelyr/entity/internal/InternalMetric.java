@@ -12,9 +12,6 @@ import java.util.function.Predicate;
 
 public class InternalMetric {
 
-    // -- Logging --
-    public static boolean LevelUpLog = true;            // Show log when level up
-
     // -- Entity Renderer --
     public static float ShadowRadius = 0.4F;
     public static float Width = 0.4F;
@@ -45,7 +42,6 @@ public class InternalMetric {
     public static int LootingRequiredLevel = 10;        // Levels required for looting enchantments
     public static int MaxLootingLevel = 3;              // Maximum level of looting enchantments
     public static int WaryTime = 50;            // Time while being in combat mode
-    public static boolean CombatMode = false;            // Time while being in combat mode
 
     // -- Protection --
     public static int FireProtectionLimit = 80;         // Fire Protection upper limit

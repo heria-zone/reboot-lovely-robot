@@ -1,10 +1,7 @@
 package net.msymbios.rlovelyr.entity.internal;
 
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
@@ -25,6 +22,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.LocalDifficulty;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.entity.enums.*;
 import org.jetbrains.annotations.Nullable;
@@ -56,35 +55,47 @@ public abstract class InternalEntity extends TameableEntity {
     protected static final TrackedData<Float> BASE_Y = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);
     protected static final TrackedData<Float> BASE_Z = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);;
 
-    protected int autoHealTimer = 0;
-    protected int waryTimer = 0;
-    protected boolean combatMode = false;
+    protected static final TrackedData<Boolean> LOG = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+
+    protected int waryTimer = 0, autoHealTimer = 0;
+    protected boolean combatMode = false, autoHeal = false;
 
     // -- Properties --
 
-    // ANIMATOR
-    public Identifier getAnimatorByID(int value) {
-        return InternalMetric.ANIMATORS.get(EntityAnimator.byId(value));
-    } // getAnimatorByID ()
+    // VARIANT
+    public abstract String getVariant();
 
-    public int getAnimatorID() {
-        int value = 0;
-        try {value = this.dataTracker.get(ANIMATOR_ID);}
+    public String getVariant(String value) {
+        try {value = this.dataTracker.get(VARIANT);}
         catch (Exception ignored) {}
         return value;
-    } // getAnimatorID ()
+    } // getVariant ()
 
-    public Identifier getAnimator() {
-        return getAnimatorByID(getAnimatorID());
-    } // getAnimator ()
+    public void setVariant(String value) {
+        this.dataTracker.set(VARIANT, value);
+    } // setVariant ()
 
-    public void setAnimator(EntityAnimator value) {
-        setAnimator(value.getId());
-    } // setAnimator ()
+    // TEXTURE
+    public abstract Identifier getTextureByID(int value);
 
-    public void setAnimator(int value) {
-        this.dataTracker.set(ANIMATOR_ID, value);
-    } // setAnimator ()
+    public Identifier getTexture() {
+        return getTextureByID(getTextureID());
+    } // getTexture ()
+
+    public int getTextureID() {
+        int value = 0;
+        try {value = this.dataTracker.get(TEXTURE_ID);}
+        catch (Exception ignored) {}
+        return value;
+    } // getTextureID ()
+
+    public void setTexture(EntityTexture value) {
+        setTexture(value.getId());
+    } // setTexture ()
+
+    public void setTexture(int value) {
+        this.dataTracker.set(TEXTURE_ID, value);
+    } // setTexture ()
 
     // MODEL
     public abstract Identifier getCurrentModelByID(int value);
@@ -115,40 +126,25 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.set(MODEL_ID, value);
     } // setModel ()
 
-    // TEXTURE
-    public abstract Identifier getTextureByID(int value);
+    // ANIMATOR
+    public Identifier getAnimatorByID(int value) {
+        return InternalMetric.ANIMATORS.get(EntityAnimator.byId(value));
+    } // getAnimatorByID ()
 
-    public Identifier getTexture() {
-        return getTextureByID(getTextureID());
-    } // getTexture ()
-
-    public int getTextureID() {
+    public int getAnimatorID() {
         int value = 0;
-        try {value = this.dataTracker.get(TEXTURE_ID);}
+        try {value = this.dataTracker.get(ANIMATOR_ID);}
         catch (Exception ignored) {}
         return value;
-    } // getTextureID ()
+    } // getAnimatorID ()
 
-    public void setTexture(EntityTexture value) {
-        setTexture(value.getId());
-    } // setTexture ()
+    public Identifier getAnimator() {
+        return getAnimatorByID(getAnimatorID());
+    } // getAnimator ()
 
-    public void setTexture(int value) {
-        this.dataTracker.set(TEXTURE_ID, value);
-    } // setTexture ()
-
-    // VARIANT
-    public abstract String getVariant();
-
-    public String getVariant(String value) {
-        try {value = this.dataTracker.get(VARIANT);}
-        catch (Exception ignored) {}
-        return value;
-    } // getVariant ()
-
-    public void setVariant(String value) {
-        this.dataTracker.set(VARIANT, value);
-    } // setVariant ()
+    public void setAnimator(int value) {
+        this.dataTracker.set(ANIMATOR_ID, value);
+    } // setAnimator ()
 
     // STATE
     public int getCurrentStateID() {
@@ -366,6 +362,18 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.set(BASE_Z, value);
     } // setBaseZ ()
 
+    // INFO
+    public boolean getLog() {
+        boolean value = true;
+        try {value = this.dataTracker.get(LOG);}
+        catch (Exception ignored) {}
+        return value;
+    } // getLog ()
+
+    public void setLog(boolean value) {
+        this.dataTracker.set(LOG, value);
+    } // setLog ()
+
     // -- Construct --
     protected InternalEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
@@ -383,11 +391,23 @@ public abstract class InternalEntity extends TameableEntity {
     } // getDeathSound ()
 
     // -- Built-In Methods --
+    @Nullable
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
+        this.setSitting(true);
+        this.setCurrentState(EntityState.Standby);
+
+        EquipmentSlot slot = EquipmentSlot.MAINHAND;
+        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
+        this.equipStack(slot, diamondSword);
+        return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
+    } // initialize ()
+
     @Override
     public void tick() {
         super.tick();
         handleCombatMode();
         handleAutoHeal();
+        commandDebugExtra();
     } // tick ()
 
     @Override
@@ -484,8 +504,7 @@ public abstract class InternalEntity extends TameableEntity {
         }
     } // getEquippedStack ()
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
         return null;
     } // createChild
@@ -506,8 +525,14 @@ public abstract class InternalEntity extends TameableEntity {
                 handleTexture(itemStack, player);
                 if(getOwner() == null) handleTame(player);
 
-                if(itemStack.isOf(Items.STICK)) displayMessage(player);
-                if(itemStack.isOf(Items.BOOK)) displayProtectionMessage(player);
+                if(itemStack.isOf(Items.OAK_BUTTON)) {
+                    this.setLog(Utility.invertBoolean(getLog()));
+                    if(getLog()) commandDebug("InfoLog ON", true);
+                    else commandDebug("InfoLog Log OFF", true);
+                }
+
+                if(itemStack.isOf(Items.BOOK)) displayMessage(player, true);
+                if(itemStack.isOf(Items.WRITABLE_BOOK)) displayProtectionMessage(player);
 
                 return ActionResult.SUCCESS;
             }
@@ -515,6 +540,24 @@ public abstract class InternalEntity extends TameableEntity {
 
         return super.interactMob(player, hand);
     } // interactMob ()
+
+    public boolean canInteract(ItemStack itemStack){
+        if(itemStack.isOf(Items.WHITE_DYE) ||itemStack.isOf(Items.ORANGE_DYE) || itemStack.isOf(Items.MAGENTA_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) ||
+                itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIME_DYE) || itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.GRAY_DYE) ||
+                itemStack.isOf(Items.LIGHT_GRAY_DYE) || itemStack.isOf(Items.CYAN_DYE) || itemStack.isOf(Items.PURPLE_DYE) || itemStack.isOf(Items.BLUE_DYE) ||
+                itemStack.isOf(Items.BROWN_DYE) || itemStack.isOf(Items.GREEN_DYE) || itemStack.isOf(Items.RED_DYE) || itemStack.isOf(Items.BLACK_DYE)) return false;
+        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
+        if(itemStack.isOf(Items.STICK) || itemStack.isOf(Items.BOOK) || itemStack.isOf(Items.WRITABLE_BOOK) || itemStack.isOf(Items.OAK_BUTTON)) return false;
+        return !itemStack.isOf(Items.COMPASS) && !itemStack.isOf(Items.RECOVERY_COMPASS);
+    } // canInteract ()
+
+    public boolean canInteractGuardMode(ItemStack itemStack){
+        return itemStack.isOf(Items.COMPASS) || itemStack.isOf(Items.RECOVERY_COMPASS);
+    } // canInteractGuardMode ()
+
+    public boolean canInteractAutoAttack(ItemStack itemStack) {
+        return itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD);
+    } // canInteractAutoAttack ()
 
     // -- Custom Methods --
     protected boolean canLevelUp() {
@@ -564,45 +607,25 @@ public abstract class InternalEntity extends TameableEntity {
                 try {
                     final LivingEntity entity = this.getOwner();
                     if (entity == null) return;
-                    this.displayMessage((PlayerEntity)entity);
+                    this.displayMessage((PlayerEntity)entity, getLog());
                 } catch (Exception ignored) {}
             }
         }
     } // addExp ()
 
-    // -- Interaction Methods --
-    public boolean canInteract(ItemStack itemStack){
-        if(itemStack.isOf(Items.WHITE_DYE) ||itemStack.isOf(Items.ORANGE_DYE) || itemStack.isOf(Items.MAGENTA_DYE) || itemStack.isOf(Items.LIGHT_BLUE_DYE) ||
-                itemStack.isOf(Items.YELLOW_DYE) || itemStack.isOf(Items.LIME_DYE) || itemStack.isOf(Items.PINK_DYE) || itemStack.isOf(Items.GRAY_DYE) ||
-                itemStack.isOf(Items.LIGHT_GRAY_DYE) || itemStack.isOf(Items.CYAN_DYE) || itemStack.isOf(Items.PURPLE_DYE) || itemStack.isOf(Items.BLUE_DYE) ||
-                itemStack.isOf(Items.BROWN_DYE) || itemStack.isOf(Items.GREEN_DYE) || itemStack.isOf(Items.RED_DYE) || itemStack.isOf(Items.BLACK_DYE)) return false;
-        if(itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD)) return false;
-        if(itemStack.isOf(Items.STICK) || itemStack.isOf(Items.BOOK)) return false;
-        return !itemStack.isOf(Items.COMPASS) && !itemStack.isOf(Items.RECOVERY_COMPASS);
-    } // canInteract ()
-
-    public boolean canInteractGuardMode(ItemStack itemStack){
-        return itemStack.isOf(Items.COMPASS) || itemStack.isOf(Items.RECOVERY_COMPASS);
-    } // canInteractGuardMode ()
-
-    public boolean canInteractAutoAttack(ItemStack itemStack) {
-        return itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD);
-    } // canInteractAutoAttack ()
-
     // -- Logic Methods --
     protected void handleAutoHeal () {
-        if(this.world.isClient && !InternalMetric.AutoHeal) return;
-        if(this.getHealth() == this.getHpValue()) return;
+        if(this.getHealth() < this.getHpValue()) autoHeal = true;
+        if(this.world.isClient && !autoHeal) return;
 
         if(autoHealTimer != 0) {
             autoHealTimer--;
         } else {
             final float healValue = this.getHpValue() / 16.0F;
             this.heal(healValue);
+            autoHeal = false;
             autoHealTimer = InternalMetric.AutoHealInterval;
         }
-
-        commandDebug("Heal: " + InternalMetric.AutoHeal + " | Timer: " + autoHealTimer, true);
     } // handleAutoHeal ()
 
     protected void handleActivateCombatMode () {
@@ -621,8 +644,6 @@ public abstract class InternalEntity extends TameableEntity {
             if(getModel() != EntityModel.Unarmed) setModel(EntityModel.Unarmed);
             combatMode = false;
         }
-
-        //commandDebug("Combat: " + combatMode + " | Wary: " + waryTimer, true);
     } // handleCombatMode ()
 
     public void handleTame(PlayerEntity player) {
@@ -705,22 +726,39 @@ public abstract class InternalEntity extends TameableEntity {
         }
     } // commandDebug ()
 
-    public void displayMessage (PlayerEntity player) {
-        if(!InternalMetric.LevelUpLog) return;
+    public void commandDebugExtra() {
+        String debug = "";
+        if(combatMode && getLog()) {
+            if(waryTimer < 10) debug += "Wary: 0" + waryTimer + " ";
+            else debug += "Wary: " + waryTimer + " ";
+        }
+
+        if(autoHeal && getLog()) {
+            if(autoHealTimer < 10) debug += "Heal: 0" + autoHealTimer + " ";
+            else debug += "Heal: " + autoHealTimer + " ";
+            if(this.getHealth() < 10) debug += "| 0" + this.getHealth();
+            else debug += "| " + (int)Math.floor(this.getHealth());
+        }
+        if(!debug.equals("")) commandDebug(debug, true);
+    } // commandDebugExtra ()
+
+    public void displayMessage (PlayerEntity player, boolean canShow) {
+        if(!canShow) return;
         player.sendMessage(Text.literal("|--------------------------"));
-        player.sendMessage(Text.literal("MaxLevel: " + this.getMaxLevel()));
-        player.sendMessage(Text.literal("Model: " + this.getVariant()));
-        player.sendMessage(Text.literal("Health: " + this.getHealth() + "/" + this.getMaxHealth()));
+        player.sendMessage(Text.literal("[LevelUp]"));
+        if(this.getCustomName() != null) player.sendMessage(Text.literal(Utility.FirstToUpperCase (this.getVariant()) + ": " + this.getCustomName().getString()));
+        else player.sendMessage(Text.literal(Utility.FirstToUpperCase (this.getVariant())));
+        player.sendMessage(Text.literal("Level: " + this.getCurrentLevel() + "/" + this.getMaxLevel()));
+        player.sendMessage(Text.literal("Exp: " + this.getExp() + "/" + this.getNextExp()));
+        player.sendMessage(Text.literal("HP: " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()));
         player.sendMessage(Text.literal("Attack: " + this.getAttackValue()));
-        player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()));
-        player.sendMessage(Text.literal("Level: " + this.getCurrentLevel()));
-        player.sendMessage(Text.literal("Exp: " + this.getExp()));
-        player.sendMessage(Text.literal("Looting: " + this.getLootingLevel()));
+        player.sendMessage(Text.literal("Defense: " + this.getDefenseValue()));
     } // displayMessage ()
 
     public void displayProtectionMessage (PlayerEntity player) {
-        if(!InternalMetric.LevelUpLog) return;
         player.sendMessage(Text.literal("|--------------------------"));
+        player.sendMessage(Text.literal("[Enchantment]"));
+        player.sendMessage(Text.literal("Looting: " + this.getLootingLevel() + "/" + InternalMetric.MaxLootingLevel));
         player.sendMessage(Text.literal("Fire Protection: " + this.getFireProtection() + "/" + InternalMetric.FireProtectionLimit));
         player.sendMessage(Text.literal("Fall Protection: " + this.getFallProtection() + "/" + InternalMetric.FallProtectionLimit));
         player.sendMessage(Text.literal("Blast Protection: " + this.getBlastProtection() + "/" + InternalMetric.BlastProtectionLimit));
@@ -735,7 +773,7 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.startTracking(MODEL_ID, EntityModel.Unarmed.getId());
         this.dataTracker.startTracking(ANIMATOR_ID, EntityAnimator.Locomotion.getId());
 
-        this.dataTracker.startTracking(STATE, EntityState.Standby.getId());
+        this.dataTracker.startTracking(STATE, EntityState.Follow.getId());
         this.dataTracker.startTracking(AUTO_ATTACK, true);
 
         this.dataTracker.startTracking(MAX_LEVEL, getAttribute(EntityAttribute.MAX_LEVEL));
@@ -750,54 +788,60 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.startTracking(BASE_X, 0F);
         this.dataTracker.startTracking(BASE_Y, 0F);
         this.dataTracker.startTracking(BASE_Z, 0F);
+
+        this.dataTracker.startTracking(LOG, true);
     } // initDataTracker ()
 
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        nbt.putString("Variant", this.getVariant());
-        nbt.putInt("TextureID", this.getTextureID());
-        nbt.putInt("ModelID", this.getModelID());
-        nbt.putInt("AnimatorID", this.getAnimatorID());
+    public void writeCustomDataToNbt(NbtCompound dataNBT) {
+        super.writeCustomDataToNbt(dataNBT);
+        dataNBT.putString("Variant", this.getVariant());
+        dataNBT.putInt("TextureID", this.getTextureID());
+        dataNBT.putInt("ModelID", this.getModelID());
+        dataNBT.putInt("AnimatorID", this.getAnimatorID());
 
-        nbt.putInt("State", this.getCurrentStateID());
-        nbt.putBoolean("AutoAttack", this.getAutoAttack());
+        dataNBT.putInt("State", this.getCurrentStateID());
+        dataNBT.putBoolean("AutoAttack", this.getAutoAttack());
 
-        nbt.putInt("MaxLevel", this.getMaxLevel());
-        nbt.putInt("Level", this.getCurrentLevel());
-        nbt.putInt("Exp", this.getExp());
+        dataNBT.putInt("MaxLevel", this.getMaxLevel());
+        dataNBT.putInt("Level", this.getCurrentLevel());
+        dataNBT.putInt("Exp", this.getExp());
 
-        nbt.putInt("FireProtection", this.getFireProtection());
-        nbt.putInt("FallProtection", this.getFallProtection());
-        nbt.putInt("BlastProtection", this.getBlastProtection());
-        nbt.putInt("ProjectileProtection", this.getProjectileProtection());
+        dataNBT.putInt("FireProtection", this.getFireProtection());
+        dataNBT.putInt("FallProtection", this.getFallProtection());
+        dataNBT.putInt("BlastProtection", this.getBlastProtection());
+        dataNBT.putInt("ProjectileProtection", this.getProjectileProtection());
 
-        nbt.putFloat("BaseX", this.getBaseX());
-        nbt.putFloat("BaseY", this.getBaseY());
-        nbt.putFloat("BaseZ", this.getBaseZ());
+        dataNBT.putFloat("BaseX", this.getBaseX());
+        dataNBT.putFloat("BaseY", this.getBaseY());
+        dataNBT.putFloat("BaseZ", this.getBaseZ());
+
+        dataNBT.putBoolean("Log", getLog());
     } // writeCustomDataToNbt ()
 
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        this.setVariant(nbt.getString("Variant"));
-        this.setTexture(nbt.getInt("TextureID"));
-        this.setModel(nbt.getInt("ModelID"));
-        this.setAnimator(nbt.getInt("AnimatorID"));
+    public void readCustomDataFromNbt(NbtCompound dataNBT) {
+        super.readCustomDataFromNbt(dataNBT);
+        this.setVariant(dataNBT.getString("Variant"));
+        this.setTexture(dataNBT.getInt("TextureID"));
+        this.setModel(dataNBT.getInt("ModelID"));
+        this.setAnimator(dataNBT.getInt("AnimatorID"));
 
-        this.setCurrentState(nbt.getInt("State"));
-        this.setAutoAttack(nbt.getBoolean("AutoAttack"));
+        this.setCurrentState(dataNBT.getInt("State"));
+        this.setAutoAttack(dataNBT.getBoolean("AutoAttack"));
 
-        this.setMaxLevel(nbt.getInt("MaxLevel"));
-        this.setCurrentLevel(nbt.getInt("Level"));
-        this.setExp(nbt.getInt("Exp"));
+        this.setMaxLevel(dataNBT.getInt("MaxLevel"));
+        this.setCurrentLevel(dataNBT.getInt("Level"));
+        this.setExp(dataNBT.getInt("Exp"));
 
-        this.setFireProtection(nbt.getInt("FireProtection"));
-        this.setFallProtection(nbt.getInt("FallProtection"));
-        this.setBlastProtection(nbt.getInt("BlastProtection"));
-        this.setProjectileProtection(nbt.getInt("ProjectileProtection"));
+        this.setFireProtection(dataNBT.getInt("FireProtection"));
+        this.setFallProtection(dataNBT.getInt("FallProtection"));
+        this.setBlastProtection(dataNBT.getInt("BlastProtection"));
+        this.setProjectileProtection(dataNBT.getInt("ProjectileProtection"));
 
-        this.setBaseY(nbt.getFloat("BaseY"));
-        this.setBaseZ(nbt.getFloat("BaseZ"));
-        this.setBaseX(nbt.getFloat("BaseX"));
+        this.setBaseY(dataNBT.getFloat("BaseY"));
+        this.setBaseZ(dataNBT.getFloat("BaseZ"));
+        this.setBaseX(dataNBT.getFloat("BaseX"));
+
+        setLog(dataNBT.getBoolean("Log"));
     } // readCustomDataFromNbt ()
 
 } // Class InternalEntity

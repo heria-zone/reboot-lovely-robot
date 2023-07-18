@@ -87,10 +87,6 @@ public class Bunny2Entity extends InternalEntity implements IAnimatable {
         this.setVariant(EntityVariant.Bunny2.getName());
         this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Bunny2)));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
-
-        EquipmentSlot slot = EquipmentSlot.MAINHAND;
-        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
-        this.equipStack(slot, diamondSword);
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 

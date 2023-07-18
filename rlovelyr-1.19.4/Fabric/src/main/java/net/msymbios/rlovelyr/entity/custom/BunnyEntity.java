@@ -1,6 +1,9 @@
 package net.msymbios.rlovelyr.entity.custom;
 
-import net.minecraft.entity.*;
+import net.minecraft.entity.EntityData;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -15,7 +18,10 @@ import net.minecraft.world.EntityView;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.entity.enums.*;
+import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
+import net.msymbios.rlovelyr.entity.enums.EntityModel;
+import net.msymbios.rlovelyr.entity.enums.EntityTexture;
+import net.msymbios.rlovelyr.entity.enums.EntityVariant;
 import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
 import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
 import net.msymbios.rlovelyr.entity.goal.AiFollowOwnerGoal;
@@ -26,15 +32,13 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.animation.AnimatableManager;
 
-import static net.msymbios.rlovelyr.entity.internal.Utility.*;
+import static net.msymbios.rlovelyr.entity.internal.Utility.getRandomNumber;
 
 public class BunnyEntity extends InternalEntity implements GeoEntity {
 
     // -- Variables --
-    private Identifier currentModel;
-    private Identifier currentAnimator;
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
     // -- Properties --
@@ -49,22 +53,8 @@ public class BunnyEntity extends InternalEntity implements GeoEntity {
     } // setAttributes ()
 
     // -- MODEL --
-    public Identifier getCurrentModel() {
-        return currentModel;
-    } // getCurrentTexture ()
-
-    public void setCurrentModel(EntityModel value) {
-        currentModel = InternalMetric.getModel(EntityVariant.Bunny, value);
-    } // setCurrentAnimator ()
-
-    // -- ANIMATOR --
-    public Identifier getCurrentAnimator() {
-        return currentAnimator;
-    } // getCurrentAnimator ()
-
-    public void setCurrentAnimator(EntityAnimation value) {
-        currentAnimator = InternalMetric.ANIMATIONS.get(value);
-    } // setCurrentAnimator ()
+    @Override
+    public Identifier getCurrentModelByID(int value) { return InternalMetric.getModel(EntityVariant.Bunny, EntityModel.byId(value)); } // getCurrentModelByID ()
 
     // TEXTURE
     @Override
@@ -77,45 +67,20 @@ public class BunnyEntity extends InternalEntity implements GeoEntity {
     } // getVariant ()
 
     // STATS
-    @Override
-    public int getMaxLevel(){ return getMaxLevel ((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
-
-    @Override
-    public int getCurrentLevel(){
-        var level = (int)(InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_LEVEL));
-        if(level != getMaxLevel()) setMaxLevel(level);
-        return super.getCurrentLevel();
-    } // getLevel ()
-
-    @Override
-    public int getHpValue() {
-        return getHpValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_HEALTH));
-    } // getHpValue ()
-
-    @Override
-    public int getAttackValue() {
-        return getAttackValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ATTACK_DAMAGE));
-    } // getAttackValue ()
-
-    @Override
-    public int getDefenseValue() {
-        return getDefenseValue((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.DEFENSE));
-    } // getDefenseValue ()
+    public float getAttributeRaw(EntityAttribute attribute) {
+        return InternalMetric.getAttributeValue(EntityVariant.Bunny, attribute);
+    } // getAttributeRaw ()
 
     // -- Constructor --
     public BunnyEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
-        setCurrentModel(EntityModel.Unarmed);
-        setCurrentAnimator(EntityAnimation.Locomotion);
     } // Constructor RobotEntity ()
 
     // -- Animations --
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(
-                InternalAnimation.locomotionAnimation(this),
-                InternalAnimation.attackAnimation(this)
-        );
+        controllerRegistrar.add(InternalAnimation.locomotionAnimation(this));
+        controllerRegistrar.add(InternalAnimation.locomotionAnimation(this));
     } // registerControllers ()
 
     @Override
@@ -128,7 +93,7 @@ public class BunnyEntity extends InternalEntity implements GeoEntity {
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.setVariant(EntityVariant.Bunny.getName());
         this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Bunny)));
-        this.setMaxLevel((int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_LEVEL));
+        this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
 
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
         ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
@@ -149,29 +114,15 @@ public class BunnyEntity extends InternalEntity implements GeoEntity {
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, new RevengeGoal(this));
-        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, 5, false, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetric.AttackChance, false, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
-
-    @Override
-    public void tick() {
-        super.tick();
-        handleModelTransition();
-        handleAutoHeal();
-    } // tick ()
-
-    // -- Custom Methods --
-    private void handleModelTransition () {
-        if(this.isAttacking()) setCurrentModel(EntityModel.Armed);
-        else setCurrentModel(EntityModel.Unarmed);
-    } // handleModelTransition ()
 
     // -- Save Methods --
     @Override
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(VARIANT, EntityVariant.Bunny.getName());
-        this.dataTracker.startTracking(MAX_LEVEL, (int) InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_LEVEL));
     } // initDataTracker ()
 
     // -- Inherited Methods --

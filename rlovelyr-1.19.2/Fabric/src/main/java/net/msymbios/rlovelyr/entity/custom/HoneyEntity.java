@@ -87,10 +87,6 @@ public class HoneyEntity extends InternalEntity implements IAnimatable {
         this.setVariant(EntityVariant.Honey.getName());
         this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Honey)));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
-
-        EquipmentSlot slot = EquipmentSlot.MAINHAND;
-        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
-        this.equipStack(slot, diamondSword);
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 

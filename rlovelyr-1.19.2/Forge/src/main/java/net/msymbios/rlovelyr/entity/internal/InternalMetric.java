@@ -12,8 +12,10 @@ import java.util.function.Predicate;
 
 public class InternalMetric {
 
-    // -- Logging --
-    public static boolean LevelUpLog = true;            // Show log when level up
+    // -- Entity Renderer --
+    public static float ShadowRadius = 0.4F;
+    public static float Width = 0.4F;
+    public static float Height = 2F;
 
     // -- Goal Attribute --
     public static float MeleeAttackMovement = 1.0F;                   // Movement speed when it is melee attacking
@@ -22,6 +24,7 @@ public class InternalMetric {
     public static float FollowBehindDistance = 10.0F;
     public static float FollowCloseDistance= 2.0F;
     public static float LookAtRange = 8.0F;
+    public static int AttackChance = 5;
     public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof Enemy && !(entity instanceof Creeper); //&& !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity);
 
     // - Level & Experience --
@@ -36,6 +39,7 @@ public class InternalMetric {
     public static boolean LootingEnchantment = true;    // Enable looting enchantments
     public static int LootingRequiredLevel = 10;        // Levels required for looting enchantments
     public static int MaxLootingLevel = 3;              // Maximum level of looting enchantments
+    public static int WaryTime = 50;            // Time while being in combat mode
 
     // -- Protection --
     public static int FireProtectionLimit = 80;         // Fire Protection upper limit
@@ -48,25 +52,25 @@ public class InternalMetric {
     public static float BaseDefenseWarpRange = 10;
 
     // -- Properties --
-    public static HashMap<EntityAnimation, ResourceLocation> ANIMATIONS = new HashMap<>() {{
-        put(EntityAnimation.Locomotion, new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
+    public static HashMap<EntityAnimator, ResourceLocation> ANIMATORS = new HashMap<>() {{
+        put(EntityAnimator.Locomotion, new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
     }};
 
-    public static HashMap<EntityVariant, HashMap<EntityTexture, ResourceLocation>> ALL_TEXTURES = new HashMap<>(){{
+    public static HashMap<EntityVariant, HashMap<EntityTexture, ResourceLocation>> TEXTURES = new HashMap<>(){{
         put(EntityVariant.Bunny, setTexture(EntityVariant.Bunny));
         put(EntityVariant.Bunny2, setTexture(EntityVariant.Bunny2));
         put(EntityVariant.Honey, setTexture(EntityVariant.Honey));
         put(EntityVariant.Vanilla, setTexture(EntityVariant.Vanilla));
     }};
 
-    public static HashMap<EntityVariant, HashMap<EntityModel, ResourceLocation>> ALL_MODELS = new HashMap<>(){{
+    public static HashMap<EntityVariant, HashMap<EntityModel, ResourceLocation>> MODELS = new HashMap<>(){{
         put(EntityVariant.Bunny, setModel(EntityVariant.Bunny));
         put(EntityVariant.Bunny2, setModel(EntityVariant.Bunny2));
         put(EntityVariant.Honey, setModel(EntityVariant.Honey));
         put(EntityVariant.Vanilla, setModel(EntityVariant.Vanilla));
     }};
 
-    public static HashMap<EntityVariant, HashMap<EntityAttribute, InternalAttribute>> ALL_ATTRIBUTES = new HashMap<>(){{
+    public static HashMap<EntityVariant, HashMap<EntityAttribute, InternalAttribute>> ATTRIBUTES = new HashMap<>(){{
         put(EntityVariant.Bunny, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
         put(EntityVariant.Bunny2, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 6F));
         put(EntityVariant.Honey, setAttribute(200F, 30F, 6F, 1.2F, 0.4F, 5F));
@@ -75,11 +79,11 @@ public class InternalMetric {
 
     // -- Methods --
     public static ResourceLocation getTexture(EntityVariant variant, EntityTexture texture) {
-        return ALL_TEXTURES.get(variant).get(texture);
+        return TEXTURES.get(variant).get(texture);
     } // getTexture ()
 
     public static int getTextureCount(EntityVariant variant) {
-        return ALL_TEXTURES.get(variant).size();
+        return TEXTURES.get(variant).size();
     } // getTextureCount ()
 
     private static HashMap<EntityTexture, ResourceLocation> setTexture(EntityVariant variant){
@@ -106,7 +110,7 @@ public class InternalMetric {
 
 
     public static ResourceLocation getModel(EntityVariant variant, EntityModel model) {
-        return ALL_MODELS.get(variant).get(model);
+        return MODELS.get(variant).get(model);
     } // getAttributeValue ()
 
     private static HashMap<EntityModel, ResourceLocation> setModel(EntityVariant variant){
@@ -119,7 +123,7 @@ public class InternalMetric {
 
 
     public static float getAttributeValue(EntityVariant variant, EntityAttribute attribute) {
-        InternalAttribute robotAttribute = ALL_ATTRIBUTES.get(variant).get(attribute);
+        InternalAttribute robotAttribute = ATTRIBUTES.get(variant).get(attribute);
         return robotAttribute == null ? 0F : robotAttribute.value;
     } // getAttributeValue ()
 
