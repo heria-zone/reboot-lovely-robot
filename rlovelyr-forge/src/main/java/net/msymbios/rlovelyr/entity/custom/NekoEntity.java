@@ -7,16 +7,17 @@ import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.entity.enums.*;
+import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
+import net.msymbios.rlovelyr.entity.enums.EntityVariant;
 import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
 import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
 import net.msymbios.rlovelyr.entity.goal.AiFollowOwnerGoal;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import net.msymbios.rlovelyr.entity.internal.InternalEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
-import net.minecraft.world.DifficultyInstance;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -24,9 +25,9 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-import static net.msymbios.rlovelyr.entity.internal.Utility.*;
+import static net.msymbios.rlovelyr.entity.internal.Utility.getRandomNumber;
 
-public class VanillaEntity extends InternalEntity implements IAngerable, IAnimatable {
+public class NekoEntity extends InternalEntity implements IAngerable, IAnimatable {
 
     // -- Variables --
     private final AnimationFactory cache = new AnimationFactory(this);
@@ -34,19 +35,19 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
     // -- Properties --
     public static AttributeModifierMap  setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_HEALTH))
-                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ATTACK_DAMAGE))
-                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ATTACK_SPEED))
-                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MOVEMENT_SPEED))
-                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ARMOR))
-                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ARMOR_TOUGHNESS)).build();
+                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.MAX_HEALTH))
+                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ATTACK_DAMAGE))
+                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ATTACK_SPEED))
+                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.MOVEMENT_SPEED))
+                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ARMOR))
+                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
     // -- Constructor --
-    public VanillaEntity(EntityType<? extends TameableEntity> entityType, World level) {
+    public NekoEntity(EntityType<? extends TameableEntity> entityType, World level) {
         super(entityType, level);
-        this.variant = EntityVariant.Vanilla;
-    } // Constructor VanillaEntity ()
+        this.variant = EntityVariant.Neko;
+    } // Constructor NekoEntity ()
 
     // -- Animations --
     @Override
@@ -61,7 +62,7 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
     // -- Inherited Methods --
     @Override
     public ILivingEntityData finalizeSpawn(IServerWorld p_213386_1_, DifficultyInstance p_213386_2_, SpawnReason p_213386_3_, @Nullable ILivingEntityData p_213386_4_, @Nullable CompoundNBT p_213386_5_) {
-        this.variant = EntityVariant.Vanilla;
+        this.variant = EntityVariant.Neko;
         this.setTexture(InternalMetric.getRandomTextureID(this.variant));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
         return super.finalizeSpawn(p_213386_1_, p_213386_2_, p_213386_3_, p_213386_4_, p_213386_5_);
@@ -102,4 +103,4 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
     @Override
     public void startPersistentAngerTimer() {} // startPersistentAngerTimer ()
 
-} // Class VanillaEntity
+} // Class NekoEntity

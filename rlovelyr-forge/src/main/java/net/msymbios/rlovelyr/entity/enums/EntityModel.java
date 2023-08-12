@@ -6,9 +6,8 @@ import java.util.Comparator;
 public enum EntityModel {
 
     // -- Enum --
-    Unarmed(0, "unarmed"),
+    Default(0, "default"),
     Armed(1, "armed");
-
 
     // -- Variables --
     private static final EntityModel[] CODEC = Arrays.stream(values()).sorted(Comparator.comparingInt(EntityModel::getId)).toArray(EntityModel[]::new);

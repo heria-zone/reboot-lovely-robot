@@ -7,7 +7,6 @@ import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.entity.enums.*;
@@ -43,29 +42,10 @@ public class HoneyEntity extends InternalEntity implements IAngerable, IAnimatab
                 .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Honey, EntityAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
-    // -- MODEL --
-    @Override
-    public ResourceLocation getCurrentModelByID(int value) { return InternalMetric.getModel(EntityVariant.Honey, EntityModel.byId(value)); } // getCurrentModelByID ()
-
-    // TEXTURE
-    @Override
-    public ResourceLocation getTextureByID(int value) { return InternalMetric.getTexture(EntityVariant.Honey, EntityTexture.byId(value)); } // getTextureByID ()
-
-    // VARIANT
-    @Override
-    public String getVariant() {
-        return this.getVariant(EntityVariant.Honey.getName());
-    } // getVariant ()
-
-    // STATS
-    public float getAttributeRaw(EntityAttribute attribute) {
-        return InternalMetric.getAttributeValue(EntityVariant.Honey, attribute);
-    } // getAttributeRaw ()
-
-
     // -- Constructor --
     public HoneyEntity(EntityType<? extends TameableEntity> entityType, World level) {
         super(entityType, level);
+        this.variant = EntityVariant.Honey;
     } // Constructor HoneyEntity ()
 
     // -- Animations --
@@ -79,13 +59,12 @@ public class HoneyEntity extends InternalEntity implements IAngerable, IAnimatab
     public AnimationFactory getFactory() { return cache; } // getFactory ()
 
     // -- Inherited Methods --
-
     @Override
-    public ILivingEntityData finalizeSpawn(IServerWorld levelAccessor, DifficultyInstance instance, SpawnReason spawnReason, @Nullable ILivingEntityData entityData, @Nullable CompoundNBT compoundTag) {
-        this.setVariant(EntityVariant.Honey.getName());
-        this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Honey)));
+    public ILivingEntityData finalizeSpawn(IServerWorld p_213386_1_, DifficultyInstance p_213386_2_, SpawnReason p_213386_3_, @Nullable ILivingEntityData p_213386_4_, @Nullable CompoundNBT p_213386_5_) {
+        this.variant = EntityVariant.Honey;
+        this.setTexture(InternalMetric.getRandomTextureID(this.variant));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
-        return super.finalizeSpawn(levelAccessor, instance, spawnReason, entityData, compoundTag);
+        return super.finalizeSpawn(p_213386_1_, p_213386_2_, p_213386_3_, p_213386_4_, p_213386_5_);
     } // finalizeSpawn ()
 
     @Override
@@ -96,6 +75,7 @@ public class HoneyEntity extends InternalEntity implements IAngerable, IAnimatab
         this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
         this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
         this.goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, InternalMetric.LookAtRange));
+        this.goalSelector.addGoal(5, new LookAtGoal(this, InternalEntity.class, InternalMetric.LookAtRange));
         this.goalSelector.addGoal(6, new LookRandomlyGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
@@ -103,13 +83,6 @@ public class HoneyEntity extends InternalEntity implements IAngerable, IAnimatab
         this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, MobEntity.class, InternalMetric.AttackChance, true, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.addGoal(5, new ResetAngerGoal<>(this, false));
     } // registerGoals ()
-
-    // -- Save Methods --
-    @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(VARIANT, EntityVariant.Honey.getName());
-    } // defineSynchedData ()
 
     // -- Inherited --
     @Override

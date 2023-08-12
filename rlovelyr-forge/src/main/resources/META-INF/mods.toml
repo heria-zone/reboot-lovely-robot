@@ -25,9 +25,9 @@ displayName="Reboot LovelyRobot" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
-#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
+displayURL="https://legacy.curseforge.com/minecraft/mc-mods/reboot-lovelyrobot" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile="examplemod.png" #optional
+logoFile="icon.png" #optional
 # A text field displayed in the mod UI
 credits="Mod originaly made by lilacx02 | Ported by MSymbios" #optional
 # A text field displayed in the mod UI

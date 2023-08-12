@@ -31,53 +31,39 @@ import static net.msymbios.rlovelyr.entity.internal.Utility.invertBoolean;
 public abstract class InternalEntity extends TameableEntity {
 
     // -- Variables --
-    protected static final DataParameter<String> VARIANT = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.STRING);
-    protected static final DataParameter<Integer> TEXTURE_ID = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Integer> MODEL_ID = EntityDataManager.defineId(InternalEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Integer> ANIMATOR_ID = EntityDataManager.defineId(InternalEntity.class, DataSerializers.INT);
+    protected static DataParameter<Integer> TEXTURE_ID = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Integer> STATE = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Boolean> AUTO_ATTACK = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.BOOLEAN);
 
-    protected static final DataParameter<Integer> STATE = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Boolean> AUTO_ATTACK = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.BOOLEAN);
+    protected static DataParameter<Integer> MAX_LEVEL = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Integer> LEVEL = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Integer> EXP = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
 
-    protected static final DataParameter<Integer> MAX_LEVEL = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Integer> LEVEL = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Integer> EXP = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Integer> FIRE_PROTECTION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Integer> FALL_PROTECTION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Integer> BLAST_PROTECTION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Integer> PROJECTILE_PROTECTION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
 
-    protected static final DataParameter<Integer> FIRE_PROTECTION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Integer> FALL_PROTECTION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Integer> BLAST_PROTECTION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
-    protected static final DataParameter<Integer> PROJECTILE_PROTECTION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.INT);
+    protected static DataParameter<Float> BASE_X = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.FLOAT);
+    protected static DataParameter<Float> BASE_Y = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.FLOAT);
+    protected static DataParameter<Float> BASE_Z = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.FLOAT);
 
-    protected static final DataParameter<Float> BASE_X = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.FLOAT);
-    protected static final DataParameter<Float> BASE_Y = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.FLOAT);
-    protected static final DataParameter<Float> BASE_Z = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.FLOAT);
-
-    protected static final DataParameter<Boolean> LOG = EntityDataManager.defineId(InternalEntity.class, DataSerializers.BOOLEAN);
+    protected static DataParameter<Boolean> NOTIFICATION = EntityDataManager.defineId(VanillaEntity.class, DataSerializers.BOOLEAN);
 
     protected int waryTimer = 0, autoHealTimer = 0;
     protected boolean combatMode = false, autoHeal = false;
+    protected EntityVariant variant;
+    protected EntityModel model = EntityModel.Default;
 
     // -- Properties --
 
     // VARIANT
-    public abstract String getVariant();
-
-    public String getVariant(String value ) {
-        try {value = this.entityData.get(VARIANT);}
-        catch (Exception ignored) {}
-        return value;
+    public String getVariant() {
+        return this.variant.getName();
     } // getVariant ()
 
-    public void setVariant(String value) {
-        this.entityData.set(VARIANT, value);
-    } // setVariant ()
-
     // TEXTURE
-    public abstract ResourceLocation getTextureByID(int value);
-
-    public ResourceLocation getTexture() {
-        return getTextureByID(getTextureID());
-    } // getTexture ()
+    public ResourceLocation getTexture() { return InternalMetric.getTexture(this.variant, EntityTexture.byId(getTextureID())); } // getTexture ()
 
     public int getTextureID() {
         int value = 0;
@@ -87,7 +73,8 @@ public abstract class InternalEntity extends TameableEntity {
     } // getTextureID ()
 
     public void setTexture(int value) {
-        this.entityData.set(TEXTURE_ID, value);
+        if(InternalMetric.checkTextureID(this.variant, EntityTexture.byId(value)))
+            this.entityData.set(TEXTURE_ID, value);
     } // setTexture ()
 
     public void setTexture(EntityTexture value) {
@@ -95,53 +82,16 @@ public abstract class InternalEntity extends TameableEntity {
     } // setTexture ()
 
     // MODEL
-    public abstract ResourceLocation getCurrentModelByID(int value);
-
-    public ResourceLocation getCurrentModel() {
-        return getCurrentModelByID(getModelID());
-    } // getCurrentModel ()
-
-    public int getModelID() {
-        int value = 0;
-        try {value = this.entityData.get(MODEL_ID);}
-        catch (Exception ignored) {}
-        return value;
-    } // getModelID ()
-
-    public EntityModel getModel() {
-        int value = 0;
-        try {value = this.entityData.get(MODEL_ID);}
-        catch (Exception ignored) {}
-        return EntityModel.byId(value);
-    } // getModel ()
-
-    public void setModel(EntityModel value) {
-        setModel(value.getId());
-    } // setModel ()
-
-    public void setModel(int value) {
-        this.entityData.set(MODEL_ID, value);
-    } // setModel ()
+    public ResourceLocation getCurrentModel() { return InternalMetric.getModel(this.variant, model); } // getCurrentModel ()
 
     // ANIMATOR
-    public ResourceLocation getAnimatorByID(int value) {
-        return InternalMetric.ANIMATORS.get(EntityAnimator.byId(value));
+    public ResourceLocation getAnimatorByID(EntityAnimator value) {
+        return InternalMetric.getAnimator(this.variant, value);
     } // getAnimatorByID ()
 
-    public int getAnimatorID() {
-        int value = 0;
-        try {value = this.entityData.get(ANIMATOR_ID);}
-        catch (Exception ignored) {}
-        return value;
-    } // getAnimatorID ()
-
     public ResourceLocation getAnimator() {
-        return getAnimatorByID(getAnimatorID());
+        return InternalMetric.getAnimator(this.variant);
     } // getAnimator ()
-
-    public void setAnimator(int value) {
-        this.entityData.set(ANIMATOR_ID, value);
-    } // setAnimator ()
 
     // STATE
     public int getCurrentStateID() {
@@ -179,11 +129,7 @@ public abstract class InternalEntity extends TameableEntity {
     } // setAutoAttack ()
 
     // STATS
-    public abstract float getAttributeRaw(EntityAttribute attribute);
-
-    public int getAttribute(EntityAttribute attribute) {
-        return (int) getAttributeRaw(attribute);
-    } // getAttribute ()
+    public int getAttribute(EntityAttribute attribute) { return (int) InternalMetric.getAttributeValue(this.variant, attribute); } // getAttribute ()
 
     public int getMaxLevel() { return getMaxLevel (getAttribute(EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
 
@@ -345,16 +291,16 @@ public abstract class InternalEntity extends TameableEntity {
     } // setBaseZ ()
 
     // INFO
-    public boolean getLog() {
-        boolean value = true;
-        try {value = this.entityData.get(LOG);}
+    public boolean getNotification() {
+        boolean value = false;
+        try {value = this.entityData.get(NOTIFICATION);}
         catch (Exception ignored) {}
         return value;
-    } // getLog ()
+    } // getNotification ()
 
-    public void setLog(boolean value) {
-        this.entityData.set(LOG, value);
-    } // setLog ()
+    public void setNotification(boolean value) {
+        this.entityData.set(NOTIFICATION, value);
+    } // setNotification ()
 
     // -- Constructor --
     protected InternalEntity(EntityType<? extends TameableEntity> entityType, World level) {
@@ -466,14 +412,12 @@ public abstract class InternalEntity extends TameableEntity {
     } // onEnterCombat ()
 
     // -- Interact Methods --
-
-
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
 
         if(hand == Hand.MAIN_HAND) {
-            handleSit(itemStack);
+            if(getOwner() != null) handleSit(itemStack);
             if (this.level.isClientSide) {
                 boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.getItem() == (Items.BONE) && !this.isTame();
                 return bl ? ActionResultType.CONSUME : ActionResultType.PASS;
@@ -483,14 +427,16 @@ public abstract class InternalEntity extends TameableEntity {
                 handleTexture(itemStack, player);
                 if(getOwner() == null) handleTame(player);
 
-                if(itemStack.getItem() == (Items.OAK_BUTTON)) {
-                    this.setLog(Utility.invertBoolean(getLog()));
-                    if(getLog()) commandDebug("InfoLog ON", true);
-                    else commandDebug("InfoLog Log OFF", true);
-                }
+                if(getOwner() != null) {
+                    if(itemStack.getItem() == (Items.OAK_BUTTON)) {
+                        this.setNotification(Utility.invertBoolean(getNotification()));
+                        if(getNotification()) commandDebug("InfoLog ON", true);
+                        else commandDebug("InfoLog Log OFF", true);
+                    }
 
-                if(itemStack.getItem() == (Items.BOOK)) displayMessage(player, true);
-                if(itemStack.getItem() == (Items.WRITABLE_BOOK)) displayProtectionMessage(player);
+                    if(itemStack.getItem() == (Items.BOOK)) displayMessage(player, true, false);
+                    if(itemStack.getItem() == (Items.WRITABLE_BOOK)) displayProtectionMessage(player);
+                }
 
                 return ActionResultType.SUCCESS;
             }
@@ -561,7 +507,7 @@ public abstract class InternalEntity extends TameableEntity {
                 try {
                     final LivingEntity entity = this.getOwner();
                     if (entity == null) return;
-                    this.displayMessage((PlayerEntity)entity, getLog());
+                    this.displayMessage((PlayerEntity)entity, getNotification(), true);
                 } catch (Exception ignored) {}
             }
         }
@@ -592,10 +538,10 @@ public abstract class InternalEntity extends TameableEntity {
         if(this.level.isClientSide && !combatMode) return;
 
         if(waryTimer != 0) {
-            if(getModel() != EntityModel.Armed) setModel(EntityModel.Armed);
+            if(model != EntityModel.Armed) model = EntityModel.Armed;
             waryTimer--;
         } else {
-            if(getModel() != EntityModel.Unarmed) setModel(EntityModel.Unarmed);
+            if(model != EntityModel.Default) model = EntityModel.Default;
             combatMode = false;
         }
     } // handleCombatMode ()
@@ -682,12 +628,12 @@ public abstract class InternalEntity extends TameableEntity {
 
     public void commandDebugExtra() {
         String debug = "";
-        if(combatMode && getLog()) {
+        if(combatMode && getNotification()) {
             if(waryTimer < 10) debug += "Wary: 0" + waryTimer + " ";
             else debug += "Wary: " + waryTimer + " ";
         }
 
-        if(autoHeal && getLog()) {
+        if(autoHeal && getNotification()) {
             if(autoHealTimer < 10) debug += "Heal: 0" + autoHealTimer + " ";
             else debug += "Heal: " + autoHealTimer + " ";
             if(this.getHealth() < 10) debug += "| 0" + this.getHealth();
@@ -696,10 +642,10 @@ public abstract class InternalEntity extends TameableEntity {
         if(!debug.equals("")) commandDebug(debug, true);
     } // commandDebugExtra ()
 
-    public void displayMessage (PlayerEntity player, boolean canShow) {
+    public void displayMessage (PlayerEntity player, boolean canShow, boolean showLevelUp) {
         if(!canShow) return;
         player.displayClientMessage(ITextComponent.nullToEmpty("|--------------------------"), false);
-        player.displayClientMessage(ITextComponent.nullToEmpty("[LevelUp]"), false);
+        if(showLevelUp) player.displayClientMessage(ITextComponent.nullToEmpty("[LevelUp]"), false);
         if(this.getCustomName() != null) player.displayClientMessage(ITextComponent.nullToEmpty(Utility.FirstToUpperCase (this.getVariant()) + ": " + this.getCustomName().getString()), false);
         else player.displayClientMessage(ITextComponent.nullToEmpty(Utility.FirstToUpperCase (this.getVariant())), false);
         player.displayClientMessage(ITextComponent.nullToEmpty("Level: " + this.getCurrentLevel() + "/" + this.getMaxLevel()), false);
@@ -723,13 +669,11 @@ public abstract class InternalEntity extends TameableEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(TEXTURE_ID, EntityTexture.PINK.getId());
-        this.entityData.define(MODEL_ID, EntityModel.Unarmed.getId());
-        this.entityData.define(ANIMATOR_ID, EntityAnimator.Locomotion.getId());
 
         this.entityData.define(STATE, EntityState.Follow.getId());
-        this.entityData.define(AUTO_ATTACK, false);
+        this.entityData.define(AUTO_ATTACK, true);
 
-        this.entityData.define(MAX_LEVEL, getAttribute(EntityAttribute.MAX_LEVEL));
+        this.entityData.define(MAX_LEVEL, 200);
         this.entityData.define(LEVEL, 0);
         this.entityData.define(EXP, 0);
 
@@ -742,17 +686,13 @@ public abstract class InternalEntity extends TameableEntity {
         this.entityData.define(BASE_Y, 0F);
         this.entityData.define(BASE_Z, 0F);
 
-        this.entityData.define(LOG, true);
+        this.entityData.define(NOTIFICATION, false);
     } // defineSynchedData ()
-
 
     @Override
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putString("Variant", this.getVariant());
         nbt.putInt("TextureID", this.getTextureID());
-        nbt.putInt("ModelID", this.getModelID());
-        nbt.putInt("AnimatorID", this.getAnimatorID());
 
         nbt.putInt("State", this.getCurrentStateID());
         nbt.putBoolean("AutoAttack", this.getAutoAttack());
@@ -770,16 +710,13 @@ public abstract class InternalEntity extends TameableEntity {
         nbt.putFloat("BaseY", this.getBaseY());
         nbt.putFloat("BaseZ", this.getBaseZ());
 
-        nbt.putBoolean("Log", this.getLog());
+        nbt.putBoolean("Notification", this.getNotification());
     } // addAdditionalSaveData ()
 
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
-        this.setVariant(nbt.getString("Variant"));
         this.setTexture(nbt.getInt("TextureID"));
-        this.setModel(nbt.getInt("ModelID"));
-        this.setAnimator(nbt.getInt("AnimatorID"));
 
         this.setCurrentState(nbt.getInt("State"));
         this.setAutoAttack(nbt.getBoolean("AutoAttack"));
@@ -797,7 +734,7 @@ public abstract class InternalEntity extends TameableEntity {
         this.setBaseZ(nbt.getFloat("BaseZ"));
         this.setBaseX(nbt.getFloat("BaseX"));
 
-        this.setLog(nbt.getBoolean("Log"));
+        this.setNotification(nbt.getBoolean("Notification"));
     } // readAdditionalSaveData ()
 
 } // Class InternalEntity
