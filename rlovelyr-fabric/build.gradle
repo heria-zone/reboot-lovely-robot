@@ -63,7 +63,7 @@ java {
 	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 	// if it is present.
 	// If you remove this line, sources will not be generated.
-	withSourcesJar()
+	//withSourcesJar()
 }
 
 jar {
@@ -80,9 +80,7 @@ publishing {
 			artifact(remapJar) {
 				builtBy remapJar
 			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+			//artifact(sourcesJar) {builtBy remapSourcesJar}
 		}
 	}
 

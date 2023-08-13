@@ -325,9 +325,6 @@ public abstract class InternalEntity extends TameableEntity {
     // -- Built-In Methods --
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable CompoundTag entityNbt) {
-        this.setSitting(true);
-        this.setCurrentState(EntityState.Standby);
-
         EquipmentSlot slot = EquipmentSlot.MAINHAND;
         ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
         this.equipStack(slot, diamondSword);
@@ -703,11 +700,10 @@ public abstract class InternalEntity extends TameableEntity {
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(TEXTURE_ID, EntityTexture.PINK.getId());
-
-        this.dataTracker.startTracking(STATE, EntityState.Follow.getId());
+        this.dataTracker.startTracking(STATE, EntityState.Standby.getId());
         this.dataTracker.startTracking(AUTO_ATTACK, true);
 
-        this.dataTracker.startTracking(MAX_LEVEL, getAttribute(EntityAttribute.MAX_LEVEL));
+        this.dataTracker.startTracking(MAX_LEVEL, 200);
         this.dataTracker.startTracking(LEVEL, 0);
         this.dataTracker.startTracking(EXP, 0);
 
@@ -720,7 +716,7 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.startTracking(BASE_Y, 0F);
         this.dataTracker.startTracking(BASE_Z, 0F);
 
-        this.dataTracker.startTracking(NOTIFICATION, true);
+        this.dataTracker.startTracking(NOTIFICATION, false);
     } // initDataTracker ()
 
     @Override
