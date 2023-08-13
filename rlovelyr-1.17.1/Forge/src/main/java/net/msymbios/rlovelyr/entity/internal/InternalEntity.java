@@ -49,10 +49,8 @@ public abstract class InternalEntity extends TamableAnimal {
     protected static final EntityDataAccessor<Float> BASE_Y = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.FLOAT);
     protected static final EntityDataAccessor<Float> BASE_Z = SynchedEntityData.defineId(VanillaEntity.class, EntityDataSerializers.FLOAT);
 
-    protected static final EntityDataAccessor<Boolean> NOTIFICATION = SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.BOOLEAN);
-
     protected int waryTimer = 0, autoHealTimer = 0;
-    protected boolean combatMode = false, autoHeal = false;
+    protected boolean combatMode = false, autoHeal = false, log = false;
     protected EntityVariant variant;
     protected EntityModel model = EntityModel.Default;
 
@@ -291,14 +289,11 @@ public abstract class InternalEntity extends TamableAnimal {
 
     // INFO
     public boolean getNotification() {
-        boolean value = true;
-        try {value = this.entityData.get(NOTIFICATION);}
-        catch (Exception ignored) {}
-        return value;
+        return this.log;
     } // getNotification ()
 
     public void setNotification(boolean value) {
-        this.entityData.set(NOTIFICATION, value);
+        this.log = value;
     } // setNotification ()
 
     // -- Constructor --
@@ -673,8 +668,6 @@ public abstract class InternalEntity extends TamableAnimal {
         this.entityData.define(BASE_X, 0F);
         this.entityData.define(BASE_Y, 0F);
         this.entityData.define(BASE_Z, 0F);
-
-        this.entityData.define(NOTIFICATION, false);
     } // defineSynchedData ()
 
     public void addAdditionalSaveData(CompoundTag nbt) {
@@ -695,8 +688,6 @@ public abstract class InternalEntity extends TamableAnimal {
         nbt.putFloat("BaseX", this.getBaseX());
         nbt.putFloat("BaseY", this.getBaseY());
         nbt.putFloat("BaseZ", this.getBaseZ());
-
-        nbt.putBoolean("Notification", this.getNotification());
     } // addAdditionalSaveData ()
 
     public void readAdditionalSaveData(CompoundTag nbt) {
@@ -717,8 +708,6 @@ public abstract class InternalEntity extends TamableAnimal {
         this.setBaseY(nbt.getFloat("BaseY"));
         this.setBaseZ(nbt.getFloat("BaseZ"));
         this.setBaseX(nbt.getFloat("BaseX"));
-
-        this.setNotification(nbt.getBoolean("Notification"));
     } // readAdditionalSaveData ()
 
 } // Class InternalEntity
