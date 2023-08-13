@@ -14,7 +14,7 @@ public class HoneyRenderer extends GeoEntityRenderer<HoneyEntity> {
         this.shadowRadius = InternalMetric.ShadowRadius;
     } // Constructor HoneyRenderer ()
 
-    // -- Methods --
+    // -- Inherited Methods --
     @Override
     public Identifier getTextureLocation(HoneyEntity instance) {
         return instance.getTexture();

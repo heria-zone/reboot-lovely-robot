@@ -6,7 +6,7 @@ import java.util.Comparator;
 public enum EntityAnimator {
 
     // -- Enum --
-    Locomotion(0, "locomotion");
+    Default(0, "default");
 
 
     // -- Variables --

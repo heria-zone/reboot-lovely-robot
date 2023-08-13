@@ -8,7 +8,7 @@ import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class Bunny2Model extends AnimatedGeoModel<Bunny2Entity> {
 
-    // -- Methods --
+    // -- Inherited Methods --
     @Override
     public Identifier getModelLocation(Bunny2Entity animatable) {
         return animatable.getCurrentModel();

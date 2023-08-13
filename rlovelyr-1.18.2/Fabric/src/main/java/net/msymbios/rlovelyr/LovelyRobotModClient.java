@@ -8,7 +8,7 @@ public class LovelyRobotModClient implements ClientModInitializer {
     // -- Method --
     @Override
     public void onInitializeClient() {
-        ModEntities.registerEntityRenderer();
+        ModEntities.registerRenderers();
     } // onInitializeClient ()
 
 } // Class LovelyRobotClient

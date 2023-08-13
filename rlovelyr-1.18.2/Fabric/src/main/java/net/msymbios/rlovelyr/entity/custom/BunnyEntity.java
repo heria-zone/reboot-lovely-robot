@@ -10,13 +10,10 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
-import net.msymbios.rlovelyr.entity.enums.EntityModel;
-import net.msymbios.rlovelyr.entity.enums.EntityTexture;
 import net.msymbios.rlovelyr.entity.enums.EntityVariant;
 import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
 import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
@@ -29,8 +26,6 @@ import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.core.manager.SingletonAnimationFactory;
-
-import static net.msymbios.rlovelyr.entity.internal.Utility.getRandomNumber;
 
 public class BunnyEntity extends InternalEntity implements IAnimatable {
 
@@ -48,31 +43,13 @@ public class BunnyEntity extends InternalEntity implements IAnimatable {
                 .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ARMOR_TOUGHNESS));
     } // setAttributes ()
 
-    // -- MODEL --
-    @Override
-    public Identifier getCurrentModelByID(int value) { return InternalMetric.getModel(EntityVariant.Bunny, EntityModel.byId(value)); } // getCurrentModelByID ()
-
-    // TEXTURE
-    @Override
-    public Identifier getTextureByID(int value) { return InternalMetric.getTexture(EntityVariant.Bunny, EntityTexture.byId(value)); } // getTextureByID ()
-
-    // VARIANT
-    @Override
-    public String getVariant() {
-        return this.getVariant(EntityVariant.Bunny.getName());
-    } // getVariant ()
-
-    // STATS
-    public float getAttributeRaw(EntityAttribute attribute) {
-        return InternalMetric.getAttributeValue(EntityVariant.Bunny, attribute);
-    } // getAttributeRaw ()
-
     // -- Constructor --
     public BunnyEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
+        this.variant = EntityVariant.Bunny;
     } // Constructor RobotEntity ()
 
-    // -- Animations --
+    // -- Inherited Methods --
     @Override
     public void registerControllers(AnimationData controllerRegister) {
         controllerRegister.addAnimationController(InternalAnimation.locomotionAnimation(this));
@@ -84,11 +61,11 @@ public class BunnyEntity extends InternalEntity implements IAnimatable {
         return cache;
     } // getFactory ()
 
-    // -- Inherited Methods --
+    // -- Built-In Methods --
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.setVariant(EntityVariant.Bunny.getName());
-        this.setTexture(getRandomNumber(InternalMetric.getTextureCount(EntityVariant.Bunny)));
+        this.variant = EntityVariant.Bunny;
+        this.setTexture(InternalMetric.getRandomTextureID(this.variant));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
@@ -102,6 +79,7 @@ public class BunnyEntity extends InternalEntity implements IAnimatable {
         this.goalSelector.add(4, new AiBaseDefenseGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
         this.goalSelector.add(5, new WanderAroundFarGoal(this, InternalMetric.WanderAroundMovement));
         this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, InternalMetric.LookAtRange));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, InternalMetric.LookAtRange));
         this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
@@ -109,12 +87,5 @@ public class BunnyEntity extends InternalEntity implements IAnimatable {
         this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetric.AttackChance, false, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
-
-    // -- Save Methods --
-    @Override
-    protected void initDataTracker() {
-        super.initDataTracker();
-        this.dataTracker.startTracking(VARIANT, EntityVariant.Bunny.getName());
-    } // initDataTracker ()
 
 } // Class BunnyEntity
