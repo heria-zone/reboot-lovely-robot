@@ -10,11 +10,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EntityItemRobotCore extends Item {
+public class RobotCoreItem extends Item {
 
-    public EntityItemRobotCore(Settings settings) {
+    // -- Constructor --
+    public RobotCoreItem(Settings settings) {
         super(settings);
-    }
+    } // Constructor RobotCoreItem ()
 
     // -- Build-In Methods --
     @Override
@@ -34,4 +35,4 @@ public class EntityItemRobotCore extends Item {
         }
     } // appendTooltip ()
 
-} // Class
+} // Class RobotCoreItem

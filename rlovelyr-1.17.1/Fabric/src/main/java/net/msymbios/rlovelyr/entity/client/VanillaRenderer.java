@@ -14,7 +14,7 @@ public class VanillaRenderer extends GeoEntityRenderer<VanillaEntity> {
         this.shadowRadius = InternalMetric.ShadowRadius;
     } // Constructor VanillaRenderer ()
 
-    // -- Methods --
+    // -- Inherited Methods --
     @Override
     public Identifier getTextureLocation(VanillaEntity instance) {
         return instance.getTexture();
