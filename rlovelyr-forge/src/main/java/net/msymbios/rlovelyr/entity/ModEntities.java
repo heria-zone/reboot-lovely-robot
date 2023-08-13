@@ -12,6 +12,7 @@ import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.msymbios.rlovelyr.entity.enums.EntityVariant;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 
 public class ModEntities {
@@ -19,33 +20,33 @@ public class ModEntities {
     // -- Variables --
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES, LovelyRobotMod.MODID);
 
-    public static final RegistryObject<EntityType<BunnyEntity>> BUNNY = ENTITY_TYPES.register("bunny",
+    public static final RegistryObject<EntityType<BunnyEntity>> BUNNY = ENTITY_TYPES.register(EntityVariant.Bunny.getName(),
             () -> EntityType.Builder.of(BunnyEntity::new, EntityClassification.CREATURE).sized(InternalMetric.Width, InternalMetric.Height)
-                    .build(new ResourceLocation(LovelyRobotMod.MODID, "bunny").toString()));
+                    .build(new ResourceLocation(LovelyRobotMod.MODID, EntityVariant.Bunny.getName()).toString()));
 
-    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = ENTITY_TYPES.register("bunny2",
+    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = ENTITY_TYPES.register(EntityVariant.Bunny2.getName(),
             () -> EntityType.Builder.of(Bunny2Entity::new, EntityClassification.CREATURE).sized(InternalMetric.Width, InternalMetric.Height)
-                    .build(new ResourceLocation(LovelyRobotMod.MODID, "bunny2").toString()));
+                    .build(new ResourceLocation(LovelyRobotMod.MODID, EntityVariant.Bunny2.getName()).toString()));
 
-    public static final RegistryObject<EntityType<DragonEntity>> DRAGON = ENTITY_TYPES.register("dragon",
+    public static final RegistryObject<EntityType<DragonEntity>> DRAGON = ENTITY_TYPES.register(EntityVariant.Dragon.getName(),
             () -> EntityType.Builder.of(DragonEntity::new, EntityClassification.CREATURE).sized(InternalMetric.Width, InternalMetric.Height)
-                    .build(new ResourceLocation(LovelyRobotMod.MODID, "dragon").toString()));
+                    .build(new ResourceLocation(LovelyRobotMod.MODID, EntityVariant.Dragon.getName()).toString()));
 
-    public static final RegistryObject<EntityType<HoneyEntity>> HONEY = ENTITY_TYPES.register("honey",
+    public static final RegistryObject<EntityType<HoneyEntity>> HONEY = ENTITY_TYPES.register(EntityVariant.Honey.getName(),
             () -> EntityType.Builder.of(HoneyEntity::new, EntityClassification.CREATURE).sized(InternalMetric.Width, InternalMetric.Height)
-                    .build(new ResourceLocation(LovelyRobotMod.MODID, "honey").toString()));
+                    .build(new ResourceLocation(LovelyRobotMod.MODID, EntityVariant.Honey.getName()).toString()));
 
-    public static final RegistryObject<EntityType<KitsuneEntity>> KITSUNE = ENTITY_TYPES.register("kitsune",
+    public static final RegistryObject<EntityType<KitsuneEntity>> KITSUNE = ENTITY_TYPES.register(EntityVariant.Kitsune.getName(),
             () -> EntityType.Builder.of(KitsuneEntity::new, EntityClassification.CREATURE).sized(InternalMetric.Width, InternalMetric.Height)
-                    .build(new ResourceLocation(LovelyRobotMod.MODID, "kitsune").toString()));
+                    .build(new ResourceLocation(LovelyRobotMod.MODID, EntityVariant.Kitsune.getName()).toString()));
 
-    public static final RegistryObject<EntityType<NekoEntity>> NEKO = ENTITY_TYPES.register("neko",
+    public static final RegistryObject<EntityType<NekoEntity>> NEKO = ENTITY_TYPES.register(EntityVariant.Neko.getName(),
             () -> EntityType.Builder.of(NekoEntity::new, EntityClassification.CREATURE).sized(InternalMetric.Width, InternalMetric.Height)
-                    .build(new ResourceLocation(LovelyRobotMod.MODID, "neko").toString()));
+                    .build(new ResourceLocation(LovelyRobotMod.MODID, EntityVariant.Neko.getName()).toString()));
 
-    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = ENTITY_TYPES.register("vanilla",
+    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = ENTITY_TYPES.register(EntityVariant.Vanilla.getName(),
             () -> EntityType.Builder.of(VanillaEntity::new, EntityClassification.CREATURE).sized(InternalMetric.Width, InternalMetric.Height)
-                    .build(new ResourceLocation(LovelyRobotMod.MODID, "vanilla").toString()));
+                    .build(new ResourceLocation(LovelyRobotMod.MODID, EntityVariant.Vanilla.getName()).toString()));
 
     // -- Methods --
     public static void register(IEventBus eventBus) {

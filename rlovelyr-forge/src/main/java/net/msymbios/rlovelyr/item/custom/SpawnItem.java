@@ -14,12 +14,12 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class EntityItemSpawn extends ForgeSpawnEggItem {
+public class SpawnItem extends ForgeSpawnEggItem {
 
     // -- Constructor --
-    public EntityItemSpawn(Supplier<? extends EntityType<? extends MobEntity>> type, Properties props) {
+    public SpawnItem(Supplier<? extends EntityType<? extends MobEntity>> type, Properties props) {
         super(type, 0xFFFFFF, 0xFFFFFF, props);
-    } // Constructor RobotSpawnItem ()
+    } // Constructor SpawnItem ()
 
     // -- Build-In Methods --
     @Override
@@ -41,4 +41,4 @@ public class EntityItemSpawn extends ForgeSpawnEggItem {
         }
     } // appendHoverText ()
 
-} // Class EntityItemSpawn
+} // Class SpawnItem

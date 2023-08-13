@@ -318,13 +318,6 @@ public abstract class InternalEntity extends TameableEntity {
 
     // -- Built-In Methods --
     @Override
-    public ILivingEntityData finalizeSpawn(IServerWorld p_213386_1_, DifficultyInstance p_213386_2_, SpawnReason p_213386_3_, @Nullable ILivingEntityData p_213386_4_, @Nullable CompoundNBT p_213386_5_) {
-        this.setOrderedToSit(true);
-        this.setCurrentState(EntityState.Standby);
-        return super.finalizeSpawn(p_213386_1_, p_213386_2_, p_213386_3_, p_213386_4_, p_213386_5_);
-    } // finalizeSpawn ()
-
-    @Override
     public void tick() {
         super.tick();
         handleCombatMode();
