@@ -31,7 +31,7 @@ import software.bernie.geckolib3.core.manager.SingletonAnimationFactory;
 
 import java.util.UUID;
 
-public class BunnyEntity extends InternalEntity implements NeutralMob, IAnimatable {
+public class DragonEntity extends InternalEntity implements NeutralMob, IAnimatable {
 
     // -- Variables --
     private final AnimationFactory cache = new SingletonAnimationFactory(this);
@@ -39,19 +39,19 @@ public class BunnyEntity extends InternalEntity implements NeutralMob, IAnimatab
     // -- Properties --
     public static AttributeSupplier setAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_HEALTH))
-                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ATTACK_DAMAGE))
-                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ATTACK_SPEED))
-                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MOVEMENT_SPEED))
-                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ARMOR))
-                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ARMOR_TOUGHNESS)).build();
+                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Dragon, EntityAttribute.MAX_HEALTH))
+                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Dragon, EntityAttribute.ATTACK_DAMAGE))
+                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Dragon, EntityAttribute.ATTACK_SPEED))
+                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Dragon, EntityAttribute.MOVEMENT_SPEED))
+                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Dragon, EntityAttribute.ARMOR))
+                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Dragon, EntityAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
     // -- Constructor --
-    public BunnyEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
+    public DragonEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
-        this.variant = EntityVariant.Bunny;
-    } // Constructor BunnyEntity ()
+        this.variant = EntityVariant.Dragon;
+    } // Constructor DragonEntity ()
 
     // -- Animations --
     @Override
@@ -66,7 +66,7 @@ public class BunnyEntity extends InternalEntity implements NeutralMob, IAnimatab
     // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.variant = EntityVariant.Bunny;
+        this.variant = EntityVariant.Dragon;
         this.setTexture(InternalMetric.getRandomTextureID(this.variant));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
@@ -108,4 +108,4 @@ public class BunnyEntity extends InternalEntity implements NeutralMob, IAnimatab
     @Override
     public void startPersistentAngerTimer() {} // startPersistentAngerTimer ()
 
-} // Class BunnyEntity
+} // Class DragonEntity

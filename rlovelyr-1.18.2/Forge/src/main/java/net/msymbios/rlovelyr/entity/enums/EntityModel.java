@@ -6,7 +6,7 @@ import java.util.Comparator;
 public enum EntityModel {
 
     // -- Enum --
-    Unarmed(0, "unarmed"),
+    Default(0, "default"),
     Armed(1, "armed");
 
 
