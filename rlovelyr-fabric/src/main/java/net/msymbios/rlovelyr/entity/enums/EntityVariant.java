@@ -8,9 +8,11 @@ public enum EntityVariant {
     // -- Enum --
     Bunny(0, "bunny"),
     Bunny2(1, "bunny2"),
-    Honey(2, "honey"),
-    Vanilla(3, "vanilla");
-
+    Dragon(2, "dragon"),
+    Honey(3, "honey"),
+    Kitsune(4, "kitsune"),
+    Neko(5, "neko"),
+    Vanilla(6, "vanilla");
 
     // -- Variables --
     private static final EntityVariant[] CODEC = Arrays.stream(values()).sorted(Comparator.comparingInt(EntityVariant::getId)).toArray(EntityVariant[]::new);

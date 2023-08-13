@@ -8,7 +8,7 @@ import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class HoneyModel extends AnimatedGeoModel<HoneyEntity> {
 
-    // -- Methods --
+    // -- Inherited Methods --
     @Override
     public Identifier getModelLocation(HoneyEntity animatable) {
         return animatable.getCurrentModel();
