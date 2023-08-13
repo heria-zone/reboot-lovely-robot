@@ -8,7 +8,7 @@ import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class VanillaModel extends AnimatedGeoModel<VanillaEntity> {
 
-    // -- Methods --
+    // -- Inherited Methods --
     @Override
     public ResourceLocation getModelLocation(VanillaEntity animatable) {
         return animatable.getCurrentModel();

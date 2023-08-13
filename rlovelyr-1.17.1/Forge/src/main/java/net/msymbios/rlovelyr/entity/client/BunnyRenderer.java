@@ -14,7 +14,7 @@ public class BunnyRenderer extends GeoEntityRenderer<BunnyEntity> {
         this.shadowRadius = InternalMetric.ShadowRadius;
     } // Constructor Bunny2Renderer ()
 
-    // -- Methods --
+    // -- Inherited Methods --
     @Override
     public ResourceLocation getTextureLocation(BunnyEntity instance) {
         return instance.getTexture();

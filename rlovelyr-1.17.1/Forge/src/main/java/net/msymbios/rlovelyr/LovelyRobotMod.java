@@ -1,12 +1,7 @@
 package net.msymbios.rlovelyr;
 
 import net.msymbios.rlovelyr.entity.ModEntities;
-import net.msymbios.rlovelyr.entity.client.BunnyRenderer;
-import net.msymbios.rlovelyr.entity.client.Bunny2Renderer;
-import net.msymbios.rlovelyr.entity.client.HoneyRenderer;
-import net.msymbios.rlovelyr.entity.client.VanillaRenderer;
 import net.msymbios.rlovelyr.item.ModItems;
-import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -45,10 +40,7 @@ public class LovelyRobotMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            EntityRenderers.register(ModEntities.BUNNY.get(), BunnyRenderer::new);
-            EntityRenderers.register(ModEntities.BUNNY2.get(), Bunny2Renderer::new);
-            EntityRenderers.register(ModEntities.HONEY.get(), HoneyRenderer::new);
-            EntityRenderers.register(ModEntities.VANILLA.get(), VanillaRenderer::new);
+            ModEntities.registerRenderers();
         } // onClientSetup ()
     } // ClientModEvents ()
 

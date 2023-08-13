@@ -12,6 +12,6 @@ public class InternalAttribute {
     public InternalAttribute(EntityAttribute attribute, float value) {
         this.attribute = attribute;
         this.value = value;
-    } // Construct RobotAttributeInstance
+    } // Construct InternalAttribute ()
 
 } // Class InternalAttribute

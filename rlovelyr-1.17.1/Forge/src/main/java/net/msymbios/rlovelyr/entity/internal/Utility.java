@@ -1,18 +1,11 @@
 package net.msymbios.rlovelyr.entity.internal;
 
-import java.util.Random;
-
 public class Utility {
 
     // -- Variables --
-    private static final Random rand = new Random();
     public static final double PI = 3.14159265358979323846;
 
     // -- Methods --
-    public static int getRandomNumber(int number) {
-        return rand.nextInt(number);
-    } // getRandomNumber ()
-
     public static boolean invertBoolean(boolean value) {
         return !value;
     } // invertBoolean ()
