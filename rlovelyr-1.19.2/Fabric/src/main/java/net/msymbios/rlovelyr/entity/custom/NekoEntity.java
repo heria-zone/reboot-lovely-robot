@@ -1,6 +1,8 @@
 package net.msymbios.rlovelyr.entity.custom;
 
-import net.minecraft.entity.*;
+import net.minecraft.entity.EntityData;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -8,11 +10,11 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.entity.enums.*;
+import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
+import net.msymbios.rlovelyr.entity.enums.EntityVariant;
 import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
 import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
 import net.msymbios.rlovelyr.entity.goal.AiFollowOwnerGoal;
@@ -25,9 +27,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.core.manager.SingletonAnimationFactory;
 
-import static net.msymbios.rlovelyr.entity.internal.Utility.*;
-
-public class Bunny2Entity extends InternalEntity implements IAnimatable {
+public class NekoEntity extends InternalEntity implements IAnimatable {
 
     // -- Variables --
     private final AnimationFactory cache = new SingletonAnimationFactory(this);
@@ -35,19 +35,19 @@ public class Bunny2Entity extends InternalEntity implements IAnimatable {
     // -- Properties --
     public static DefaultAttributeContainer.Builder setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MAX_HEALTH))
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ATTACK_DAMAGE))
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ATTACK_SPEED))
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MOVEMENT_SPEED))
-                .add(EntityAttributes.GENERIC_ARMOR, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ARMOR))
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ARMOR_TOUGHNESS));
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.MAX_HEALTH))
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ATTACK_DAMAGE))
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ATTACK_SPEED))
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.MOVEMENT_SPEED))
+                .add(EntityAttributes.GENERIC_ARMOR, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ARMOR))
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ARMOR_TOUGHNESS));
     } // setAttributes ()
 
     // -- Constructor --
-    public Bunny2Entity(EntityType<? extends TameableEntity> entityType, World world) {
+    public NekoEntity(EntityType<? extends TameableEntity> entityType, World world) {
         super(entityType, world);
-        this.variant = EntityVariant.Bunny2;
-    } // Constructor Bunny2Entity ()
+        this.variant = EntityVariant.Neko;
+    } // Constructor NekoEntity ()
 
     // -- Inherited Methods --
     @Override
@@ -64,7 +64,7 @@ public class Bunny2Entity extends InternalEntity implements IAnimatable {
     // -- Built-In Methods --
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.variant = EntityVariant.Bunny2;
+        this.variant = EntityVariant.Neko;
         this.setTexture(InternalMetric.getRandomTextureID(this.variant));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
@@ -88,4 +88,4 @@ public class Bunny2Entity extends InternalEntity implements IAnimatable {
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
-} // Class Bunny2Entity
+} // Class NekoEntity

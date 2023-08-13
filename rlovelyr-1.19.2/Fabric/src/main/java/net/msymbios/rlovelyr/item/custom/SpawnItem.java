@@ -13,12 +13,12 @@ import net.msymbios.rlovelyr.entity.internal.Utility;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class EntityItemSpawn extends SpawnEggItem {
+public class SpawnItem extends SpawnEggItem {
 
     // -- Constructor --
-    public EntityItemSpawn(EntityType<? extends MobEntity> type, Settings settings) {
+    public SpawnItem(EntityType<? extends MobEntity> type, Settings settings) {
         super(type, 0xFFFFFF, 0xFFFFFF, settings);
-    } // Constructor RobotSpawnItem ()
+    } // Constructor SpawnItem ()
 
     // -- Build-In Methods --
     @Override
@@ -39,4 +39,4 @@ public class EntityItemSpawn extends SpawnEggItem {
         }
     } // appendTooltip ()
 
-} // Class EntityItemSpawn
+} // Class SpawnItem

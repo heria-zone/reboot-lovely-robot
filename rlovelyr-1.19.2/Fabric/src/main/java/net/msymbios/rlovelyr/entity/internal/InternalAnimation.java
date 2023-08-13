@@ -17,13 +17,13 @@ public final class InternalAnimation {
     public static final AnimationBuilder IDLE = new AnimationBuilder().addAnimation("animation.lovelyrobot.idle", ILoopType.EDefaultLoopTypes.LOOP);
     public static final AnimationBuilder WALK = new AnimationBuilder().addAnimation("animation.lovelyrobot.walk", ILoopType.EDefaultLoopTypes.LOOP);
     public static final AnimationBuilder SIT = new AnimationBuilder().addAnimation ("animation.lovelyrobot.sit", ILoopType.EDefaultLoopTypes.LOOP);
-    public static final AnimationBuilder ATTACK_SWING = new AnimationBuilder().addAnimation ("animation.lovelyrobot.attack", ILoopType.EDefaultLoopTypes.PLAY_ONCE);
+    public static final AnimationBuilder ATTACK = new AnimationBuilder().addAnimation ("animation.lovelyrobot.attack", ILoopType.EDefaultLoopTypes.PLAY_ONCE);
 
     // -- Methods --
     public static <T extends InternalEntity & IAnimatable> AnimationController<T> attackAnimation(T animatable) {
         return new AnimationController<>(animatable, "Attack", 5, event -> {
             if (animatable.handSwinging) {
-                event.getController().setAnimation(ATTACK_SWING);
+                event.getController().setAnimation(ATTACK);
                 return PlayState.CONTINUE;
             }
             event.getController().clearAnimationCache();
