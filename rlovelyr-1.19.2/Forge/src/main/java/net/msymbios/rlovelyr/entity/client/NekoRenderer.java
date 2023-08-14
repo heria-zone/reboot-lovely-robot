@@ -1,24 +1,24 @@
 package net.msymbios.rlovelyr.entity.client;
 
-import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.msymbios.rlovelyr.entity.custom.NekoEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class VanillaRenderer extends GeoEntityRenderer<VanillaEntity> {
+public class NekoRenderer extends GeoEntityRenderer<NekoEntity> {
 
     // -- Constructor --
-    public VanillaRenderer(EntityRendererProvider.Context renderManager) {
-        super(renderManager, new VanillaModel());
+    public NekoRenderer(EntityRendererProvider.Context renderManager) {
+        super(renderManager, new NekoModel());
         this.shadowRadius = InternalMetric.ShadowRadius;
-    } // Constructor VanillaRenderer ()
+    } // Constructor NekoRenderer ()
 
     // -- Methods --
     @Override
-    public @NotNull ResourceLocation getTextureLocation(VanillaEntity instance) {
+    public @NotNull ResourceLocation getTextureLocation(NekoEntity instance) {
         return instance.getTexture();
     } // getTextureLocation ()
 
-} // Class VanillaRenderer
+} // Class NekoRenderer

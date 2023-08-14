@@ -45,10 +45,7 @@ public class LovelyRobotMod {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            EntityRenderers.register(ModEntities.BUNNY.get(), BunnyRenderer::new);
-            EntityRenderers.register(ModEntities.BUNNY2.get(), Bunny2Renderer::new);
-            EntityRenderers.register(ModEntities.HONEY.get(), HoneyRenderer::new);
-            EntityRenderers.register(ModEntities.VANILLA.get(), VanillaRenderer::new);
+            ModEntities.registerRenderers();
         } // onClientSetup ()
     } // ClientModEvents ()
 

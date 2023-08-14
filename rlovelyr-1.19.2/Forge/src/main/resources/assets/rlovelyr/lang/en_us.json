@@ -1,14 +1,20 @@
 {
   "item.rlovelyr.bunny_spawn": "Bunny",
   "item.rlovelyr.bunny2_spawn": "Bunny 2.0",
+  "item.rlovelyr.dragon_spawn": "Dragon",
   "item.rlovelyr.honey_spawn": "Honey",
+  "item.rlovelyr.kitsune_spawn": "Kitsune",
+  "item.rlovelyr.neko_spawn": "Neko",
   "item.rlovelyr.vanilla_spawn": "Vanilla",
   "item.rlovelyr.robot_core": "Robot Core",
 
-  "itemGroup.rlovelyr.lovely_robot": "Reboot LovelyRobot",
+  "itemGroup.lovely_robot": "Reboot LovelyRobot",
 
   "entity.rlovelyr.bunny": "Bunny",
   "entity.rlovelyr.bunny2": "Bunny 2.0",
+  "entity.rlovelyr.dragon": "Dragon",
   "entity.rlovelyr.honey": "Honey",
+  "entity.rlovelyr.kitsune": "Kitsune",
+  "entity.rlovelyr.neko": "Neko",
   "entity.rlovelyr.vanilla": "Vanilla"
 }

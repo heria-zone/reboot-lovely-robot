@@ -10,12 +10,12 @@ import net.msymbios.rlovelyr.entity.internal.Utility;
 
 import java.util.List;
 
-public class EntityItemRobotCore extends Item {
+public class RobotCoreItem extends Item {
 
     // -- Constructor --
-    public EntityItemRobotCore(Properties setting) {
+    public RobotCoreItem(Properties setting) {
         super(setting);
-    } // Constructor EntityItemRobotCore
+    } // Constructor RobotCoreItem
 
     // -- Build-In Methods --
     @Override
@@ -37,4 +37,4 @@ public class EntityItemRobotCore extends Item {
         }
     } // appendHoverText ()
 
-} // Class EntityItemRobotCore
+} // Class RobotCoreItem

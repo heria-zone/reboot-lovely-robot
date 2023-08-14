@@ -13,7 +13,7 @@ public class BunnyRenderer extends GeoEntityRenderer<BunnyEntity> {
     public BunnyRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new BunnyModel());
         this.shadowRadius = InternalMetric.ShadowRadius;
-    } // Constructor Bunny2Renderer ()
+    } // Constructor BunnyRenderer ()
 
     // -- Methods --
     @Override
