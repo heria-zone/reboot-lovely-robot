@@ -1,33 +1,33 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.client;
 
-import net.msymbios.rlovelyr.entity.custom.HoneyEntity;
+import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
-public class HoneyModel extends AnimatedGeoModel<HoneyEntity> {
+public class VanillaModel extends AnimatedGeoModel<VanillaEntity> {
 
     // -- Methods --
     @Override
-    public ResourceLocation getModelResource(HoneyEntity animatable) {
+    public ResourceLocation getModelResource(VanillaEntity animatable) {
         return animatable.getCurrentModel();
     } // getModelResource ()
 
     @Override
-    public ResourceLocation getTextureResource(HoneyEntity animatable) {
+    public ResourceLocation getTextureResource(VanillaEntity animatable) {
         return animatable.getTexture();
     } // getTextureResource ()
 
     @Override
-    public ResourceLocation getAnimationResource(HoneyEntity animatable) {
+    public ResourceLocation getAnimationResource(VanillaEntity animatable) {
         return animatable.getAnimator();
     } // getAnimationResource ()
 
     @Override
-    public void setLivingAnimations(HoneyEntity animatable, Integer uniqueID, AnimationEvent event){
+    public void setLivingAnimations(VanillaEntity animatable, Integer uniqueID, AnimationEvent event){
         super.setLivingAnimations(animatable, uniqueID, event);
         InternalAnimation.headAnimation(this, event);
     } // setLivingAnimations ()
 
-} // Class HoneyModel
+} // Class VanillaModel

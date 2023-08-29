@@ -1,24 +1,24 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.client;
 
-import net.msymbios.rlovelyr.entity.custom.Bunny2Entity;
+import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class Bunny2Renderer extends GeoEntityRenderer<Bunny2Entity> {
+public class BunnyRenderer extends GeoEntityRenderer<BunnyEntity> {
 
     // -- Constructor --
-    public Bunny2Renderer(EntityRendererProvider.Context renderManager) {
-        super(renderManager, new Bunny2Model());
+    public BunnyRenderer(EntityRendererProvider.Context renderManager) {
+        super(renderManager, new BunnyModel());
         this.shadowRadius = InternalMetric.ShadowRadius;
-    } // Constructor Bunny2Renderer ()
+    } // Constructor BunnyRenderer ()
 
     // -- Methods --
     @Override
-    public @NotNull ResourceLocation getTextureLocation(Bunny2Entity instance) {
+    public @NotNull ResourceLocation getTextureLocation(BunnyEntity instance) {
         return instance.getTexture();
     } // getTextureLocation ()
 
-} // Class Bunny2Renderer
+} // Class BunnyRenderer

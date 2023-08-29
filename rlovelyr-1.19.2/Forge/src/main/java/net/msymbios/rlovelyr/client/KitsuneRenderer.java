@@ -1,24 +1,24 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.client;
 
-import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.msymbios.rlovelyr.entity.custom.KitsuneEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class BunnyRenderer extends GeoEntityRenderer<BunnyEntity> {
+public class KitsuneRenderer extends GeoEntityRenderer<KitsuneEntity> {
 
     // -- Constructor --
-    public BunnyRenderer(EntityRendererProvider.Context renderManager) {
-        super(renderManager, new BunnyModel());
+    public KitsuneRenderer(EntityRendererProvider.Context renderManager) {
+        super(renderManager, new KitsuneModel());
         this.shadowRadius = InternalMetric.ShadowRadius;
-    } // Constructor BunnyRenderer ()
+    } // Constructor KitsuneRenderer ()
 
     // -- Methods --
     @Override
-    public @NotNull ResourceLocation getTextureLocation(BunnyEntity instance) {
+    public @NotNull ResourceLocation getTextureLocation(KitsuneEntity instance) {
         return instance.getTexture();
     } // getTextureLocation ()
 
-} // Class BunnyRenderer
+} // Class KitsuneRenderer

@@ -1,33 +1,33 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.client;
 
-import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
 import net.minecraft.resources.ResourceLocation;
+import net.msymbios.rlovelyr.entity.custom.NekoEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
-public class BunnyModel extends AnimatedGeoModel<BunnyEntity> {
+public class NekoModel extends AnimatedGeoModel<NekoEntity> {
 
     // -- Methods --
     @Override
-    public ResourceLocation getModelResource(BunnyEntity animatable) {
+    public ResourceLocation getModelResource(NekoEntity animatable) {
         return animatable.getCurrentModel();
     } // getModelResource ()
 
     @Override
-    public ResourceLocation getTextureResource(BunnyEntity animatable) {
+    public ResourceLocation getTextureResource(NekoEntity animatable) {
         return animatable.getTexture();
     } // getTextureResource ()
 
     @Override
-    public ResourceLocation getAnimationResource(BunnyEntity animatable) {
+    public ResourceLocation getAnimationResource(NekoEntity animatable) {
         return animatable.getAnimator();
     } // getAnimationResource ()
 
     @Override
-    public void setLivingAnimations(BunnyEntity animatable, Integer uniqueID, AnimationEvent event){
+    public void setLivingAnimations(NekoEntity animatable, Integer uniqueID, AnimationEvent event){
         super.setLivingAnimations(animatable, uniqueID, event);
         InternalAnimation.headAnimation(this, event);
     } // setLivingAnimations ()
 
-} // Class BunnyModel
+} // Class NekoModel

@@ -2,7 +2,7 @@ package net.msymbios.rlovelyr.entity;
 
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.msymbios.rlovelyr.entity.client.*;
+import net.msymbios.rlovelyr.client.*;
 import net.msymbios.rlovelyr.entity.custom.*;
 import net.msymbios.rlovelyr.LovelyRobotMod;
 import net.minecraft.resources.ResourceLocation;
