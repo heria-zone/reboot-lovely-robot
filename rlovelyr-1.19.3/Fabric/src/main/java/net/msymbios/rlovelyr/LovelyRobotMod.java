@@ -20,7 +20,7 @@ public class LovelyRobotMod implements ModInitializer {
 
 		GeckoLib.initialize();
 
-		ModEntities.registerEntityAttribute();
+		ModEntities.registerAttributes();
 	} // onInitialize ()
 
 } // Class LovelyRobotMod
