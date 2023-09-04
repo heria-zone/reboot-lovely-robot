@@ -2,6 +2,8 @@ package net.msymbios.rlovelyr.entity.internal;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -414,10 +416,10 @@ public abstract class InternalEntity extends TamableAnimal {
                     handleAutoAttack(itemStack, player);
                     handleTexture(itemStack, player);
 
-                    if(itemStack.is(Items.OAK_BUTTON)) {
+                    if(itemStack.getItem() == (Items.OAK_BUTTON)) {
                         this.setNotification(Utility.invertBoolean(getNotification()));
-                        if(getNotification()) commandDebug("Notification ON", true);
-                        else commandDebug("Notification OFF", true);
+                        if(getNotification()) commandDebug(new TranslatableComponent("msg.rlovelyr.notification").append(Component.nullToEmpty(" ")).append(new TranslatableComponent("msg.rlovelyr.on")), true);
+                        else commandDebug(new TranslatableComponent("msg.rlovelyr.notification").append(Component.nullToEmpty(" ")).append(new TranslatableComponent("msg.rlovelyr.off")), true);
                     }
 
                     if(itemStack.is(Items.BOOK)) displayMessage(player, true, false);
@@ -534,7 +536,7 @@ public abstract class InternalEntity extends TamableAnimal {
         this.setOwnerUUID(player.getUUID());
         this.setTame(true);
         this.setOrderedToSit(true);
-        player.displayClientMessage(Component.nullToEmpty("Owner: " + getOwner().getName().getString()), true);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.owner").append(": " + getOwner().getName().getString()), true);
     } // handleTame ()
 
     public void handleTexture(ItemStack item, Player player) {
@@ -556,8 +558,7 @@ public abstract class InternalEntity extends TamableAnimal {
         if(item.is(Items.RED_DYE)) setTexture(EntityTexture.RED);
         if(item.is(Items.BLACK_DYE)) setTexture(EntityTexture.BLACK);
         if(oldTexture != getTextureID()) {
-            if (!player.getAbilities().instabuild)
-                item.shrink(1);
+            if (!player.getAbilities().instabuild) item.shrink(1);
         }
     } // handleTexture ()
 
@@ -569,7 +570,10 @@ public abstract class InternalEntity extends TamableAnimal {
     public void handleAutoAttack(ItemStack itemStack, Player player){
         if (!canInteractAutoAttack(itemStack)) return;
         setAutoAttack(invertBoolean(getAutoAttack()));
-        player.displayClientMessage(Component.nullToEmpty("Auto Attack: " + this.getAutoAttack()), true);
+        String msgAutoAttack;
+        if(this.getAutoAttack()) msgAutoAttack = "msg.rlovelyr.on";
+        else msgAutoAttack = "msg.rlovelyr.off";
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.auto_attack").append(Component.nullToEmpty(": ")).append(new TranslatableComponent(msgAutoAttack)), true);
     } // handleAutoAttack ()
 
     public void handleState(ItemStack itemStack, Player player) {
@@ -577,7 +581,7 @@ public abstract class InternalEntity extends TamableAnimal {
         StandbyState(itemStack);
         FollowState(itemStack);
         BaseDefenseState(itemStack);
-        if(previousState != getCurrentState()) player.displayClientMessage(Component.nullToEmpty("State: " + getCurrentState().name()), true);
+        if(previousState != getCurrentState()) player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.state").append(Component.nullToEmpty(": ")).append(new TranslatableComponent(Utility.getTranslatableState(this.getCurrentState()))), true);
     } // handleState
 
     public void StandbyState(ItemStack itemStack){
@@ -610,42 +614,54 @@ public abstract class InternalEntity extends TamableAnimal {
         }
     } // commandDebug ()
 
+    public void commandDebug(MutableComponent message, boolean overlay) {
+        if(this.getOwner() != null) {
+            Player player = (Player)this.getOwner();
+            player.displayClientMessage(message, overlay);
+        }
+    } // commandDebug ()
+
     public void commandDebugExtra() {
-        String debug = "";
+        MutableComponent debug = null;
         if(combatMode && getNotification()) {
-            if(waryTimer < 10) debug += "Wary: 0" + waryTimer + " ";
-            else debug += "Wary: " + waryTimer + " ";
+            debug = new TranslatableComponent(Utility.getTranslatableEntity(this.variant)).append(Component.nullToEmpty(": ")).append(new TranslatableComponent("msg.rlovelyr.wary"));
+            if(waryTimer < 10) debug = debug.append(": 0" + waryTimer + " ");
+            else debug = debug.append(": " + waryTimer + " ");
         }
 
         if(autoHeal && getNotification()) {
-            if(autoHealTimer < 10) debug += "Heal: 0" + autoHealTimer + " ";
-            else debug += "Heal: " + autoHealTimer + " ";
-            if(this.getHealth() < 10) debug += "| 0" + this.getHealth();
-            else debug += "| " + (int)Math.floor(this.getHealth());
+            if(debug != null) debug = debug.append(new TranslatableComponent("msg.rlovelyr.heal"));
+            else debug = new TranslatableComponent(Utility.getTranslatableEntity(this.variant)).append(Component.nullToEmpty(": ")).append(new TranslatableComponent("msg.rlovelyr.heal"));
+
+            if(autoHealTimer < 10) debug = debug.append(": 0" + autoHealTimer + " ");
+            else debug = debug.append(": " + autoHealTimer + " ");
+            if(this.getHealth() < 10) debug = debug.append("| 0" + this.getHealth());
+            else debug = debug.append("| " + (int)Math.floor(this.getHealth()));
         }
-        if(!debug.equals("")) commandDebug(debug, true);
+        if(debug != null) commandDebug(debug, true);
     } // commandDebugExtra ()
 
     public void displayMessage (Player player, boolean canShow, boolean showLevelUp) {
         if(!canShow) return;
-        player.displayClientMessage(Component.nullToEmpty("|--------------------------"), false);
-        if(showLevelUp) player.displayClientMessage(Component.nullToEmpty("[LevelUp]"), false);
-        if(this.getCustomName() != null) player.displayClientMessage(Component.nullToEmpty(Utility.FirstToUpperCase (this.getVariant()) + ": " + this.getCustomName().getString()), false);
-        else player.displayClientMessage(Component.nullToEmpty(Utility.FirstToUpperCase (this.getVariant())), false);
-        player.displayClientMessage(Component.nullToEmpty("Level: " + this.getCurrentLevel() + "/" + this.getMaxLevel()), false);
-        player.displayClientMessage(Component.nullToEmpty("Exp: " + this.getExp() + "/" + this.getNextExp()), false);
-        player.displayClientMessage(Component.nullToEmpty("HP: " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
-        player.displayClientMessage(Component.nullToEmpty("Attack: " + this.getAttackValue()), false);
-        player.displayClientMessage(Component.nullToEmpty("Defense: " + this.getDefenseValue()), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.bar"), false);
+        if(showLevelUp) player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.level_up"), false);
+        if(this.getCustomName() != null) player.displayClientMessage(new TranslatableComponent(Utility.getTranslatableEntity(this.variant)).append(": " + this.getCustomName().getString()), false);
+        else player.displayClientMessage(new TranslatableComponent(Utility.getTranslatableEntity(this.variant)), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.level").append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.experience").append(": " + this.getExp()                 + "/" + this.getNextExp()), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.health").append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.attack").append(": " + this.getAttackValue()), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.defence").append(": " + this.getDefenseValue()), false);
     } // displayMessage ()
 
     public void displayProtectionMessage (Player player) {
-        player.displayClientMessage(Component.nullToEmpty("|--------------------------"), false);
-        player.displayClientMessage(Component.nullToEmpty("[Enchantment]"), false);
-        player.displayClientMessage(Component.nullToEmpty("Fire Protection: " + this.getFireProtection() + "/" + InternalMetric.FireProtectionLimit), false);
-        player.displayClientMessage(Component.nullToEmpty("Fall Protection: " + this.getFallProtection() + "/" + InternalMetric.FallProtectionLimit), false);
-        player.displayClientMessage(Component.nullToEmpty("Blast Protection: " + this.getBlastProtection() + "/" + InternalMetric.BlastProtectionLimit), false);
-        player.displayClientMessage(Component.nullToEmpty("Projectile Protection: " + this.getProjectileProtection() + "/" + InternalMetric.ProjectileProtectionLimit), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.bar"), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.enchantment"), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.looting").append(": " + this.getLootingLevel()                       + "/" + InternalMetric.MaxLootingLevel), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.fire_protection").append(": " + this.getFireProtection()             + "/" + InternalMetric.FireProtectionLimit), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.fall_protection").append(": " + this.getFallProtection()             + "/" + InternalMetric.FallProtectionLimit), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.blast_protection").append(": " + this.getBlastProtection()           + "/" + InternalMetric.BlastProtectionLimit), false);
+        player.displayClientMessage(new TranslatableComponent("msg.rlovelyr.projectile_protection").append(": " + this.getProjectileProtection() + "/" + InternalMetric.ProjectileProtectionLimit), false);
     } // displayProtectionMessage ()
 
     // -- Save Methods --
