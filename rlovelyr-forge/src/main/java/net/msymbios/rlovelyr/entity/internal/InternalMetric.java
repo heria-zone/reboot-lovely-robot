@@ -104,92 +104,31 @@ public class InternalMetric {
     }};
 
     public static HashMap<EntityTexture, List<EntityVariant>> ENTITY_TEXTURE = new HashMap(){{
-        List<EntityVariant> list = new ArrayList<EntityVariant>() {{
+        List<EntityVariant> list = new ArrayList() {{
             add(EntityVariant.Bunny);
             add(EntityVariant.Bunny2);
+            add(EntityVariant.Dragon);
             add(EntityVariant.Honey);
+            add(EntityVariant.Kitsune);
+            add(EntityVariant.Neko);
             add(EntityVariant.Vanilla);
         }};
-        put(EntityTexture.BLUE, new ArrayList<EntityVariant>() {{
-            add(EntityVariant.Bunny);
-            add(EntityVariant.Bunny2);
-            add(EntityVariant.Honey);
-            add(EntityVariant.Vanilla);
-            add(EntityVariant.Dragon);
-            add(EntityVariant.Neko);
-        }});
+        put(EntityTexture.BLUE, list);
         put(EntityTexture.BLACK, list);
         put(EntityTexture.CYAN, list);
         put(EntityTexture.BROWN, list);
-
-        put(EntityTexture.LIME, new ArrayList<EntityVariant>() {{
-            add(EntityVariant.Bunny);
-            add(EntityVariant.Bunny2);
-            add(EntityVariant.Honey);
-            add(EntityVariant.Vanilla);
-            add(EntityVariant.Dragon);
-        }});
-
+        put(EntityTexture.LIME, list);
         put(EntityTexture.GRAY, list);
         put(EntityTexture.GREEN, list);
-
-        put(EntityTexture.LIGHT_BLUE, new ArrayList<EntityVariant>() {{
-            add(EntityVariant.Bunny);
-            add(EntityVariant.Bunny2);
-            add(EntityVariant.Honey);
-            add(EntityVariant.Vanilla);
-            add(EntityVariant.Dragon);
-            add(EntityVariant.Kitsune);
-            add(EntityVariant.Neko);
-        }});
-
-        put(EntityTexture.LIGHT_GRAY, new ArrayList<EntityVariant>() {{
-            add(EntityVariant.Bunny);
-            add(EntityVariant.Bunny2);
-            add(EntityVariant.Honey);
-            add(EntityVariant.Vanilla);
-            add(EntityVariant.Kitsune);
-        }});
-
+        put(EntityTexture.LIGHT_BLUE, list);
+        put(EntityTexture.LIGHT_GRAY, list);
         put(EntityTexture.MAGENTA, list);
-
-        put(EntityTexture.ORANGE, new ArrayList<EntityVariant>() {{
-            add(EntityVariant.Bunny);
-            add(EntityVariant.Bunny2);
-            add(EntityVariant.Honey);
-            add(EntityVariant.Vanilla);
-            add(EntityVariant.Kitsune);
-            add(EntityVariant.Neko);
-        }});
-
+        put(EntityTexture.ORANGE, list);
         put(EntityTexture.PINK, list);
-
-        put(EntityTexture.PURPLE, new ArrayList<EntityVariant>() {{
-            add(EntityVariant.Bunny);
-            add(EntityVariant.Bunny2);
-            add(EntityVariant.Honey);
-            add(EntityVariant.Vanilla);
-            add(EntityVariant.Neko);
-        }});
-
-        put(EntityTexture.RED, new ArrayList<EntityVariant>() {{
-            add(EntityVariant.Bunny);
-            add(EntityVariant.Bunny2);
-            add(EntityVariant.Honey);
-            add(EntityVariant.Vanilla);
-            add(EntityVariant.Dragon);
-        }});
-
+        put(EntityTexture.PURPLE, list);
+        put(EntityTexture.RED, list);
         put(EntityTexture.WHITE, list);
-
-        put(EntityTexture.YELLOW, new ArrayList<EntityVariant>() {{
-            add(EntityVariant.Bunny);
-            add(EntityVariant.Bunny2);
-            add(EntityVariant.Honey);
-            add(EntityVariant.Vanilla);
-            add(EntityVariant.Dragon);
-            add(EntityVariant.Kitsune);
-        }});
+        put(EntityTexture.YELLOW, list);
     }};
 
     public static HashMap<EntityAnimator, ResourceLocation> ANIMATOR = new HashMap() {{
@@ -199,30 +138,11 @@ public class InternalMetric {
     public static HashMap<EntityVariant, HashMap<EntityTexture, ResourceLocation>> TEXTURE = new HashMap(){{
         put(EntityVariant.Bunny,    setTexture(EntityVariant.Bunny));
         put(EntityVariant.Bunny2,    setTexture(EntityVariant.Bunny2));
+        put(EntityVariant.Dragon,    setTexture(EntityVariant.Dragon));
         put(EntityVariant.Honey,    setTexture(EntityVariant.Honey));
+        put(EntityVariant.Kitsune,    setTexture(EntityVariant.Kitsune));
+        put(EntityVariant.Neko,    setTexture(EntityVariant.Neko));
         put(EntityVariant.Vanilla,    setTexture(EntityVariant.Vanilla));
-
-        put(EntityVariant.Dragon,    new HashMap() {{
-            put(EntityTexture.LIGHT_BLUE,    new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/dragon/dragon_03.png")); // Light Blue
-            put(EntityTexture.YELLOW,        new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/dragon/dragon_04.png")); // Yellow
-            put(EntityTexture.LIME,          new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/dragon/dragon_05.png")); // Lime
-            put(EntityTexture.BLUE,          new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/dragon/dragon_11.png")); // Blue
-            put(EntityTexture.RED,           new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/dragon/dragon_14.png")); // Red
-        }});
-
-        put(EntityVariant.Kitsune,    new HashMap() {{
-            put(EntityTexture.ORANGE,        new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/kitsune/kitsune_01.png")); // Orange
-            put(EntityTexture.LIGHT_BLUE,    new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/kitsune/kitsune_03.png")); // Light Blue
-            put(EntityTexture.YELLOW,        new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/kitsune/kitsune_04.png")); // Yellow
-            put(EntityTexture.LIGHT_GRAY,    new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/kitsune/kitsune_08.png")); // Light Gray
-        }});
-
-        put(EntityVariant.Neko,    new HashMap() {{
-            put(EntityTexture.ORANGE,        new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/neko/neko_01.png")); // Orange
-            put(EntityTexture.LIGHT_BLUE,    new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/neko/neko_03.png")); // Light Blue
-            put(EntityTexture.PURPLE,        new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/neko/neko_10.png")); // Purple
-            put(EntityTexture.BLUE,          new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/neko/neko_11.png")); // Blue
-        }});
     }};
 
     public static HashMap<EntityVariant, HashMap<EntityAttribute, InternalAttribute>> ATTRIBUTES = new HashMap(){{

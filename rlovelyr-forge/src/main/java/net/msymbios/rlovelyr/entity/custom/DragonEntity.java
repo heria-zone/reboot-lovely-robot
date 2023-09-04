@@ -25,8 +25,6 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-import static net.msymbios.rlovelyr.entity.internal.Utility.getRandomNumber;
-
 public class DragonEntity extends InternalEntity implements IAngerable, IAnimatable {
 
     // -- Variables --
