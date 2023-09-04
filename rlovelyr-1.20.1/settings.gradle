@@ -18,4 +18,4 @@ pluginManagement {
 }
 
 rootProject.name = "${mod_name}"
-include("Fabric"/*, "Forge"*/)
+include("Fabric", "Forge")
