@@ -1,32 +1,32 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.client.model;
 
 import net.minecraft.resources.ResourceLocation;
-import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
+import net.msymbios.rlovelyr.entity.custom.NekoEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.model.GeoModel;
 
-public class VanillaModel extends GeoModel<VanillaEntity> {
+public class NekoModel extends GeoModel<NekoEntity> {
 
     // -- Methods --
     @Override
-    public ResourceLocation getModelResource(VanillaEntity animatable) {
+    public ResourceLocation getModelResource(NekoEntity animatable) {
         return animatable.getCurrentModel();
     } // getModelResource ()
 
     @Override
-    public ResourceLocation getTextureResource(VanillaEntity animatable) {
+    public ResourceLocation getTextureResource(NekoEntity animatable) {
         return animatable.getTexture();
     } // getTextureResource ()
 
     @Override
-    public ResourceLocation getAnimationResource(VanillaEntity animatable) {
+    public ResourceLocation getAnimationResource(NekoEntity animatable) {
         return animatable.getAnimator();
     } // getAnimationResource ()
 
     @Override
-    public void setCustomAnimations(VanillaEntity animatable, long instanceId, AnimationState<VanillaEntity> event) {
+    public void setCustomAnimations(NekoEntity animatable, long instanceId, AnimationState<NekoEntity> event) {
         InternalAnimation.headAnimation(this, event);
     } // setCustomAnimations ()
 
-} // Class VanillaModel
+} // Class NekoModel

@@ -31,7 +31,7 @@ import software.bernie.geckolib.core.animation.AnimatableManager;
 
 import java.util.UUID;
 
-public class BunnyEntity extends InternalEntity implements NeutralMob, GeoEntity {
+public class KitsuneEntity extends InternalEntity implements NeutralMob, GeoEntity {
 
     // -- Variables --
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
@@ -39,19 +39,19 @@ public class BunnyEntity extends InternalEntity implements NeutralMob, GeoEntity
     // -- Properties --
     public static AttributeSupplier setAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MAX_HEALTH))
-                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ATTACK_DAMAGE))
-                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ATTACK_SPEED))
-                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.MOVEMENT_SPEED))
-                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ARMOR))
-                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Bunny, EntityAttribute.ARMOR_TOUGHNESS)).build();
+                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Kitsune, EntityAttribute.MAX_HEALTH))
+                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Kitsune, EntityAttribute.ATTACK_DAMAGE))
+                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Kitsune, EntityAttribute.ATTACK_SPEED))
+                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Kitsune, EntityAttribute.MOVEMENT_SPEED))
+                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Kitsune, EntityAttribute.ARMOR))
+                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Kitsune, EntityAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
     // -- Constructor --
-    public BunnyEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
+    public KitsuneEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
-        this.variant = EntityVariant.Bunny;
-    } // Constructor BunnyEntity ()
+        this.variant = EntityVariant.Kitsune;
+    } // Constructor KitsuneEntity ()
 
     // -- Animations --
     @Override
@@ -68,7 +68,7 @@ public class BunnyEntity extends InternalEntity implements NeutralMob, GeoEntity
     // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.variant = EntityVariant.Bunny;
+        this.variant = EntityVariant.Kitsune;
         this.setTexture(InternalMetric.getRandomTextureID(this.variant));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
@@ -110,4 +110,4 @@ public class BunnyEntity extends InternalEntity implements NeutralMob, GeoEntity
     @Override
     public void startPersistentAngerTimer() {} // startPersistentAngerTimer ()
 
-} // Class BunnyEntity
+} // Class KitsuneEntity

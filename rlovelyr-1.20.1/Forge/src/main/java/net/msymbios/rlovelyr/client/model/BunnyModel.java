@@ -1,4 +1,4 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.client.model;
 
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.rlovelyr.entity.custom.BunnyEntity;

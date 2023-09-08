@@ -1,5 +1,7 @@
 package net.msymbios.rlovelyr.event;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.msymbios.rlovelyr.entity.ModEntities;
 import net.msymbios.rlovelyr.entity.custom.Bunny2Entity;
 import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
@@ -22,12 +24,17 @@ public class ModEvents {
 
         @SubscribeEvent
         public static void entityAttributeEvent(EntityAttributeCreationEvent event) {
-            event.put(ModEntities.BUNNY.get(), BunnyEntity.setAttributes());
-            event.put(ModEntities.BUNNY2.get(), Bunny2Entity.setAttributes());
-            event.put(ModEntities.HONEY.get(), HoneyEntity.setAttributes());
-            event.put(ModEntities.VANILLA.get(), VanillaEntity.setAttributes());
+            ModEntities.registerAttributes(event);
         } // entityAttributeEvent ()
 
     } // Class ModEventBusEvents
+
+    @Mod.EventBusSubscriber(modid = LovelyRobotMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static class ClientModEvents {
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+            ModEntities.registerRenderers();
+        } // onClientSetup ()
+    } // ClientModEvents ()
 
 } // Class ModEvents

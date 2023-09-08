@@ -1,10 +1,10 @@
 package net.msymbios.rlovelyr;
 
 import net.msymbios.rlovelyr.entity.ModEntities;
-import net.msymbios.rlovelyr.entity.client.BunnyRenderer;
-import net.msymbios.rlovelyr.entity.client.Bunny2Renderer;
-import net.msymbios.rlovelyr.entity.client.HoneyRenderer;
-import net.msymbios.rlovelyr.entity.client.VanillaRenderer;
+import net.msymbios.rlovelyr.client.renderer.BunnyRenderer;
+import net.msymbios.rlovelyr.client.renderer.Bunny2Renderer;
+import net.msymbios.rlovelyr.client.renderer.HoneyRenderer;
+import net.msymbios.rlovelyr.client.renderer.VanillaRenderer;
 import net.msymbios.rlovelyr.item.ModItems;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
@@ -44,19 +44,6 @@ public class LovelyRobotMod {
     } // Constructor RLovelyRobotMod ()
 
     // -- Methods --
-    private void commonSetup(final FMLCommonSetupEvent event) {
-
-    } // commonSetup ()
-
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            EntityRenderers.register(ModEntities.BUNNY.get(), BunnyRenderer::new);
-            EntityRenderers.register(ModEntities.BUNNY2.get(), Bunny2Renderer::new);
-            EntityRenderers.register(ModEntities.HONEY.get(), HoneyRenderer::new);
-            EntityRenderers.register(ModEntities.VANILLA.get(), VanillaRenderer::new);
-        } // onClientSetup ()
-    } // ClientModEvents ()
+    private void commonSetup(final FMLCommonSetupEvent event) {} // commonSetup ()
 
 } // Class LovelyRobotMod

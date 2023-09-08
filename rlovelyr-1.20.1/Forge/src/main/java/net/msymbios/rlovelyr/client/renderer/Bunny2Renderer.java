@@ -1,7 +1,8 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.client.renderer;
 
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.msymbios.rlovelyr.client.model.Bunny2Model;
 import net.msymbios.rlovelyr.entity.custom.Bunny2Entity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import org.jetbrains.annotations.NotNull;
