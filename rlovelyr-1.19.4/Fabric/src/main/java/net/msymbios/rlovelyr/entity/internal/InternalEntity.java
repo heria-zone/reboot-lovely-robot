@@ -19,6 +19,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -35,11 +36,7 @@ import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
 public abstract class InternalEntity extends TameableEntity {
 
     // -- Variables --
-    protected static final TrackedData<String> VARIANT = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.STRING);
     protected static final TrackedData<Integer> TEXTURE_ID = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> MODEL_ID = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
-    protected static final TrackedData<Integer> ANIMATOR_ID = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
-
     protected static final TrackedData<Integer> STATE = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.INTEGER);
     protected static final TrackedData<Boolean> AUTO_ATTACK = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
@@ -56,96 +53,39 @@ public abstract class InternalEntity extends TameableEntity {
     protected static final TrackedData<Float> BASE_Y = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);
     protected static final TrackedData<Float> BASE_Z = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);;
 
-    protected static final TrackedData<Boolean> LOG = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    protected static final TrackedData<Boolean> NOTIFICATION = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     protected int waryTimer = 0, autoHealTimer = 0;
     protected boolean combatMode = false, autoHeal = false;
+    protected EntityVariant variant;
+    protected EntityModel model = EntityModel.Default;
 
     // -- Properties --
 
     // VARIANT
-    public abstract String getVariant();
-
-    public String getVariant(String value) {
-        try {value = this.dataTracker.get(VARIANT);}
-        catch (Exception ignored) {}
-        return value;
-    } // getVariant ()
-
-    public void setVariant(String value) {
-        this.dataTracker.set(VARIANT, value);
-    } // setVariant ()
+    public String getVariant() { return this.variant.getName(); } // getVariant ()
 
     // TEXTURE
-    public abstract Identifier getTextureByID(int value);
-
-    public Identifier getTexture() {
-        return getTextureByID(getTextureID());
-    } // getTexture ()
+    public Identifier getTexture() { return InternalMetric.getTexture(this.variant, EntityTexture.byId(getTextureID())); } // getTexture ()
 
     public int getTextureID() {
-        int value = 0;
+        int value = InternalMetric.getRandomTextureID(this.variant);
         try {value = this.dataTracker.get(TEXTURE_ID);}
         catch (Exception ignored) {}
         return value;
     } // getTextureID ()
 
-    public void setTexture(EntityTexture value) {
-        setTexture(value.getId());
-    } // setTexture ()
+    public void setTexture(int value) { if(InternalMetric.checkTextureID(this.variant, EntityTexture.byId(value))) this.dataTracker.set(TEXTURE_ID, value); } // setTexture ()
 
-    public void setTexture(int value) {
-        this.dataTracker.set(TEXTURE_ID, value);
-    } // setTexture ()
+    public void setTexture(EntityTexture value) { setTexture(value.getId()); } // setTexture ()
 
     // MODEL
-    public abstract Identifier getCurrentModelByID(int value);
-
-    public Identifier getCurrentModel() {
-        return getCurrentModelByID(getModelID());
-    } // getCurrentModel ()
-
-    public int getModelID() {
-        int value = 0;
-        try {value = this.dataTracker.get(MODEL_ID);}
-        catch (Exception ignored) {}
-        return value;
-    } // getModelID ()
-
-    public EntityModel getModel() {
-        int value = 0;
-        try {value = this.dataTracker.get(MODEL_ID);}
-        catch (Exception ignored) {}
-        return EntityModel.byId(value);
-    } // getModel ()
-
-    public void setModel(EntityModel value) {
-        setModel(value.getId());
-    } // setModel ()
-
-    public void setModel(int value) {
-        this.dataTracker.set(MODEL_ID, value);
-    } // setModel ()
+    public Identifier getCurrentModel() { return InternalMetric.getModel(this.variant, model); } // getCurrentModel ()
 
     // ANIMATOR
-    public Identifier getAnimatorByID(int value) {
-        return InternalMetric.ANIMATORS.get(EntityAnimator.byId(value));
-    } // getAnimatorByID ()
+    public Identifier getAnimatorByID(EntityAnimator value) { return InternalMetric.getAnimator(this.variant, value); } // getAnimatorByID ()
 
-    public int getAnimatorID() {
-        int value = 0;
-        try {value = this.dataTracker.get(ANIMATOR_ID);}
-        catch (Exception ignored) {}
-        return value;
-    } // getAnimatorID ()
-
-    public Identifier getAnimator() {
-        return getAnimatorByID(getAnimatorID());
-    } // getAnimator ()
-
-    public void setAnimator(int value) {
-        this.dataTracker.set(ANIMATOR_ID, value);
-    } // setAnimator ()
+    public Identifier getAnimator() { return InternalMetric.getAnimator(this.variant); } // getAnimator ()
 
     // STATE
     public int getCurrentStateID() {
@@ -183,11 +123,7 @@ public abstract class InternalEntity extends TameableEntity {
     } // setAutoAttack ()
 
     // STATS
-    public abstract float getAttributeRaw(EntityAttribute attribute);
-
-    public int getAttribute(EntityAttribute attribute) {
-        return (int) getAttributeRaw(attribute);
-    } // getAttribute ()
+    public int getAttribute(EntityAttribute attribute) { return (int) InternalMetric.getAttributeValue(this.variant, attribute); } // getAttribute ()
 
     public int getMaxLevel() { return getMaxLevel (getAttribute(EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
 
@@ -364,16 +300,16 @@ public abstract class InternalEntity extends TameableEntity {
     } // setBaseZ ()
 
     // INFO
-    public boolean getLog() {
+    public boolean getNotification() {
         boolean value = true;
-        try {value = this.dataTracker.get(LOG);}
+        try {value = this.dataTracker.get(NOTIFICATION);}
         catch (Exception ignored) {}
         return value;
-    } // getLog ()
+    } // getNotification ()
 
-    public void setLog(boolean value) {
-        this.dataTracker.set(LOG, value);
-    } // setLog ()
+    public void setNotification(boolean value) {
+        this.dataTracker.set(NOTIFICATION, value);
+    } // setNotification ()
 
     // -- Construct --
     protected InternalEntity(EntityType<? extends TameableEntity> entityType, World world) {
@@ -392,17 +328,6 @@ public abstract class InternalEntity extends TameableEntity {
     } // getDeathSound ()
 
     // -- Built-In Methods --
-    @Nullable
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.setSitting(true);
-        this.setCurrentState(EntityState.Standby);
-
-        EquipmentSlot slot = EquipmentSlot.MAINHAND;
-        ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
-        this.equipStack(slot, diamondSword);
-        return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
-    } // initialize ()
-    
     @Override
     public void tick() {
         super.tick();
@@ -516,25 +441,26 @@ public abstract class InternalEntity extends TameableEntity {
         var itemStack = player.getStackInHand(hand);
 
         if(hand == Hand.MAIN_HAND) {
-            handleSit(itemStack);
+            if(getOwner() != null) handleSit(itemStack);
             if(this.world.isClient) {
                 boolean bl = this.isOwner(player) || this.isTamed() || itemStack.isOf(Items.BONE) && !this.isTamed();
                 return bl ? ActionResult.CONSUME : ActionResult.PASS;
             } else {
-                handleState(itemStack, player);
-                handleAutoAttack(itemStack, player);
-                handleTexture(itemStack, player);
                 if(getOwner() == null) handleTame(player);
+                if(getOwner() != null) {
+                    handleState(itemStack, player);
+                    handleAutoAttack(itemStack, player);
+                    handleTexture(itemStack, player);
 
-                if(itemStack.isOf(Items.OAK_BUTTON)) {
-                    this.setLog(Utility.invertBoolean(getLog()));
-                    if(getLog()) commandDebug("InfoLog ON", true);
-                    else commandDebug("InfoLog Log OFF", true);
+                    if(itemStack.isOf(Items.OAK_BUTTON)) {
+                        this.setNotification(Utility.invertBoolean(getNotification()));
+                        if(getNotification()) commandDebug(Text.translatable("msg.rlovelyr.notification").append(Text.literal(" ").append(Text.translatable("msg.rlovelyr.on"))), true);
+                        else commandDebug(Text.translatable("msg.rlovelyr.notification").append(Text.literal(" ").append(Text.translatable("msg.rlovelyr.off"))), true);
+                    }
+
+                    if(itemStack.isOf(Items.BOOK)) displayMessage(player, true, false);
+                    if(itemStack.isOf(Items.WRITABLE_BOOK)) displayProtectionMessage(player);
                 }
-
-                if(itemStack.isOf(Items.BOOK)) displayMessage(player, true);
-                if(itemStack.isOf(Items.WRITABLE_BOOK)) displayProtectionMessage(player);
-
                 return ActionResult.SUCCESS;
             }
         }
@@ -608,7 +534,7 @@ public abstract class InternalEntity extends TameableEntity {
                 try {
                     final LivingEntity entity = this.getOwner();
                     if (entity == null) return;
-                    this.displayMessage((PlayerEntity)entity, getLog());
+                    this.displayMessage((PlayerEntity)entity, getNotification(), true);
                 } catch (Exception ignored) {}
             }
         }
@@ -637,12 +563,11 @@ public abstract class InternalEntity extends TameableEntity {
     protected void handleCombatMode() {
         if(this.isAttacking()) handleActivateCombatMode();
         if(this.world.isClient && !combatMode) return;
-
         if(waryTimer != 0) {
-            if(getModel() != EntityModel.Armed) setModel(EntityModel.Armed);
+            if(this.model != EntityModel.Armed) this.model = EntityModel.Armed;
             waryTimer--;
         } else {
-            if(getModel() != EntityModel.Unarmed) setModel(EntityModel.Unarmed);
+            if(this.model != EntityModel.Default) this.model = EntityModel.Default;
             combatMode = false;
         }
     } // handleCombatMode ()
@@ -650,7 +575,7 @@ public abstract class InternalEntity extends TameableEntity {
     public void handleTame(PlayerEntity player) {
         this.setOwner(player);
         this.setTamed(true);
-        player.sendMessage(Text.literal("Owner: " + getOwner().getEntityName()), true);
+        player.sendMessage(Text.translatable("msg.rlovelyr.owner").append(": " + getOwner().getEntityName()), true);
     } // handleTame ()
 
     public void handleTexture(ItemStack items, PlayerEntity player) {
@@ -673,8 +598,7 @@ public abstract class InternalEntity extends TameableEntity {
         if(items.isOf(Items.BLACK_DYE)) setTexture(EntityTexture.BLACK);
 
         if(oldTexture != getTextureID()) {
-            if (!player.getAbilities().creativeMode)
-                items.decrement(1);
+            if (!player.getAbilities().creativeMode) items.decrement(1);
         }
     } // handleTexture ()
 
@@ -686,7 +610,10 @@ public abstract class InternalEntity extends TameableEntity {
     public void handleAutoAttack(ItemStack itemStack, PlayerEntity player){
         if (!canInteractAutoAttack(itemStack)) return;
         setAutoAttack(invertBoolean(getAutoAttack()));
-        player.sendMessage(Text.literal("Auto Attack: " + this.getAutoAttack()), true);
+        String msgAutoAttack;
+        if(this.getAutoAttack()) msgAutoAttack = "msg.rlovelyr.on";
+        else msgAutoAttack = "msg.rlovelyr.off";
+        player.sendMessage(Text.translatable("msg.rlovelyr.auto_attack").append(Text.literal(": ").append(Text.translatable(msgAutoAttack))), true);
     } // handleAutoAttack ()
 
     public void handleState(ItemStack itemStack, PlayerEntity player) {
@@ -694,7 +621,7 @@ public abstract class InternalEntity extends TameableEntity {
         StandbyState(itemStack);
         FollowState(itemStack);
         BaseDefenseState(itemStack);
-        if(previousState != getCurrentState()) player.sendMessage(Text.literal("State: " + getCurrentState().name()), true);
+        if(previousState != getCurrentState()) player.sendMessage(Text.translatable("msg.rlovelyr.state").append(Text.literal(": ").append(Text.translatable(Utility.getTranslatableState(this.getCurrentState())))), true);
     } // handleState
 
     public void StandbyState(ItemStack itemStack){
@@ -727,43 +654,53 @@ public abstract class InternalEntity extends TameableEntity {
         }
     } // commandDebug ()
 
+    public void commandDebug(MutableText message, boolean overlay) {
+        if(this.getOwner() != null) {
+            PlayerEntity player = (PlayerEntity)this.getOwner();
+            player.sendMessage(message, overlay);
+        }
+    } // commandDebug ()
+
     public void commandDebugExtra() {
-        String debug = "";
-        if(combatMode && getLog()) {
-            if(waryTimer < 10) debug += "Wary: 0" + waryTimer + " ";
-            else debug += "Wary: " + waryTimer + " ";
+        MutableText debug = null;
+        if(combatMode && getNotification()) {
+            debug = Text.translatable(Utility.getTranslatableEntity(this.variant)).append(Text.literal(": ").append(Text.translatable("msg.rlovelyr.wary")));
+            if(waryTimer < 10) debug = debug.append(": 0" + waryTimer + " ");
+            else debug = debug.append(": " + waryTimer + " ");
         }
 
-        if(autoHeal && getLog()) {
-            if(autoHealTimer < 10) debug += "Heal: 0" + autoHealTimer + " ";
-            else debug += "Heal: " + autoHealTimer + " ";
-            if(this.getHealth() < 10) debug += "| 0" + this.getHealth();
-            else debug += "| " + (int)Math.floor(this.getHealth());
+        if(autoHeal && getNotification()) {
+            if(debug != null) debug = debug.append(Text.translatable("msg.rlovelyr.heal"));
+            else debug = Text.translatable(Utility.getTranslatableEntity(this.variant)).append(Text.literal(": ").append(Text.translatable("msg.rlovelyr.heal")));
+
+            if(autoHealTimer < 10) debug = debug.append(": 0" + autoHealTimer + " ");
+            else debug = debug.append(": " + autoHealTimer + " ");
+            if(this.getHealth() < 10) debug = debug.append("| 0" + this.getHealth());
+            else debug = debug.append("| " + (int)Math.floor(this.getHealth()));
         }
-        if(!debug.equals("")) commandDebug(debug, true);
+        if(debug != null) commandDebug(debug, true);
     } // commandDebugExtra ()
 
-    public void displayMessage (PlayerEntity player, boolean canShow) {
+    public void displayMessage (PlayerEntity player, boolean canShow, boolean showLevelUp) {
         if(!canShow) return;
-        player.sendMessage(Text.literal("|--------------------------"));
-        player.sendMessage(Text.literal("[LevelUp]"));
-        if(this.getCustomName() != null) player.sendMessage(Text.literal(Utility.FirstToUpperCase (this.getVariant()) + ": " + this.getCustomName().getString()));
-        else player.sendMessage(Text.literal(Utility.FirstToUpperCase (this.getVariant())));
-        player.sendMessage(Text.literal("Level: " + this.getCurrentLevel() + "/" + this.getMaxLevel()));
-        player.sendMessage(Text.literal("Exp: " + this.getExp() + "/" + this.getNextExp()));
-        player.sendMessage(Text.literal("HP: " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()));
-        player.sendMessage(Text.literal("Attack: " + this.getAttackValue()));
-        player.sendMessage(Text.literal("Defense: " + this.getDefenseValue()));
+        player.sendMessage(Text.translatable("msg.rlovelyr.bar"));
+        if(showLevelUp) player.sendMessage(Text.translatable("msg.rlovelyr.level_up"));
+        if(this.getCustomName() != null) player.sendMessage(Text.translatable(Utility.getTranslatableEntity(this.variant)).append(": " + this.getCustomName().getString()));
+        else player.sendMessage(Text.translatable(Utility.getTranslatableEntity(this.variant)));
+        player.sendMessage(Text.translatable("msg.rlovelyr.level").append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()));
+        player.sendMessage(Text.translatable("msg.rlovelyr.experience").append(": " + this.getExp()                 + "/" + this.getNextExp()));
+        player.sendMessage(Text.translatable("msg.rlovelyr.health").append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()));
+        player.sendMessage(Text.translatable("msg.rlovelyr.attack").append(": " + this.getAttackValue()));
+        player.sendMessage(Text.translatable("msg.rlovelyr.defence").append(": " + this.getDefenseValue()));
     } // displayMessage ()
 
     public void displayProtectionMessage (PlayerEntity player) {
-        player.sendMessage(Text.literal("|--------------------------"));
-        player.sendMessage(Text.literal("[Enchantment]"));
-        player.sendMessage(Text.literal("Looting: " + this.getLootingLevel() + "/" + InternalMetric.MaxLootingLevel));
-        player.sendMessage(Text.literal("Fire Protection: " + this.getFireProtection() + "/" + InternalMetric.FireProtectionLimit));
-        player.sendMessage(Text.literal("Fall Protection: " + this.getFallProtection() + "/" + InternalMetric.FallProtectionLimit));
-        player.sendMessage(Text.literal("Blast Protection: " + this.getBlastProtection() + "/" + InternalMetric.BlastProtectionLimit));
-        player.sendMessage(Text.literal("Projectile Protection: " + this.getProjectileProtection() + "/" + InternalMetric.ProjectileProtectionLimit));
+        player.sendMessage(Text.translatable("msg.rlovelyr.bar"));
+        player.sendMessage(Text.translatable("msg.rlovelyr.enchantment"));
+        player.sendMessage(Text.translatable("msg.rlovelyr.looting").append(": " + this.getLootingLevel()                       + "/" + InternalMetric.MaxLootingLevel));
+        player.sendMessage(Text.translatable("msg.rlovelyr.fire_protection").append(": " + this.getFireProtection()             + "/" + InternalMetric.FireProtectionLimit));
+        player.sendMessage(Text.translatable("msg.rlovelyr.fall_protection").append(": " + this.getFallProtection()             + "/" + InternalMetric.FallProtectionLimit));
+        player.sendMessage(Text.translatable("msg.rlovelyr.blast_protection").append(": " + this.getBlastProtection()           + "/" + InternalMetric.BlastProtectionLimit));
     } // displayProtectionMessage ()
 
     // -- Save Methods --
@@ -771,13 +708,10 @@ public abstract class InternalEntity extends TameableEntity {
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(TEXTURE_ID, EntityTexture.PINK.getId());
-        this.dataTracker.startTracking(MODEL_ID, EntityModel.Unarmed.getId());
-        this.dataTracker.startTracking(ANIMATOR_ID, EntityAnimator.Locomotion.getId());
-
         this.dataTracker.startTracking(STATE, EntityState.Follow.getId());
         this.dataTracker.startTracking(AUTO_ATTACK, true);
 
-        this.dataTracker.startTracking(MAX_LEVEL, getAttribute(EntityAttribute.MAX_LEVEL));
+        this.dataTracker.startTracking(MAX_LEVEL, 200);
         this.dataTracker.startTracking(LEVEL, 0);
         this.dataTracker.startTracking(EXP, 0);
 
@@ -790,16 +724,12 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.startTracking(BASE_Y, 0F);
         this.dataTracker.startTracking(BASE_Z, 0F);
 
-        this.dataTracker.startTracking(LOG, true);
+        this.dataTracker.startTracking(NOTIFICATION, false);
     } // initDataTracker ()
 
     public void writeCustomDataToNbt(NbtCompound dataNBT) {
         super.writeCustomDataToNbt(dataNBT);
-        dataNBT.putString("Variant", this.getVariant());
         dataNBT.putInt("TextureID", this.getTextureID());
-        dataNBT.putInt("ModelID", this.getModelID());
-        dataNBT.putInt("AnimatorID", this.getAnimatorID());
-
         dataNBT.putInt("State", this.getCurrentStateID());
         dataNBT.putBoolean("AutoAttack", this.getAutoAttack());
 
@@ -816,16 +746,12 @@ public abstract class InternalEntity extends TameableEntity {
         dataNBT.putFloat("BaseY", this.getBaseY());
         dataNBT.putFloat("BaseZ", this.getBaseZ());
 
-        dataNBT.putBoolean("Log", getLog());
+        dataNBT.putBoolean("Notification", this.getNotification());
     } // writeCustomDataToNbt ()
 
     public void readCustomDataFromNbt(NbtCompound dataNBT) {
         super.readCustomDataFromNbt(dataNBT);
-        this.setVariant(dataNBT.getString("Variant"));
         this.setTexture(dataNBT.getInt("TextureID"));
-        this.setModel(dataNBT.getInt("ModelID"));
-        this.setAnimator(dataNBT.getInt("AnimatorID"));
-
         this.setCurrentState(dataNBT.getInt("State"));
         this.setAutoAttack(dataNBT.getBoolean("AutoAttack"));
 
@@ -842,7 +768,7 @@ public abstract class InternalEntity extends TameableEntity {
         this.setBaseZ(dataNBT.getFloat("BaseZ"));
         this.setBaseX(dataNBT.getFloat("BaseX"));
 
-        setLog(dataNBT.getBoolean("Log"));
+        this.setNotification(dataNBT.getBoolean("Notification"));
     } // readCustomDataFromNbt ()
 
 } // Class InternalEntity
