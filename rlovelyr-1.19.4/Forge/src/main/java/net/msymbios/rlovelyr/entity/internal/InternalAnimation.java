@@ -18,12 +18,12 @@ public final class InternalAnimation {
     public static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.lovelyrobot.idle");
     public static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.lovelyrobot.walk");
     public static final RawAnimation SIT = RawAnimation.begin().thenPlayAndHold("animation.lovelyrobot.sit");
-    public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE);
+    public static final RawAnimation ATTACK = RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE);
 
     // -- Methods --
     public static <T extends InternalEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
         return new AnimationController<>(animatable, "Attack", 5, state -> {
-            if (animatable.swinging) return state.setAndContinue(ATTACK_SWING);
+            if (animatable.swinging) return state.setAndContinue(ATTACK);
             state.getController().forceAnimationReset();
             return PlayState.STOP;
         });
