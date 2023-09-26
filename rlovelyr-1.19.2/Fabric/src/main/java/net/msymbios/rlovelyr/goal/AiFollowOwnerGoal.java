@@ -1,4 +1,4 @@
-package net.msymbios.rlovelyr.entity.goal;
+package net.msymbios.rlovelyr.goal;
 
 import net.minecraft.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.entity.passive.TameableEntity;

@@ -1,4 +1,4 @@
-package net.msymbios.rlovelyr.entity.goal;
+package net.msymbios.rlovelyr.goal;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.LeavesBlock;
