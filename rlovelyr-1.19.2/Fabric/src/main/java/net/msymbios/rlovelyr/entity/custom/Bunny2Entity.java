@@ -8,14 +8,14 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
+import net.msymbios.rlovelyr.config.ConfigMetric;
 import net.msymbios.rlovelyr.entity.enums.*;
-import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
-import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
-import net.msymbios.rlovelyr.entity.goal.AiFollowOwnerGoal;
+import net.msymbios.rlovelyr.goal.AiAutoAttackGoal;
+import net.msymbios.rlovelyr.goal.AiBaseDefenseGoal;
+import net.msymbios.rlovelyr.goal.AiFollowOwnerGoal;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import net.msymbios.rlovelyr.entity.internal.InternalEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
@@ -24,8 +24,6 @@ import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.core.manager.SingletonAnimationFactory;
-
-import static net.msymbios.rlovelyr.entity.internal.Utility.*;
 
 public class Bunny2Entity extends InternalEntity implements IAnimatable {
 
@@ -74,17 +72,17 @@ public class Bunny2Entity extends InternalEntity implements IAnimatable {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new MeleeAttackGoal(this, InternalMetric.MeleeAttackMovement, false));
-        this.goalSelector.add(4, new AiFollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
-        this.goalSelector.add(4, new AiBaseDefenseGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
-        this.goalSelector.add(5, new WanderAroundFarGoal(this, InternalMetric.WanderAroundMovement));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, InternalMetric.LookAtRange));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, InternalMetric.LookAtRange));
+        this.goalSelector.add(3, new MeleeAttackGoal(this, ConfigMetric.MOVEMENT_MELEE_ATTACK, false));
+        this.goalSelector.add(4, new AiFollowOwnerGoal(this, ConfigMetric.MOVEMENT_FOLLOW_OWNER, ConfigMetric.FOLLOW_DISTANCE_MAX, ConfigMetric.FOLLOW_DISTANCE_MIN, false));
+        this.goalSelector.add(4, new AiBaseDefenseGoal(this, ConfigMetric.MOVEMENT_FOLLOW_OWNER, ConfigMetric.BUNNY2_BASE_DEFENCE_RANGE, ConfigMetric.BUNNY2_BASE_DEFENCE_WARP_RANGE));
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, ConfigMetric.MOVEMENT_WANDER_AROUND));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, ConfigMetric.LOOK_RANGE));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, ConfigMetric.LOOK_RANGE));
         this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, new RevengeGoal(this));
-        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetric.AttackChance, false, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, ConfigMetric.ATTACK_CHANCE, false, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 

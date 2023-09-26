@@ -9,7 +9,7 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.msymbios.rlovelyr.LovelyRobotMod;
-import net.msymbios.rlovelyr.entity.client.*;
+import net.msymbios.rlovelyr.client.renderer.*;
 import net.msymbios.rlovelyr.entity.custom.*;
 import net.msymbios.rlovelyr.entity.enums.EntityVariant;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
