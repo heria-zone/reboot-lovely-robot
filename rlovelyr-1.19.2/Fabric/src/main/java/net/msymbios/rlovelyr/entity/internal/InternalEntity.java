@@ -26,7 +26,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.config.ConfigMetric;
+import net.msymbios.rlovelyr.config.InternalMetrics;
 import net.msymbios.rlovelyr.entity.enums.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,26 +66,26 @@ public abstract class InternalEntity extends TameableEntity {
     public String getVariant() { return this.variant.getName(); } // getVariant ()
 
     // TEXTURE
-    public Identifier getTexture() { return InternalMetric.getTexture(this.variant, EntityTexture.byId(getTextureID())); } // getTexture ()
+    public Identifier getTexture() { return net.msymbios.rlovelyr.entity.internal.InternalMetric.getTexture(this.variant, EntityTexture.byId(getTextureID())); } // getTexture ()
 
     public int getTextureID() {
-        int value = InternalMetric.getRandomTextureID(this.variant);
+        int value = net.msymbios.rlovelyr.entity.internal.InternalMetric.getRandomTextureID(this.variant);
         try {value = this.dataTracker.get(TEXTURE_ID);}
         catch (Exception ignored) {}
         return value;
     } // getTextureID ()
 
-    public void setTexture(int value) { if(InternalMetric.checkTextureID(this.variant, EntityTexture.byId(value))) this.dataTracker.set(TEXTURE_ID, value); } // setTexture ()
+    public void setTexture(int value) { if(net.msymbios.rlovelyr.entity.internal.InternalMetric.checkTextureID(this.variant, EntityTexture.byId(value))) this.dataTracker.set(TEXTURE_ID, value); } // setTexture ()
 
     public void setTexture(EntityTexture value) { setTexture(value.getId()); } // setTexture ()
 
     // MODEL
-    public Identifier getCurrentModel() { return InternalMetric.getModel(this.variant, model); } // getCurrentModel ()
+    public Identifier getCurrentModel() { return net.msymbios.rlovelyr.entity.internal.InternalMetric.getModel(this.variant, model); } // getCurrentModel ()
 
     // ANIMATOR
-    public Identifier getAnimatorByID(EntityAnimator value) { return InternalMetric.getAnimator(this.variant, value); } // getAnimatorByID ()
+    public Identifier getAnimatorByID(EntityAnimator value) { return net.msymbios.rlovelyr.entity.internal.InternalMetric.getAnimator(this.variant, value); } // getAnimatorByID ()
 
-    public Identifier getAnimator() { return InternalMetric.getAnimator(this.variant); } // getAnimator ()
+    public Identifier getAnimator() { return net.msymbios.rlovelyr.entity.internal.InternalMetric.getAnimator(this.variant); } // getAnimator ()
 
     // STATE
     public int getCurrentStateID() {
@@ -198,10 +198,10 @@ public abstract class InternalEntity extends TameableEntity {
 
     public int getLootingLevel() {
         int level = 0;
-        if (ConfigMetric.LOOT_ENCHANTMENT) {
-            level = this.getCurrentLevel() / ConfigMetric.LOOT_ENCHANTMENT_LEVEL;
-            if (level > ConfigMetric.MAX_LOOT_ENCHANTMENT) {
-                level = ConfigMetric.MAX_LOOT_ENCHANTMENT;
+        if (InternalMetrics.LOOT_ENCHANTMENT) {
+            level = this.getCurrentLevel() / InternalMetrics.LOOT_ENCHANTMENT_LEVEL;
+            if (level > InternalMetrics.MAX_LOOT_ENCHANTMENT) {
+                level = InternalMetrics.MAX_LOOT_ENCHANTMENT;
             }
         }
         return level;
@@ -488,23 +488,23 @@ public abstract class InternalEntity extends TameableEntity {
     } // canLevelUp ()
 
     protected boolean canLevelUpFireProtection() {
-        return this.getFireProtection() < ConfigMetric.PROTECTION_LIMIT_FIRE;
+        return this.getFireProtection() < InternalMetrics.PROTECTION_LIMIT_FIRE;
     } // canLevelUpFireProtection ()
 
     protected boolean canLevelUpFallProtection() {
-        return this.getFallProtection() < ConfigMetric.PROTECTION_LIMIT_FALL;
+        return this.getFallProtection() < InternalMetrics.PROTECTION_LIMIT_FALL;
     } // canLevelUpFallProtection ()
 
     protected boolean canLevelUpBlastProtection() {
-        return this.getBlastProtection() < ConfigMetric.PROTECTION_LIMIT_BLAST;
+        return this.getBlastProtection() < InternalMetrics.PROTECTION_LIMIT_BLAST;
     } // canLevelUpBlastProtection ()
 
     protected boolean canLevelUpProjectileProtection() {
-        return this.getProjectileProtection() < ConfigMetric.PROTECTION_LIMIT_PROJECTILE;
+        return this.getProjectileProtection() < InternalMetrics.PROTECTION_LIMIT_PROJECTILE;
     } // canLevelUpProjectileProtection ()
 
     protected int getNextExp() {
-        return ConfigMetric.EXPERIENCE_BASE + this.getCurrentLevel() * ConfigMetric.EXPERIENCE_MULTIPLIER;
+        return InternalMetrics.EXPERIENCE_BASE + this.getCurrentLevel() * InternalMetrics.EXPERIENCE_MULTIPLIER;
     } // getNextExp ()
 
     protected void addExp (int value) {
@@ -547,13 +547,13 @@ public abstract class InternalEntity extends TameableEntity {
             final float healValue = this.getHpValue() / 16.0F;
             this.heal(healValue);
             autoHeal = false;
-            autoHealTimer = ConfigMetric.HEAL_INTERVAL;
+            autoHealTimer = InternalMetrics.HEAL_INTERVAL;
         }
     } // handleAutoHeal ()
 
     protected void handleActivateCombatMode () {
         if(!combatMode) combatMode = true;
-        waryTimer = ConfigMetric.WARY_TIME;
+        waryTimer = InternalMetrics.WARY_TIME;
     } // handleActivateCombatMode ()
 
     protected void handleCombatMode() {
@@ -696,11 +696,11 @@ public abstract class InternalEntity extends TameableEntity {
     public void displayProtectionMessage (PlayerEntity player) {
         player.sendMessage(Text.translatable("msg.rlovelyr.bar"));
         player.sendMessage(Text.translatable("msg.rlovelyr.enchantment"));
-        player.sendMessage(Text.translatable("msg.rlovelyr.looting").append(": " + this.getLootingLevel()                       + "/" + ConfigMetric.MAX_LOOT_ENCHANTMENT));
-        player.sendMessage(Text.translatable("msg.rlovelyr.fire_protection").append(": " + this.getFireProtection()             + "/" + ConfigMetric.PROTECTION_LIMIT_FIRE));
-        player.sendMessage(Text.translatable("msg.rlovelyr.fall_protection").append(": " + this.getFallProtection()             + "/" + ConfigMetric.PROTECTION_LIMIT_FALL));
-        player.sendMessage(Text.translatable("msg.rlovelyr.blast_protection").append(": " + this.getBlastProtection()           + "/" + ConfigMetric.PROTECTION_LIMIT_BLAST));
-        player.sendMessage(Text.translatable("msg.rlovelyr.projectile_protection").append(": " + this.getProjectileProtection() + "/" + ConfigMetric.PROTECTION_LIMIT_PROJECTILE));
+        player.sendMessage(Text.translatable("msg.rlovelyr.looting").append(": " + this.getLootingLevel()                       + "/" + InternalMetrics.MAX_LOOT_ENCHANTMENT));
+        player.sendMessage(Text.translatable("msg.rlovelyr.fire_protection").append(": " + this.getFireProtection()             + "/" + InternalMetrics.PROTECTION_LIMIT_FIRE));
+        player.sendMessage(Text.translatable("msg.rlovelyr.fall_protection").append(": " + this.getFallProtection()             + "/" + InternalMetrics.PROTECTION_LIMIT_FALL));
+        player.sendMessage(Text.translatable("msg.rlovelyr.blast_protection").append(": " + this.getBlastProtection()           + "/" + InternalMetrics.PROTECTION_LIMIT_BLAST));
+        player.sendMessage(Text.translatable("msg.rlovelyr.projectile_protection").append(": " + this.getProjectileProtection() + "/" + InternalMetrics.PROTECTION_LIMIT_PROJECTILE));
     } // displayProtectionMessage ()
 
     // -- Save Methods --

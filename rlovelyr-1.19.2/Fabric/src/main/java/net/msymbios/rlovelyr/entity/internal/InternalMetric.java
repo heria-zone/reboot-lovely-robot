@@ -5,7 +5,7 @@ import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.util.Identifier;
 import net.msymbios.rlovelyr.LovelyRobotMod;
-import net.msymbios.rlovelyr.config.ConfigMetric;
+import net.msymbios.rlovelyr.config.InternalMetrics;
 import net.msymbios.rlovelyr.entity.enums.*;
 
 import java.util.ArrayList;
@@ -106,22 +106,22 @@ public class InternalMetric {
 
     public static HashMap<EntityVariant, HashMap<EntityTexture, Identifier>> TEXTURE = new HashMap<>(){{
         put(EntityVariant.Bunny,    setTexture(EntityVariant.Bunny));
-        put(EntityVariant.Bunny2,    setTexture(EntityVariant.Bunny2));
-        put(EntityVariant.Dragon,    setTexture(EntityVariant.Dragon));
+        put(EntityVariant.Bunny2,   setTexture(EntityVariant.Bunny2));
+        put(EntityVariant.Dragon,   setTexture(EntityVariant.Dragon));
         put(EntityVariant.Honey,    setTexture(EntityVariant.Honey));
-        put(EntityVariant.Kitsune,    setTexture(EntityVariant.Kitsune));
-        put(EntityVariant.Neko,    setTexture(EntityVariant.Neko));
-        put(EntityVariant.Vanilla,    setTexture(EntityVariant.Vanilla));
+        put(EntityVariant.Kitsune,  setTexture(EntityVariant.Kitsune));
+        put(EntityVariant.Neko,     setTexture(EntityVariant.Neko));
+        put(EntityVariant.Vanilla,  setTexture(EntityVariant.Vanilla));
     }};
 
     public static HashMap<EntityVariant, HashMap<EntityAttribute, Float>> ATTRIBUTES = new HashMap<>(){{
-        put(EntityVariant.Bunny,        setAttribute(ConfigMetric.BUNNY_MAX_LEVEL, ConfigMetric.BUNNY_MAX_HEALTH, ConfigMetric.BUNNY_ATTACK_DAMAGE, ConfigMetric.BUNNY_ATTACK_SPEED, ConfigMetric.BUNNY_MOVEMENT_SPEED, ConfigMetric.BUNNY_DEFENCE));
-        put(EntityVariant.Bunny2,       setAttribute(ConfigMetric.BUNNY2_MAX_LEVEL, ConfigMetric.BUNNY2_MAX_HEALTH, ConfigMetric.BUNNY2_ATTACK_DAMAGE, ConfigMetric.BUNNY2_ATTACK_SPEED, ConfigMetric.BUNNY2_MOVEMENT_SPEED, ConfigMetric.BUNNY2_DEFENCE));
-        put(EntityVariant.Dragon,       setAttribute(ConfigMetric.DRAGON_MAX_LEVEL, ConfigMetric.DRAGON_MAX_HEALTH, ConfigMetric.DRAGON_ATTACK_DAMAGE, ConfigMetric.DRAGON_ATTACK_SPEED, ConfigMetric.DRAGON_MOVEMENT_SPEED, ConfigMetric.DRAGON_DEFENCE));
-        put(EntityVariant.Honey,        setAttribute(ConfigMetric.HONEY_MAX_LEVEL, ConfigMetric.HONEY_MAX_HEALTH, ConfigMetric.HONEY_ATTACK_DAMAGE, ConfigMetric.HONEY_ATTACK_SPEED, ConfigMetric.HONEY_MOVEMENT_SPEED, ConfigMetric.HONEY_DEFENCE));
-        put(EntityVariant.Kitsune,      setAttribute(ConfigMetric.KITSUNE_MAX_LEVEL, ConfigMetric.KITSUNE_MAX_HEALTH, ConfigMetric.KITSUNE_ATTACK_DAMAGE, ConfigMetric.KITSUNE_ATTACK_SPEED, ConfigMetric.KITSUNE_MOVEMENT_SPEED, ConfigMetric.KITSUNE_DEFENCE));
-        put(EntityVariant.Neko,         setAttribute(ConfigMetric.NEKO_MAX_LEVEL, ConfigMetric.NEKO_MAX_HEALTH, ConfigMetric.NEKO_ATTACK_DAMAGE, ConfigMetric.NEKO_ATTACK_SPEED, ConfigMetric.NEKO_MOVEMENT_SPEED, ConfigMetric.NEKO_DEFENCE));
-        put(EntityVariant.Vanilla,      setAttribute(ConfigMetric.VANILLA_MAX_LEVEL, ConfigMetric.VANILLA_MAX_HEALTH, ConfigMetric.VANILLA_ATTACK_DAMAGE, ConfigMetric.VANILLA_ATTACK_SPEED, ConfigMetric.VANILLA_MOVEMENT_SPEED, ConfigMetric.VANILLA_DEFENCE));
+        put(EntityVariant.Bunny,        setAttribute(InternalMetrics.BUNNY_MAX_LEVEL, InternalMetrics.BUNNY_MAX_HEALTH, InternalMetrics.BUNNY_ATTACK_DAMAGE, InternalMetrics.BUNNY_ATTACK_SPEED, InternalMetrics.BUNNY_MOVEMENT_SPEED, InternalMetrics.BUNNY_DEFENCE));
+        put(EntityVariant.Bunny2,       setAttribute(InternalMetrics.BUNNY2_MAX_LEVEL, InternalMetrics.BUNNY2_MAX_HEALTH, InternalMetrics.BUNNY2_ATTACK_DAMAGE, InternalMetrics.BUNNY2_ATTACK_SPEED, InternalMetrics.BUNNY2_MOVEMENT_SPEED, InternalMetrics.BUNNY2_DEFENCE));
+        put(EntityVariant.Dragon,       setAttribute(InternalMetrics.DRAGON_MAX_LEVEL, InternalMetrics.DRAGON_MAX_HEALTH, InternalMetrics.DRAGON_ATTACK_DAMAGE, InternalMetrics.DRAGON_ATTACK_SPEED, InternalMetrics.DRAGON_MOVEMENT_SPEED, InternalMetrics.DRAGON_DEFENCE));
+        put(EntityVariant.Honey,        setAttribute(InternalMetrics.HONEY_MAX_LEVEL, InternalMetrics.HONEY_MAX_HEALTH, InternalMetrics.HONEY_ATTACK_DAMAGE, InternalMetrics.HONEY_ATTACK_SPEED, InternalMetrics.HONEY_MOVEMENT_SPEED, InternalMetrics.HONEY_DEFENCE));
+        put(EntityVariant.Kitsune,      setAttribute(InternalMetrics.KITSUNE_MAX_LEVEL, InternalMetrics.KITSUNE_MAX_HEALTH, InternalMetrics.KITSUNE_ATTACK_DAMAGE, InternalMetrics.KITSUNE_ATTACK_SPEED, InternalMetrics.KITSUNE_MOVEMENT_SPEED, InternalMetrics.KITSUNE_DEFENCE));
+        put(EntityVariant.Neko,         setAttribute(InternalMetrics.NEKO_MAX_LEVEL, InternalMetrics.NEKO_MAX_HEALTH, InternalMetrics.NEKO_ATTACK_DAMAGE, InternalMetrics.NEKO_ATTACK_SPEED, InternalMetrics.NEKO_MOVEMENT_SPEED, InternalMetrics.NEKO_DEFENCE));
+        put(EntityVariant.Vanilla,      setAttribute(InternalMetrics.VANILLA_MAX_LEVEL, InternalMetrics.VANILLA_MAX_HEALTH, InternalMetrics.VANILLA_ATTACK_DAMAGE, InternalMetrics.VANILLA_ATTACK_SPEED, InternalMetrics.VANILLA_MOVEMENT_SPEED, InternalMetrics.VANILLA_DEFENCE));
     }};
 
     // -- Methods --
@@ -229,9 +229,9 @@ public class InternalMetric {
             put(EntityAttribute.ATTACK_SPEED, attackSpeed);         // Attack Speed
             put(EntityAttribute.MOVEMENT_SPEED, movementSpeed);     // Movement Speed
             put(EntityAttribute.DEFENSE, defense);                  // Defense
-            put(EntityAttribute.ARMOR, 0F);
-            put(EntityAttribute.ARMOR_TOUGHNESS, 0F);
+            put(EntityAttribute.ARMOR, InternalMetrics.GENERAL_ARMOR);
+            put(EntityAttribute.ARMOR_TOUGHNESS, InternalMetrics.GENERAL_ARMOR_TOUGHNESS);
         }};
     } // setAttribute ()
 
-} // Class InternalMetric
+} // Class InternalMetrics

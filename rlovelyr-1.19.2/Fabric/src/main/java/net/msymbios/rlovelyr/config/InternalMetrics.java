@@ -1,6 +1,6 @@
 package net.msymbios.rlovelyr.config;
 
-public class ConfigMetric {
+public class InternalMetrics {
 
     // -- Variables --
 
@@ -8,6 +8,9 @@ public class ConfigMetric {
     public static float MOVEMENT_MELEE_ATTACK;      // Movement speed when it is melee attacking
     public static float MOVEMENT_FOLLOW_OWNER;      // Movement speed when following player
     public static float MOVEMENT_WANDER_AROUND;     // Movement speed while it is wandering around
+    public static float GENERAL_ARMOR;
+    public static float GENERAL_ARMOR_TOUGHNESS;
+
     public static float FOLLOW_DISTANCE_MAX;        // Maximum distance allowed while following
     public static float FOLLOW_DISTANCE_MIN;        // Minimum distance allowed while following
     public static float LOOK_RANGE;                 // How much should the head rotate while looking
@@ -100,4 +103,4 @@ public class ConfigMetric {
     public static float VANILLA_BASE_DEFENCE_RANGE;         // Total area to be defended
     public static float VANILLA_BASE_DEFENCE_WARP_RANGE;    // Distance from base allowed until teleported
 
-} // Class ConfigMetric
+} // Class InternalMetrics

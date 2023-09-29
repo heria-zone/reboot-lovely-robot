@@ -11,8 +11,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.config.ConfigMetric;
-import net.msymbios.rlovelyr.entity.internal.InternalMetric;
+import net.msymbios.rlovelyr.config.InternalMetrics;
 import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
 import net.msymbios.rlovelyr.entity.enums.EntityVariant;
 import net.msymbios.rlovelyr.goal.AiAutoAttackGoal;
@@ -34,12 +33,12 @@ public class Bunny2Entity extends InternalEntity implements IAnimatable {
     // -- Properties --
     public static DefaultAttributeContainer.Builder setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MAX_HEALTH))
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ATTACK_DAMAGE))
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ATTACK_SPEED))
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MOVEMENT_SPEED))
-                .add(EntityAttributes.GENERIC_ARMOR, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ARMOR))
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ARMOR_TOUGHNESS));
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, InternalMetrics.BUNNY2_MAX_HEALTH)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, InternalMetrics.BUNNY2_ATTACK_DAMAGE)
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, InternalMetrics.BUNNY2_ATTACK_SPEED)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, InternalMetrics.BUNNY2_MOVEMENT_SPEED)
+                .add(EntityAttributes.GENERIC_ARMOR, InternalMetrics.GENERAL_ARMOR)
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, InternalMetrics.GENERAL_ARMOR_TOUGHNESS);
     } // setAttributes ()
 
     // -- Constructor --
@@ -64,7 +63,7 @@ public class Bunny2Entity extends InternalEntity implements IAnimatable {
     @Nullable
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
         this.variant = EntityVariant.Bunny2;
-        this.setTexture(InternalMetric.getRandomTextureID(this.variant));
+        this.setTexture(net.msymbios.rlovelyr.entity.internal.InternalMetric.getRandomTextureID(this.variant));
         this.setMaxLevel(getAttribute(EntityAttribute.MAX_LEVEL));
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
@@ -73,17 +72,17 @@ public class Bunny2Entity extends InternalEntity implements IAnimatable {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new MeleeAttackGoal(this, ConfigMetric.MOVEMENT_MELEE_ATTACK, false));
-        this.goalSelector.add(4, new AiFollowOwnerGoal(this, ConfigMetric.MOVEMENT_FOLLOW_OWNER, ConfigMetric.FOLLOW_DISTANCE_MAX, ConfigMetric.FOLLOW_DISTANCE_MIN, false));
-        this.goalSelector.add(4, new AiBaseDefenseGoal(this, ConfigMetric.MOVEMENT_FOLLOW_OWNER, ConfigMetric.BUNNY2_BASE_DEFENCE_RANGE, ConfigMetric.BUNNY2_BASE_DEFENCE_WARP_RANGE));
-        this.goalSelector.add(5, new WanderAroundFarGoal(this, ConfigMetric.MOVEMENT_WANDER_AROUND));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, ConfigMetric.LOOK_RANGE));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, ConfigMetric.LOOK_RANGE));
+        this.goalSelector.add(3, new MeleeAttackGoal(this, InternalMetrics.MOVEMENT_MELEE_ATTACK, false));
+        this.goalSelector.add(4, new AiFollowOwnerGoal(this, InternalMetrics.MOVEMENT_FOLLOW_OWNER, InternalMetrics.FOLLOW_DISTANCE_MAX, InternalMetrics.FOLLOW_DISTANCE_MIN, false));
+        this.goalSelector.add(4, new AiBaseDefenseGoal(this, InternalMetrics.MOVEMENT_FOLLOW_OWNER, InternalMetrics.BUNNY2_BASE_DEFENCE_RANGE, InternalMetrics.BUNNY2_BASE_DEFENCE_WARP_RANGE));
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, InternalMetrics.MOVEMENT_WANDER_AROUND));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, InternalMetrics.LOOK_RANGE));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, InternalMetrics.LOOK_RANGE));
         this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, new RevengeGoal(this));
-        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, ConfigMetric.ATTACK_CHANCE, false, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetrics.ATTACK_CHANCE, false, false, net.msymbios.rlovelyr.entity.internal.InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
