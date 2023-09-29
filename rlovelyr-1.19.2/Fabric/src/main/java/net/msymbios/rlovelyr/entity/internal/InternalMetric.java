@@ -101,7 +101,7 @@ public class InternalMetric {
     }};
 
     public static HashMap<EntityAnimator, Identifier> ANIMATOR = new HashMap<>() {{
-        put(EntityAnimator.Default,    new Identifier(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
+        put(EntityAnimator.Default,    new Identifier(LovelyRobotMod.MODID, "animations/default.animation.json"));
     }};
 
     public static HashMap<EntityVariant, HashMap<EntityTexture, Identifier>> TEXTURE = new HashMap<>(){{
@@ -115,13 +115,13 @@ public class InternalMetric {
     }};
 
     public static HashMap<EntityVariant, HashMap<EntityAttribute, Float>> ATTRIBUTES = new HashMap<>(){{
-        put(EntityVariant.Bunny,    setAttribute(ConfigMetric.BUNNY_MAX_LEVEL, ConfigMetric.BUNNY_MAX_HEALTH, ConfigMetric.BUNNY_ATTACK_DAMAGE, ConfigMetric.BUNNY_ATTACK_SPEED, ConfigMetric.BUNNY_MOVEMENT_SPEED, ConfigMetric.BUNNY_DEFENCE, ConfigMetric.BUNNY_BASE_DEFENCE_RANGE, ConfigMetric.BUNNY_BASE_DEFENCE_WARP_RANGE));
-        put(EntityVariant.Bunny2,    setAttribute(ConfigMetric.BUNNY2_MAX_LEVEL, ConfigMetric.BUNNY2_MAX_HEALTH, ConfigMetric.BUNNY2_ATTACK_DAMAGE, ConfigMetric.BUNNY2_ATTACK_SPEED, ConfigMetric.BUNNY2_MOVEMENT_SPEED, ConfigMetric.BUNNY2_DEFENCE, ConfigMetric.BUNNY2_BASE_DEFENCE_RANGE, ConfigMetric.BUNNY2_BASE_DEFENCE_WARP_RANGE));
-        put(EntityVariant.Dragon,    setAttribute(ConfigMetric.DRAGON_MAX_LEVEL, ConfigMetric.DRAGON_MAX_HEALTH, ConfigMetric.DRAGON_ATTACK_DAMAGE, ConfigMetric.DRAGON_ATTACK_SPEED, ConfigMetric.DRAGON_MOVEMENT_SPEED, ConfigMetric.DRAGON_DEFENCE, ConfigMetric.DRAGON_BASE_DEFENCE_RANGE, ConfigMetric.DRAGON_BASE_DEFENCE_WARP_RANGE));
-        put(EntityVariant.Honey,    setAttribute(ConfigMetric.HONEY_MAX_LEVEL, ConfigMetric.HONEY_MAX_HEALTH, ConfigMetric.HONEY_ATTACK_DAMAGE, ConfigMetric.HONEY_ATTACK_SPEED, ConfigMetric.HONEY_MOVEMENT_SPEED, ConfigMetric.HONEY_DEFENCE, ConfigMetric.HONEY_BASE_DEFENCE_RANGE, ConfigMetric.HONEY_BASE_DEFENCE_WARP_RANGE));
-        put(EntityVariant.Kitsune,    setAttribute(ConfigMetric.KITSUNE_MAX_LEVEL, ConfigMetric.KITSUNE_MAX_HEALTH, ConfigMetric.KITSUNE_ATTACK_DAMAGE, ConfigMetric.KITSUNE_ATTACK_SPEED, ConfigMetric.KITSUNE_MOVEMENT_SPEED, ConfigMetric.KITSUNE_DEFENCE, ConfigMetric.KITSUNE_BASE_DEFENCE_RANGE, ConfigMetric.KITSUNE_BASE_DEFENCE_WARP_RANGE));
-        put(EntityVariant.Neko,    setAttribute(ConfigMetric.NEKO_MAX_LEVEL, ConfigMetric.NEKO_MAX_HEALTH, ConfigMetric.NEKO_ATTACK_DAMAGE, ConfigMetric.NEKO_ATTACK_SPEED, ConfigMetric.NEKO_MOVEMENT_SPEED, ConfigMetric.NEKO_DEFENCE, ConfigMetric.NEKO_BASE_DEFENCE_RANGE, ConfigMetric.NEKO_BASE_DEFENCE_WARP_RANGE));
-        put(EntityVariant.Vanilla,    setAttribute(ConfigMetric.VANILLA_MAX_LEVEL, ConfigMetric.VANILLA_MAX_HEALTH, ConfigMetric.VANILLA_ATTACK_DAMAGE, ConfigMetric.VANILLA_ATTACK_SPEED, ConfigMetric.VANILLA_MOVEMENT_SPEED, ConfigMetric.VANILLA_DEFENCE, ConfigMetric.VANILLA_BASE_DEFENCE_RANGE, ConfigMetric.VANILLA_BASE_DEFENCE_WARP_RANGE));
+        put(EntityVariant.Bunny,        setAttribute(ConfigMetric.BUNNY_MAX_LEVEL, ConfigMetric.BUNNY_MAX_HEALTH, ConfigMetric.BUNNY_ATTACK_DAMAGE, ConfigMetric.BUNNY_ATTACK_SPEED, ConfigMetric.BUNNY_MOVEMENT_SPEED, ConfigMetric.BUNNY_DEFENCE));
+        put(EntityVariant.Bunny2,       setAttribute(ConfigMetric.BUNNY2_MAX_LEVEL, ConfigMetric.BUNNY2_MAX_HEALTH, ConfigMetric.BUNNY2_ATTACK_DAMAGE, ConfigMetric.BUNNY2_ATTACK_SPEED, ConfigMetric.BUNNY2_MOVEMENT_SPEED, ConfigMetric.BUNNY2_DEFENCE));
+        put(EntityVariant.Dragon,       setAttribute(ConfigMetric.DRAGON_MAX_LEVEL, ConfigMetric.DRAGON_MAX_HEALTH, ConfigMetric.DRAGON_ATTACK_DAMAGE, ConfigMetric.DRAGON_ATTACK_SPEED, ConfigMetric.DRAGON_MOVEMENT_SPEED, ConfigMetric.DRAGON_DEFENCE));
+        put(EntityVariant.Honey,        setAttribute(ConfigMetric.HONEY_MAX_LEVEL, ConfigMetric.HONEY_MAX_HEALTH, ConfigMetric.HONEY_ATTACK_DAMAGE, ConfigMetric.HONEY_ATTACK_SPEED, ConfigMetric.HONEY_MOVEMENT_SPEED, ConfigMetric.HONEY_DEFENCE));
+        put(EntityVariant.Kitsune,      setAttribute(ConfigMetric.KITSUNE_MAX_LEVEL, ConfigMetric.KITSUNE_MAX_HEALTH, ConfigMetric.KITSUNE_ATTACK_DAMAGE, ConfigMetric.KITSUNE_ATTACK_SPEED, ConfigMetric.KITSUNE_MOVEMENT_SPEED, ConfigMetric.KITSUNE_DEFENCE));
+        put(EntityVariant.Neko,         setAttribute(ConfigMetric.NEKO_MAX_LEVEL, ConfigMetric.NEKO_MAX_HEALTH, ConfigMetric.NEKO_ATTACK_DAMAGE, ConfigMetric.NEKO_ATTACK_SPEED, ConfigMetric.NEKO_MOVEMENT_SPEED, ConfigMetric.NEKO_DEFENCE));
+        put(EntityVariant.Vanilla,      setAttribute(ConfigMetric.VANILLA_MAX_LEVEL, ConfigMetric.VANILLA_MAX_HEALTH, ConfigMetric.VANILLA_ATTACK_DAMAGE, ConfigMetric.VANILLA_ATTACK_SPEED, ConfigMetric.VANILLA_MOVEMENT_SPEED, ConfigMetric.VANILLA_DEFENCE));
     }};
 
     // -- Methods --
@@ -186,7 +186,7 @@ public class InternalMetric {
         List<EntityTexture> textures = ENTITY_TEXTURE.keySet().stream().filter(entityTexture -> ENTITY_TEXTURE.get(entityTexture).contains(variant)).toList();
         if (!textures.isEmpty()) {
             EntityTexture randomTexture = textures.get(new Random().nextInt(textures.size()));
-            return randomTexture.getId(); // Replace with the appropriate method to get the ID
+            return randomTexture.getId();
         }
 
         // Return a default or error ID if no valid variant is found
@@ -221,18 +221,16 @@ public class InternalMetric {
         return robotAttribute == null ? 0F : robotAttribute;
     } // getAttributeValue ()
 
-    private static HashMap<EntityAttribute, Float> setAttribute(float maxLevel, float maxHealth, float attackDamage, float attackSpeed, float movementSpeed, float defense, float baseDefenseRange, float baseDefenseWarpRange){
+    private static HashMap<EntityAttribute, Float> setAttribute(float maxLevel, float maxHealth, float attackDamage, float attackSpeed, float movementSpeed, float defense){
         return new HashMap<>(){{
-            put(EntityAttribute.MAX_LEVEL, maxLevel);                // Max Level
+            put(EntityAttribute.MAX_LEVEL, maxLevel);               // Max Level
             put(EntityAttribute.MAX_HEALTH, maxHealth);             // Max Health
-            put(EntityAttribute.ATTACK_DAMAGE, attackDamage);    // Attack Damage
-            put(EntityAttribute.ATTACK_SPEED, attackSpeed);       // Attack Speed
-            put(EntityAttribute.MOVEMENT_SPEED, movementSpeed); // Movement Speed
-            put(EntityAttribute.DEFENSE, defense);                     // Defense
+            put(EntityAttribute.ATTACK_DAMAGE, attackDamage);       // Attack Damage
+            put(EntityAttribute.ATTACK_SPEED, attackSpeed);         // Attack Speed
+            put(EntityAttribute.MOVEMENT_SPEED, movementSpeed);     // Movement Speed
+            put(EntityAttribute.DEFENSE, defense);                  // Defense
             put(EntityAttribute.ARMOR, 0F);
             put(EntityAttribute.ARMOR_TOUGHNESS, 0F);
-            put(EntityAttribute.BASE_DEFENSE_RANGE, baseDefenseRange);
-            put(EntityAttribute.BASE_DEFENSE_WARP_RANGE, baseDefenseWarpRange);
         }};
     } // setAttribute ()
 

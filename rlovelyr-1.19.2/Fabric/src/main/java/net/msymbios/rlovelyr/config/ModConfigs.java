@@ -24,9 +24,9 @@ public class ModConfigs {
         String additional = "\n";
 
         // GENERAL
-        CONFIG.addKeyValuePair(new Pair<>("general.movement-melee-attack", 1F), "Movement speed when it is melee attacking | Float");
-        CONFIG.addKeyValuePair(new Pair<>("general.movement-follow-owner", 1F), "Movement speed when following player | Float");
-        CONFIG.addKeyValuePair(new Pair<>("general.movement-wander-around", 1F),"Movement speed while it is wandering around | Float");
+        CONFIG.addKeyValuePair(new Pair<>("general.movement-melee-attack", 0.4F), "Movement speed when it is melee attacking | Float");
+        CONFIG.addKeyValuePair(new Pair<>("general.movement-follow-owner", 0.4F), "Movement speed when following player | Float");
+        CONFIG.addKeyValuePair(new Pair<>("general.movement-wander-around", 0.4F),"Movement speed while it is wandering around | Float");
         CONFIG.addKeyValuePair(new Pair<>("general.follow-distance-max", 10F),  "Maximum distance allowed while following | Float");
         CONFIG.addKeyValuePair(new Pair<>("general.follow-distance-min", 2F),   "Minimum distance allowed while following | Float");
         CONFIG.addKeyValuePair(new Pair<>("general.look-range", 8F),            "How much should the head rotate while looking | Float", additional);
@@ -122,9 +122,9 @@ public class ModConfigs {
 
     private static void assignConfigs() {
         // GENERAL
-        ConfigMetric.MOVEMENT_MELEE_ATTACK = CONSTRUCTOR.getOrDefault("general.movement-melee-attack", 1F);
-        ConfigMetric.MOVEMENT_FOLLOW_OWNER = CONSTRUCTOR.getOrDefault("general.movement-follow-owner", 1F);
-        ConfigMetric.MOVEMENT_WANDER_AROUND = CONSTRUCTOR.getOrDefault("general.movement-wander-around", 1F);
+        ConfigMetric.MOVEMENT_MELEE_ATTACK = CONSTRUCTOR.getOrDefault("general.movement-melee-attack", 0.4F);
+        ConfigMetric.MOVEMENT_FOLLOW_OWNER = CONSTRUCTOR.getOrDefault("general.movement-follow-owner", 0.4F);
+        ConfigMetric.MOVEMENT_WANDER_AROUND = CONSTRUCTOR.getOrDefault("general.movement-wander-around", 0.4F);
         ConfigMetric.FOLLOW_DISTANCE_MAX = CONSTRUCTOR.getOrDefault("general.follow-distance-max", 10F);
         ConfigMetric.FOLLOW_DISTANCE_MIN = CONSTRUCTOR.getOrDefault("general.follow-distance-min", 2F);
         ConfigMetric.LOOK_RANGE = CONSTRUCTOR.getOrDefault("general.look-range", 8F);

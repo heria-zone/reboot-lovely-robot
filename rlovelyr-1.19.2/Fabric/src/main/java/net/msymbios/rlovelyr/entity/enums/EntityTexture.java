@@ -6,6 +6,7 @@ import java.util.Comparator;
 public enum EntityTexture {
 
     // -- Enum --
+    RANDOM(-1, "random"),
     WHITE(0, "white"),
     ORANGE(1, "orange"),
     MAGENTA(2, "magenta"),

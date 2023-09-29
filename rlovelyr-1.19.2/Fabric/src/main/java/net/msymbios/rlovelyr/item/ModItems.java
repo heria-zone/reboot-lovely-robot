@@ -26,8 +26,8 @@ public class ModItems {
         return Registry.register(Registry.ITEM, new Identifier(LovelyRobotMod.MODID, name), item);
     } // registerItem ()
 
-    public static void registerModItems() {
+    public static void registerItems() {
         LovelyRobotMod.LOGGER.debug(LovelyRobotMod.MODID + ": Registering Items");
-    } // registerModItems ()
+    } // registerItems ()
 
 } // Class ModItems

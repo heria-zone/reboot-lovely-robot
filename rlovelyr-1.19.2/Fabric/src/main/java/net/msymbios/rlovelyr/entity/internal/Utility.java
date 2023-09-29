@@ -1,7 +1,6 @@
 package net.msymbios.rlovelyr.entity.internal;
 
-import net.msymbios.rlovelyr.entity.enums.EntityState;
-import net.msymbios.rlovelyr.entity.enums.EntityVariant;
+import net.msymbios.rlovelyr.entity.enums.*;
 
 public class Utility {
 
@@ -18,9 +17,10 @@ public class Utility {
         return letterToUpper.toUpperCase() + value.substring(1);
     } // FirstToUpperCase ()
 
-    public static String getTranslatableEntity(EntityVariant variant){
+    // TRANSLATABLE
+    public static String getTranslatable(EntityVariant translatable){
         String value = "entity.rlovelyr.bunny";
-        switch (variant) {
+        switch (translatable) {
             case Bunny -> value = "entity.rlovelyr.bunny";
             case Bunny2 -> value = "entity.rlovelyr.bunny2";
             case Dragon -> value = "entity.rlovelyr.dragon";
@@ -30,16 +30,40 @@ public class Utility {
             case Vanilla -> value = "entity.rlovelyr.vanilla";
         }
         return value;
-    } // getTranslatableEntity ()
+    } // getTranslatable ()
 
-    public static String getTranslatableState(EntityState state){
+    public static String getTranslatable(EntityState translatable){
         String value = "msg.rlovelyr.follow";
-        switch (state) {
+        switch (translatable) {
             case Follow -> value = "msg.rlovelyr.follow";
             case BaseDefense -> value = "msg.rlovelyr.base_defence";
             case Standby -> value = "msg.rlovelyr.standby";
         }
         return value;
-    } // getTranslatableEntity ()
+    } // getTranslatable ()
+
+    public static String getTranslatable(EntityTexture translatable){
+        String value = "msg.item.pink";
+        switch (translatable) {
+            case RANDOM -> value = "msg.item.random";
+            case WHITE -> value = "msg.item.white";
+            case ORANGE -> value = "msg.item.orange";
+            case MAGENTA -> value = "msg.item.magenta";
+            case LIGHT_BLUE -> value = "msg.item.light_blue";
+            case YELLOW -> value = "msg.item.yellow";
+            case LIME -> value = "msg.item.lime";
+            case PINK -> value = "msg.item.pink";
+            case GRAY -> value = "msg.item.gray";
+            case LIGHT_GRAY -> value = "msg.item.light_gray";
+            case CYAN -> value = "msg.item.cyan";
+            case PURPLE -> value = "msg.item.purple";
+            case BLUE -> value = "msg.item.blue";
+            case BROWN -> value = "msg.item.brown";
+            case GREEN -> value = "msg.item.green";
+            case RED -> value = "msg.item.red";
+            case BLACK -> value = "msg.item.black";
+        }
+        return value;
+    } // getTranslatable ()
 
 } // Class Utility

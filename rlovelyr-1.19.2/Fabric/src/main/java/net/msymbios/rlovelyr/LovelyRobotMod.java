@@ -18,11 +18,9 @@ public class LovelyRobotMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		ModConfigs.registerConfigs();
-
-		ModItems.registerModItems();
+		ModItems.registerItems();
 
 		GeckoLib.initialize();
-
 		ModEntities.registerAttribute();
 	} // onInitialize ()
 

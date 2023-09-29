@@ -404,6 +404,8 @@ public abstract class InternalEntity extends TamableAnimal {
         super.onEnterCombat();
     } // onEnterCombat ()
 
+
+
     // -- Interact Methods --
     @Override
     public @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
