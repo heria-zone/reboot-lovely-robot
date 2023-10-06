@@ -75,7 +75,7 @@ public abstract class InternalEntity extends TameableEntity {
         return value;
     } // getTextureID ()
 
-    public void setTexture(int value) { if(net.msymbios.rlovelyr.entity.internal.InternalMetric.checkTextureID(this.variant, EntityTexture.byId(value))) this.dataTracker.set(TEXTURE_ID, value); } // setTexture ()
+    public void setTexture(int value) { if(InternalMetric.checkTextureID(this.variant, EntityTexture.byId(value))) this.dataTracker.set(TEXTURE_ID, value); } // setTexture ()
 
     public void setTexture(EntityTexture value) { setTexture(value.getId()); } // setTexture ()
 

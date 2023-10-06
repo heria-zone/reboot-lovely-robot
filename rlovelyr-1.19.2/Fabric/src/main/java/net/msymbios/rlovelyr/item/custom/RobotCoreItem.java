@@ -24,7 +24,7 @@ public class RobotCoreItem extends Item {
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         if(!stack.hasNbt()) {
             NbtCompound compound = new NbtCompound();
-            compound.putInt("color", -1);
+            compound.putInt("color", 16);
             compound.putInt("level", 0);
             stack.setNbt(compound);
         }
