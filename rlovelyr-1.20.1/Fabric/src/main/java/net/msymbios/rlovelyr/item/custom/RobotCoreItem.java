@@ -29,6 +29,7 @@ public class RobotCoreItem extends Item {
         }
 
         if(stack.hasNbt()) {
+            if(!stack.getNbt().getString("custom_name").isEmpty()) tooltip.add(Text.translatable("msg.item.name").append(Text.literal(": " + stack.getNbt().getString("custom_name"))));
             if(!stack.getNbt().getString("type").isEmpty()) tooltip.add(Text.translatable("msg.item.type").append(Text.literal(": ")).append(Text.translatable(stack.getNbt().getString("type"))));
             tooltip.add(Text.translatable("msg.item.color").append(Text.literal(": ").append(Text.translatable(Utility.getTranslatable(EntityTexture.byId(stack.getNbt().getInt("color")))))));
             if(stack.getNbt().getInt("level") > 0) tooltip.add(Text.translatable("msg.item.level").append(Text.literal(": " + stack.getNbt().getInt("level"))));

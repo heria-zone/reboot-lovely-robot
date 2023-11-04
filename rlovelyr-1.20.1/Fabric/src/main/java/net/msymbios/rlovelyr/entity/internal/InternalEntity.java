@@ -402,7 +402,7 @@ public abstract class InternalEntity extends TameableEntity {
             NbtCompound nbt = dropItem.getNbt();
             if(nbt == null) nbt = new NbtCompound();
 
-            final String customName = this.getEntityName();
+            final String customName = this.getCustomName().getString();
             if (customName != null && !customName.trim().isEmpty()) nbt.putString("custom_name", customName);
 
             nbt.putString("type", Utility.getTranslatable(this.variant));
@@ -736,7 +736,7 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.startTracking(BASE_Y, 0F);
         this.dataTracker.startTracking(BASE_Z, 0F);
 
-        this.dataTracker.startTracking(NOTIFICATION, false);
+        this.dataTracker.startTracking(NOTIFICATION, true);
     } // initDataTracker ()
 
     public void writeCustomDataToNbt(NbtCompound dataNBT) {

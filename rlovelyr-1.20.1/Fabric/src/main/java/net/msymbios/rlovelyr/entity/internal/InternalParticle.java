@@ -3,6 +3,7 @@ package net.msymbios.rlovelyr.entity.internal;
 import net.minecraft.entity.Entity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.random.Random;
+import net.msymbios.rlovelyr.particles.LovelyRobotParticles;
 
 public class InternalParticle {
 
@@ -32,6 +33,15 @@ public class InternalParticle {
             entity.getWorld().addParticle(ParticleTypes.HEART, entity.getParticleX(1.0D), entity.getRandomBodyY() + 0.5D, entity.getParticleZ(1.0D), d0, d1, d2);
         }
     } // Heart ()
+
+    public static void LevelUp(Entity entity) {
+        for (int i = 0; i < MaximumNumberParticles; ++i) {
+            double d0 = CalculateVelocity();
+            double d1 = CalculateVelocity();
+            double d2 = CalculateVelocity();
+            entity.getWorld().addParticle(LovelyRobotParticles.LEVEL_UP, entity.getParticleX(1.0D), entity.getRandomBodyY() + 0.5D, entity.getParticleZ(1.0D), d0, d1, d2);
+        }
+    } // LevelUp ()
 
     // UTILITY
     private static double CalculateVelocity() {
