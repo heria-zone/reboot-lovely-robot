@@ -12,7 +12,7 @@ public class NekoRenderer extends GeoEntityRenderer<NekoEntity> {
     // -- Constructor --
     public NekoRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new NekoModel());
-        this.shadowRadius = InternalMetric.ShadowRadius;
+        this.shadowRadius = InternalMetric.SHADOW_RADIUS;
     } // Constructor VanillaRenderer ()
 
     // -- Methods --

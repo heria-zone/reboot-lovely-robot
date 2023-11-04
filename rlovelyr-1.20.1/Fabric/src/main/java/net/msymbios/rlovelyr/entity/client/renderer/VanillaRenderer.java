@@ -12,7 +12,7 @@ public class VanillaRenderer extends GeoEntityRenderer<VanillaEntity> {
     // -- Constructor --
     public VanillaRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new VanillaModel());
-        this.shadowRadius = InternalMetric.ShadowRadius;
+        this.shadowRadius = InternalMetric.SHADOW_RADIUS;
     } // Constructor VanillaRenderer ()
 
     // -- Methods --

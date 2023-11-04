@@ -1,6 +1,7 @@
 package net.msymbios.rlovelyr;
 
 import net.fabricmc.api.ModInitializer;
+import net.msymbios.rlovelyr.config.LovelyRobotConfig;
 import net.msymbios.rlovelyr.entity.LovelyRobotEntities;
 import net.msymbios.rlovelyr.event.CraftHandler;
 import net.msymbios.rlovelyr.event.ItemCraftCallback;
@@ -23,13 +24,13 @@ public class LovelyRobot implements ModInitializer {
 	public void onInitialize() {
 		GeckoLib.initialize();
 
+		LovelyRobotConfig.register();
 		LovelyRobotItemsGroup.register();
-		LovelyRobotItems.register();
 
+		LovelyRobotItems.register();
 		LovelyRobotEvents.register();
 
 		LovelyRobotEntities.registerAttribute();
-
 		LovelyRobotParticles.register();
 	} // onInitialize ()
 

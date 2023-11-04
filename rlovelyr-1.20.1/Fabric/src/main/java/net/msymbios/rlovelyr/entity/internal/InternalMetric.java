@@ -15,46 +15,40 @@ import java.util.function.Predicate;
 
 public class InternalMetric {
 
-    // -- Entity Renderer --
-    public static float ShadowRadius = 0.4F;
-    public static float Width = 0.4F;
-    public static float Height = 2F;
+    // -- RENDERER --
+    public static float SHADOW_RADIUS;
+    public static float WIDTH;
+    public static float HEIGHT;
 
+    // -- GENERAL --
+    public static float MOVEMENT_MELEE_ATTACK;
+    public static float MOVEMENT_FOLLOW_OWNER;
+    public static float MOVEMENT_WANDER_AROUND;
+    public static float FOLLOW_DISTANCE_MAX;
+    public static float FOLLOW_DISTANCE_MIN;
+    public static float LOOK_RANGE;
 
-    // -- Goal Attribute --
-    public static float MeleeAttackMovement = 1.0F;                   // Movement speed when it is melee attacking
-    public static float FollowOwnerMovement = 1.0F;                   // Movement speed when following player
-    public static float WanderAroundMovement = 0.6F;                  // Movement speed while it is wandering around
-    public static float FollowBehindDistance = 10.0F;
-    public static float FollowCloseDistance= 2.0F;
-    public static float LookAtRange = 8.0F;
-    public static int AttackChance = 5;
+    // -- LEVEL | EXPERIENCE ---
+    public static int EXPERIENCE_BASE;
+    public static int EXPERIENCE_MULTIPLIER;
+
+    // -- COMBAT --
     public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof Monster && !(entity instanceof CreeperEntity) && !(entity instanceof InternalEntity);
+    public static int ATTACK_CHANCE;
+    public static int HEAL_INTERVAL;
+    public static int WARY_TIME;
+    public static boolean GLOBAL_AUTO_HEAL;
+    public static boolean LOOT_ENCHANTMENT;
+    public static int LOOT_ENCHANTMENT_LEVEL;
+    public static int MAX_LOOT_ENCHANTMENT;
+    public static float BASE_DEFENCE_RANGE;
+    public static float BASE_DEFENCE_WARP_RANGE;
 
-
-    // - Level & Experience --
-    public static int BaseExp = 50;                     // Basic experience required to level up
-    public static int UpExpValue = 2;                   // Increase value for each level
-
-    // -- Auto Healing --
-    public static boolean AutoHeal = true;              // Enable automatic recovery
-    public static int AutoHealInterval = 50;            // Automatic recovery interval
-
-    // -- Combat --
-    public static boolean LootingEnchantment = true;    // Enable looting enchantments
-    public static int LootingRequiredLevel = 10;        // Levels required for looting enchantments
-    public static int MaxLootingLevel = 3;              // Maximum level of looting enchantments
-    public static int WaryTime = 50;            // Time while being in combat mode
-
-    // -- Protection --
-    public static int FireProtectionLimit = 80;         // Fire Protection upper limit
-    public static int FallProtectionLimit = 80;         // Fall Protection upper limit
-    public static int BlastProtectionLimit = 80;        // Blast Protection upper limit
-    public static int ProjectileProtectionLimit = 80;   // Projectile Protection upper limit
-
-    // -- Base --
-    public static float BaseDefenseRange = 15;
-    public static float BaseDefenseWarpRange = 10;
+    // -- PROTECTION --
+    public static int PROTECTION_LIMIT_FIRE;
+    public static int PROTECTION_LIMIT_FALL;
+    public static int PROTECTION_LIMIT_BLAST;
+    public static int PROTECTION_LIMIT_PROJECTILE;
 
     // Proprieties --
     public static HashMap<EntityVariant, EntityAnimator> ENTITY_ANIMATOR = new HashMap<>(){{
@@ -146,15 +140,7 @@ public class InternalMetric {
         put(EntityVariant.Vanilla,    setTexture(EntityVariant.Vanilla));
     }};
 
-    public static HashMap<EntityVariant, HashMap<EntityAttribute, InternalAttribute>> ATTRIBUTES = new HashMap<>(){{
-        put(EntityVariant.Bunny, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
-        put(EntityVariant.Bunny2, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 6F));
-        put(EntityVariant.Dragon, setAttribute(200F, 30F, 7F, 1.2F, 0.4F, 7F));
-        put(EntityVariant.Honey, setAttribute(200F, 30F, 6F, 1.2F, 0.4F, 5F));
-        put(EntityVariant.Kitsune, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
-        put(EntityVariant.Neko, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
-        put(EntityVariant.Vanilla, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 6F));
-    }};
+    public static HashMap<EntityVariant, HashMap<EntityAttribute, Float>> ATTRIBUTES = new HashMap<>();
 
     // -- Methods --
     // ANIMATOR
@@ -247,24 +233,8 @@ public class InternalMetric {
     } // setTexture ()
 
     // ATTRIBUTE
-    public static float getAttributeValue(EntityVariant variant, EntityAttribute attribute) {
-        InternalAttribute robotAttribute = ATTRIBUTES.get(variant).get(attribute);
-        return robotAttribute == null ? 0F : robotAttribute.value;
-    } // getAttributeValue ()
-
-    private static HashMap<EntityAttribute, InternalAttribute> setAttribute(float maxLevel, float maxHealth, float attackDamage, float attackSpeed, float movementSpeed, float defense){
-        return new HashMap<>(){{
-            put(EntityAttribute.MAX_LEVEL, new InternalAttribute(EntityAttribute.MAX_LEVEL, maxLevel));                // Max Level
-            put(EntityAttribute.MAX_HEALTH, new InternalAttribute(EntityAttribute.MAX_HEALTH, maxHealth));             // Max Health
-            put(EntityAttribute.ATTACK_DAMAGE, new InternalAttribute(EntityAttribute.ATTACK_DAMAGE, attackDamage));    // Attack Damage
-            put(EntityAttribute.ATTACK_SPEED, new InternalAttribute(EntityAttribute.ATTACK_SPEED, attackSpeed));       // Attack Speed
-            put(EntityAttribute.MOVEMENT_SPEED, new InternalAttribute(EntityAttribute.MOVEMENT_SPEED, movementSpeed)); // Movement Speed
-            put(EntityAttribute.DEFENSE, new InternalAttribute(EntityAttribute.DEFENSE, defense));                     // Defense
-            put(EntityAttribute.ARMOR, new InternalAttribute(EntityAttribute.ARMOR, 0F));
-            put(EntityAttribute.ARMOR_TOUGHNESS, new InternalAttribute(EntityAttribute.ARMOR_TOUGHNESS, 0F));
-            put(EntityAttribute.BASE_DEFENSE_RANGE, new InternalAttribute(EntityAttribute.BASE_DEFENSE_RANGE, 15F));
-            put(EntityAttribute.BASE_DEFENSE_WARP_RANGE, new InternalAttribute(EntityAttribute.BASE_DEFENSE_WARP_RANGE, 10F));
-        }};
-    } // setAttribute ()
+    public static float getAttribute(EntityVariant variant, EntityAttribute attribute) {
+        return ATTRIBUTES.get(variant).get(attribute);
+    } // getAttribute ()
 
 } // Class InternalMetric

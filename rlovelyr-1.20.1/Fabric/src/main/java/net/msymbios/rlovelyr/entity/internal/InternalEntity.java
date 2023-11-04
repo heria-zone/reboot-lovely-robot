@@ -123,7 +123,7 @@ public abstract class InternalEntity extends TameableEntity {
     } // setAutoAttack ()
 
     // STATS
-    public int getAttribute(EntityAttribute attribute) { return (int) InternalMetric.getAttributeValue(this.variant, attribute); } // getAttribute ()
+    public int getAttribute(EntityAttribute attribute) { return (int) InternalMetric.getAttribute(this.variant, attribute); } // getAttribute ()
 
     public int getMaxLevel() { return getMaxLevel (getAttribute(EntityAttribute.MAX_LEVEL)); } // getMaxLevel ()
 
@@ -198,10 +198,10 @@ public abstract class InternalEntity extends TameableEntity {
 
     public int getLootingLevel() {
         int level = 0;
-        if (InternalMetric.LootingEnchantment) {
-            level = this.getCurrentLevel() / InternalMetric.LootingRequiredLevel;
-            if (level > InternalMetric.MaxLootingLevel) {
-                level = InternalMetric.MaxLootingLevel;
+        if (InternalMetric.LOOT_ENCHANTMENT) {
+            level = this.getCurrentLevel() / InternalMetric.LOOT_ENCHANTMENT_LEVEL;
+            if (level > InternalMetric.MAX_LOOT_ENCHANTMENT) {
+                level = InternalMetric.MAX_LOOT_ENCHANTMENT;
             }
         }
         return level;
@@ -501,33 +501,32 @@ public abstract class InternalEntity extends TameableEntity {
     } // canLevelUp ()
 
     protected boolean canLevelUpFireProtection() {
-        return this.getFireProtection() < InternalMetric.FireProtectionLimit;
+        return this.getFireProtection() < InternalMetric.PROTECTION_LIMIT_FIRE;
     } // canLevelUpFireProtection ()
 
     protected boolean canLevelUpFallProtection() {
-        return this.getFallProtection() < InternalMetric.FallProtectionLimit;
+        return this.getFallProtection() < InternalMetric.PROTECTION_LIMIT_FALL;
     } // canLevelUpFallProtection ()
 
     protected boolean canLevelUpBlastProtection() {
-        return this.getBlastProtection() < InternalMetric.BlastProtectionLimit;
+        return this.getBlastProtection() < InternalMetric.PROTECTION_LIMIT_BLAST;
     } // canLevelUpBlastProtection ()
 
     protected boolean canLevelUpProjectileProtection() {
-        return this.getProjectileProtection() < InternalMetric.ProjectileProtectionLimit;
+        return this.getProjectileProtection() < InternalMetric.PROTECTION_LIMIT_PROJECTILE;
     } // canLevelUpProjectileProtection ()
 
     protected int getNextExp() {
-        return InternalMetric.BaseExp + this.getCurrentLevel() * InternalMetric.UpExpValue;
+        return InternalMetric.EXPERIENCE_BASE + this.getCurrentLevel() * InternalMetric.EXPERIENCE_MULTIPLIER;
     } // getNextExp ()
 
     protected void addExp (int value) {
-        var addExp = value;
-
-        final String customName = this.getEntityName();
-        if(customName != null && !customName.trim().isEmpty())
-            addExp = addExp * 3 / 2;
-
+        int addExp = value;
         int exp = this.getExp();
+        final String customName = this.getCustomName().getString();
+
+        // if they have a name they earn more exp
+        if(customName != null && !customName.trim().isEmpty()) addExp = addExp * 3 / 2;
         exp += addExp;
 
         var oldLevel = getCurrentLevel();
@@ -537,7 +536,6 @@ public abstract class InternalEntity extends TameableEntity {
         }
 
         this.setExp(exp);
-
         if(oldLevel != getCurrentLevel()) {
             if(!getWorld().isClient) {
                 try {
@@ -560,13 +558,13 @@ public abstract class InternalEntity extends TameableEntity {
             final float healValue = this.getHpValue() / 16.0F;
             this.heal(healValue);
             autoHeal = false;
-            autoHealTimer = InternalMetric.AutoHealInterval;
+            autoHealTimer = InternalMetric.HEAL_INTERVAL;
         }
     } // handleAutoHeal ()
 
     protected void handleActivateCombatMode () {
         if(!combatMode) combatMode = true;
-        waryTimer = InternalMetric.WaryTime;
+        waryTimer = InternalMetric.WARY_TIME;
     } // handleActivateCombatMode ()
 
     protected void handleCombatMode() {
@@ -708,11 +706,11 @@ public abstract class InternalEntity extends TameableEntity {
     public void displayProtectionMessage (PlayerEntity player) {
         player.sendMessage(Text.translatable("msg.rlovelyr.bar"));
         player.sendMessage(Text.translatable("msg.rlovelyr.enchantment"));
-        player.sendMessage(Text.translatable("msg.rlovelyr.looting").append(": " + this.getLootingLevel()                       + "/" + InternalMetric.MaxLootingLevel));
-        player.sendMessage(Text.translatable("msg.rlovelyr.fire_protection").append(": " + this.getFireProtection()             + "/" + InternalMetric.FireProtectionLimit));
-        player.sendMessage(Text.translatable("msg.rlovelyr.fall_protection").append(": " + this.getFallProtection()             + "/" + InternalMetric.FallProtectionLimit));
-        player.sendMessage(Text.translatable("msg.rlovelyr.blast_protection").append(": " + this.getBlastProtection()           + "/" + InternalMetric.BlastProtectionLimit));
-        player.sendMessage(Text.translatable("msg.rlovelyr.projectile_protection").append(": " + this.getProjectileProtection() + "/" + InternalMetric.ProjectileProtectionLimit));
+        player.sendMessage(Text.translatable("msg.rlovelyr.looting").append(": " + this.getLootingLevel()                       + "/" + InternalMetric.MAX_LOOT_ENCHANTMENT));
+        player.sendMessage(Text.translatable("msg.rlovelyr.fire_protection").append(": " + this.getFireProtection()             + "/" + InternalMetric.PROTECTION_LIMIT_FIRE));
+        player.sendMessage(Text.translatable("msg.rlovelyr.fall_protection").append(": " + this.getFallProtection()             + "/" + InternalMetric.PROTECTION_LIMIT_FALL));
+        player.sendMessage(Text.translatable("msg.rlovelyr.blast_protection").append(": " + this.getBlastProtection()           + "/" + InternalMetric.PROTECTION_LIMIT_BLAST));
+        player.sendMessage(Text.translatable("msg.rlovelyr.projectile_protection").append(": " + this.getProjectileProtection() + "/" + InternalMetric.PROTECTION_LIMIT_PROJECTILE));
     } // displayProtectionMessage ()
 
     // -- Save Methods --
