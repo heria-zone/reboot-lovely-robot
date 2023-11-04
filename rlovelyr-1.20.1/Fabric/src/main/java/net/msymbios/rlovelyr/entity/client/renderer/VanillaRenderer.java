@@ -1,7 +1,8 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.entity.client.renderer;
 
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.util.Identifier;
+import net.msymbios.rlovelyr.entity.client.model.VanillaModel;
 import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;

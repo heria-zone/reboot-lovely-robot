@@ -1,14 +1,14 @@
 package net.msymbios.rlovelyr;
 
 import net.fabricmc.api.ModInitializer;
-import net.msymbios.rlovelyr.entity.ModEntities;
-import net.msymbios.rlovelyr.item.ModItems;
-import net.msymbios.rlovelyr.item.ModItemsGroup;
+import net.msymbios.rlovelyr.entity.LovelyRobotEntities;
+import net.msymbios.rlovelyr.item.LovelyRobotItems;
+import net.msymbios.rlovelyr.item.LovelyRobotItemsGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.GeckoLib;
 
-public class LovelyRobotMod implements ModInitializer {
+public class LovelyRobot implements ModInitializer {
 
 	// -- Variables --
 	public static final String MODID = "rlovelyr";
@@ -17,12 +17,11 @@ public class LovelyRobotMod implements ModInitializer {
 	// -- Methods --
 	@Override
 	public void onInitialize() {
-		ModItems.registerModItems();
-		//ModItemsGroup.registerItemsGroups();
-
 		GeckoLib.initialize();
-
-		ModEntities.registerAttribute();
+		
+		LovelyRobotItemsGroup.register();
+		LovelyRobotItems.register();
+		LovelyRobotEntities.registerAttribute();
 	} // onInitialize ()
 
-} // Class LovelyRobotMod
+} // Class LovelyRobot

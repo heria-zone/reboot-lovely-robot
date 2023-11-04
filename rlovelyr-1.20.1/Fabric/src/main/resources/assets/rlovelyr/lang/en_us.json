@@ -1,11 +1,14 @@
 {
   "item.rlovelyr.bunny_spawn": "Bunny",
   "item.rlovelyr.bunny2_spawn": "Bunny 2.0",
+  "item.rlovelyr.dragon_spawn": "Dragon",
   "item.rlovelyr.honey_spawn": "Honey",
+  "item.rlovelyr.kitsune_spawn": "Kitsune",
+  "item.rlovelyr.neko_spawn": "Neko",
   "item.rlovelyr.vanilla_spawn": "Vanilla",
   "item.rlovelyr.robot_core": "Robot Core",
 
-  "itemGroup.rlovelyr.lovely_robot": "Reboot LovelyRobot",
+  "itemGroup.lovely_robot": "Reboot LovelyRobot",
 
   "entity.rlovelyr.bunny": "Bunny",
   "entity.rlovelyr.bunny2": "Bunny 2.0",
@@ -38,5 +41,27 @@
   "msg.rlovelyr.notification": "Notification",
   "msg.rlovelyr.auto_attack": "Auto Attack",
   "msg.rlovelyr.on": "ON",
-  "msg.rlovelyr.off": "OFF"
+  "msg.rlovelyr.off": "OFF",
+
+  "msg.item.level": "Level",
+  "msg.item.type": "Type",
+  "msg.item.color": "Color",
+  "msg.item.random": "Random",
+
+  "msg.item.white": "White",
+  "msg.item.orange": "Orange",
+  "msg.item.magenta": "Magenta",
+  "msg.item.light_blue": "Light Blue",
+  "msg.item.yellow": "Yellow",
+  "msg.item.lime": "Lime",
+  "msg.item.pink": "Pink",
+  "msg.item.gray": "Gray",
+  "msg.item.light_gray": "Light Gray",
+  "msg.item.cyan": "Cyan",
+  "msg.item.purple": "Purple",
+  "msg.item.blue": "Blue",
+  "msg.item.brown": "Brown",
+  "msg.item.green": "Green",
+  "msg.item.red": "Red",
+  "msg.item.black": "Black"
 }

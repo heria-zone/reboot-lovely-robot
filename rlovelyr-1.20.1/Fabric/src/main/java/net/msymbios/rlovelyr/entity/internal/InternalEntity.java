@@ -31,7 +31,7 @@ import net.msymbios.rlovelyr.entity.enums.*;
 import org.jetbrains.annotations.Nullable;
 
 import static net.msymbios.rlovelyr.entity.internal.Utility.*;
-import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
+import static net.msymbios.rlovelyr.item.LovelyRobotItems.ROBOT_CORE;
 
 public abstract class InternalEntity extends TameableEntity {
 
@@ -341,7 +341,7 @@ public abstract class InternalEntity extends TameableEntity {
         super.tick();
         handleCombatMode();
         handleAutoHeal();
-        commandDebugExtra();
+        //commandDebugExtra();
     } // tick ()
 
     @Override
@@ -397,28 +397,29 @@ public abstract class InternalEntity extends TameableEntity {
 
     @Override
     protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean allowDrops) {
-        final ItemStack craftPurchaseOrder = new ItemStack(ROBOT_CORE, 1);
-
+        final ItemStack dropItem = new ItemStack(ROBOT_CORE, 1);
         try {
-            final NbtCompound nbt = new NbtCompound();
+            NbtCompound nbt = dropItem.getNbt();
+            if(nbt == null) nbt = new NbtCompound();
+
             final String customName = this.getEntityName();
-            if (customName != null && !customName.trim().equals("")) {
-                nbt.putString("CustomName", customName);
-            }
+            if (customName != null && !customName.trim().isEmpty()) nbt.putString("custom_name", customName);
 
-            nbt.putString("Variant", this.getVariant());
-            nbt.putInt("TextureID", this.getTextureID());
+            nbt.putString("type", Utility.getTranslatable(this.variant));
+            nbt.putInt("color", this.getTextureID());
 
-            nbt.putInt("State", this.getCurrentStateID());
-            nbt.putBoolean("AutoAttack", this.getAutoAttack());
+            nbt.putInt("max_level", this.getMaxLevel());
+            nbt.putInt("level", this.getCurrentLevel());
+            nbt.putInt("exp", this.getExp());
 
-            nbt.putInt("MaxLevel", this.getMaxLevel());
-            nbt.putInt("Level", this.getCurrentLevel());
-            nbt.putInt("Exp", this.getExp());
+            nbt.putInt("fire_protection", this.getFireProtection());
+            nbt.putInt("fall_protection", this.getFallProtection());
+            nbt.putInt("blast_protection", this.getBlastProtection());
+            nbt.putInt("projectile_protection", this.getProjectileProtection());
 
-            craftPurchaseOrder.setNbt(nbt);
+            dropItem.setNbt(nbt);
         } catch (Exception ignored) {}
-        this.dropStack(craftPurchaseOrder, 0.0f);
+        this.dropStack(dropItem, 0.0f);
     } // dropEquipment ()
 
     @Override
@@ -584,7 +585,8 @@ public abstract class InternalEntity extends TameableEntity {
     public void handleTame(PlayerEntity player) {
         this.setOwner(player);
         this.setTamed(true);
-        player.sendMessage(Text.translatable("msg.rlovelyr.owner").append(": " + getOwner().getEntityName()), true);
+        InternalParticle.Heart(this);
+        this.getWorld().sendEntityStatus(this, (byte) 7);
     } // handleTame ()
 
     public void handleTexture(ItemStack items, PlayerEntity player) {
@@ -630,7 +632,7 @@ public abstract class InternalEntity extends TameableEntity {
         StandbyState(itemStack);
         FollowState(itemStack);
         BaseDefenseState(itemStack);
-        if(previousState != getCurrentState()) player.sendMessage(Text.translatable("msg.rlovelyr.state").append(Text.literal(": ").append(Text.translatable(Utility.getTranslatableState(this.getCurrentState())))), true);
+        if(previousState != getCurrentState()) player.sendMessage(Text.translatable("msg.rlovelyr.state").append(Text.literal(": ").append(Text.translatable(Utility.getTranslatable(this.getCurrentState())))), true);
     } // handleState
 
     public void StandbyState(ItemStack itemStack){
@@ -673,14 +675,14 @@ public abstract class InternalEntity extends TameableEntity {
     public void commandDebugExtra() {
         MutableText debug = null;
         if(combatMode && getNotification()) {
-            debug = Text.translatable(Utility.getTranslatableEntity(this.variant)).append(Text.literal(": ").append(Text.translatable("msg.rlovelyr.wary")));
+            debug = Text.translatable(Utility.getTranslatable(this.variant)).append(Text.literal(": ").append(Text.translatable("msg.rlovelyr.wary")));
             if(waryTimer < 10) debug = debug.append(": 0" + waryTimer + " ");
             else debug = debug.append(": " + waryTimer + " ");
         }
 
         if(autoHeal && getNotification()) {
             if(debug != null) debug = debug.append(Text.translatable("msg.rlovelyr.heal"));
-            else debug = Text.translatable(Utility.getTranslatableEntity(this.variant)).append(Text.literal(": ").append(Text.translatable("msg.rlovelyr.heal")));
+            else debug = Text.translatable(Utility.getTranslatable(this.variant)).append(Text.literal(": ").append(Text.translatable("msg.rlovelyr.heal")));
 
             if(autoHealTimer < 10) debug = debug.append(": 0" + autoHealTimer + " ");
             else debug = debug.append(": " + autoHealTimer + " ");
@@ -694,8 +696,8 @@ public abstract class InternalEntity extends TameableEntity {
         if(!canShow) return;
         player.sendMessage(Text.translatable("msg.rlovelyr.bar"));
         if(showLevelUp) player.sendMessage(Text.translatable("msg.rlovelyr.level_up"));
-        if(this.getCustomName() != null) player.sendMessage(Text.translatable(Utility.getTranslatableEntity(this.variant)).append(": " + this.getCustomName().getString()));
-        else player.sendMessage(Text.translatable(Utility.getTranslatableEntity(this.variant)));
+        if(this.getCustomName() != null) player.sendMessage(Text.translatable(Utility.getTranslatable(this.variant)).append(": " + this.getCustomName().getString()));
+        else player.sendMessage(Text.translatable(Utility.getTranslatable(this.variant)));
         player.sendMessage(Text.translatable("msg.rlovelyr.level").append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()));
         player.sendMessage(Text.translatable("msg.rlovelyr.experience").append(": " + this.getExp()                 + "/" + this.getNextExp()));
         player.sendMessage(Text.translatable("msg.rlovelyr.health").append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()));

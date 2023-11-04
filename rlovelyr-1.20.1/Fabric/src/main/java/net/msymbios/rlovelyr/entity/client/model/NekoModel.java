@@ -1,33 +1,33 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.entity.client.model;
 
 import net.minecraft.util.Identifier;
-import net.msymbios.rlovelyr.entity.custom.HoneyEntity;
+import net.msymbios.rlovelyr.entity.custom.NekoEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.model.GeoModel;
 
 
-public class HoneyModel extends GeoModel<HoneyEntity> {
+public class NekoModel extends GeoModel<NekoEntity> {
 
     // -- Methods --
     @Override
-    public Identifier getModelResource(HoneyEntity animatable) {
+    public Identifier getModelResource(NekoEntity animatable) {
         return animatable.getCurrentModel();
     } // getModelResource ()
 
     @Override
-    public Identifier getTextureResource(HoneyEntity animatable) {
+    public Identifier getTextureResource(NekoEntity animatable) {
         return animatable.getTexture();
     } // getTextureResource ()
 
     @Override
-    public Identifier getAnimationResource(HoneyEntity animatable) {
+    public Identifier getAnimationResource(NekoEntity animatable) {
         return animatable.getAnimator();
     } // getAnimationResource ()
 
     @Override
-    public void setCustomAnimations(HoneyEntity animatable, long instanceId, AnimationState<HoneyEntity> event) {
+    public void setCustomAnimations(NekoEntity animatable, long instanceId, AnimationState<NekoEntity> event) {
         InternalAnimation.headAnimation(this, event);
     } // setCustomAnimations ()
 
-} // Class HoneyModel
+} // Class NekoModel
