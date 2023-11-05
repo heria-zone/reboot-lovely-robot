@@ -94,10 +94,12 @@ public class InternalLogic {
     public static void addExp (InternalEntity entity, int value) {
         int addExp = value;
         int exp = entity.getExp();
-        final String customName = Objects.requireNonNull(entity.getCustomName()).getString();
+        String customName = "";
+        try {customName = entity.getCustomName().getString();}
+        catch (Exception ignored) {}
 
         // if they have a name they earn more exp
-        if(customName != null && !customName.trim().isEmpty()) addExp = addExp * 3 / 2;
+        if(!customName.isEmpty()) addExp = addExp * 3 / 2;
         exp += addExp;
 
         var oldLevel = entity.getCurrentLevel();

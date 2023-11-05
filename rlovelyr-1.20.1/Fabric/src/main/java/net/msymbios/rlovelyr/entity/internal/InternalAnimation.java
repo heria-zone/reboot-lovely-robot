@@ -18,11 +18,11 @@ public final class InternalAnimation {
     public static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
     public static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
     public static final RawAnimation REST = RawAnimation.begin().thenLoop("rest");
-    public static final RawAnimation ATTACK = RawAnimation.begin().then("attack", Animation.LoopType.PLAY_ONCE);
+    public static final RawAnimation ATTACK = RawAnimation.begin().thenPlay("attack");
 
     // -- Methods --
     public static <T extends InternalEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
-        return new AnimationController<>(animatable, "Attack", 5, state -> {
+        return new AnimationController<>(animatable, "Attack", 0, state -> {
             if (animatable.handSwinging) return state.setAndContinue(ATTACK);
             state.getController().forceAnimationReset();
             return PlayState.STOP;

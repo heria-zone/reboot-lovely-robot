@@ -353,27 +353,27 @@ public abstract class InternalEntity extends TameableEntity {
     @Override
     protected void dropEquipment(DamageSource source, int lootingMultiplier, boolean allowDrops) {
         final ItemStack dropItem = new ItemStack(ROBOT_CORE, 1);
-        try {
-            NbtCompound nbt = dropItem.getNbt();
-            if(nbt == null) nbt = new NbtCompound();
+        NbtCompound nbt = dropItem.getNbt();
+        if(nbt == null) nbt = new NbtCompound();
 
-            final String customName = Objects.requireNonNull(this.getCustomName()).getString();
-            if (customName != null && !customName.trim().isEmpty()) nbt.putString("custom_name", customName);
+        String customName = "";
+        try {customName = getCustomName().getString();}
+        catch (Exception ignored) {}
+        if (!customName.isEmpty()) nbt.putString("custom_name", customName);
 
-            nbt.putString("type", Utility.getTranslatable(this.variant));
-            nbt.putInt("color", this.getTextureID());
+        nbt.putString("type", Utility.getTranslatable(this.variant));
+        nbt.putInt("color", this.getTextureID());
 
-            nbt.putInt("max_level", this.getMaxLevel());
-            nbt.putInt("level", this.getCurrentLevel());
-            nbt.putInt("exp", this.getExp());
+        nbt.putInt("max_level", this.getMaxLevel());
+        nbt.putInt("level", this.getCurrentLevel());
+        nbt.putInt("exp", this.getExp());
 
-            nbt.putInt("fire_protection", this.getFireProtection());
-            nbt.putInt("fall_protection", this.getFallProtection());
-            nbt.putInt("blast_protection", this.getBlastProtection());
-            nbt.putInt("projectile_protection", this.getProjectileProtection());
+        nbt.putInt("fire_protection", this.getFireProtection());
+        nbt.putInt("fall_protection", this.getFallProtection());
+        nbt.putInt("blast_protection", this.getBlastProtection());
+        nbt.putInt("projectile_protection", this.getProjectileProtection());
 
-            dropItem.setNbt(nbt);
-        } catch (Exception ignored) {}
+        dropItem.setNbt(nbt);
         this.dropStack(dropItem, 0.0f);
     } // dropEquipment ()
 
