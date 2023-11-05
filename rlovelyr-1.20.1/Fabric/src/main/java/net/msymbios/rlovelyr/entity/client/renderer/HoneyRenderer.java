@@ -2,6 +2,7 @@ package net.msymbios.rlovelyr.entity.client.renderer;
 
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.util.Identifier;
+import net.msymbios.rlovelyr.entity.client.layer.HoneyLayer;
 import net.msymbios.rlovelyr.entity.client.model.HoneyModel;
 import net.msymbios.rlovelyr.entity.custom.HoneyEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
@@ -13,7 +14,8 @@ public class HoneyRenderer extends GeoEntityRenderer<HoneyEntity> {
     public HoneyRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new HoneyModel());
         this.shadowRadius = InternalMetric.SHADOW_RADIUS;
-    } // Constructor VanillaRenderer ()
+        addRenderLayer(new HoneyLayer(this));
+    } // Constructor HoneyRenderer ()
 
     // -- Methods --
     @Override
