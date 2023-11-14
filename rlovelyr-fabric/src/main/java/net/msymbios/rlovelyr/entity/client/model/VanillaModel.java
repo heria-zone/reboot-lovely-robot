@@ -1,4 +1,4 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.entity.client.model;
 
 import net.minecraft.util.Identifier;
 import net.msymbios.rlovelyr.entity.custom.VanillaEntity;

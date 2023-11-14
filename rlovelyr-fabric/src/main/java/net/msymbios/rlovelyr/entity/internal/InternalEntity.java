@@ -32,7 +32,7 @@ import net.msymbios.rlovelyr.entity.enums.*;
 import org.jetbrains.annotations.Nullable;
 
 import static net.msymbios.rlovelyr.entity.internal.Utility.invertBoolean;
-import static net.msymbios.rlovelyr.item.ModItems.ROBOT_CORE;
+import static net.msymbios.rlovelyr.item.LovelyRobotItems.ROBOT_CORE;
 
 public abstract class InternalEntity extends TameableEntity {
 

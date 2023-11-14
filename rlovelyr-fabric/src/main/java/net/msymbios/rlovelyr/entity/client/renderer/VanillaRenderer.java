@@ -1,8 +1,10 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.entity.client.renderer;
 
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.util.Identifier;
+import net.msymbios.rlovelyr.entity.client.layer.VanillaLayer;
+import net.msymbios.rlovelyr.entity.client.model.VanillaModel;
 import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import software.bernie.geckolib3.renderer.geo.GeoEntityRenderer;
@@ -13,6 +15,7 @@ public class VanillaRenderer extends GeoEntityRenderer<VanillaEntity> {
     public VanillaRenderer(EntityRenderDispatcher renderManager, EntityRendererRegistry.Context context) {
         super(renderManager, new VanillaModel());
         this.shadowRadius = InternalMetric.ShadowRadius;
+        addLayer(new VanillaLayer(this));
     } // Constructor VanillaRenderer ()
 
     // -- Inherited Methods --
