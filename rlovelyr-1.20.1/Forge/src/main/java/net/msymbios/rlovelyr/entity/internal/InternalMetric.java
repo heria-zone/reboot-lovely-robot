@@ -131,7 +131,7 @@ public class InternalMetric {
     }};
 
     public static HashMap<EntityAnimator, ResourceLocation> ANIMATOR = new HashMap<>() {{
-        put(EntityAnimator.Default,    new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
+        put(EntityAnimator.Default,    new ResourceLocation(LovelyRobotMod.MODID, "animations/default.animation.json"));
     }};
 
     public static HashMap<EntityVariant, HashMap<EntityTexture, ResourceLocation>> TEXTURE = new HashMap<>(){{
