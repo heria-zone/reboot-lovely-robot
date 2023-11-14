@@ -19,10 +19,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.msymbios.rlovelyr.LovelyRobotMod"
+      "net.msymbios.rlovelyr.LovelyRobot"
     ],
     "client": [
-      "net.msymbios.rlovelyr.LovelyRobotModClient"
+      "net.msymbios.rlovelyr.client.LovelyRobotClient"
     ]
   },
   "mixins": [
