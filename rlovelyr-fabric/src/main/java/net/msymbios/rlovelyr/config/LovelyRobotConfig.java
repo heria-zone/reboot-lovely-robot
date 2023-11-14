@@ -155,7 +155,7 @@ public class LovelyRobotConfig {
     private static void assign() {
         CONFIG = SimpleConfig.of(LovelyRobot.MODID + "-config").provider(PROVIDER).request();
 
-        /*// GENERAL
+        // GENERAL
         InternalMetric.MOVEMENT_MELEE_ATTACK = CONFIG.getOrDefault("general.movement-melee-attack", 0.8F);
         InternalMetric.MOVEMENT_FOLLOW_OWNER = CONFIG.getOrDefault("general.movement-follow-owner", 0.7F);
         InternalMetric.MOVEMENT_WANDER_AROUND = CONFIG.getOrDefault("general.movement-wander-around", 0.6F);
@@ -284,7 +284,7 @@ public class LovelyRobotConfig {
             put(EntityAttribute.ARMOR_TOUGHNESS,         CONFIG.getOrDefault("entity.vanilla.armor-toughness", 0F));
             put(EntityAttribute.BASE_DEFENSE_RANGE,      CONFIG.getOrDefault("entity.vanilla.base-defence-range", 15F));
             put(EntityAttribute.BASE_DEFENSE_WARP_RANGE, CONFIG.getOrDefault("entity.vanilla.base-defence-warp-range", 10F));
-        }});*/
+        }});
 
     } // assign ()
 

@@ -14,7 +14,7 @@ public class KitsuneRenderer extends GeoEntityRenderer<KitsuneEntity> {
     // -- Constructor --
     public KitsuneRenderer(EntityRenderDispatcher renderManager, EntityRendererRegistry.Context context) {
         super(renderManager, new KitsuneModel());
-        this.shadowRadius = InternalMetric.ShadowRadius;
+        this.shadowRadius = InternalMetric.SHADOW_RADIUS;
         addLayer(new KitsuneLayer(this));
     } // Constructor KitsuneRenderer ()
 

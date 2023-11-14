@@ -15,10 +15,10 @@ public class LovelyRobot implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		GeckoLib.initialize();
+		//LovelyRobotEvents.register();
 
 		LovelyRobotConfig.register();
 		LovelyRobotItems.register();
-		//LovelyRobotEvents.register();
 		LovelyRobotEntities.registerAttribute();
 	} // onInitialize ()
 

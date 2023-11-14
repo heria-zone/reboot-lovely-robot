@@ -21,8 +21,8 @@ public enum EntityTexture {
     BROWN(12, "brown"),
     GREEN(13, "green"),
     RED(14, "red"),
-    BLACK(15, "black");
-
+    BLACK(15, "black"),
+    RANDOM(16, "random");
 
     // -- Variables --
     private static final EntityTexture[] CODEC = Arrays.stream(values()).sorted(Comparator.comparingInt(EntityTexture::getId)).toArray(EntityTexture[]::new);
@@ -31,13 +31,11 @@ public enum EntityTexture {
 
     private final String m_name;
 
-
     // -- Constructor --
     EntityTexture(int id, String name) {
         this.m_id = id;
         this.m_name = name;
-    } // Constructor RobotTexture
-
+    } // Constructor EntityTexture
 
     // -- Methods --
     public static EntityTexture byId(int id) {

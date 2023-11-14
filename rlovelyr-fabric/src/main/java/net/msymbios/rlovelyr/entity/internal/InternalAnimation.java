@@ -4,6 +4,7 @@ import net.msymbios.rlovelyr.entity.enums.EntityState;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.processor.IBone;
@@ -13,10 +14,10 @@ import software.bernie.geckolib3.model.provider.data.EntityModelData;
 public final class InternalAnimation {
 
     // -- Variables --
-    public static final AnimationBuilder IDLE = new AnimationBuilder().addAnimation("animation.lovelyrobot.idle", true);
-    public static final AnimationBuilder WALK = new AnimationBuilder().addAnimation("animation.lovelyrobot.walk", true);
-    public static final AnimationBuilder SIT = new AnimationBuilder().addAnimation ("animation.lovelyrobot.sit", true);
-    public static final AnimationBuilder ATTACK = new AnimationBuilder().addAnimation ("animation.lovelyrobot.attack", false);
+    public static final AnimationBuilder IDLE = new AnimationBuilder().addAnimation("idle", ILoopType.EDefaultLoopTypes.LOOP);
+    public static final AnimationBuilder WALK = new AnimationBuilder().addAnimation("walk", ILoopType.EDefaultLoopTypes.LOOP);
+    public static final AnimationBuilder SIT = new AnimationBuilder().addAnimation ("rest", ILoopType.EDefaultLoopTypes.LOOP);
+    public static final AnimationBuilder ATTACK = new AnimationBuilder().addAnimation ("attack", ILoopType.EDefaultLoopTypes.PLAY_ONCE);
 
     // -- Methods --
     public static <T extends InternalEntity & IAnimatable> AnimationController<T> attackAnimation(T animatable) {

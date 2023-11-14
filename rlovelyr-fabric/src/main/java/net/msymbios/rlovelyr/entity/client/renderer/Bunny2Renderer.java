@@ -9,14 +9,12 @@ import net.msymbios.rlovelyr.entity.custom.Bunny2Entity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import software.bernie.geckolib3.renderer.geo.GeoEntityRenderer;
 
-import java.util.function.Function;
-
 public class Bunny2Renderer extends GeoEntityRenderer<Bunny2Entity> {
 
     // -- Constructor --
     public Bunny2Renderer(EntityRenderDispatcher renderManager, EntityRendererRegistry.Context context) {
         super(renderManager, new Bunny2Model());
-        this.shadowRadius = InternalMetric.ShadowRadius;
+        this.shadowRadius = InternalMetric.SHADOW_RADIUS;
         addLayer(new Bunny2Layer(this));
     } // Constructor Bunny2Renderer ()
 
