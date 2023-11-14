@@ -606,7 +606,7 @@ public abstract class InternalEntity extends TameableEntity {
     protected void initDataTracker() {
         super.initDataTracker();
         this.dataTracker.startTracking(TEXTURE_ID, EntityTexture.PINK.getId());
-        this.dataTracker.startTracking(STATE, EntityState.Standby.getId());
+        this.dataTracker.startTracking(STATE, EntityState.Follow.getId());
         this.dataTracker.startTracking(AUTO_ATTACK, true);
 
         this.dataTracker.startTracking(MAX_LEVEL, 200);
@@ -622,7 +622,7 @@ public abstract class InternalEntity extends TameableEntity {
         this.dataTracker.startTracking(BASE_Y, 0F);
         this.dataTracker.startTracking(BASE_Z, 0F);
 
-        this.dataTracker.startTracking(NOTIFICATION, false);
+        this.dataTracker.startTracking(NOTIFICATION, true);
     } // initDataTracker ()
 
     @Override
