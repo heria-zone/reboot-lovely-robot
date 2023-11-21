@@ -24,8 +24,6 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-import static net.msymbios.rlovelyr.entity.internal.Utility.*;
-
 public class VanillaEntity extends InternalEntity implements IAngerable, IAnimatable {
 
     // -- Variables --
@@ -34,12 +32,12 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
     // -- Properties --
     public static AttributeModifierMap  setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MAX_HEALTH))
-                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ATTACK_DAMAGE))
-                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ATTACK_SPEED))
-                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.MOVEMENT_SPEED))
-                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ARMOR))
-                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Vanilla, EntityAttribute.ARMOR_TOUGHNESS)).build();
+                .add(Attributes.MAX_HEALTH, InternalMetric.getAttribute(EntityVariant.Vanilla, EntityAttribute.MAX_HEALTH))
+                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttribute(EntityVariant.Vanilla, EntityAttribute.ATTACK_DAMAGE))
+                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttribute(EntityVariant.Vanilla, EntityAttribute.ATTACK_SPEED))
+                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttribute(EntityVariant.Vanilla, EntityAttribute.MOVEMENT_SPEED))
+                .add(Attributes.ARMOR, InternalMetric.getAttribute(EntityVariant.Vanilla, EntityAttribute.ARMOR))
+                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttribute(EntityVariant.Vanilla, EntityAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
     // -- Constructor --
@@ -71,16 +69,16 @@ public class VanillaEntity extends InternalEntity implements IAngerable, IAnimat
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new SwimGoal(this));
         this.goalSelector.addGoal(2, new SitGoal(this));
-        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, InternalMetric.MeleeAttackMovement, true));
-        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
-        this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
-        this.goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, InternalMetric.LookAtRange));
-        this.goalSelector.addGoal(5, new LookAtGoal(this, InternalEntity.class, InternalMetric.LookAtRange));
+        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, InternalMetric.MOVEMENT_MELEE_ATTACK, true));
+        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER, InternalMetric.FOLLOW_DISTANCE_MAX, InternalMetric.FOLLOW_DISTANCE_MIN, false));
+        this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
+        this.goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, InternalMetric.LOOK_RANGE));
+        this.goalSelector.addGoal(5, new LookAtGoal(this, InternalEntity.class, InternalMetric.LOOK_RANGE));
         this.goalSelector.addGoal(6, new LookRandomlyGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, MobEntity.class, InternalMetric.AttackChance, true, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, MobEntity.class, InternalMetric.ATTACK_CHANCE, true, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.addGoal(5, new ResetAngerGoal<>(this, false));
     } // registerGoals ()
 

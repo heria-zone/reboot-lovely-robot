@@ -1,19 +1,20 @@
 package net.msymbios.rlovelyr.entity.enums;
 
+import net.msymbios.rlovelyr.config.LovelyRobotID;
+
 import java.util.Arrays;
 import java.util.Comparator;
 
 public enum EntityVariant {
 
     // -- Enum --
-    Bunny(0, "bunny"),
-    Bunny2(1, "bunny2"),
-    Dragon(2, "dragon"),
-    Honey(3, "honey"),
-    Kitsune(4, "kitsune"),
-    Neko(5, "neko"),
-    Vanilla(6, "vanilla");
-
+    Bunny(0, LovelyRobotID.BUNNY),
+    Bunny2(1, LovelyRobotID.BUNNY2),
+    Dragon(2, LovelyRobotID.DRAGON),
+    Honey(3, LovelyRobotID.HONEY),
+    Kitsune(4, LovelyRobotID.KITSUNE),
+    Neko(5, LovelyRobotID.NEKO),
+    Vanilla(6, LovelyRobotID.VANILLA);
 
     // -- Variables --
     private static final EntityVariant[] CODEC = Arrays.stream(values()).sorted(Comparator.comparingInt(EntityVariant::getId)).toArray(EntityVariant[]::new);
@@ -22,13 +23,11 @@ public enum EntityVariant {
 
     private final String m_name;
 
-
     // -- Constructor --
     EntityVariant(int id, String name) {
         this.m_id = id;
         this.m_name = name;
-    } // Constructor VanillaVariant
-
+    } // Constructor EntityVariant
 
     // -- Methods --
     public static EntityVariant byId(int id) {

@@ -9,6 +9,7 @@ public enum EntityModel {
     Default(0, "default"),
     Armed(1, "armed");
 
+
     // -- Variables --
     private static final EntityModel[] CODEC = Arrays.stream(values()).sorted(Comparator.comparingInt(EntityModel::getId)).toArray(EntityModel[]::new);
 

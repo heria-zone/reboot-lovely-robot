@@ -4,7 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.util.ResourceLocation;
-import net.msymbios.rlovelyr.LovelyRobotMod;
+import net.msymbios.rlovelyr.LovelyRobot;
 import net.msymbios.rlovelyr.entity.enums.*;
 
 import java.util.ArrayList;
@@ -16,90 +16,90 @@ import java.util.stream.Collectors;
 
 public class InternalMetric {
 
-    // -- Entity Renderer --
-    public static float ShadowRadius = 0.4F;
-    public static float Width = 0.4F;
-    public static float Height = 2F;
+    // -- RENDERER --
+    public static float SHADOW_RADIUS = 0.4F;
+    public static float WIDTH = 0.4F;
+    public static float HEIGHT = 2F;
 
-    // -- Goal Attribute --
-    public static float MeleeAttackMovement = 1.0F;                   // Movement speed when it is melee attacking
-    public static float FollowOwnerMovement = 1.0F;                   // Movement speed when following player
-    public static float WanderAroundMovement = 0.6F;                  // Movement speed while it is wandering around
-    public static float FollowBehindDistance = 10.0F;
-    public static float FollowCloseDistance= 2.0F;
-    public static float LookAtRange = 8.0F;
-    public static int AttackChance = 5;
+    // -- GENERAL --
+    public static float MOVEMENT_MELEE_ATTACK = 1.0F;                   // Movement speed when it is melee attacking
+    public static float MOVEMENT_FOLLOW_OWNER = 1.0F;                   // Movement speed when following player
+    public static float MOVEMENT_WANDER_AROUND = 0.6F;                  // Movement speed while it is wandering around
+    public static float FOLLOW_DISTANCE_MAX = 10.0F;
+    public static float FOLLOW_DISTANCE_MIN = 2.0F;
+    public static float LOOK_RANGE = 8.0F;
+
+    // -- LEVEL | EXPERIENCE ---
+    public static int EXPERIENCE_BASE = 50;                     // Basic experience required to level up
+    public static int EXPERIENCE_MULTIPLIER = 2;                   // Increase value for each level
+
+    // -- COMBAT --
     public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof MonsterEntity && !(entity instanceof CreeperEntity); //&& !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity);
+    public static int ATTACK_CHANCE = 5;
+    public static boolean GLOBAL_AUTO_HEAL = true;              // Enable automatic recovery
+    public static int HEAL_INTERVAL = 50;            // Automatic recovery interval
+    public static int WARY_TIME = 50;            // Time while being in combat mode
+    public static boolean LOOT_ENCHANTMENT = true;    // Enable looting enchantments
+    public static int LOOT_ENCHANTMENT_LEVEL = 10;        // Levels required for looting enchantments
+    public static int MAX_LOOT_ENCHANTMENT = 3;              // Maximum level of looting enchantments
+    public static float BASE_DEFENCE_RANGE;
+    public static float BASE_DEFENCE_WARP_RANGE;
 
-    // - Level & Experience --
-    public static int BaseExp = 50;                     // Basic experience required to level up
-    public static int UpExpValue = 2;                   // Increase value for each level
+    // -- PROTECTION --
+    public static int PROTECTION_LIMIT_FIRE = 80;         // Fire Protection upper limit
+    public static int PROTECTION_LIMIT_FALL = 80;         // Fall Protection upper limit
+    public static int PROTECTION_LIMIT_BLAST = 80;        // Blast Protection upper limit
+    public static int PROTECTION_LIMIT_PROJECTILE = 80;   // Projectile Protection upper limit
 
-    // -- Auto Healing --
-    public static boolean AutoHeal = true;              // Enable automatic recovery
-    public static int AutoHealInterval = 50;            // Automatic recovery interval
-
-    // -- Combat --
-    public static boolean LootingEnchantment = true;    // Enable looting enchantments
-    public static int LootingRequiredLevel = 10;        // Levels required for looting enchantments
-    public static int MaxLootingLevel = 3;              // Maximum level of looting enchantments
-    public static int WaryTime = 50;            // Time while being in combat mode
-
-    // -- Protection --
-    public static int FireProtectionLimit = 80;         // Fire Protection upper limit
-    public static int FallProtectionLimit = 80;         // Fall Protection upper limit
-    public static int BlastProtectionLimit = 80;        // Blast Protection upper limit
-    public static int ProjectileProtectionLimit = 80;   // Projectile Protection upper limit
-
-    // -- Base --
+    // -- BASE --
     public static float BaseDefenseRange = 15;
     public static float BaseDefenseWarpRange = 10;
 
     // -- Properties --
     public static HashMap<EntityVariant, EntityAnimator> ENTITY_ANIMATOR = new HashMap(){{
-        put(EntityVariant.Bunny, EntityAnimator.Locomotion);
-        put(EntityVariant.Bunny2, EntityAnimator.Locomotion);
-        put(EntityVariant.Dragon, EntityAnimator.Locomotion);
-        put(EntityVariant.Honey, EntityAnimator.Locomotion);
-        put(EntityVariant.Kitsune, EntityAnimator.Locomotion);
-        put(EntityVariant.Neko, EntityAnimator.Locomotion);
-        put(EntityVariant.Vanilla, EntityAnimator.Locomotion);
+        put(EntityVariant.Bunny, EntityAnimator.Default);
+        put(EntityVariant.Bunny2, EntityAnimator.Default);
+        put(EntityVariant.Dragon, EntityAnimator.Default);
+        put(EntityVariant.Honey, EntityAnimator.Default);
+        put(EntityVariant.Kitsune, EntityAnimator.Default);
+        put(EntityVariant.Neko, EntityAnimator.Default);
+        put(EntityVariant.Vanilla, EntityAnimator.Default);
     }};
 
     public static HashMap<EntityVariant, HashMap<EntityModel, ResourceLocation>> ENTITY_MODEL = new HashMap(){{
         put(EntityVariant.Bunny, new HashMap() {{
-            put(EntityModel.Default,    new ResourceLocation(LovelyRobotMod.MODID, "geo/bunny.geo.json"));
-            put(EntityModel.Armed,      new ResourceLocation(LovelyRobotMod.MODID, "geo/bunny.attack.geo.json"));
+            put(EntityModel.Default,    new ResourceLocation(LovelyRobot.MODID, "geo/bunny.geo.json"));
+            put(EntityModel.Armed,      new ResourceLocation(LovelyRobot.MODID, "geo/bunny.attack.geo.json"));
         }});
 
         put(EntityVariant.Bunny2, new HashMap() {{
-            put(EntityModel.Default,    new ResourceLocation(LovelyRobotMod.MODID, "geo/bunny2.geo.json"));
-            put(EntityModel.Armed,      new ResourceLocation(LovelyRobotMod.MODID, "geo/bunny2.attack.geo.json"));
+            put(EntityModel.Default,    new ResourceLocation(LovelyRobot.MODID, "geo/bunny2.geo.json"));
+            put(EntityModel.Armed,      new ResourceLocation(LovelyRobot.MODID, "geo/bunny2.attack.geo.json"));
         }});
 
         put(EntityVariant.Dragon, new HashMap() {{
-            put(EntityModel.Default,    new ResourceLocation(LovelyRobotMod.MODID, "geo/dragon.geo.json"));
-            put(EntityModel.Armed,      new ResourceLocation(LovelyRobotMod.MODID, "geo/dragon.attack.geo.json"));
+            put(EntityModel.Default,    new ResourceLocation(LovelyRobot.MODID, "geo/dragon.geo.json"));
+            put(EntityModel.Armed,      new ResourceLocation(LovelyRobot.MODID, "geo/dragon.attack.geo.json"));
         }});
 
         put(EntityVariant.Honey, new HashMap() {{
-            put(EntityModel.Default,    new ResourceLocation(LovelyRobotMod.MODID, "geo/honey.geo.json"));
-            put(EntityModel.Armed,      new ResourceLocation(LovelyRobotMod.MODID, "geo/honey.attack.geo.json"));
+            put(EntityModel.Default,    new ResourceLocation(LovelyRobot.MODID, "geo/honey.geo.json"));
+            put(EntityModel.Armed,      new ResourceLocation(LovelyRobot.MODID, "geo/honey.attack.geo.json"));
         }});
 
         put(EntityVariant.Kitsune, new HashMap() {{
-            put(EntityModel.Default,    new ResourceLocation(LovelyRobotMod.MODID, "geo/kitsune.geo.json"));
-            put(EntityModel.Armed,      new ResourceLocation(LovelyRobotMod.MODID, "geo/kitsune.attack.geo.json"));
+            put(EntityModel.Default,    new ResourceLocation(LovelyRobot.MODID, "geo/kitsune.geo.json"));
+            put(EntityModel.Armed,      new ResourceLocation(LovelyRobot.MODID, "geo/kitsune.attack.geo.json"));
         }});
 
         put(EntityVariant.Neko, new HashMap() {{
-            put(EntityModel.Default,    new ResourceLocation(LovelyRobotMod.MODID, "geo/neko.geo.json"));
-            put(EntityModel.Armed,      new ResourceLocation(LovelyRobotMod.MODID, "geo/neko.attack.geo.json"));
+            put(EntityModel.Default,    new ResourceLocation(LovelyRobot.MODID, "geo/neko.geo.json"));
+            put(EntityModel.Armed,      new ResourceLocation(LovelyRobot.MODID, "geo/neko.attack.geo.json"));
         }});
 
         put(EntityVariant.Vanilla, new HashMap() {{
-            put(EntityModel.Default,    new ResourceLocation(LovelyRobotMod.MODID, "geo/vanilla.geo.json"));
-            put(EntityModel.Armed,      new ResourceLocation(LovelyRobotMod.MODID, "geo/vanilla.attack.geo.json"));
+            put(EntityModel.Default,    new ResourceLocation(LovelyRobot.MODID, "geo/vanilla.geo.json"));
+            put(EntityModel.Armed,      new ResourceLocation(LovelyRobot.MODID, "geo/vanilla.attack.geo.json"));
         }});
     }};
 
@@ -132,7 +132,7 @@ public class InternalMetric {
     }};
 
     public static HashMap<EntityAnimator, ResourceLocation> ANIMATOR = new HashMap() {{
-        put(EntityAnimator.Locomotion,    new ResourceLocation(LovelyRobotMod.MODID, "animations/lovelyrobot.animation.json"));
+        put(EntityAnimator.Default,    new ResourceLocation(LovelyRobot.MODID, "animations/default.animation.json"));
     }};
 
     public static HashMap<EntityVariant, HashMap<EntityTexture, ResourceLocation>> TEXTURE = new HashMap(){{
@@ -145,7 +145,7 @@ public class InternalMetric {
         put(EntityVariant.Vanilla,    setTexture(EntityVariant.Vanilla));
     }};
 
-    public static HashMap<EntityVariant, HashMap<EntityAttribute, InternalAttribute>> ATTRIBUTES = new HashMap(){{
+    public static HashMap<EntityVariant, HashMap<EntityAttribute, Float>> ATTRIBUTES = new HashMap(){{
         put(EntityVariant.Bunny, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
         put(EntityVariant.Bunny2, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 6F));
         put(EntityVariant.Dragon, setAttribute(200F, 30F, 7F, 1.2F, 0.4F, 7F));
@@ -171,14 +171,6 @@ public class InternalMetric {
     } // getAnimator ()
 
     // MODEL
-    public static ResourceLocation getModel(EntityVariant variant) {
-        if (ENTITY_MODEL.containsKey(variant)) {
-            EntityModel defaultModel = EntityModel.Default; // Use the default model key, or adjust as needed
-            if (ENTITY_MODEL.get(variant).containsKey(defaultModel)) return ENTITY_MODEL.get(variant).get(defaultModel);
-        }
-        return null; // Return a default or error identifier if the combination is not found
-    } // getModel ()
-
     public static ResourceLocation getModel(EntityVariant variant, EntityModel model) {
         if (ENTITY_MODEL.containsKey(variant) && ENTITY_MODEL.get(variant).containsKey(model)) return ENTITY_MODEL.get(variant).get(model);
         return null;  // Return a default or error identifier if the combination is not found
@@ -227,43 +219,42 @@ public class InternalMetric {
     private static HashMap<EntityTexture, ResourceLocation> setTexture(EntityVariant variant){
         String path = variant.getName() + "/" + variant.getName();
         return new HashMap() {{
-            put(EntityTexture.WHITE,         new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_00.png")); // White
-            put(EntityTexture.ORANGE,        new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_01.png")); // Orange
-            put(EntityTexture.MAGENTA,       new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_02.png")); // Magenta
-            put(EntityTexture.LIGHT_BLUE,    new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_03.png")); // Light Blue
-            put(EntityTexture.YELLOW,        new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_04.png")); // Yellow
-            put(EntityTexture.LIME,          new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_05.png")); // Lime
-            put(EntityTexture.PINK,          new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_06.png")); // Pink
-            put(EntityTexture.GRAY,          new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_07.png")); // Gray
-            put(EntityTexture.LIGHT_GRAY,    new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_08.png")); // Light Gray
-            put(EntityTexture.CYAN,          new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_09.png")); // Cyan
-            put(EntityTexture.PURPLE,        new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_10.png")); // Purple
-            put(EntityTexture.BLUE,          new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_11.png")); // Blue
-            put(EntityTexture.BROWN,         new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_12.png")); // Brown
-            put(EntityTexture.GREEN,         new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_13.png")); // Green
-            put(EntityTexture.RED,           new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_14.png")); // Red
-            put(EntityTexture.BLACK,         new ResourceLocation(LovelyRobotMod.MODID, "textures/entity/" + path + "_15.png")); // Black
+            put(EntityTexture.WHITE,         new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_00.png")); // White
+            put(EntityTexture.ORANGE,        new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_01.png")); // Orange
+            put(EntityTexture.MAGENTA,       new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_02.png")); // Magenta
+            put(EntityTexture.LIGHT_BLUE,    new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_03.png")); // Light Blue
+            put(EntityTexture.YELLOW,        new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_04.png")); // Yellow
+            put(EntityTexture.LIME,          new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_05.png")); // Lime
+            put(EntityTexture.PINK,          new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_06.png")); // Pink
+            put(EntityTexture.GRAY,          new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_07.png")); // Gray
+            put(EntityTexture.LIGHT_GRAY,    new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_08.png")); // Light Gray
+            put(EntityTexture.CYAN,          new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_09.png")); // Cyan
+            put(EntityTexture.PURPLE,        new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_10.png")); // Purple
+            put(EntityTexture.BLUE,          new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_11.png")); // Blue
+            put(EntityTexture.BROWN,         new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_12.png")); // Brown
+            put(EntityTexture.GREEN,         new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_13.png")); // Green
+            put(EntityTexture.RED,           new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_14.png")); // Red
+            put(EntityTexture.BLACK,         new ResourceLocation(LovelyRobot.MODID, "textures/entity/" + path + "_15.png")); // Black
         }};
     } // setTexture ()
 
     // ATTRIBUTE
-    public static float getAttributeValue(EntityVariant variant, EntityAttribute attribute) {
-        InternalAttribute robotAttribute = ATTRIBUTES.get(variant).get(attribute);
-        return robotAttribute == null ? 0F : robotAttribute.value;
-    } // getAttributeValue ()
+    public static float getAttribute(EntityVariant variant, EntityAttribute attribute) {
+        return ATTRIBUTES.get(variant).get(attribute);
+    } // getAttribute ()
 
-    private static HashMap<EntityAttribute, InternalAttribute> setAttribute(float maxLevel, float maxHealth, float attackDamage, float attackSpeed, float movementSpeed, float defense){
+    private static HashMap<EntityAttribute, Float> setAttribute(float maxLevel, float maxHealth, float attackDamage, float attackSpeed, float movementSpeed, float defense){
         return new HashMap(){{
-            put(EntityAttribute.MAX_LEVEL, new InternalAttribute(EntityAttribute.MAX_LEVEL, maxLevel));                // Max Level
-            put(EntityAttribute.MAX_HEALTH, new InternalAttribute(EntityAttribute.MAX_HEALTH, maxHealth));             // Max Health
-            put(EntityAttribute.ATTACK_DAMAGE, new InternalAttribute(EntityAttribute.ATTACK_DAMAGE, attackDamage));    // Attack Damage
-            put(EntityAttribute.ATTACK_SPEED, new InternalAttribute(EntityAttribute.ATTACK_SPEED, attackSpeed));       // Attack Speed
-            put(EntityAttribute.MOVEMENT_SPEED, new InternalAttribute(EntityAttribute.MOVEMENT_SPEED, movementSpeed)); // Movement Speed
-            put(EntityAttribute.DEFENSE, new InternalAttribute(EntityAttribute.DEFENSE, defense));                     // Defense
-            put(EntityAttribute.ARMOR, new InternalAttribute(EntityAttribute.ARMOR, 0F));
-            put(EntityAttribute.ARMOR_TOUGHNESS, new InternalAttribute(EntityAttribute.ARMOR_TOUGHNESS, 0F));
-            put(EntityAttribute.BASE_DEFENSE_RANGE, new InternalAttribute(EntityAttribute.BASE_DEFENSE_RANGE, 15F));
-            put(EntityAttribute.BASE_DEFENSE_WARP_RANGE, new InternalAttribute(EntityAttribute.BASE_DEFENSE_WARP_RANGE, 10F));
+            put(EntityAttribute.MAX_LEVEL, maxLevel);                // Max Level
+            put(EntityAttribute.MAX_HEALTH, maxHealth);             // Max Health
+            put(EntityAttribute.ATTACK_DAMAGE, attackDamage);    // Attack Damage
+            put(EntityAttribute.ATTACK_SPEED, attackSpeed);       // Attack Speed
+            put(EntityAttribute.MOVEMENT_SPEED,  movementSpeed); // Movement Speed
+            put(EntityAttribute.DEFENSE, defense);                     // Defense
+            put(EntityAttribute.ARMOR, 0F);
+            put(EntityAttribute.ARMOR_TOUGHNESS, 0F);
+            put(EntityAttribute.BASE_DEFENSE_RANGE, 15F);
+            put(EntityAttribute.BASE_DEFENSE_WARP_RANGE, 10F);
         }};
     } // setAttribute ()
 
