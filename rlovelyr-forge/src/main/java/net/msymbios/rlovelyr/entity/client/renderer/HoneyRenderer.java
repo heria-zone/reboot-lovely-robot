@@ -13,7 +13,7 @@ public class HoneyRenderer extends GeoEntityRenderer<HoneyEntity> {
     // -- Constructor --
     public HoneyRenderer(EntityRendererManager renderManager) {
         super(renderManager, new HoneyModel());
-        this.shadowRadius = InternalMetric.SHADOW_RADIUS;
+        this.shadowRadius = InternalMetric.SHADOW_RADIUS.get();
         addLayer(new HoneyLayer(this));
     } // Constructor HoneyRenderer ()
 

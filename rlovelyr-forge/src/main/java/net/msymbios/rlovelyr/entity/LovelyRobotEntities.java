@@ -21,31 +21,31 @@ public class LovelyRobotEntities {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES, LovelyRobot.MODID);
 
     public static final RegistryObject<EntityType<BunnyEntity>> BUNNY = ENTITY_TYPES.register(EntityVariant.Bunny.getName(),
-            () -> EntityType.Builder.of(BunnyEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH, InternalMetric.HEIGHT)
+            () -> EntityType.Builder.of(BunnyEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH.get(), InternalMetric.HEIGHT.get())
                     .build(new ResourceLocation(LovelyRobot.MODID, EntityVariant.Bunny.getName()).toString()));
 
     public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = ENTITY_TYPES.register(EntityVariant.Bunny2.getName(),
-            () -> EntityType.Builder.of(Bunny2Entity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH, InternalMetric.HEIGHT)
+            () -> EntityType.Builder.of(Bunny2Entity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH.get(), InternalMetric.HEIGHT.get())
                     .build(new ResourceLocation(LovelyRobot.MODID, EntityVariant.Bunny2.getName()).toString()));
 
     public static final RegistryObject<EntityType<DragonEntity>> DRAGON = ENTITY_TYPES.register(EntityVariant.Dragon.getName(),
-            () -> EntityType.Builder.of(DragonEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH, InternalMetric.HEIGHT)
+            () -> EntityType.Builder.of(DragonEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH.get(), InternalMetric.HEIGHT.get())
                     .build(new ResourceLocation(LovelyRobot.MODID, EntityVariant.Dragon.getName()).toString()));
 
     public static final RegistryObject<EntityType<HoneyEntity>> HONEY = ENTITY_TYPES.register(EntityVariant.Honey.getName(),
-            () -> EntityType.Builder.of(HoneyEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH, InternalMetric.HEIGHT)
+            () -> EntityType.Builder.of(HoneyEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH.get(), InternalMetric.HEIGHT.get())
                     .build(new ResourceLocation(LovelyRobot.MODID, EntityVariant.Honey.getName()).toString()));
 
     public static final RegistryObject<EntityType<KitsuneEntity>> KITSUNE = ENTITY_TYPES.register(EntityVariant.Kitsune.getName(),
-            () -> EntityType.Builder.of(KitsuneEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH, InternalMetric.HEIGHT)
+            () -> EntityType.Builder.of(KitsuneEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH.get(), InternalMetric.HEIGHT.get())
                     .build(new ResourceLocation(LovelyRobot.MODID, EntityVariant.Kitsune.getName()).toString()));
 
     public static final RegistryObject<EntityType<NekoEntity>> NEKO = ENTITY_TYPES.register(EntityVariant.Neko.getName(),
-            () -> EntityType.Builder.of(NekoEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH, InternalMetric.HEIGHT)
+            () -> EntityType.Builder.of(NekoEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH.get(), InternalMetric.HEIGHT.get())
                     .build(new ResourceLocation(LovelyRobot.MODID, EntityVariant.Neko.getName()).toString()));
 
     public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = ENTITY_TYPES.register(EntityVariant.Vanilla.getName(),
-            () -> EntityType.Builder.of(VanillaEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH, InternalMetric.HEIGHT)
+            () -> EntityType.Builder.of(VanillaEntity::new, EntityClassification.CREATURE).sized(InternalMetric.WIDTH.get(), InternalMetric.HEIGHT.get())
                     .build(new ResourceLocation(LovelyRobot.MODID, EntityVariant.Vanilla.getName()).toString()));
 
     // -- Methods --

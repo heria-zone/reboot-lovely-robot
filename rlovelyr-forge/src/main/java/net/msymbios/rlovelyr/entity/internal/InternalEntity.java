@@ -189,10 +189,10 @@ public abstract class InternalEntity extends TameableEntity {
 
     public int getLootingLevel() {
         int level = 0;
-        if (InternalMetric.LOOT_ENCHANTMENT) {
-            level = this.getCurrentLevel() / InternalMetric.LOOT_ENCHANTMENT_LEVEL;
-            if (level > InternalMetric.MAX_LOOT_ENCHANTMENT) {
-                level = InternalMetric.MAX_LOOT_ENCHANTMENT;
+        if (InternalMetric.LOOT_ENCHANTMENT.get()) {
+            level = this.getCurrentLevel() / InternalMetric.LOOT_ENCHANTMENT_LEVEL.get();
+            if (level > InternalMetric.MAX_LOOT_ENCHANTMENT.get()) {
+                level = InternalMetric.MAX_LOOT_ENCHANTMENT.get();
             }
         }
         return level;
@@ -490,23 +490,23 @@ public abstract class InternalEntity extends TameableEntity {
     } // canLevelUp ()
 
     protected boolean canLevelUpFireProtection() {
-        return this.getFireProtection() < InternalMetric.PROTECTION_LIMIT_FIRE;
+        return this.getFireProtection() < InternalMetric.PROTECTION_LIMIT_FIRE.get();
     } // canLevelUpFireProtection ()
 
     protected boolean canLevelUpFallProtection() {
-        return this.getFallProtection() < InternalMetric.PROTECTION_LIMIT_FALL;
+        return this.getFallProtection() < InternalMetric.PROTECTION_LIMIT_FALL.get();
     } // canLevelUpFallProtection ()
 
     protected boolean canLevelUpBlastProtection() {
-        return this.getBlastProtection() < InternalMetric.PROTECTION_LIMIT_BLAST;
+        return this.getBlastProtection() < InternalMetric.PROTECTION_LIMIT_BLAST.get();
     } // canLevelUpBlastProtection ()
 
     protected boolean canLevelUpProjectileProtection() {
-        return this.getProjectileProtection() < InternalMetric.PROTECTION_LIMIT_PROJECTILE;
+        return this.getProjectileProtection() < InternalMetric.PROTECTION_LIMIT_PROJECTILE.get();
     } // canLevelUpProjectileProtection ()
 
     protected int getNextExp() {
-        return InternalMetric.EXPERIENCE_BASE + this.getCurrentLevel() * InternalMetric.EXPERIENCE_MULTIPLIER;
+        return InternalMetric.EXPERIENCE_BASE.get() + this.getCurrentLevel() * InternalMetric.EXPERIENCE_MULTIPLIER.get();
     } // getNextExp ()
 
     protected void addExp (int value) {
@@ -545,13 +545,13 @@ public abstract class InternalEntity extends TameableEntity {
             final float healValue = this.getHpValue() / 16.0F;
             this.heal(healValue);
             autoHeal = false;
-            autoHealTimer = InternalMetric.HEAL_INTERVAL;
+            autoHealTimer = InternalMetric.HEAL_INTERVAL.get();
         }
     } // handleAutoHeal ()
 
     protected void handleActivateCombatMode () {
         if(!combatMode) combatMode = true;
-        waryTimer = InternalMetric.WARY_TIME;
+        waryTimer = InternalMetric.WARY_TIME.get();
     } // handleActivateCombatMode ()
 
     protected void handleCombatMode() {

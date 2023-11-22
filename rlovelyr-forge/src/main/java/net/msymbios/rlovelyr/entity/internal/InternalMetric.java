@@ -4,6 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.msymbios.rlovelyr.LovelyRobot;
 import net.msymbios.rlovelyr.entity.enums.*;
 
@@ -16,44 +17,41 @@ import java.util.stream.Collectors;
 
 public class InternalMetric {
 
-    // -- RENDERER --
-    public static float SHADOW_RADIUS = 0.4F;
-    public static float WIDTH = 0.4F;
-    public static float HEIGHT = 2F;
-
     // -- GENERAL --
-    public static float MOVEMENT_MELEE_ATTACK = 1.0F;                   // Movement speed when it is melee attacking
-    public static float MOVEMENT_FOLLOW_OWNER = 1.0F;                   // Movement speed when following player
-    public static float MOVEMENT_WANDER_AROUND = 0.6F;                  // Movement speed while it is wandering around
-    public static float FOLLOW_DISTANCE_MAX = 10.0F;
-    public static float FOLLOW_DISTANCE_MIN = 2.0F;
-    public static float LOOK_RANGE = 8.0F;
+    public static ForgeConfigSpec.ConfigValue<Float> MOVEMENT_MELEE_ATTACK;
+    public static ForgeConfigSpec.ConfigValue<Float> MOVEMENT_FOLLOW_OWNER;
+    public static ForgeConfigSpec.ConfigValue<Float> MOVEMENT_WANDER_AROUND;
+    public static ForgeConfigSpec.ConfigValue<Float> FOLLOW_DISTANCE_MAX;
+    public static ForgeConfigSpec.ConfigValue<Float> FOLLOW_DISTANCE_MIN;
+    public static ForgeConfigSpec.ConfigValue<Float> LOOK_RANGE;
+
+    // -- RENDERER --
+    public static ForgeConfigSpec.ConfigValue<Float> SHADOW_RADIUS;
+    public static ForgeConfigSpec.ConfigValue<Float> WIDTH;
+    public static ForgeConfigSpec.ConfigValue<Float> HEIGHT;
 
     // -- LEVEL | EXPERIENCE ---
-    public static int EXPERIENCE_BASE = 50;                     // Basic experience required to level up
-    public static int EXPERIENCE_MULTIPLIER = 2;                   // Increase value for each level
+    public static ForgeConfigSpec.ConfigValue<Integer> EXPERIENCE_BASE;
+    public static ForgeConfigSpec.ConfigValue<Integer> EXPERIENCE_MULTIPLIER;
 
     // -- COMBAT --
-    public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof MonsterEntity && !(entity instanceof CreeperEntity); //&& !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity);
-    public static int ATTACK_CHANCE = 5;
-    public static boolean GLOBAL_AUTO_HEAL = true;              // Enable automatic recovery
-    public static int HEAL_INTERVAL = 50;            // Automatic recovery interval
-    public static int WARY_TIME = 50;            // Time while being in combat mode
-    public static boolean LOOT_ENCHANTMENT = true;    // Enable looting enchantments
-    public static int LOOT_ENCHANTMENT_LEVEL = 10;        // Levels required for looting enchantments
-    public static int MAX_LOOT_ENCHANTMENT = 3;              // Maximum level of looting enchantments
-    public static float BASE_DEFENCE_RANGE;
-    public static float BASE_DEFENCE_WARP_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> ATTACK_CHANCE;
+    public static ForgeConfigSpec.ConfigValue<Boolean> GLOBAL_AUTO_HEAL;
+    public static ForgeConfigSpec.ConfigValue<Integer> HEAL_INTERVAL;
+    public static ForgeConfigSpec.ConfigValue<Integer> WARY_TIME;
+    public static ForgeConfigSpec.ConfigValue<Boolean> LOOT_ENCHANTMENT;
+    public static ForgeConfigSpec.ConfigValue<Integer> LOOT_ENCHANTMENT_LEVEL;
+    public static ForgeConfigSpec.ConfigValue<Integer> MAX_LOOT_ENCHANTMENT;
+    public static ForgeConfigSpec.ConfigValue<Integer> BASE_DEFENCE_RANGE;
+    public static ForgeConfigSpec.ConfigValue<Integer> BASE_DEFENCE_WARP_RANGE;
 
     // -- PROTECTION --
-    public static int PROTECTION_LIMIT_FIRE = 80;         // Fire Protection upper limit
-    public static int PROTECTION_LIMIT_FALL = 80;         // Fall Protection upper limit
-    public static int PROTECTION_LIMIT_BLAST = 80;        // Blast Protection upper limit
-    public static int PROTECTION_LIMIT_PROJECTILE = 80;   // Projectile Protection upper limit
+    public static ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_FIRE;
+    public static ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_FALL;
+    public static ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_BLAST;
+    public static ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_PROJECTILE;
 
-    // -- BASE --
-    public static float BaseDefenseRange = 15;
-    public static float BaseDefenseWarpRange = 10;
+    public static Predicate<LivingEntity> AvoidAttackingEntities = entity -> entity instanceof MonsterEntity && !(entity instanceof CreeperEntity); //&& !(entity instanceof Bunny2Entity) && !(entity instanceof BunnyEntity) && !(entity instanceof HoneyEntity);
 
     // -- Properties --
     public static HashMap<EntityVariant, EntityAnimator> ENTITY_ANIMATOR = new HashMap(){{
@@ -145,15 +143,7 @@ public class InternalMetric {
         put(EntityVariant.Vanilla,    setTexture(EntityVariant.Vanilla));
     }};
 
-    public static HashMap<EntityVariant, HashMap<EntityAttribute, Float>> ATTRIBUTES = new HashMap(){{
-        put(EntityVariant.Bunny, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
-        put(EntityVariant.Bunny2, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 6F));
-        put(EntityVariant.Dragon, setAttribute(200F, 30F, 7F, 1.2F, 0.4F, 7F));
-        put(EntityVariant.Honey, setAttribute(200F, 30F, 6F, 1.2F, 0.4F, 5F));
-        put(EntityVariant.Kitsune, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
-        put(EntityVariant.Neko, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 5F));
-        put(EntityVariant.Vanilla, setAttribute(200F, 30F, 5F, 1.2F, 0.4F, 6F));
-    }};
+    public static HashMap<EntityVariant, HashMap<EntityAttribute, Float>> ATTRIBUTES = new HashMap();
 
     // -- Methods --
 

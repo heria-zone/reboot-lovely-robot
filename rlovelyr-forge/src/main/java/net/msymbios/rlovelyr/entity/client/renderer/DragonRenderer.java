@@ -13,7 +13,7 @@ public class DragonRenderer extends GeoEntityRenderer<DragonEntity> {
     // -- Constructor --
     public DragonRenderer(EntityRendererManager renderManager) {
         super(renderManager, new DragonModel());
-        this.shadowRadius = InternalMetric.SHADOW_RADIUS;
+        this.shadowRadius = InternalMetric.SHADOW_RADIUS.get();
         addLayer(new DragonLayer(this));
     } // Constructor DragonRenderer ()
 
