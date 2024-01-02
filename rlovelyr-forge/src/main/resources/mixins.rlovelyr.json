@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "net.msymbios.rlovelyr.mixins",
+  "mixinPriority": 1000,
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "WorkbenchContainerMixin"
+  ]
+}

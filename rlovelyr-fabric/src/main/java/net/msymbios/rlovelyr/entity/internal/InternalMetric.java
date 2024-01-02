@@ -51,7 +51,7 @@ public class InternalMetric {
     public static int PROTECTION_LIMIT_BLAST;
     public static int PROTECTION_LIMIT_PROJECTILE;
 
-    // -- Base --
+    // -- BASE --
     public static float BaseDefenseRange = 15;
     public static float BaseDefenseWarpRange = 10;
 

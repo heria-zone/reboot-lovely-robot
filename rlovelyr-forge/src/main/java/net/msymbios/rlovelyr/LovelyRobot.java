@@ -2,6 +2,7 @@ package net.msymbios.rlovelyr;
 
 import net.msymbios.rlovelyr.config.LovelyRobotConfigs;
 import net.msymbios.rlovelyr.entity.LovelyRobotEntities;
+import net.msymbios.rlovelyr.event.CraftingHandler;
 import net.msymbios.rlovelyr.item.LovelyRobotItems;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -31,6 +32,7 @@ public class LovelyRobot {
         GeckoLib.initialize();
 
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new CraftingHandler());
     } // Constructor LovelyRobot ()
 
     // -- Methods --

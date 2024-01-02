@@ -17,7 +17,6 @@ public class CraftHandler implements ItemCraftCallback {
 
     @Override
     public ActionResult onCraft(PlayerEntity player, ItemStack crafted, CraftingInventory matrix) {
-
         if (crafted.getItem() instanceof SpawnItem) {
             ItemStack spawn = null;
             ItemStack dye = null;
