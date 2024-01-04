@@ -6,6 +6,7 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
@@ -23,6 +24,8 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
+
+import static net.msymbios.rlovelyr.item.LovelyRobotItems.BUNNY2_SPAWN;
 
 public class Bunny2Entity extends InternalEntity implements IAngerable, IAnimatable {
 
@@ -55,6 +58,11 @@ public class Bunny2Entity extends InternalEntity implements IAngerable, IAnimata
 
     @Override
     public AnimationFactory getFactory() { return cache; } // getFactory ()
+
+    @Override
+    public ItemStack setDropItem() {
+        return new ItemStack(BUNNY2_SPAWN.get(), 1);
+    } // setDropItem ()
 
     // -- Inherited Methods --
     @Override

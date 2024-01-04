@@ -57,11 +57,6 @@ public abstract class InternalEntity extends TameableEntity {
 
     // -- Properties --
 
-    // VARIANT
-    public String getVariant() {
-        return this.variant.getName();
-    } // getVariant ()
-
     // TEXTURE
     public ResourceLocation getTexture() { return InternalMetric.getTexture(this.variant, EntityTexture.byId(getTextureID())); } // getTexture ()
 
@@ -85,10 +80,6 @@ public abstract class InternalEntity extends TameableEntity {
     public ResourceLocation getCurrentModel() { return InternalMetric.getModel(this.variant, model); } // getCurrentModel ()
 
     // ANIMATOR
-    public ResourceLocation getAnimatorByID(EntityAnimator value) {
-        return InternalMetric.getAnimator(this.variant, value);
-    } // getAnimatorByID ()
-
     public ResourceLocation getAnimator() {
         return InternalMetric.getAnimator(this.variant);
     } // getAnimator ()
@@ -152,10 +143,7 @@ public abstract class InternalEntity extends TameableEntity {
 
     public void setCurrentLevel(int value) {
         this.entityData.set(LEVEL, value);
-        Objects.requireNonNull(this.getAttribute(Attributes.MAX_HEALTH)).setBaseValue(getHpValue());
-        Objects.requireNonNull(this.getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(getAttackValue());
-        Objects.requireNonNull(this.getAttribute(Attributes.ARMOR)).setBaseValue(getBaseArmorValue());
-        Objects.requireNonNull(this.getAttribute(Attributes.ARMOR_TOUGHNESS)).setBaseValue(getArmorToughnessValue());
+        InternalLogic.handleSetLevel(this);
     } // setCurrentLevel ()
 
     public int getExp() {
@@ -169,47 +157,23 @@ public abstract class InternalEntity extends TameableEntity {
         this.entityData.set(EXP, value);
     } // setExp ()
 
-    public int getHpValue() { return getHpValue(getAttribute(EntityAttribute.MAX_HEALTH)); } // getHpValue ()
+    public int getHp() { return InternalLogic.getHpValue(this, getAttribute(EntityAttribute.MAX_HEALTH)); } // getHp ()
 
-    public int getHpValue(int value) {
-        return (value + this.getCurrentLevel() * value / 50);
-    } // getHpValue ()
+    public int getAttack() { return InternalLogic.getAttackValue(this, getAttribute(EntityAttribute.ATTACK_DAMAGE)); } // getAttack ()
 
-    public int getAttackValue() { return getAttackValue(getAttribute(EntityAttribute.ATTACK_DAMAGE)); } // getAttackValue ()
+    public int getDefense() { return InternalLogic.getDefenseValue(this, getAttribute(EntityAttribute.DEFENSE)); } // getDefenseValue ()
 
-    public int getAttackValue(int value) {
-        return (value + this.getCurrentLevel() * value / 50);
-    } // getAttackValue ()
+    public int getLooting() {
+        return InternalLogic.getLootingLevel(this);
+    } // getLooting ()
 
-    public int getDefenseValue() { return getDefenseValue(getAttribute(EntityAttribute.DEFENSE)); } // getDefenseValue ()
+    public double getArmorLevel() {
+        return InternalLogic.getArmorValue(this);
+    } // getArmorLevel ()
 
-    public int getDefenseValue(int value) {
-        return (value + this.getCurrentLevel() * value / 50);
-    } // getDefenseValue ()
-
-    public int getLootingLevel() {
-        int level = 0;
-        if (InternalMetric.LOOT_ENCHANTMENT.get()) {
-            level = this.getCurrentLevel() / InternalMetric.LOOT_ENCHANTMENT_LEVEL.get();
-            if (level > InternalMetric.MAX_LOOT_ENCHANTMENT.get()) {
-                level = InternalMetric.MAX_LOOT_ENCHANTMENT.get();
-            }
-        }
-        return level;
-    } // getLootingLevel ()
-
-    public double getBaseArmorValue () {
-        int armor = this.getDefenseValue();
-        if (armor > 30) armor = 30;
-        return armor;
-    } // getArmorValue ()
-
-    public double getArmorToughnessValue () {
-        double armor = getArmorValue();
-        double armor_tou = 0;
-        if (armor > 30) armor_tou = armor - 30;
-        return armor_tou;
-    } // getArmorToughnessValue ()
+    public double getArmorToughnessLevel() {
+        return InternalLogic.getArmorToughnessValue(this);
+    } // getArmorToughnessLevel ()
 
     // PROTECTION
     public int getFireProtection() {
@@ -327,9 +291,9 @@ public abstract class InternalEntity extends TameableEntity {
     @Override
     public boolean doHurtTarget(Entity target) {
         handleActivateCombatMode();
-        if(this.canLevelUp() && !(target instanceof PlayerEntity) && !this.level.isClientSide) {
+        if(InternalLogic.canLevelUp(this) && !(target instanceof PlayerEntity) && !this.level.isClientSide) {
             final int maxHp = (int)((LivingEntity)target).getMaxHealth();
-            this.addExp(maxHp / 4);
+            InternalLogic.addExp(this, maxHp / 4);
         }
         this.level.broadcastEntityEvent(this, (byte)4);
         return super.doHurtTarget(target);
@@ -355,17 +319,17 @@ public abstract class InternalEntity extends TameableEntity {
         if (amount < 1.0f) return false;
 
         if(!level.isClientSide) {
-            if(source.isFire() && canLevelUpFireProtection()) this.setFireProtection(this.getFireProtection() + 1);
-            if(source == DamageSource.FALL && canLevelUpFallProtection()) this.setFallProtection(this.getFallProtection() + 1);
-            if(source.isExplosion() && canLevelUpBlastProtection()) this.setBlastProtection(this.getBlastProtection() + 1);
-            if(source.isProjectile() && canLevelUpProjectileProtection()) this.setProjectileProtection(this.getProjectileProtection() + 1);
+            if(source.isFire() && InternalLogic.canLevelUpFireProtection(this)) this.setFireProtection(this.getFireProtection() + 1);
+            if(source == DamageSource.FALL && InternalLogic.canLevelUpFallProtection(this)) this.setFallProtection(this.getFallProtection() + 1);
+            if(source.isExplosion() && InternalLogic.canLevelUpBlastProtection(this)) this.setBlastProtection(this.getBlastProtection() + 1);
+            if(source.isProjectile() && InternalLogic.canLevelUpProjectileProtection(this)) this.setProjectileProtection(this.getProjectileProtection() + 1);
         }
 
         final Entity entity = source.getEntity();
 
-        if (this.canLevelUp() && !(entity instanceof PlayerEntity) && entity instanceof LivingEntity && !this.level.isClientSide) {
+        if (InternalLogic.canLevelUp(this) && !(entity instanceof PlayerEntity) && entity instanceof LivingEntity && !this.level.isClientSide) {
             final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
-            this.addExp(maxHp / 6);
+            InternalLogic.addExp(this, maxHp / 6);
         }
 
         if (entity != null && !(entity instanceof PlayerEntity) && !(entity instanceof ArrowEntity)) {
@@ -377,7 +341,7 @@ public abstract class InternalEntity extends TameableEntity {
 
     @Override
     protected void dropEquipment() {
-        final ItemStack dropItem = new ItemStack(ROBOT_CORE.get(), 1);
+        final ItemStack dropItem = setDropItem();//new ItemStack(ROBOT_CORE.get(), 1);
         CompoundNBT nbt = dropItem.getTag();
         if(nbt == null) nbt = new CompoundNBT();
 
@@ -414,7 +378,7 @@ public abstract class InternalEntity extends TameableEntity {
         switch (slot.getType()){
             case HAND: {
                 final ItemStack tempSword = new ItemStack(Items.DIAMOND_SWORD,1);
-                final int lootingLevel = this.getLootingLevel();
+                final int lootingLevel = this.getLooting();
                 if(lootingLevel > 0) {
                     tempSword.enchant(Enchantment.byId(21), lootingLevel);
                 }
@@ -436,33 +400,22 @@ public abstract class InternalEntity extends TameableEntity {
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
-
         if(hand == Hand.MAIN_HAND) {
             if(getOwner() != null) handleSit(stack);
-            if (this.level.isClientSide) {
+            if(this.level.isClientSide) {
                 boolean bl = this.isOwnedBy(player) || this.isTame() || stack.getItem() == (Items.BONE) && !this.isTame();
                 return bl ? ActionResultType.CONSUME : ActionResultType.PASS;
             } else {
-                handleState(stack, player);
-                handleAutoAttack(stack);
-                handleTexture(stack, player);
                 if(getOwner() == null) handleTame(player);
-
                 if(getOwner() != null) {
-                    if(stack.getItem() == (Items.OAK_BUTTON)) {
-                        this.setNotification(Utility.invertBoolean(getNotification()));
-                        if(getNotification()) commandDebug(new TranslationTextComponent("msg.rlovelyr.notification").append(ITextComponent.nullToEmpty(" ")).append(new TranslationTextComponent("msg.rlovelyr.on")), true);
-                        else commandDebug(new TranslationTextComponent("msg.rlovelyr.notification").append(ITextComponent.nullToEmpty(" ")).append(new TranslationTextComponent("msg.rlovelyr.off")), true);
-                    }
-
-                    if(stack.getItem() == (Items.BOOK)) displayMessage(player, true, false);
-                    if(stack.getItem() == (Items.WRITABLE_BOOK)) displayProtectionMessage(player);
+                    handleState(stack);
+                    handleAutoAttack(stack);
+                    handleTexture(stack, player);
+                    handleDisplayInteraction(stack);
                 }
-
                 return ActionResultType.SUCCESS;
             }
         }
-
         return super.mobInteract(player, hand);
     } // mobInteract ()
 
@@ -485,64 +438,17 @@ public abstract class InternalEntity extends TameableEntity {
     } // canInteractAutoAttack ()
 
     // -- Custom Methods --
-    protected boolean canLevelUp() {
-        return this.getCurrentLevel() < getMaxLevel();
-    } // canLevelUp ()
-
-    protected boolean canLevelUpFireProtection() {
-        return this.getFireProtection() < InternalMetric.PROTECTION_LIMIT_FIRE.get();
-    } // canLevelUpFireProtection ()
-
-    protected boolean canLevelUpFallProtection() {
-        return this.getFallProtection() < InternalMetric.PROTECTION_LIMIT_FALL.get();
-    } // canLevelUpFallProtection ()
-
-    protected boolean canLevelUpBlastProtection() {
-        return this.getBlastProtection() < InternalMetric.PROTECTION_LIMIT_BLAST.get();
-    } // canLevelUpBlastProtection ()
-
-    protected boolean canLevelUpProjectileProtection() {
-        return this.getProjectileProtection() < InternalMetric.PROTECTION_LIMIT_PROJECTILE.get();
-    } // canLevelUpProjectileProtection ()
-
-    protected int getNextExp() {
-        return InternalMetric.EXPERIENCE_BASE.get() + this.getCurrentLevel() * InternalMetric.EXPERIENCE_MULTIPLIER.get();
-    } // getNextExp ()
-
-    protected void addExp (int value) {
-        int addExp = value;
-        if(this.hasCustomName()) addExp = addExp * 3 / 2;
-
-        int exp = this.getExp();
-        exp += addExp;
-
-        int oldLevel = getCurrentLevel();
-        while (exp >= this.getNextExp()) {
-            exp -= this.getNextExp();
-            this.setCurrentLevel(this.getCurrentLevel() + 1);
-        }
-
-        this.setExp(exp);
-        if(oldLevel != getCurrentLevel()) {
-            if(!level.isClientSide) {
-                try {
-                    final LivingEntity entity = this.getOwner();
-                    if (entity == null) return;
-                    this.displayMessage((PlayerEntity)entity, getNotification(), true);
-                } catch (Exception ignored) {}
-            }
-        }
-    } // addExp ()
+    public abstract ItemStack setDropItem();
 
     // -- Logic Methods --
     protected void handleAutoHeal () {
-        if(this.getHealth() < this.getHpValue()) autoHeal = true;
+        if(this.getHealth() < this.getHp()) autoHeal = true;
         if(this.level.isClientSide && !autoHeal) return;
 
         if(autoHealTimer != 0) {
             autoHealTimer--;
         } else {
-            final float healValue = this.getHpValue() / 16.0F;
+            final float healValue = this.getHp() / 16.0F;
             this.heal(healValue);
             autoHeal = false;
             autoHealTimer = InternalMetric.HEAL_INTERVAL.get();
@@ -605,7 +511,18 @@ public abstract class InternalEntity extends TameableEntity {
         setAutoAttack(invertBoolean(getAutoAttack()));
     } // handleAutoAttack ()
 
-    public void handleState(ItemStack itemStack, PlayerEntity player) {
+    protected void handleDisplayInteraction (ItemStack stack) {
+        if(stack.getItem() == (Items.OAK_BUTTON)) {
+            this.setNotification(Utility.invertBoolean(getNotification()));
+            if(getNotification()) InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.notification").append(" ").append(new TranslationTextComponent("msg.rlovelyr.on")), true);
+            else InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.notification").append(" ").append(new TranslationTextComponent("msg.rlovelyr.off")), true);
+        }
+
+        if(stack.getItem() == (Items.BOOK)) displayGeneralMessage(true, false);
+        if(stack.getItem() == (Items.WRITABLE_BOOK)) displayEnchantmentMessage();
+    } // handleDisplayInteraction ()
+
+    public void handleState(ItemStack itemStack) {
         StandbyState(itemStack);
         FollowState(itemStack);
         BaseDefenseState(itemStack);
@@ -633,22 +550,7 @@ public abstract class InternalEntity extends TameableEntity {
         setCurrentState(EntityState.BaseDefense);
     } // BaseDefenseState ()
 
-    // -- Debug Methods --
-    public void commandDebug(String message, boolean overlay) {
-        if(this.getOwner() != null) {
-            PlayerEntity player = (PlayerEntity) this.getOwner();
-            player.displayClientMessage(ITextComponent.nullToEmpty(message), overlay);
-        }
-    } // commandDebug ()
-
-    public void commandDebug(IFormattableTextComponent message, boolean overlay) {
-        if(this.getOwner() != null) {
-            PlayerEntity player = (PlayerEntity) this.getOwner();
-            player.displayClientMessage(message, overlay);
-        }
-    } // commandDebug ()
-
-    public void commandDebugExtra() {
+    public void displayExtra() {
         IFormattableTextComponent debug = null;
         if(combatMode && getNotification()) {
             debug = new TranslationTextComponent(Utility.getTranslatable(this.variant)).append(ITextComponent.nullToEmpty(": ")).append(new TranslationTextComponent("msg.rlovelyr.wary"));
@@ -665,30 +567,30 @@ public abstract class InternalEntity extends TameableEntity {
             if(this.getHealth() < 10) debug = debug.append("| 0" + this.getHealth());
             else debug = debug.append("| " + (int)Math.floor(this.getHealth()));
         }
-        if(debug != null) commandDebug(debug, true);
-    } // commandDebugExtra ()
+        if(debug != null) InternalLogic.commandDebug(this, debug, true);
+    } // displayExtra ()
 
-    public void displayMessage (PlayerEntity player, boolean canShow, boolean showLevelUp) {
+    public void displayGeneralMessage(boolean canShow, boolean showLevelUp) {
         if(!canShow) return;
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.bar"), false);
-        if(showLevelUp) player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.level_up"), false);
-        if(this.getCustomName() != null) player.displayClientMessage(new TranslationTextComponent(Utility.getTranslatable(this.variant)).append(": " + this.getCustomName().getString()), false);
-        else player.displayClientMessage(new TranslationTextComponent(Utility.getTranslatable(this.variant)), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.level").append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.experience").append(": " + this.getExp()                 + "/" + this.getNextExp()), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.health").append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.attack").append(": " + this.getAttackValue()), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.defence").append(": " + this.getDefenseValue()), false);
-    } // displayMessage ()
+        InternalLogic.commandDebug(this, (new TranslationTextComponent("msg.rlovelyr.bar")), false);
+        if(showLevelUp) InternalLogic.commandDebug(this, (new TranslationTextComponent("msg.rlovelyr.level_up")), false);
+        if(this.getCustomName() != null) InternalLogic.commandDebug(this, new TranslationTextComponent(Utility.getTranslatable(this.variant)).append(": " + this.getCustomName().getString()), false);
+        else InternalLogic.commandDebug(this, new TranslationTextComponent(Utility.getTranslatable(this.variant)), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.level").append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.experience").append(": " + this.getExp()                 + "/" + InternalLogic.getNextExp(this)), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.health").append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.attack").append(": " + this.getAttack()), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.defence").append(": " + this.getDefense()), false);
+    } // displayGeneralMessage  ()
 
-    public void displayProtectionMessage (PlayerEntity player) {
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.bar"), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.enchantment"), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.looting").append(": " + this.getLootingLevel()                       + "/" + InternalMetric.MAX_LOOT_ENCHANTMENT), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.fire_protection").append(": " + this.getFireProtection()             + "/" + InternalMetric.PROTECTION_LIMIT_FIRE), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.fall_protection").append(": " + this.getFallProtection()             + "/" + InternalMetric.PROTECTION_LIMIT_FALL), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.blast_protection").append(": " + this.getBlastProtection()           + "/" + InternalMetric.PROTECTION_LIMIT_BLAST), false);
-        player.displayClientMessage(new TranslationTextComponent("msg.rlovelyr.projectile_protection").append(": " + this.getProjectileProtection() + "/" + InternalMetric.PROTECTION_LIMIT_PROJECTILE), false);
+    public void displayEnchantmentMessage() {
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.bar"), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.enchantment"), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.looting").append(": " + this.getLooting()                       + "/" + InternalMetric.MAX_LOOT_ENCHANTMENT), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.fire_protection").append(": " + this.getFireProtection()             + "/" + InternalMetric.PROTECTION_LIMIT_FIRE), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.fall_protection").append(": " + this.getFallProtection()             + "/" + InternalMetric.PROTECTION_LIMIT_FALL), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.blast_protection").append(": " + this.getBlastProtection()           + "/" + InternalMetric.PROTECTION_LIMIT_BLAST), false);
+        InternalLogic.commandDebug(this, new TranslationTextComponent("msg.rlovelyr.projectile_protection").append(": " + this.getProjectileProtection() + "/" + InternalMetric.PROTECTION_LIMIT_PROJECTILE.get()), false);
     } // displayProtectionMessage ()
 
     // -- Save Methods --
