@@ -13,10 +13,10 @@ import software.bernie.geckolib3.model.provider.data.EntityModelData;
 public final class InternalAnimation {
 
     // -- Variables --
-    public static final AnimationBuilder IDLE = new AnimationBuilder().addAnimation("animation.lovelyrobot.idle", true);
-    public static final AnimationBuilder WALK = new AnimationBuilder().addAnimation("animation.lovelyrobot.walk", true);
-    public static final AnimationBuilder SIT = new AnimationBuilder().addAnimation ("animation.lovelyrobot.sit", true);
-    public static final AnimationBuilder ATTACK = new AnimationBuilder().addAnimation ("animation.lovelyrobot.attack", false);
+    public static final AnimationBuilder IDLE = new AnimationBuilder().addAnimation("idle", true);
+    public static final AnimationBuilder WALK = new AnimationBuilder().addAnimation("walk", true);
+    public static final AnimationBuilder SIT = new AnimationBuilder().addAnimation ("rest", true);
+    public static final AnimationBuilder ATTACK = new AnimationBuilder().addAnimation ("attack", false);
 
     // -- Methods --
     public static <T extends InternalEntity & IAnimatable> AnimationController<T> attackAnimation(T animatable) {

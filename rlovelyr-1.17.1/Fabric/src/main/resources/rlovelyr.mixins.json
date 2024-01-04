@@ -4,6 +4,8 @@
   "package": "net.msymbios.rlovelyr.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "CraftingScreenHandlerAccessor",
+    "CraftingResultSlotMixin"
   ],
   "client": [
     "LovelyRobotMixin"

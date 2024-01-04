@@ -41,5 +41,28 @@
   "msg.rlovelyr.notification": "Notification",
   "msg.rlovelyr.auto_attack": "Auto Attack",
   "msg.rlovelyr.on": "ON",
-  "msg.rlovelyr.off": "OFF"
+  "msg.rlovelyr.off": "OFF",
+
+  "msg.item.level": "Level",
+  "msg.item.type": "Type",
+  "msg.item.color": "Color",
+  "msg.item.random": "Random",
+  "msg.item.name": "Name",
+
+  "msg.item.white": "White",
+  "msg.item.orange": "Orange",
+  "msg.item.magenta": "Magenta",
+  "msg.item.light_blue": "Light Blue",
+  "msg.item.yellow": "Yellow",
+  "msg.item.lime": "Lime",
+  "msg.item.pink": "Pink",
+  "msg.item.gray": "Gray",
+  "msg.item.light_gray": "Light Gray",
+  "msg.item.cyan": "Cyan",
+  "msg.item.purple": "Purple",
+  "msg.item.blue": "Blue",
+  "msg.item.brown": "Brown",
+  "msg.item.green": "Green",
+  "msg.item.red": "Red",
+  "msg.item.black": "Black"
 }
