@@ -1,15 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "NNN",
-    "NRN",
-    "NNN"
+    "INI",
+    "NCN",
+    "INI"
   ],
   "key": {
     "N": {
       "item": "minecraft:gold_nugget"
     },
-    "R": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
       "item": "rlovelyr:robot_core"
     }
   },

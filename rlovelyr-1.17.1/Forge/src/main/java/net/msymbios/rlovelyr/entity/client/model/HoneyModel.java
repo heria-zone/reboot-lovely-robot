@@ -1,33 +1,33 @@
-package net.msymbios.rlovelyr.entity.client;
+package net.msymbios.rlovelyr.entity.client.model;
 
 import net.minecraft.resources.ResourceLocation;
-import net.msymbios.rlovelyr.entity.custom.BunnyEntity;
+import net.msymbios.rlovelyr.entity.custom.HoneyEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
-public class BunnyModel extends AnimatedGeoModel<BunnyEntity> {
+public class HoneyModel extends AnimatedGeoModel<HoneyEntity> {
 
     // -- Inherited Methods --
     @Override
-    public ResourceLocation getModelLocation(BunnyEntity animatable) {
+    public ResourceLocation getModelLocation(HoneyEntity animatable) {
         return animatable.getCurrentModel();
     } // getModelLocation ()
 
     @Override
-    public ResourceLocation getTextureLocation(BunnyEntity animatable) {
+    public ResourceLocation getTextureLocation(HoneyEntity animatable) {
         return animatable.getTexture();
     } // getTextureLocation ()
 
     @Override
-    public ResourceLocation getAnimationFileLocation(BunnyEntity animatable) {
+    public ResourceLocation getAnimationFileLocation(HoneyEntity animatable) {
         return animatable.getAnimator();
     } // getAnimationFileLocation ()
 
     @Override
-    public void setLivingAnimations(BunnyEntity animatable, Integer uniqueID, AnimationEvent event){
+    public void setLivingAnimations(HoneyEntity animatable, Integer uniqueID, AnimationEvent event){
         super.setLivingAnimations(animatable, uniqueID, event);
         InternalAnimation.headAnimation(this, event);
     } // setLivingAnimations ()
 
-} // Class BunnyModel
+} // Class HoneyModel

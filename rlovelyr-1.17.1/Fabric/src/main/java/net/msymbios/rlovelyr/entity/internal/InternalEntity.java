@@ -294,7 +294,7 @@ public abstract class InternalEntity extends TameableEntity {
     @Override
     public void onAttacking(Entity target) {
         handleActivateCombatMode();
-        if(this.canLevelUp() && !(target instanceof PlayerEntity) && target != null && !this.world.isClient) {
+        if(InternalLogic.canLevelUp(this) && !(target instanceof PlayerEntity) && target != null && !this.world.isClient) {
             final int maxHp = (int)((LivingEntity)target).getMaxHealth();
             InternalLogic.addExp(this, maxHp / 4);
         }
@@ -330,7 +330,7 @@ public abstract class InternalEntity extends TameableEntity {
 
         final Entity entity = source.getSource();
 
-        if (this.canLevelUp() && !(entity instanceof PlayerEntity) && entity instanceof LivingEntity && !this.world.isClient) {
+        if (InternalLogic.canLevelUp(this) && !(entity instanceof PlayerEntity) && entity instanceof LivingEntity && !this.world.isClient) {
             final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
             InternalLogic.addExp(this, maxHp / 6);
         }
@@ -431,11 +431,6 @@ public abstract class InternalEntity extends TameableEntity {
     public boolean canInteractAutoAttack(ItemStack itemStack) {
         return itemStack.isOf(Items.WOODEN_SWORD) || itemStack.isOf(Items.STONE_SWORD) || itemStack.isOf(Items.IRON_SWORD) || itemStack.isOf(Items.GOLDEN_SWORD) || itemStack.isOf(Items.DIAMOND_SWORD) || itemStack.isOf(Items.NETHERITE_SWORD);
     } // canInteractAutoAttack ()
-
-    // -- Custom Methods --
-    protected boolean canLevelUp() {
-        return this.getCurrentLevel() < getMaxLevel();
-    } // canLevelUp ()
 
     // -- Logic Methods --
     protected void handleAutoHeal () {

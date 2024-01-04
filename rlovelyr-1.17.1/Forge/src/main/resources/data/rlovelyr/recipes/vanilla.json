@@ -1,18 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "NIN",
-    "IRI",
-    "NIN"
+    "III",
+    "ICI",
+    "III"
   ],
   "key": {
-    "N": {
-      "item": "minecraft:gold_nugget"
-    },
     "I": {
       "item": "minecraft:iron_ingot"
     },
-    "R": {
+    "C": {
       "item": "rlovelyr:robot_core"
     }
   },
