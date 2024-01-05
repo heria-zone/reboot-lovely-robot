@@ -12,6 +12,7 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
@@ -31,6 +32,8 @@ import software.bernie.geckolib3.core.manager.SingletonAnimationFactory;
 
 import java.util.UUID;
 
+import static net.msymbios.rlovelyr.item.LovelyRobotItems.NEKO_SPAWN;
+
 public class NekoEntity extends InternalEntity implements NeutralMob, IAnimatable {
 
     // -- Variables --
@@ -39,12 +42,12 @@ public class NekoEntity extends InternalEntity implements NeutralMob, IAnimatabl
     // -- Properties --
     public static AttributeSupplier setAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.MAX_HEALTH))
-                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ATTACK_DAMAGE))
-                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ATTACK_SPEED))
-                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.MOVEMENT_SPEED))
-                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ARMOR))
-                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Neko, EntityAttribute.ARMOR_TOUGHNESS)).build();
+                .add(Attributes.MAX_HEALTH, InternalMetric.getAttribute(EntityVariant.Neko, EntityAttribute.MAX_HEALTH))
+                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttribute(EntityVariant.Neko, EntityAttribute.ATTACK_DAMAGE))
+                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttribute(EntityVariant.Neko, EntityAttribute.ATTACK_SPEED))
+                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttribute(EntityVariant.Neko, EntityAttribute.MOVEMENT_SPEED))
+                .add(Attributes.ARMOR, InternalMetric.getAttribute(EntityVariant.Neko, EntityAttribute.ARMOR))
+                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttribute(EntityVariant.Neko, EntityAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
     // -- Constructor --
@@ -63,6 +66,11 @@ public class NekoEntity extends InternalEntity implements NeutralMob, IAnimatabl
     @Override
     public AnimationFactory getFactory() { return cache; } // getFactory ()
 
+    @Override
+    public ItemStack setDropItem() {
+        return new ItemStack(NEKO_SPAWN.get(), 1);
+    } // setDropItem ()
+
     // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
@@ -76,17 +84,17 @@ public class NekoEntity extends InternalEntity implements NeutralMob, IAnimatabl
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, InternalMetric.MeleeAttackMovement, true));
-        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
-        this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
-        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, InternalMetric.WanderAroundMovement));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, InternalMetric.LookAtRange));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, InternalEntity.class, InternalMetric.LookAtRange));
+        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, InternalMetric.MOVEMENT_MELEE_ATTACK.get(), true));
+        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER.get(), InternalMetric.FOLLOW_DISTANCE_MAX.get(), InternalMetric.FOLLOW_DISTANCE_MIN.get(), false));
+        this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER.get(), InternalMetric.BASE_DEFENCE_RANGE.get(), InternalMetric.BASE_DEFENCE_WARP_RANGE.get()));
+        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, InternalMetric.MOVEMENT_WANDER_AROUND.get()));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, InternalMetric.LOOK_RANGE.get()));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, InternalEntity.class, InternalMetric.LOOK_RANGE.get()));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, InternalMetric.AttackChance, true, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, InternalMetric.ATTACK_CHANCE.get(), true, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
     } // registerGoals ()
 
