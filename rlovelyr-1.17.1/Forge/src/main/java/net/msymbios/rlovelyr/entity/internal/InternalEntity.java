@@ -476,7 +476,7 @@ public abstract class InternalEntity extends TamableAnimal {
     public void handleTame(Player player) {
         this.setOwnerUUID(player.getUUID());
         this.setTame(true);
-        this.setOrderedToSit(true);
+        InternalParticle.Heart(this);
     } // handleTame ()
 
     public void handleTexture(ItemStack item, Player player) {
