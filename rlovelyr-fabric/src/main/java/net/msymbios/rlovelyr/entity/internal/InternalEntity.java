@@ -476,7 +476,6 @@ public abstract class InternalEntity extends TameableEntity {
         this.setOwner(player);
         this.setTamed(true);
         InternalParticle.Heart(this);
-        this.world.sendEntityStatus(this, (byte) 4);
     } // handleTame ()
 
     public void handleTexture(ItemStack items, PlayerEntity player) {
