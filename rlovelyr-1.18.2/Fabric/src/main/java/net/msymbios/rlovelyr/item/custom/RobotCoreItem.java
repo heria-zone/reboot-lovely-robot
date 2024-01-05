@@ -5,7 +5,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.world.World;
+import net.msymbios.rlovelyr.entity.enums.EntityTexture;
+import net.msymbios.rlovelyr.entity.internal.Utility;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,16 +25,16 @@ public class RobotCoreItem extends Item {
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         if(!stack.hasNbt()) {
             NbtCompound compound = new NbtCompound();
-            compound.putString("rlovelyr.type", "??");
-            compound.putString("rlovelyr.color", "Random");
-            compound.putInt("rlovelyr.level", 0);
+            compound.putInt("color", 16);
+            compound.putInt("level", 0);
             stack.setNbt(compound);
         }
 
         if(stack.hasNbt()) {
-            tooltip.add(Text.of("Type: " + stack.getNbt().getString("rlovelyr.type")));
-            tooltip.add(Text.of("Color: " + stack.getNbt().getString("rlovelyr.color")));
-            tooltip.add(Text.of("Level: " + stack.getNbt().getInt("rlovelyr.level")));
+            if(!stack.getNbt().getString("custom_name").isEmpty()) tooltip.add(new TranslatableText("msg.item.name").append(": " + stack.getNbt().getString("custom_name")));
+            if(!stack.getNbt().getString("type").isEmpty()) tooltip.add(new TranslatableText("msg.item.type").append(": ").append(new TranslatableText(stack.getNbt().getString("type"))));
+            tooltip.add(new TranslatableText("msg.item.color").append(": ").append(new TranslatableText(Utility.getTranslatable(EntityTexture.byId(stack.getNbt().getInt("color"))))));
+            if(stack.getNbt().getInt("level") > 0) tooltip.add(new TranslatableText("msg.item.level").append(": " + stack.getNbt().getInt("level")));
         }
     } // appendTooltip ()
 

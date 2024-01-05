@@ -74,17 +74,17 @@ public class VanillaEntity extends InternalEntity implements IAnimatable {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new MeleeAttackGoal(this, InternalMetric.MeleeAttackMovement, false));
-        this.goalSelector.add(4, new AiFollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
-        this.goalSelector.add(4, new AiBaseDefenseGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
-        this.goalSelector.add(5, new WanderAroundFarGoal(this, InternalMetric.WanderAroundMovement));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, InternalMetric.LookAtRange));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, InternalMetric.LookAtRange));
+        this.goalSelector.add(3, new MeleeAttackGoal(this, InternalMetric.MOVEMENT_MELEE_ATTACK, false));
+        this.goalSelector.add(4, new AiFollowOwnerGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER, InternalMetric.FOLLOW_DISTANCE_MAX, InternalMetric.FOLLOW_DISTANCE_MIN, false));
+        this.goalSelector.add(4, new AiBaseDefenseGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER, InternalMetric.BASE_DEFENCE_RANGE, InternalMetric.BASE_DEFENCE_WARP_RANGE));
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, InternalMetric.MOVEMENT_WANDER_AROUND));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, InternalMetric.LOOK_RANGE));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, InternalMetric.LOOK_RANGE));
         this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, new RevengeGoal(this));
-        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetric.AttackChance, false, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetric.ATTACK_CHANCE, false, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
