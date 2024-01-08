@@ -1,5 +1,6 @@
 package net.msymbios.rlovelyr.entity.custom;
 
+import net.minecraft.world.item.ItemStack;
 import net.msymbios.rlovelyr.entity.enums.*;
 import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
 import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
@@ -8,7 +9,6 @@ import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import net.msymbios.rlovelyr.entity.internal.InternalEntity;
 import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -28,7 +28,7 @@ import software.bernie.geckolib3.core.manager.SingletonAnimationFactory;
 
 import java.util.UUID;
 
-import static net.msymbios.rlovelyr.entity.internal.Utility.*;
+import static net.msymbios.rlovelyr.item.LovelyRobotItems.BUNNY2_SPAWN;
 
 public class Bunny2Entity extends InternalEntity implements NeutralMob, IAnimatable {
 
@@ -38,12 +38,12 @@ public class Bunny2Entity extends InternalEntity implements NeutralMob, IAnimata
     // -- Properties --
     public static AttributeSupplier setAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MAX_HEALTH))
-                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ATTACK_DAMAGE))
-                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ATTACK_SPEED))
-                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.MOVEMENT_SPEED))
-                .add(Attributes.ARMOR, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ARMOR))
-                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Bunny2, EntityAttribute.ARMOR_TOUGHNESS)).build();
+                .add(Attributes.MAX_HEALTH, InternalMetric.getAttribute(EntityVariant.Bunny2, EntityAttribute.MAX_HEALTH))
+                .add(Attributes.ATTACK_DAMAGE, InternalMetric.getAttribute(EntityVariant.Bunny2, EntityAttribute.ATTACK_DAMAGE))
+                .add(Attributes.ATTACK_SPEED, InternalMetric.getAttribute(EntityVariant.Bunny2, EntityAttribute.ATTACK_SPEED))
+                .add(Attributes.MOVEMENT_SPEED, InternalMetric.getAttribute(EntityVariant.Bunny2, EntityAttribute.MOVEMENT_SPEED))
+                .add(Attributes.ARMOR, InternalMetric.getAttribute(EntityVariant.Bunny2, EntityAttribute.ARMOR))
+                .add(Attributes.ARMOR_TOUGHNESS, InternalMetric.getAttribute(EntityVariant.Bunny2, EntityAttribute.ARMOR_TOUGHNESS)).build();
     } // setAttributes ()
 
     // -- Constructor --
@@ -62,6 +62,11 @@ public class Bunny2Entity extends InternalEntity implements NeutralMob, IAnimata
     @Override
     public AnimationFactory getFactory() { return cache; } // getFactory ()
 
+    @Override
+    public ItemStack setDropItem() {
+        return new ItemStack(BUNNY2_SPAWN.get(), 1);
+    } // setDropItem ()
+
     // -- Inherited Methods --
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
@@ -75,17 +80,17 @@ public class Bunny2Entity extends InternalEntity implements NeutralMob, IAnimata
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, InternalMetric.MeleeAttackMovement, true));
-        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.FollowBehindDistance, InternalMetric.FollowCloseDistance, false));
-        this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, InternalMetric.FollowOwnerMovement, InternalMetric.BaseDefenseRange, InternalMetric.BaseDefenseWarpRange));
-        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, InternalMetric.WanderAroundMovement));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, InternalMetric.LookAtRange));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, InternalEntity.class, InternalMetric.LookAtRange));
+        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, InternalMetric.MOVEMENT_MELEE_ATTACK.get(), true));
+        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER.get(), InternalMetric.FOLLOW_DISTANCE_MAX.get(), InternalMetric.FOLLOW_DISTANCE_MIN.get(), false));
+        this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER.get(), InternalMetric.BASE_DEFENCE_RANGE.get(), InternalMetric.BASE_DEFENCE_WARP_RANGE.get()));
+        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, InternalMetric.MOVEMENT_WANDER_AROUND.get()));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, InternalMetric.LOOK_RANGE.get()));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, InternalEntity.class, InternalMetric.LOOK_RANGE.get()));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, InternalMetric.AttackChance, true, false, InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, InternalMetric.ATTACK_CHANCE.get(), true, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
     } // registerGoals ()
 

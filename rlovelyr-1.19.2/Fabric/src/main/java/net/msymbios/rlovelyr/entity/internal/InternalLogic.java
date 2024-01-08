@@ -104,6 +104,7 @@ public class InternalLogic {
         while (exp >= getNextExp(entity)) {
             exp -= getNextExp(entity);
             entity.setCurrentLevel(entity.getCurrentLevel() + 1);
+            //InternalParticle.LevelUp(entity);
         }
 
         entity.setExp(exp);

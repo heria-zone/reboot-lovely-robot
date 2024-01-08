@@ -225,8 +225,8 @@ public class InternalMetric {
     } // setTexture ()
 
     // ATTRIBUTE
-    public static float getAttributeValue(EntityVariant variant, EntityAttribute attribute) {
+    public static float getAttribute(EntityVariant variant, EntityAttribute attribute) {
         return ATTRIBUTES.get(variant).get(attribute);
-    } // getAttributeValue ()
+    } // getAttribute ()
 
 } // Class InternalMetrics

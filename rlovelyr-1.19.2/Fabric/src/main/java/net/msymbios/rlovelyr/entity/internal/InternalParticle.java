@@ -22,7 +22,7 @@ public class InternalParticle {
             double d2 = CalculateVelocity();
             entity.world.addParticle(ParticleTypes.ASH, entity.getParticleX(1.0D), entity.getRandomBodyY() + 0.5D, entity.getParticleZ(1.0D), d0, d1, d2);
         }
-        entity.world.sendEntityStatus(entity, (byte) 7);
+        entity.world.sendEntityStatus(entity, (byte) 4);
     } // Ash ()
 
     public static void Heart(Entity entity) {
@@ -34,6 +34,16 @@ public class InternalParticle {
         }
         entity.world.sendEntityStatus(entity, (byte) 7);
     } // Heart ()
+
+    public static void LevelUp(Entity entity) {
+        for (int i = 0; i < MaximumNumberParticles; ++i) {
+            double d0 = CalculateVelocity();
+            double d1 = CalculateVelocity();
+            double d2 = CalculateVelocity();
+            entity.world.addParticle(ParticleTypes.HAPPY_VILLAGER, entity.getParticleX(1.0D), entity.getRandomBodyY() + 0.5D, entity.getParticleZ(1.0D), d0, d1, d2);
+        }
+        entity.world.sendEntityStatus(entity, (byte) 38);
+    } // LevelUp ()
 
     // UTILITY
     private static double CalculateVelocity() {

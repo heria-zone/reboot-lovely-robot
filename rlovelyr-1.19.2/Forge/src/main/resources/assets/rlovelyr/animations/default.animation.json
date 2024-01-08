@@ -103,8 +103,8 @@
 			}
 		},
 		"attack": {
-			"loop": true,
 			"animation_length": 0.48,
+			"override_previous_animation": true,
 			"bones": {
 				"rightArm": {
 					"rotation": {
