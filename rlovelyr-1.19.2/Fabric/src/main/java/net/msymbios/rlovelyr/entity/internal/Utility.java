@@ -12,11 +12,6 @@ public class Utility {
         return !value;
     } // invertBoolean ()
 
-    public static String FirstToUpperCase(String value) {
-        String letterToUpper = value.substring(0, 1);  // Get the first character
-        return letterToUpper.toUpperCase() + value.substring(1);
-    } // FirstToUpperCase ()
-
     // TRANSLATABLE
     public static String getTranslatable(EntityVariant translatable){
         String value = "entity.rlovelyr.bunny";

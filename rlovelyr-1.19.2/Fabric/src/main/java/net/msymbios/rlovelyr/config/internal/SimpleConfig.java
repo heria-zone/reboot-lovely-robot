@@ -266,4 +266,4 @@ public class SimpleConfig {
         return request.file.delete();
     }
 
-}
+} // Class SimpleConfig

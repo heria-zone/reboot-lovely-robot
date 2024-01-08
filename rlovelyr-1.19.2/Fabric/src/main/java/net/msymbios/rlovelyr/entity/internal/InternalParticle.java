@@ -22,6 +22,7 @@ public class InternalParticle {
             double d2 = CalculateVelocity();
             entity.world.addParticle(ParticleTypes.ASH, entity.getParticleX(1.0D), entity.getRandomBodyY() + 0.5D, entity.getParticleZ(1.0D), d0, d1, d2);
         }
+        entity.world.sendEntityStatus(entity, (byte) 7);
     } // Ash ()
 
     public static void Heart(Entity entity) {
@@ -31,6 +32,7 @@ public class InternalParticle {
             double d2 = CalculateVelocity();
             entity.world.addParticle(ParticleTypes.HEART, entity.getParticleX(1.0D), entity.getRandomBodyY() + 0.5D, entity.getParticleZ(1.0D), d0, d1, d2);
         }
+        entity.world.sendEntityStatus(entity, (byte) 7);
     } // Heart ()
 
     // UTILITY

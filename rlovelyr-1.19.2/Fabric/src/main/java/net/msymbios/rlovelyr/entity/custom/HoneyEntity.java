@@ -13,14 +13,14 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
-import net.msymbios.rlovelyr.config.InternalMetrics;
 import net.msymbios.rlovelyr.entity.enums.EntityAttribute;
 import net.msymbios.rlovelyr.entity.enums.EntityVariant;
-import net.msymbios.rlovelyr.goal.AiAutoAttackGoal;
-import net.msymbios.rlovelyr.goal.AiBaseDefenseGoal;
-import net.msymbios.rlovelyr.goal.AiFollowOwnerGoal;
+import net.msymbios.rlovelyr.entity.goal.AiAutoAttackGoal;
+import net.msymbios.rlovelyr.entity.goal.AiBaseDefenseGoal;
+import net.msymbios.rlovelyr.entity.goal.AiFollowOwnerGoal;
 import net.msymbios.rlovelyr.entity.internal.InternalAnimation;
 import net.msymbios.rlovelyr.entity.internal.InternalEntity;
+import net.msymbios.rlovelyr.entity.internal.InternalMetric;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -35,12 +35,12 @@ public class HoneyEntity extends InternalEntity implements IAnimatable {
     // -- Properties --
     public static DefaultAttributeContainer.Builder setAttributes() {
         return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, InternalMetrics.HONEY_MAX_HEALTH)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, InternalMetrics.HONEY_ATTACK_DAMAGE)
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, InternalMetrics.HONEY_ATTACK_SPEED)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, InternalMetrics.HONEY_MOVEMENT_SPEED)
-                .add(EntityAttributes.GENERIC_ARMOR, InternalMetrics.GENERAL_ARMOR)
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, InternalMetrics.GENERAL_ARMOR_TOUGHNESS);
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, InternalMetric.getAttributeValue(EntityVariant.Honey, EntityAttribute.MAX_HEALTH))
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, InternalMetric.getAttributeValue(EntityVariant.Honey, EntityAttribute.ATTACK_DAMAGE))
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, InternalMetric.getAttributeValue(EntityVariant.Honey, EntityAttribute.ATTACK_SPEED))
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, InternalMetric.getAttributeValue(EntityVariant.Honey, EntityAttribute.MOVEMENT_SPEED))
+                .add(EntityAttributes.GENERIC_ARMOR, InternalMetric.getAttributeValue(EntityVariant.Honey, EntityAttribute.ARMOR))
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, InternalMetric.getAttributeValue(EntityVariant.Honey, EntityAttribute.ARMOR_TOUGHNESS));
     } // setAttributes ()
 
     // -- Constructor --
@@ -74,17 +74,17 @@ public class HoneyEntity extends InternalEntity implements IAnimatable {
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new MeleeAttackGoal(this, InternalMetrics.MOVEMENT_MELEE_ATTACK, false));
-        this.goalSelector.add(4, new AiFollowOwnerGoal(this, InternalMetrics.MOVEMENT_FOLLOW_OWNER, InternalMetrics.FOLLOW_DISTANCE_MAX, InternalMetrics.FOLLOW_DISTANCE_MIN, false));
-        this.goalSelector.add(4, new AiBaseDefenseGoal(this, InternalMetrics.MOVEMENT_FOLLOW_OWNER, InternalMetrics.HONEY_BASE_DEFENCE_RANGE, InternalMetrics.HONEY_BASE_DEFENCE_WARP_RANGE));
-        this.goalSelector.add(5, new WanderAroundFarGoal(this, InternalMetrics.MOVEMENT_WANDER_AROUND));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, InternalMetrics.LOOK_RANGE));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, InternalMetrics.LOOK_RANGE));
+        this.goalSelector.add(3, new MeleeAttackGoal(this, InternalMetric.MOVEMENT_MELEE_ATTACK, false));
+        this.goalSelector.add(4, new AiFollowOwnerGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER, InternalMetric.FOLLOW_DISTANCE_MAX, InternalMetric.FOLLOW_DISTANCE_MIN, false));
+        this.goalSelector.add(4, new AiBaseDefenseGoal(this, InternalMetric.MOVEMENT_FOLLOW_OWNER, InternalMetric.BASE_DEFENCE_RANGE, InternalMetric.BASE_DEFENCE_WARP_RANGE));
+        this.goalSelector.add(5, new WanderAroundFarGoal(this, InternalMetric.MOVEMENT_WANDER_AROUND));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, InternalMetric.LOOK_RANGE));
+        this.goalSelector.add(6, new LookAtEntityGoal(this, InternalEntity.class, InternalMetric.LOOK_RANGE));
         this.goalSelector.add(7, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, new RevengeGoal(this));
-        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetrics.ATTACK_CHANCE, false, false, net.msymbios.rlovelyr.entity.internal.InternalMetric.AvoidAttackingEntities));
+        this.targetSelector.add(4, new AiAutoAttackGoal(this, MobEntity.class, InternalMetric.ATTACK_CHANCE, false, false, InternalMetric.AvoidAttackingEntities));
         this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     } // initGoals ()
 
