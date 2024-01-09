@@ -1,6 +1,6 @@
 package net.msymbios.rlovelyr.mixin;
 
-import net.msymbios.rlovelyr.LovelyRobotMod;
+import net.msymbios.rlovelyr.LovelyRobot;
 import net.minecraft.client.gui.screen.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,7 +13,7 @@ public class LovelyRobotMixin {
 	// -- Method --
 	@Inject(at = @At("HEAD"), method = "init()V")
 	private void init(CallbackInfo info) {
-		LovelyRobotMod.LOGGER.info("This line is printed by an reboot lovely robot mixin!");
+		LovelyRobot.LOGGER.info("This line is printed by an reboot lovely robot mixin!");
 	} // init ()
 
 } // Class LovelyRobotMixin
