@@ -15,15 +15,15 @@ import software.bernie.geckolib.model.data.EntityModelData;
 public final class InternalAnimation {
 
     // -- Variables --
-    public static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.lovelyrobot.idle");
-    public static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.lovelyrobot.walk");
-    public static final RawAnimation SIT = RawAnimation.begin().thenPlayAndHold("animation.lovelyrobot.sit");
-    public static final RawAnimation ATTACK = RawAnimation.begin().then("animation.lovelyrobot.attack", Animation.LoopType.PLAY_ONCE);
+    public static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+    public static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+    public static final RawAnimation REST = RawAnimation.begin().thenPlayAndHold("rest");
+    public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then("attack", Animation.LoopType.PLAY_ONCE);
 
     // -- Methods --
     public static <T extends InternalEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
         return new AnimationController<>(animatable, "Attack", 5, state -> {
-            if (animatable.swinging) return state.setAndContinue(ATTACK);
+            if (animatable.swinging) return state.setAndContinue(ATTACK_SWING);
             state.getController().forceAnimationReset();
             return PlayState.STOP;
         });
@@ -32,7 +32,7 @@ public final class InternalAnimation {
     public static <T extends InternalEntity & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
         return new AnimationController<T>(entity, "Locomotion", 0, state -> {
             if (state.isMoving()) return state.setAndContinue(WALK);
-            else if(entity.getCurrentState() == EntityState.Standby) return state.setAndContinue(SIT);
+            else if(entity.getCurrentState() == EntityState.Standby) return state.setAndContinue(REST);
             else return state.setAndContinue(IDLE);
         });
     } // locomotionAnimation ()
