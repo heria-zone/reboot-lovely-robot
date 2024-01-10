@@ -19,8 +19,8 @@ public class LovelyRobot {
 
     // -- Constructor --
     public LovelyRobot() {
-        GeckoLib.initialize();
         IEventBus event = FMLJavaModLoadingContext.get().getModEventBus();
+        GeckoLib.initialize();
 
         LovelyRobotConfig.register();
         LovelyRobotItems.register(event);

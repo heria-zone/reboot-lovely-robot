@@ -14,7 +14,7 @@ authors="MSymbios"
 description='''This mod is a reboot that adds several robots girl to Minecraft as an assistant in battles with various functionalities.'''
 
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.forge]] #optional
+[[dependencies.examplemod]] #optional
 modId="forge"
 mandatory=true
 versionRange="[45,)"
@@ -22,7 +22,7 @@ ordering="NONE"
 side="BOTH"
 
 # Here's another dependency
-[[dependencies.minecraft]]
+[[dependencies.examplemod]]
 modId="minecraft"
 mandatory=true
 versionRange="[1.19.4,1.19.4)"
