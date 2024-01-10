@@ -18,7 +18,7 @@ public class LovelyRobotItemsGroup {
     public static DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LovelyRobot.MODID);
 
     public static RegistryObject<CreativeModeTab> LOVELY_ROBOT = CREATIVE_MODE_TABS.register(LovelyRobotID.TAB_GROUP, () ->
-            CreativeModeTab.builder().icon(() -> new ItemStack(LovelyRobotItems.BUNNY2_SPAWN.get())).title(Component.translatable("itemGroup.lovely_robot")).build());
+            CreativeModeTab.builder().icon(() -> new ItemStack(LovelyRobotItems.BUNNY_SPAWN.get())).title(Component.translatable("itemGroup.lovely_robot")).build());
 
     // -- Methods --
     public static void register(IEventBus eventBus) {
