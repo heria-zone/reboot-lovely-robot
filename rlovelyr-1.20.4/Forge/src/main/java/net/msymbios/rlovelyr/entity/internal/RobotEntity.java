@@ -284,6 +284,41 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
     } // defineSynchedData ()
 
     @Override
+    public void addAdditionalSaveData(CompoundTag dataNBT) {
+        dataNBT.putInt("Level", this.getCurrentLevel());
+        dataNBT.putInt("Exp", this.getExp());
+        dataNBT.putBoolean("AutoAttack", this.getAutoAttack());
+
+        dataNBT.putInt("FireProtection", this.getFireProtection());
+        dataNBT.putInt("FallProtection", this.getFallProtection());
+        dataNBT.putInt("BlastProtection", this.getBlastProtection());
+        dataNBT.putInt("ProjectileProtection", this.getProjectileProtection());
+
+        dataNBT.putFloat("BaseX", this.getBaseX());
+        dataNBT.putFloat("BaseY", this.getBaseY());
+        dataNBT.putFloat("BaseZ", this.getBaseZ());
+
+        super.addAdditionalSaveData(dataNBT);
+    } // writeCustomDataToNbt ()
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag dataNBT) {
+        this.setCurrentLevel(dataNBT.getInt("Level"));
+        this.setExp(dataNBT.getInt("Exp"));
+        this.setAutoAttack(dataNBT.getBoolean("AutoAttack"));
+
+        this.setFireProtection(dataNBT.getInt("FireProtection"));
+        this.setFallProtection(dataNBT.getInt("FallProtection"));
+        this.setBlastProtection(dataNBT.getInt("BlastProtection"));
+        this.setProjectileProtection(dataNBT.getInt("ProjectileProtection"));
+
+        this.setBaseY(dataNBT.getFloat("BaseY"));
+        this.setBaseZ(dataNBT.getFloat("BaseZ"));
+        this.setBaseX(dataNBT.getFloat("BaseX"));
+        super.readAdditionalSaveData(dataNBT);
+    } // readCustomDataFromNbt ()
+
+    @Override
     public CompoundTag writeToNBT(@Nonnull CompoundTag dataNBT) {
         dataNBT = super.writeToNBT(dataNBT);
         dataNBT.putInt("Level", this.getCurrentLevel());

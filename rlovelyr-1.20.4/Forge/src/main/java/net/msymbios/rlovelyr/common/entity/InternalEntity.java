@@ -22,7 +22,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.msymbios.rlovelyr.LovelyRobot;
 import net.msymbios.rlovelyr.common.entity.enums.EntityState;
-import net.msymbios.rlovelyr.common.util.ObjectUtil;
 import net.msymbios.rlovelyr.common.util.interfaces.IReadWriteNBT;
 import net.msymbios.rlovelyr.common.util.internal.Utility;
 import net.msymbios.rlovelyr.common.util.internal.Version;
@@ -209,6 +208,11 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     @Override
     public void addAdditionalSaveData(CompoundTag dataNBT) {
         super.addAdditionalSaveData(dataNBT);
+
+        dataNBT.putInt("TextureID", this.getTextureID());
+        dataNBT.putInt("State", this.getCurrentStateID());
+        dataNBT.putBoolean("Notification", this.getNotification());
+
         CompoundTag entityData = new CompoundTag();
         entityData.putString("VersionNBT", LovelyRobot.VERSION.toString());
         writeToNBT(entityData);
@@ -218,8 +222,13 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     @Override
     public void readAdditionalSaveData(CompoundTag dataNBT) {
         super.readAdditionalSaveData(dataNBT);
-        CompoundTag entityData = dataNBT.getCompound("EntityData");
-        readFromNBT(entityData, ObjectUtil.coalesce(new Version(entityData.getString("VersionNBT")), LovelyRobot.VERSION));
+
+        this.setTexture(dataNBT.getInt("TextureID"));
+        this.setCurrentState(dataNBT.getInt("State"));
+        this.setNotification(dataNBT.getBoolean("Notification"));
+
+        //CompoundTag entityData = dataNBT.getCompound("EntityData");
+        //readFromNBT(entityData, ObjectUtil.coalesce(new Version(entityData.getString("VersionNBT")), LovelyRobot.VERSION));
     } // readAdditionalSaveData ()
 
     @Override

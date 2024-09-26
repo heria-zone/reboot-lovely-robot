@@ -179,6 +179,9 @@ public class LovelyRobotID {
             case Kitsune -> value = getVariantTranslation(LovelyRobotID.VARIANT_KITSUNE);
             case Neko -> value = getVariantTranslation(LovelyRobotID.VARIANT_NEKO);
             case Vanilla -> value = getVariantTranslation(LovelyRobotID.VARIANT_VANILLA);
+            case Prime -> value = getVariantTranslation(LovelyRobotID.VARIANT_PRIME);
+            case Hyperion -> value = getVariantTranslation(LovelyRobotID.VARIANT_HYPERION);
+            case Empyrium -> value = getVariantTranslation(LovelyRobotID.VARIANT_EMPYRIUM);
         }
         return value;
     } // getTranslation ()
@@ -209,6 +212,16 @@ public class LovelyRobotID {
             case GREEN -> value = getMessageTranslation(LovelyRobotID.TEX_GREEN);
             case RED -> value = getMessageTranslation(LovelyRobotID.TEX_RED);
             case BLACK -> value = getMessageTranslation(LovelyRobotID.TEX_BLACK);
+
+            case DARK_MATTER -> value = getMessageTranslation(LovelyRobotID.TEX_DARK_MATTER);
+            case SUPERNOVA -> value = getMessageTranslation(LovelyRobotID.TEX_SUPERNOVA);
+            case COLD_GOLD -> value = getMessageTranslation(LovelyRobotID.TEX_COLD_GOLD);
+            case EMBRYON -> value = getMessageTranslation(LovelyRobotID.TEX_EMBRYON);
+            case DARK_GOLD -> value = getMessageTranslation(LovelyRobotID.TEX_DARK_GOLD);
+            case GOLD_MATTER -> value = getMessageTranslation(LovelyRobotID.TEX_GOLD_MATTER);
+            case HESTIA -> value = getMessageTranslation(LovelyRobotID.TEX_HESTIA);
+            case COMMANDER -> value = getMessageTranslation(LovelyRobotID.TEX_COMMANDER);
+            case VALKYRIE -> value = getMessageTranslation(LovelyRobotID.TEX_VALKYRIE);
         }
         return value;
     } // getTranslation ()

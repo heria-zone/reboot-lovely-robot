@@ -214,26 +214,29 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
         this.dataTracker.startTracking(NOTIFICATION, true);
     } // initDataTracker ()
 
+    @Override
     public void writeCustomDataToNbt(NbtCompound dataNBT) {
-        super.writeCustomDataToNbt(dataNBT);
-        //dataNBT.putInt("TextureID", this.getTextureID());
-        //dataNBT.putInt("State", this.getCurrentStateID());
-        //dataNBT.putBoolean("Notification", this.getNotification());
+        dataNBT.putInt("TextureID", this.getTextureID());
+        dataNBT.putInt("State", this.getCurrentStateID());
+        dataNBT.putBoolean("Notification", this.getNotification());
 
         NbtCompound entityData = new NbtCompound();
         entityData.putString("VersionNBT", LovelyRobot.VERSION.toString());
         writeToNBT(entityData);
         dataNBT.put("EntityData", entityData);
+
+        super.writeCustomDataToNbt(dataNBT);
     } // writeCustomDataToNbt ()
 
+    @Override
     public void readCustomDataFromNbt(NbtCompound dataNBT) {
         super.readCustomDataFromNbt(dataNBT);
-        //this.setTexture(dataNBT.getInt("TextureID"));
-        //this.setCurrentState(dataNBT.getInt("State"));
-        //this.setNotification(dataNBT.getBoolean("Notification"));
+        this.setTexture(dataNBT.getInt("TextureID"));
+        this.setCurrentState(dataNBT.getInt("State"));
+        this.setNotification(dataNBT.getBoolean("Notification"));
 
-        NbtCompound entityData = dataNBT.getCompound("EntityData");
-        readFromNBT(entityData, ObjectUtil.coalesce(new Version(entityData.getString("VersionNBT")), LovelyRobot.VERSION));
+        //NbtCompound entityData = dataNBT.getCompound("EntityData");
+        //readFromNBT(entityData, ObjectUtil.coalesce(new Version(entityData.getString("VersionNBT")), LovelyRobot.VERSION));
     } // readCustomDataFromNbt ()
 
     @Override

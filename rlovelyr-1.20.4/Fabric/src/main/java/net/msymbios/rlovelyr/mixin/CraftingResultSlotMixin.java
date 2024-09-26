@@ -7,7 +7,6 @@ import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.CraftingResultSlot;
 import net.msymbios.rlovelyr.event.interfaces.ItemCraftCallback;
-import net.msymbios.rlovelyr.mixin.interfaces.CraftingScreenHandlerAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

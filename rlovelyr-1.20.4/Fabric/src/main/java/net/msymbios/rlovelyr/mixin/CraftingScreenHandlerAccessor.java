@@ -1,4 +1,4 @@
-package net.msymbios.rlovelyr.mixin.interfaces;
+package net.msymbios.rlovelyr.mixin;
 
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.screen.CraftingScreenHandler;
