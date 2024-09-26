@@ -38,7 +38,7 @@ public abstract class InternalEntityType<T> {
     /**
      * The standard texture for the entity type.
      */
-    public final HashMap<EntityTexture, Identifier> texture;
+    public HashMap<EntityTexture, Identifier> texture;
 
     /**
      * The standard model for the entity type.

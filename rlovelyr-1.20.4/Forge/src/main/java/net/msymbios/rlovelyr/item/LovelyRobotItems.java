@@ -24,7 +24,10 @@ public class LovelyRobotItems {
     // -- Variables --
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, LovelyRobot.MODID);
+
     public static final RegistryObject<Item> ROBOT_CORE = registerItem(LovelyRobotID.ROBOT_CORE, Rarity.UNCOMMON, 1);
+    public static final RegistryObject<Item> ROBOT_CORE_ALDARIAN = registerItem(LovelyRobotID.ROBOT_CORE_ALDARIAN, Rarity.UNCOMMON, 1);
+
     public static final RegistryObject<Item> BUNNY_SPAWN = registerItem(LovelyRobotID.BUNNY_SPAWN, LovelyRobotEntities.BUNNY, Rarity.RARE, 1);
     public static final RegistryObject<Item> BUNNY2_SPAWN = registerItem(LovelyRobotID.BUNNY2_SPAWN, LovelyRobotEntities.BUNNY2, Rarity.RARE, 1);
     public static final RegistryObject<Item> DRAGON_SPAWN = registerItem(LovelyRobotID.DRAGON_SPAWN, LovelyRobotEntities.DRAGON, Rarity.RARE, 1);
@@ -32,6 +35,10 @@ public class LovelyRobotItems {
     public static final RegistryObject<Item> KITSUNE_SPAWN = registerItem(LovelyRobotID.KITSUNE_SPAWN, LovelyRobotEntities.KITSUNE, Rarity.RARE, 1);
     public static final RegistryObject<Item> NEKO_SPAWN = registerItem(LovelyRobotID.NEKO_SPAWN, LovelyRobotEntities.NEKO, Rarity.RARE, 1);
     public static final RegistryObject<Item> VANILLA_SPAWN = registerItem(LovelyRobotID.VANILLA_SPAWN, LovelyRobotEntities.VANILLA, Rarity.RARE, 1);
+
+    public static final RegistryObject<Item> PRIME_SPAWN = registerItem(LovelyRobotID.PRIME_SPAWN, LovelyRobotEntities.PRIME, Rarity.RARE, 1);
+    public static final RegistryObject<Item> HYPERION_SPAWN = registerItem(LovelyRobotID.HYPERION_SPAWN, LovelyRobotEntities.HYPERION, Rarity.RARE, 1);
+    public static final RegistryObject<Item> EMPYRIUM_SPAWN = registerItem(LovelyRobotID.EMPYRIUM_SPAWN, LovelyRobotEntities.EMPYRIUM, Rarity.RARE, 1);
 
     // -- Methods --
 
@@ -56,10 +63,11 @@ public class LovelyRobotItems {
 
     private static void addCreative(BuildCreativeModeTabContentsEvent event) {
         addItemsToDefaultTab(event);
+        addItemsToAldarianTechTab(event);
     } // addCreative ()
 
     protected static void addItemsToDefaultTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() != LovelyRobotItemsGroup.DEFAULT_TAB_KEY) return;
+        if (event.getTabKey() != LovelyRobotItemsGroup.DEFAULT_KEY) return;
         event.accept(ROBOT_CORE);
         event.accept(BUNNY_SPAWN);
         event.accept(BUNNY2_SPAWN);
@@ -69,6 +77,13 @@ public class LovelyRobotItems {
         event.accept(NEKO_SPAWN);
         event.accept(VANILLA_SPAWN);
     } // addItemsToDefaultTab ()
+
+    protected static void addItemsToAldarianTechTab(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() != LovelyRobotItemsGroup.ALDARIAN_TECH_KEY) return;
+        event.accept(PRIME_SPAWN);
+        event.accept(HYPERION_SPAWN);
+        event.accept(EMPYRIUM_SPAWN);
+    } // addItemsToAldarianTechTab ()
 
     @SafeVarargs
     protected static void addItemsToCreativeTab(BuildCreativeModeTabContentsEvent event, ResourceKey<CreativeModeTab> creativeTab, RegistryObject<Item>... items) {

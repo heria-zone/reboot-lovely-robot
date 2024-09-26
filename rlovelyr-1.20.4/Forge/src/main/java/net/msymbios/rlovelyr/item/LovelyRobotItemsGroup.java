@@ -12,6 +12,7 @@ import net.msymbios.rlovelyr.LovelyRobot;
 import net.msymbios.rlovelyr.config.LovelyRobotID;
 
 import static net.msymbios.rlovelyr.item.LovelyRobotItems.ROBOT_CORE;
+import static net.msymbios.rlovelyr.item.LovelyRobotItems.ROBOT_CORE_ALDARIAN;
 
 public class LovelyRobotItemsGroup {
 
@@ -22,9 +23,11 @@ public class LovelyRobotItemsGroup {
 
     // -- TABS
     public static final RegistryObject<CreativeModeTab> DEFAULT_TAB = CREATIVE_TABS.register(LovelyRobotID.DEFAULT_TAB, () -> registerCreativeTab(LovelyRobotID.DEFAULT_TAB, ROBOT_CORE));
+    public static final RegistryObject<CreativeModeTab> ALDARIAN_TECH_TAB = CREATIVE_TABS.register(LovelyRobotID.ALDARIAN_TECH_TAB, () -> registerCreativeTab(LovelyRobotID.ALDARIAN_TECH_TAB, ROBOT_CORE_ALDARIAN));
 
     // -- KEYS
-    public static final ResourceKey<CreativeModeTab> DEFAULT_TAB_KEY = createKey(LovelyRobotID.getId(LovelyRobotID.DEFAULT_TAB));
+    public static final ResourceKey<CreativeModeTab> DEFAULT_KEY = createKey(LovelyRobotID.getId(LovelyRobotID.DEFAULT_TAB));
+    public static final ResourceKey<CreativeModeTab> ALDARIAN_TECH_KEY = createKey(LovelyRobotID.getId(LovelyRobotID.ALDARIAN_TECH_TAB));
 
     // -- Methods --
 

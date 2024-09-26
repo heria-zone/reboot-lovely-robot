@@ -26,6 +26,10 @@ public class LovelyRobotEntities {
     public static final EntityType<NekoEntity> NEKO = register(LovelyRobotID.VARIANT_NEKO, NekoEntity::new, SpawnGroup.CREATURE, LovelyRobotConfig.Common.Width, LovelyRobotConfig.Common.Height);
     public static final EntityType<VanillaEntity> VANILLA = register(LovelyRobotID.VARIANT_VANILLA, VanillaEntity::new, SpawnGroup.CREATURE, LovelyRobotConfig.Common.Width, LovelyRobotConfig.Common.Height);
 
+    public static final EntityType<PrimeEntity> PRIME = register(LovelyRobotID.VARIANT_PRIME, PrimeEntity::new, SpawnGroup.CREATURE, LovelyRobotConfig.Common.Width, LovelyRobotConfig.Common.Height);
+    public static final EntityType<HyperionEntity> HYPERION = register(LovelyRobotID.VARIANT_HYPERION, HyperionEntity::new, SpawnGroup.CREATURE,  LovelyRobotConfig.Common.Width, LovelyRobotConfig.Common.Height);
+    public static final EntityType<EmpyriumEntity> EMPYRIUM = register(LovelyRobotID.VARIANT_EMPYRIUM, EmpyriumEntity::new, SpawnGroup.CREATURE,  LovelyRobotConfig.Common.Width, LovelyRobotConfig.Common.Height);
+
     // -- Methods --
 
     /**
@@ -57,6 +61,10 @@ public class LovelyRobotEntities {
         FabricDefaultAttributeRegistry.register(KITSUNE, KitsuneEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(NEKO, NekoEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(VANILLA, VanillaEntity.createAttributes());
+
+        FabricDefaultAttributeRegistry.register(PRIME, PrimeEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(HYPERION, HyperionEntity.createAttributes());
+        FabricDefaultAttributeRegistry.register(EMPYRIUM, EmpyriumEntity.createAttributes());
     } // registerAttribute ()
 
     /**
@@ -71,6 +79,10 @@ public class LovelyRobotEntities {
         EntityRendererRegistry.register(KITSUNE, KitsuneRenderer::new);
         EntityRendererRegistry.register(NEKO, NekoRenderer::new);
         EntityRendererRegistry.register(VANILLA, VanillaRenderer::new);
+
+        EntityRendererRegistry.register(PRIME, PrimeRenderer::new);
+        EntityRendererRegistry.register(HYPERION, HyperionRenderer::new);
+        EntityRendererRegistry.register(EMPYRIUM, EmpyriumRenderer::new);
     } // registerRender ()
 
 } // Class LovelyRobotEntities

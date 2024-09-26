@@ -370,7 +370,8 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
         String customName = Utility.getEntityCustomName(this);
         if (!customName.isEmpty()) nbt.putString(LovelyRobotID.STAT_CUSTOM_NAME, customName);
 
-        nbt.putString(LovelyRobotID.STAT_OWNER, Objects.requireNonNull(this.getOwner()).getNameForScoreboard());
+        String ownerName = Utility.getEntityOwnerName(this);
+        if (!ownerName.isEmpty()) nbt.putString(LovelyRobotID.STAT_OWNER, ownerName);
 
         nbt.putString(LovelyRobotID.STAT_TYPE, this.nativeEntity.key);
         nbt.putInt(LovelyRobotID.STAT_COLOR, this.getTextureID());
@@ -404,7 +405,7 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
         if(stack.getItem() instanceof DyeItem) return false;
         if(stack.getItem() instanceof SwordItem) return false;
         if(stack.isOf(Items.STICK) || stack.isOf(Items.BOOK) || stack.isOf(Items.WRITABLE_BOOK) || stack.isOf(Items.OAK_BUTTON)) return false;
-        return !(stack.getItem() instanceof CompassItem) && !stack.isOf(Items.RECOVERY_COMPASS);
+        return !stack.isOf(Items.COMPASS) && !stack.isOf(Items.RECOVERY_COMPASS);
     } // canInteractWithItems ()
 
     @Override
@@ -491,7 +492,7 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
     } // canInteractAutoAttack ()
 
     private boolean canInteractGuardMode(ItemStack stack) {
-        return (stack.getItem() instanceof CompassItem) && stack.isOf(Items.RECOVERY_COMPASS);
+        return stack.isOf(Items.COMPASS) || stack.isOf(Items.RECOVERY_COMPASS);
     } // canInteractGuardMode ()
 
     protected boolean handleDisplayInteraction (ItemStack stack) {
@@ -531,8 +532,8 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
         if(!canShow) return;
         InternalLogic.displayInfo(this, (LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_BAR)), false);
         if(showLevelUp) InternalLogic.displayInfo(this, (LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_LEVEL_UP)), false);
-        if(this.getCustomName() != null) InternalLogic.displayInfo(this, LovelyRobotID.getTranslation(Objects.requireNonNull(EntityVariant.byName(nativeEntity.key))).append(": " + this.getCustomName().getString()), false);
-        else InternalLogic.displayInfo(this, LovelyRobotID.getTranslation(Objects.requireNonNull(EntityVariant.byName(nativeEntity.key))), false);
+        if(this.getCustomName() != null) InternalLogic.displayInfo(this, LovelyRobotID.getVariantTranslation(nativeEntity.key).append(": " + this.getCustomName().getString()), false);
+        else InternalLogic.displayInfo(this, LovelyRobotID.getVariantTranslation(nativeEntity.key), false);
         InternalLogic.displayInfo(this, LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_LEVEL).append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
         InternalLogic.displayInfo(this, LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_EXPERIENCE).append(": " + this.getExp()                 + "/" + InternalLogic.calculateNextExp(this.getExp())), false);
         InternalLogic.displayInfo(this, LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_HEALTH).append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);

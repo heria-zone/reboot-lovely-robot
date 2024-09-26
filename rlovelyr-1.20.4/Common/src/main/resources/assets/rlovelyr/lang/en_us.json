@@ -1,4 +1,7 @@
 {
+  "tab.rlovelyr.lovely_robot": "Reboot LovelyRobot",
+  "tab.rlovelyr.aldarian_tech": "Aldarian Tech",
+
   "item.rlovelyr.robot_core": "Robot Core",
   "item.rlovelyr.bunny_spawn": "Spawn Bunny",
   "item.rlovelyr.bunny2_spawn": "Spawn Bunny 2.0",
@@ -7,8 +10,9 @@
   "item.rlovelyr.kitsune_spawn": "Spawn Kitsune",
   "item.rlovelyr.neko_spawn": "Spawn Neko",
   "item.rlovelyr.vanilla_spawn": "Spawn Vanilla",
-
-  "tab.rlovelyr.lovely_robot": "Reboot LovelyRobot",
+  "item.rlovelyr.empyrium_spawn": "Spawn Empyrium",
+  "item.rlovelyr.hyperion_spawn": "Spawn Hyperion",
+  "item.rlovelyr.prime_spawn": "Spawn Prime",
 
   "variant.rlovelyr.bunny": "Bunny",
   "variant.rlovelyr.bunny2": "Bunny 2.0",
@@ -17,6 +21,9 @@
   "variant.rlovelyr.kitsune": "Kitsune",
   "variant.rlovelyr.neko": "Neko",
   "variant.rlovelyr.vanilla": "Vanilla",
+  "variant.rlovelyr.empyrium": "Empyrium",
+  "variant.rlovelyr.hyperion": "Hyperion",
+  "variant.rlovelyr.prime": "Prime",
 
   "entity.rlovelyr.bunny": "Bunny",
   "entity.rlovelyr.bunny2": "Bunny 2.0",
@@ -25,6 +32,9 @@
   "entity.rlovelyr.kitsune": "Kitsune",
   "entity.rlovelyr.neko": "Neko",
   "entity.rlovelyr.vanilla": "Vanilla",
+  "entity.rlovelyr.empyrium": "Empyrium",
+  "entity.rlovelyr.hyperion": "Hyperion",
+  "entity.rlovelyr.prime": "Prime",
 
   "msg.rlovelyr.heal": "Heal",
   "msg.rlovelyr.wary": "Wary",
@@ -49,10 +59,13 @@
   "msg.rlovelyr.on": "ON",
   "msg.rlovelyr.off": "OFF",
 
+  "msg.rlovelyr.creator": "Creator",
+  "msg.rlovelyr.credits": "Credits",
   "msg.rlovelyr.owner": "Owner",
   "msg.rlovelyr.name": "Name",
   "msg.rlovelyr.type": "Type",
   "msg.rlovelyr.color": "Color",
+  "msg.rlovelyr.design": "Design",
   "msg.rlovelyr.level": "Level",
 
   "msg.rlovelyr.random": "Random",
@@ -71,5 +84,16 @@
   "msg.rlovelyr.brown": "Brown",
   "msg.rlovelyr.green": "Green",
   "msg.rlovelyr.red": "Red",
-  "msg.rlovelyr.black": "Black"
+  "msg.rlovelyr.black": "Black",
+
+  "msg.rlovelyr.commander": "Commander",
+  "msg.rlovelyr.valkyrie": "Valkyrie",
+
+  "msg.rlovelyr.dark-matter": "Dark Matter",
+  "msg.rlovelyr.supernova": "Supernova",
+  "msg.rlovelyr.cold-gold": "Cold Gold",
+  "msg.rlovelyr.embryon": "Embryon",
+  "msg.rlovelyr.dark-gold": "Dark Gold",
+  "msg.rlovelyr.gold-matter": "Gold Matter",
+  "msg.rlovelyr.hestia": "Hestia"
 }

@@ -34,6 +34,9 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
     public static final NativeEntityType KITSUNE    = create(LovelyRobotID.VARIANT_KITSUNE);
     public static final NativeEntityType NEKO       = create(LovelyRobotID.VARIANT_NEKO);
     public static final NativeEntityType VANILLA    = create(LovelyRobotID.VARIANT_VANILLA);
+    public static final NativeEntityType PRIME      = create(LovelyRobotID.VARIANT_PRIME);
+    public static final NativeEntityType HYPERION   = create(LovelyRobotID.VARIANT_HYPERION);
+    public static final NativeEntityType EMPYRIUM   = create(LovelyRobotID.VARIANT_EMPYRIUM);
 
     static {
         BUNNY.addCombat(LovelyRobotConfig.Common.BunnyMaxLevel,LovelyRobotConfig.Common.BunnyMaxHealth, LovelyRobotConfig.Common.BunnyAttackDamage, LovelyRobotConfig.Common.BunnyAttackSpeed, LovelyRobotConfig.Common.BunnyArmor, LovelyRobotConfig.Common.BunnyArmorToughness, 0F, LovelyRobotConfig.Common.BunnyMovementSpeed);
@@ -43,6 +46,15 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
         KITSUNE.addCombat(LovelyRobotConfig.Common.KitsuneMaxLevel,LovelyRobotConfig.Common.KitsuneMaxHealth, LovelyRobotConfig.Common.KitsuneAttackDamage, LovelyRobotConfig.Common.KitsuneAttackSpeed, LovelyRobotConfig.Common.KitsuneArmor, LovelyRobotConfig.Common.KitsuneArmorToughness, 0F, LovelyRobotConfig.Common.KitsuneMovementSpeed);
         NEKO.addCombat(LovelyRobotConfig.Common.NekoMaxLevel,LovelyRobotConfig.Common.NekoMaxHealth, LovelyRobotConfig.Common.NekoAttackDamage, LovelyRobotConfig.Common.NekoAttackSpeed, LovelyRobotConfig.Common.NekoArmor, LovelyRobotConfig.Common.NekoArmorToughness, 0F, LovelyRobotConfig.Common.NekoMovementSpeed);
         VANILLA.addCombat(LovelyRobotConfig.Common.VanillaMaxLevel,LovelyRobotConfig.Common.VanillaMaxHealth, LovelyRobotConfig.Common.VanillaAttackDamage, LovelyRobotConfig.Common.VanillaAttackSpeed, LovelyRobotConfig.Common.VanillaArmor, LovelyRobotConfig.Common.VanillaArmorToughness, 0F, LovelyRobotConfig.Common.VanillaMovementSpeed);
+
+        PRIME.addCombat(LovelyRobotConfig.Common.VanillaMaxLevel,LovelyRobotConfig.Common.VanillaMaxHealth, LovelyRobotConfig.Common.VanillaAttackDamage, LovelyRobotConfig.Common.VanillaAttackSpeed, LovelyRobotConfig.Common.VanillaArmor, LovelyRobotConfig.Common.VanillaArmorToughness, 0F, LovelyRobotConfig.Common.VanillaMovementSpeed);
+        PRIME.addTexture(EntityVariant.Prime, EntityTexture.DARK_MATTER, EntityTexture.SUPERNOVA, EntityTexture.COLD_GOLD, EntityTexture.EMBRYON, EntityTexture.DARK_GOLD, EntityTexture.GOLD_MATTER, EntityTexture.HESTIA);
+
+        HYPERION.addCombat(LovelyRobotConfig.Common.VanillaMaxLevel,LovelyRobotConfig.Common.VanillaMaxHealth, LovelyRobotConfig.Common.VanillaAttackDamage, LovelyRobotConfig.Common.VanillaAttackSpeed, LovelyRobotConfig.Common.VanillaArmor, LovelyRobotConfig.Common.VanillaArmorToughness, 0F, LovelyRobotConfig.Common.VanillaMovementSpeed);
+        HYPERION.addTexture(EntityVariant.Hyperion, EntityTexture.COMMANDER, EntityTexture.VALKYRIE);
+
+        EMPYRIUM.addCombat(LovelyRobotConfig.Common.VanillaMaxLevel,LovelyRobotConfig.Common.VanillaMaxHealth, LovelyRobotConfig.Common.VanillaAttackDamage, LovelyRobotConfig.Common.VanillaAttackSpeed, LovelyRobotConfig.Common.VanillaArmor, LovelyRobotConfig.Common.VanillaArmorToughness, 0F, LovelyRobotConfig.Common.VanillaMovementSpeed);
+        EMPYRIUM.addTexture(EntityVariant.Empyrium, EntityTexture.COLD_GOLD);
     }
     
     // -- Constructors --
@@ -64,6 +76,49 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
         NATIVES.add(entityNative);
         return entityNative;
     } // create ()
+
+    protected NativeEntityType addTexture(EntityVariant variant, EntityTexture... textureSet) {
+        // Construct the path for the textures
+        String path = LovelyRobotID.TEXTURE_ENTITY_PATH + variant.getName() + "/" + variant.getName();
+        // Map to store the textures
+        this.texture.clear();
+        this.texture = new HashMap<>() {{
+            // Loop through the given texture set
+            for (EntityTexture texture : textureSet) {
+                // Switch based on the texture type
+                switch (texture) {
+                    case WHITE      -> put(texture,         LovelyRobotID.getId(path + "_00.png")); // White
+                    case ORANGE     -> put(texture,         LovelyRobotID.getId(path + "_01.png")); // Orange
+                    case MAGENTA    -> put(texture,         LovelyRobotID.getId(path + "_02.png")); // Magenta
+                    case LIGHT_BLUE -> put(texture,         LovelyRobotID.getId(path + "_03.png")); // Light Blue
+                    case YELLOW     -> put(texture,         LovelyRobotID.getId(path + "_04.png")); // Yellow
+                    case LIME       -> put(texture,         LovelyRobotID.getId(path + "_05.png")); // Lime
+                    case PINK       -> put(texture,         LovelyRobotID.getId(path + "_06.png")); // Pink
+                    case GRAY       -> put(texture,         LovelyRobotID.getId(path + "_07.png")); // Gray
+                    case LIGHT_GRAY -> put(texture,         LovelyRobotID.getId(path + "_08.png")); // Light Gray
+                    case CYAN       -> put(texture,         LovelyRobotID.getId(path + "_09.png")); // Cyan
+                    case PURPLE     -> put(texture,         LovelyRobotID.getId(path + "_10.png")); // Purple
+                    case BLUE       -> put(texture,         LovelyRobotID.getId(path + "_11.png")); // Blue
+                    case BROWN      -> put(texture,         LovelyRobotID.getId(path + "_12.png")); // Brown
+                    case GREEN      -> put(texture,         LovelyRobotID.getId(path + "_13.png")); // Green
+                    case RED        -> put(texture,         LovelyRobotID.getId(path + "_14.png")); // Red
+                    case BLACK      -> put(texture,         LovelyRobotID.getId(path + "_15.png")); // Black
+
+                    case DARK_MATTER    -> put(texture, LovelyRobotID.getId(path + "_02.png")); // Dark Matter
+                    case SUPERNOVA      -> put(texture, LovelyRobotID.getId(path + "_01.png")); // Supernova
+                    case COLD_GOLD      -> put(texture, LovelyRobotID.getId(path + "_00.png")); // Cold Gold
+                    case EMBRYON        -> put(texture, LovelyRobotID.getId(path + "_05.png")); // Embryon
+                    case DARK_GOLD      -> put(texture, LovelyRobotID.getId(path + "_04.png")); // Dark Gold
+                    case GOLD_MATTER    -> put(texture, LovelyRobotID.getId(path + "_03.png")); // Gold Matter
+                    case HESTIA         -> put(texture, LovelyRobotID.getId(path + "_06.png")); // Hestia
+
+                    case COMMANDER      -> put(texture, LovelyRobotID.getId(path + "_00.png")); // Commander
+                    case VALKYRIE       -> put(texture, LovelyRobotID.getId(path + "_01.png")); // Valkyrie
+                }
+            }
+        }};
+        return this;
+    } // addTexture ()
 
     @Override
     protected HashMap<EntityTexture, Identifier> setTexture(EntityVariant variant){

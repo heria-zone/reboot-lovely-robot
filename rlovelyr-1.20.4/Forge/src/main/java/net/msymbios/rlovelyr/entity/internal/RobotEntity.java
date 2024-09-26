@@ -33,7 +33,6 @@ import net.msymbios.rlovelyr.common.entity.InternalEntityType;
 import net.msymbios.rlovelyr.common.entity.InternalLogic;
 import net.msymbios.rlovelyr.common.entity.enums.EntityState;
 import net.msymbios.rlovelyr.entity.internal.enums.EntityTexture;
-import net.msymbios.rlovelyr.entity.internal.enums.EntityVariant;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -41,7 +40,6 @@ import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInst
 import software.bernie.geckolib.core.animation.AnimatableManager;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 import static net.msymbios.rlovelyr.common.util.internal.Utility.invertBoolean;
 
@@ -374,14 +372,15 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
 
     @Override
     protected void handleItemDrop() {
-        final ItemStack dropItem = setDropItem();//new ItemStack(ROBOT_CORE.get(), 1);
+        final ItemStack dropItem = setDropItem();
         CompoundTag nbt = dropItem.getTag();
         if(nbt == null) nbt = new CompoundTag();
 
         String customName = Utility.getEntityCustomName(this);
         if (!customName.isEmpty()) nbt.putString(LovelyRobotID.STAT_CUSTOM_NAME, customName);
 
-        nbt.putString(LovelyRobotID.STAT_OWNER, Objects.requireNonNull(this.getOwner()).getScoreboardName());
+        String ownerName = Utility.getEntityOwnerName(this);
+        if (!ownerName.isEmpty()) nbt.putString(LovelyRobotID.STAT_OWNER, ownerName);
 
         nbt.putString(LovelyRobotID.STAT_TYPE, this.nativeEntity.key);
         nbt.putInt(LovelyRobotID.STAT_COLOR, this.getTextureID());
@@ -415,7 +414,7 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
         if(stack.getItem() instanceof DyeItem) return false;
         if(stack.getItem() instanceof SwordItem) return false;
         if(stack.is(Items.STICK) || stack.is(Items.BOOK) || stack.is(Items.WRITABLE_BOOK) || stack.is(Items.OAK_BUTTON)) return false;
-        return !(stack.getItem() instanceof CompassItem) && !stack.is(Items.RECOVERY_COMPASS);
+        return !stack.is(Items.COMPASS) && !stack.is(Items.RECOVERY_COMPASS);
     } // canInteractWithItems ()
 
     @Override
@@ -498,7 +497,7 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
     } // canInteractAutoAttack ()
 
     private boolean canInteractGuardMode(ItemStack stack) {
-        return stack.is(Items.COMPASS);
+        return stack.is(Items.COMPASS) || stack.is(Items.RECOVERY_COMPASS);
     } // canInteractGuardMode ()
 
 
@@ -539,8 +538,8 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
         if(!canShow) return;
         InternalLogic.displayInfo(this, (LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_BAR)), false);
         if(showLevelUp) InternalLogic.displayInfo(this, (LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_LEVEL_UP)), false);
-        if(this.getCustomName() != null) InternalLogic.displayInfo(this, LovelyRobotID.getTranslation(Objects.requireNonNull(EntityVariant.byName(nativeEntity.key))).append(": " + this.getCustomName().getString()), false);
-        else InternalLogic.displayInfo(this, LovelyRobotID.getTranslation(Objects.requireNonNull(EntityVariant.byName(nativeEntity.key))), false);
+        if(this.getCustomName() != null) InternalLogic.displayInfo(this, LovelyRobotID.getVariantTranslation(nativeEntity.key).append(": " + this.getCustomName().getString()), false);
+        else InternalLogic.displayInfo(this, LovelyRobotID.getVariantTranslation(nativeEntity.key), false);
         InternalLogic.displayInfo(this, LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_LEVEL).append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
         InternalLogic.displayInfo(this, LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_EXPERIENCE).append(": " + this.getExp()                 + "/" + InternalLogic.calculateNextExp(this.getExp())), false);
         InternalLogic.displayInfo(this, LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_HEALTH).append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);

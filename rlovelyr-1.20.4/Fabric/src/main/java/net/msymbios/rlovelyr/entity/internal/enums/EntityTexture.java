@@ -26,7 +26,17 @@ public enum EntityTexture {
     GREEN(13, LovelyRobotID.TEX_GREEN),
     RED(14, LovelyRobotID.TEX_RED),
     BLACK(15, LovelyRobotID.TEX_BLACK),
-    RANDOM(16, LovelyRobotID.TEX_RANDOM);
+    RANDOM(16, LovelyRobotID.TEX_RANDOM),
+
+    DARK_MATTER(17, LovelyRobotID.TEX_DARK_MATTER),
+    SUPERNOVA(18, LovelyRobotID.TEX_SUPERNOVA),
+    COLD_GOLD(19, LovelyRobotID.TEX_COLD_GOLD),
+    EMBRYON(20, LovelyRobotID.TEX_EMBRYON),
+    DARK_GOLD(21, LovelyRobotID.TEX_DARK_GOLD),
+    GOLD_MATTER(22, LovelyRobotID.TEX_GOLD_MATTER),
+    HESTIA(23, LovelyRobotID.TEX_HESTIA),
+    COMMANDER(24, LovelyRobotID.TEX_COMMANDER),
+    VALKYRIE(25, LovelyRobotID.TEX_VALKYRIE);
 
     // -- Variables --
 

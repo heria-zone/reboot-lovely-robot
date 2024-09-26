@@ -20,7 +20,7 @@ public class InternalAnimation {
 
     public static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
     public static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
-    public static final RawAnimation REST = RawAnimation.begin().thenPlayAndHold("rest");
+    public static final RawAnimation REST = RawAnimation.begin().thenLoop("rest");
     public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then("attack", Animation.LoopType.PLAY_ONCE);
 
     // -- Methods --

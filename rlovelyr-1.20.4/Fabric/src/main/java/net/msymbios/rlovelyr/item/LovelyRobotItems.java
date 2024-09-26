@@ -22,6 +22,7 @@ public class LovelyRobotItems extends InternalItems {
 
     // MISCELLANEOUS
     public static final Item ROBOT_CORE = registerItem(LovelyRobotID.ROBOT_CORE, Rarity.UNCOMMON, 1);
+    public static final Item ROBOT_CORE_ALDARIAN = registerItem(LovelyRobotID.ROBOT_CORE_ALDARIAN, Rarity.UNCOMMON, 1);
 
     // SPAWNS
     public static final Item BUNNY_SPAWN = registerItem(LovelyRobotID.BUNNY_SPAWN, LovelyRobotEntities.BUNNY, Rarity.RARE, 1);
@@ -31,6 +32,11 @@ public class LovelyRobotItems extends InternalItems {
     public static final Item KITSUNE_SPAWN = registerItem(LovelyRobotID.KITSUNE_SPAWN, LovelyRobotEntities.KITSUNE, Rarity.RARE, 1);
     public static final Item NEKO_SPAWN = registerItem(LovelyRobotID.NEKO_SPAWN, LovelyRobotEntities.NEKO, Rarity.RARE, 1);
     public static final Item VANILLA_SPAWN = registerItem(LovelyRobotID.VANILLA_SPAWN, LovelyRobotEntities.VANILLA, Rarity.RARE, 1);
+
+    public static final Item PRIME_SPAWN = registerItem(LovelyRobotID.PRIME_SPAWN, LovelyRobotEntities.PRIME, Rarity.RARE, 1);
+    public static final Item HYPERION_SPAWN = registerItem(LovelyRobotID.HYPERION_SPAWN, LovelyRobotEntities.HYPERION, Rarity.RARE, 1);
+    public static final Item EMPYRIUM_SPAWN = registerItem(LovelyRobotID.EMPYRIUM_SPAWN, LovelyRobotEntities.EMPYRIUM, Rarity.RARE, 1);
+
 
     // -- Methods --
 
@@ -47,6 +53,7 @@ public class LovelyRobotItems extends InternalItems {
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(LovelyRobotItems::spawnEggItemsEntry);
         ItemGroupEvents.modifyEntriesEvent(LovelyRobotItemsGroup.DEFAULT_KEY).register(LovelyRobotItems::allItemsEntry);
+        ItemGroupEvents.modifyEntriesEvent(LovelyRobotItemsGroup.ALDARIAN_TECH_KEY).register(LovelyRobotItems::addItemsToAldarianTechTab);
     } // register ()
 
     private static void spawnEggItemsEntry(FabricItemGroupEntries entries) {
@@ -70,6 +77,12 @@ public class LovelyRobotItems extends InternalItems {
         entries.add(NEKO_SPAWN);
         entries.add(VANILLA_SPAWN);
     } // allItemsEntry ()
+
+    protected static void addItemsToAldarianTechTab(FabricItemGroupEntries entries) {
+        entries.add(PRIME_SPAWN);
+        entries.add(HYPERION_SPAWN);
+        entries.add(EMPYRIUM_SPAWN);
+    } // addItemsToAldarianTechTab ()
 
     public static void registerModels() {
         ModelPredicateProviderRegistry.register(LovelyRobotID.getId(LovelyRobotID.ITEM_TAG_VARIANT), (stack, world, entity, seed) -> stack.getNbt() != null && stack.getNbt().contains(LovelyRobotID.STAT_COLOR) ? stack.getNbt().getInt(LovelyRobotID.STAT_COLOR) : 16);

@@ -12,11 +12,13 @@ public class LovelyRobotID {
     // -- Creative Tab --
 
     public static final String DEFAULT_TAB = "lovely_robot";
+    public static final String ALDARIAN_TECH_TAB = "aldarian_tech";
 
     // -- Items --
 
     // GENERAL
     public static final String ROBOT_CORE = "robot_core";
+    public static final String ROBOT_CORE_ALDARIAN = "robot_core_aldarian";
 
     // SPAWN
     public static final String BUNNY_SPAWN = "bunny_spawn";
@@ -26,6 +28,9 @@ public class LovelyRobotID {
     public static final String KITSUNE_SPAWN = "kitsune_spawn";
     public static final String NEKO_SPAWN = "neko_spawn";
     public static final String VANILLA_SPAWN = "vanilla_spawn";
+    public static final String PRIME_SPAWN = "prime_spawn";
+    public static final String HYPERION_SPAWN = "hyperion_spawn";
+    public static final String EMPYRIUM_SPAWN = "empyrium_spawn";
 
     public static final String ITEM_TAG_VARIANT = "variant";
 
@@ -38,10 +43,15 @@ public class LovelyRobotID {
     public static final String VARIANT_KITSUNE = "kitsune";
     public static final String VARIANT_NEKO = "neko";
     public static final String VARIANT_VANILLA = "vanilla";
+    public static final String VARIANT_PRIME = "prime";
+    public static final String VARIANT_HYPERION = "hyperion";
+    public static final String VARIANT_EMPYRIUM = "empyrium";
 
     // -- Stats --
 
     public static final String STAT_CUSTOM_NAME = "custom_name";
+    public static final String STAT_CREATOR = "creator";
+    public static final String STAT_CREDITS = "credits";
     public static final String STAT_OWNER = "owner";
     public static final String STAT_COLOR = "color";
     public static final String STAT_TYPE = "type";
@@ -85,6 +95,7 @@ public class LovelyRobotID {
     public static final String MSG_CUSTOM_NAME = "name";
     public static final String MSG_TYPE = "type";
     public static final String MSG_COLOR = "color";
+    public static final String MSG_DESIGN = "design";
     public static final String MSG_LEVEL = "level";
 
     // -- Path --
@@ -118,6 +129,16 @@ public class LovelyRobotID {
     public static final String TEX_RED = "red";
     public static final String TEX_BLACK = "black";
     public static final String TEX_RANDOM = "random";
+
+    public static final String TEX_DARK_MATTER = "dark-matter";
+    public static final String TEX_SUPERNOVA = "supernova";
+    public static final String TEX_COLD_GOLD = "cold-gold";
+    public static final String TEX_EMBRYON = "embryon";
+    public static final String TEX_DARK_GOLD = "dark-gold";
+    public static final String TEX_GOLD_MATTER = "gold-matter";
+    public static final String TEX_HESTIA = "hestia";
+    public static final String TEX_COMMANDER = "commander";
+    public static final String TEX_VALKYRIE = "valkyrie";
 
     // -- Methods --
 
@@ -158,6 +179,10 @@ public class LovelyRobotID {
             case Kitsune -> value = getVariantTranslation(LovelyRobotID.VARIANT_KITSUNE);
             case Neko -> value = getVariantTranslation(LovelyRobotID.VARIANT_NEKO);
             case Vanilla -> value = getVariantTranslation(LovelyRobotID.VARIANT_VANILLA);
+
+            case Prime -> value = getVariantTranslation(LovelyRobotID.VARIANT_PRIME);
+            case Hyperion -> value = getVariantTranslation(LovelyRobotID.VARIANT_HYPERION);
+            case Empyrium -> value = getVariantTranslation(LovelyRobotID.VARIANT_EMPYRIUM);
         }
         return value;
     } // getTranslation ()
@@ -188,6 +213,16 @@ public class LovelyRobotID {
             case GREEN -> value = getMessageTranslation(LovelyRobotID.TEX_GREEN);
             case RED -> value = getMessageTranslation(LovelyRobotID.TEX_RED);
             case BLACK -> value = getMessageTranslation(LovelyRobotID.TEX_BLACK);
+
+            case DARK_MATTER -> value = getMessageTranslation(LovelyRobotID.TEX_DARK_MATTER);
+            case SUPERNOVA -> value = getMessageTranslation(LovelyRobotID.TEX_SUPERNOVA);
+            case COLD_GOLD -> value = getMessageTranslation(LovelyRobotID.TEX_COLD_GOLD);
+            case EMBRYON -> value = getMessageTranslation(LovelyRobotID.TEX_EMBRYON);
+            case DARK_GOLD -> value = getMessageTranslation(LovelyRobotID.TEX_DARK_GOLD);
+            case GOLD_MATTER -> value = getMessageTranslation(LovelyRobotID.TEX_GOLD_MATTER);
+            case HESTIA -> value = getMessageTranslation(LovelyRobotID.TEX_HESTIA);
+            case COMMANDER -> value = getMessageTranslation(LovelyRobotID.TEX_COMMANDER);
+            case VALKYRIE -> value = getMessageTranslation(LovelyRobotID.TEX_VALKYRIE);
         }
         return value;
     } // getTranslation ()

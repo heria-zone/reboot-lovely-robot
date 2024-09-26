@@ -15,7 +15,10 @@ public enum EntityVariant {
     Honey(3, LovelyRobotID.VARIANT_HONEY),
     Kitsune(4, LovelyRobotID.VARIANT_KITSUNE),
     Neko(5, LovelyRobotID.VARIANT_NEKO),
-    Vanilla(6, LovelyRobotID.VARIANT_VANILLA);
+    Vanilla(6, LovelyRobotID.VARIANT_VANILLA),
+    Prime(7, LovelyRobotID.VARIANT_PRIME),
+    Hyperion(8, LovelyRobotID.VARIANT_HYPERION),
+    Empyrium(9, LovelyRobotID.VARIANT_EMPYRIUM);
 
     // -- Variables --
     private static final EntityVariant[] CODEC = Arrays.stream(values()).sorted(Comparator.comparingInt(EntityVariant::getId)).toArray(EntityVariant[]::new);

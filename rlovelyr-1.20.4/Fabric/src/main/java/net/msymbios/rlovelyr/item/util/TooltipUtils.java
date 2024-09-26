@@ -13,7 +13,7 @@ public class TooltipUtils {
     // -- Variables --
 
     // Define default formatting for the tooltip
-    private static final Formatting defaultFormatting = Formatting.AQUA;
+    private static final Formatting defaultFormatting = Formatting.GRAY;
 
     // -- Methods --
 
@@ -102,7 +102,7 @@ public class TooltipUtils {
         String type = nbt.getString(LovelyRobotID.STAT_TYPE);
 
         // Add the type tooltip if the type is not empty
-        if (!type.isEmpty()) tooltip.add(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_TYPE).append(Text.literal(": ")).formatted(defaultFormatting).append(LovelyRobotID.getTranslation(type).formatted(textFormatting)));
+        if (!type.isEmpty()) tooltip.add(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_TYPE).append(Text.literal(": ")).formatted(defaultFormatting).append(LovelyRobotID.getVariantTranslation(type).formatted(textFormatting)));
     } // addTypeTooltip ()
 
     /**
@@ -119,7 +119,7 @@ public class TooltipUtils {
         var textFormatting = getFormattingColor(texture);
 
         // Add the color tooltip to the list
-        tooltip.add(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_COLOR).append(Text.literal(": ")).formatted(defaultFormatting).append(LovelyRobotID.getTranslation(texture).formatted(textFormatting)));
+        tooltip.add(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_DESIGN).append(Text.literal(": ")).formatted(defaultFormatting).append(LovelyRobotID.getTranslation(texture).formatted(textFormatting)));
     } // appendTooltip ()
 
     /**

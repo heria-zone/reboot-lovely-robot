@@ -1,8 +1,10 @@
 package net.msymbios.rlovelyr.common.util.internal;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.TameableEntity;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class Utility {
@@ -24,9 +26,22 @@ public class Utility {
     public static String getEntityCustomName(LivingEntity entity) {
         String customName = "";
         try {customName = entity.getCustomName().getString();}
-        catch (Exception ignored) {} // Custom name not found, return empty string
+        catch (Exception ignored) {} // custom name not be found, return empty string
         return customName;
     } // getEntityCustomName ()
+
+    /**
+     * Retrieves the name of the owner of a given TameableEntity.
+     *
+     * @param entity the TameableEntity to retrieve the owner's name for
+     * @return the owner's name, or an empty string if no custom name is found
+     */
+    public static String getEntityOwnerName(TameableEntity entity) {
+        String ownerName = "";
+        try {ownerName = Objects.requireNonNull(entity.getOwner()).getNameForScoreboard();}
+        catch (Exception ignored) {} // owner name not be found, return empty string
+        return ownerName;
+    } // getEntityOwnerName ()
 
     public static String getRandomTitle() {
         List<String> titles = List.of("Wishful", "Cute", "Clever", "Adventurer", "Lazy", "Silly", "Stupid", "Smart", "Fancy", "Lucky", "Stinky", "Brave", "Swift", "Wise", "Bold", "Fearless", "Mighty", "Silent", "Cunning", "Valiant", "Merciless", "Gentle", "Fierce", "Noble", "Reckless", "Mysterious");
