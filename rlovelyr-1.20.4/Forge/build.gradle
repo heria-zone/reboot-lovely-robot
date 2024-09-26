@@ -17,8 +17,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-    copyIdeResources = true
+    //copyIdeResources = true
 
     runs {
         // applies to all the run configs below
@@ -39,8 +38,11 @@ minecraft {
 
             args "-mixin.config="+mod_id+".mixins.json"
 
-            source sourceSets.main
-            source project(":Common").sourceSets.main
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
         }
 
         client {
@@ -84,22 +86,13 @@ repositories {
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
 mixin { // Add mixins refmap
-    add sourceSets.main, "${mod_id}.refmap.json"
+    add sourceSets.main, "${mod_id}.mixins.json"
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    compileOnly project(":Common")
-}
-
-tasks.withType(JavaCompile) {
-    source(project(":Common").sourceSets.main.allSource)
-}
-
-sourcesJar {
-    from(project(":Common").sourceSets.main.allSource)
 }
 
 processResources {
@@ -116,14 +109,11 @@ processResources {
             mod_authors: mod_authors,
             mod_description: mod_description,
     ]
-    from project(":Common").sourceSets.main.resources
     inputs.properties replaceProperties
 
     filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
     }
-
-    exclude '**/*.accesswidener'
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
@@ -140,17 +130,7 @@ tasks.named('jar', Jar).configure {
 
         ])
     }
-
-    // This is the preferred method to reobfuscate your jar file
-    finalizedBy 'reobfJar'
 }
-
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing:
-// tasks.named('publish').configure {
-//     dependsOn 'reobfJar'
-// }
-publish.dependsOn('reobfJar')
-
 
 // Example configuration to allow publishing using the maven-publish plugin
 publishing {
@@ -168,21 +148,4 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
-}
-
-eclipse {
-    // Run everytime eclipse builds the code
-    //autoBuildTasks genEclipseRuns
-    // Run when importing the project
-    synchronizationTasks 'genEclipseRuns'
-}
-
-// Merge the resources and classes into the same directory. 
-// This is done because java expects modules to be in a single directory.
-// And if we have it in multiple we have to do performance intensive hacks like having the UnionFileSystem
-// This will eventually be migrated to ForgeGradle so modders don't need to manually do it. But that is later.
-sourceSets.each {
-    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
-    it.output.resourcesDir = dir
-    it.java.destinationDirectory = dir
 }

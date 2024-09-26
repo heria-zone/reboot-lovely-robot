@@ -30,7 +30,6 @@
 	"mixins": [
 		"rlovelyr.mixins.json"
 	],
-	"accessWidener" : "rlovelyr.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.16.5",
 		"minecraft": "~1.20.4",
