@@ -59,6 +59,8 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
 
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
+    protected boolean changeWeapon = false;
+
     // -- Properties --
 
     // AUTO ATTACK
@@ -229,10 +231,9 @@ public abstract class RobotEntity extends InternalEntity implements GeoEntity {
         this.targetSelector.add(4, new AiAutoAttackGoal<>(this, MobEntity.class, LovelyRobotConfig.Common.AttackChance, true, false, InternalEntityType.AvoidAttackingEntities));
     } // initGoals ()
 
-
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+        if (!changeWeapon) this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
 

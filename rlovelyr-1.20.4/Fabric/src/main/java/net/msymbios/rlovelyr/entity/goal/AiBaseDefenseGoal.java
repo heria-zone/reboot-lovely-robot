@@ -34,6 +34,7 @@ public class AiBaseDefenseGoal extends Goal {
     } // Constructor StandGuardGoal ()
 
     // -- Inherited Methods --
+
     public boolean canStart() {
         if(this.entity.getCurrentState() != EntityState.Defense) return false;
         if(this.entity.isSitting()) this.entity.setSitting(false);

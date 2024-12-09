@@ -37,6 +37,7 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
     public static final NativeEntityType PRIME      = create(LovelyRobotID.VARIANT_PRIME);
     public static final NativeEntityType HYPERION   = create(LovelyRobotID.VARIANT_HYPERION);
     public static final NativeEntityType EMPYRIUM   = create(LovelyRobotID.VARIANT_EMPYRIUM);
+    public static final NativeEntityType STINGER   = create(LovelyRobotID.VARIANT_STINGER);
 
     static {
         BUNNY.addCombat(LovelyRobotConfig.Common.BunnyMaxLevel,LovelyRobotConfig.Common.BunnyMaxHealth, LovelyRobotConfig.Common.BunnyAttackDamage, LovelyRobotConfig.Common.BunnyAttackSpeed, LovelyRobotConfig.Common.BunnyArmor, LovelyRobotConfig.Common.BunnyArmorToughness, 0F, LovelyRobotConfig.Common.BunnyMovementSpeed);
@@ -55,6 +56,9 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
 
         EMPYRIUM.addCombat(LovelyRobotConfig.Common.VanillaMaxLevel,LovelyRobotConfig.Common.VanillaMaxHealth, LovelyRobotConfig.Common.VanillaAttackDamage, LovelyRobotConfig.Common.VanillaAttackSpeed, LovelyRobotConfig.Common.VanillaArmor, LovelyRobotConfig.Common.VanillaArmorToughness, 0F, LovelyRobotConfig.Common.VanillaMovementSpeed);
         EMPYRIUM.addTexture(EntityVariant.Empyrium, EntityTexture.COLD_GOLD);
+
+        STINGER.addCombat(LovelyRobotConfig.Common.VanillaMaxLevel,LovelyRobotConfig.Common.VanillaMaxHealth, LovelyRobotConfig.Common.VanillaAttackDamage, LovelyRobotConfig.Common.VanillaAttackSpeed, LovelyRobotConfig.Common.VanillaArmor, LovelyRobotConfig.Common.VanillaArmorToughness, 0F, LovelyRobotConfig.Common.VanillaMovementSpeed);
+        STINGER.addTexture(EntityVariant.Stinger, EntityTexture.BLUE);
     }
     
     // -- Constructors --

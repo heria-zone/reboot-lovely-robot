@@ -37,6 +37,8 @@ public class LovelyRobotItems extends InternalItems {
     public static final Item HYPERION_SPAWN = registerItem(LovelyRobotID.HYPERION_SPAWN, LovelyRobotEntities.HYPERION, Rarity.RARE, 1);
     public static final Item EMPYRIUM_SPAWN = registerItem(LovelyRobotID.EMPYRIUM_SPAWN, LovelyRobotEntities.EMPYRIUM, Rarity.RARE, 1);
 
+    public static final Item STINGER_SPAWN = registerItem(LovelyRobotID.STINGER_SPAWN, LovelyRobotEntities.STINGER, Rarity.RARE, 1);
+
 
     // -- Methods --
 
@@ -76,6 +78,7 @@ public class LovelyRobotItems extends InternalItems {
         entries.add(KITSUNE_SPAWN);
         entries.add(NEKO_SPAWN);
         entries.add(VANILLA_SPAWN);
+        entries.add(STINGER_SPAWN);
     } // allItemsEntry ()
 
     protected static void addItemsToAldarianTechTab(FabricItemGroupEntries entries) {

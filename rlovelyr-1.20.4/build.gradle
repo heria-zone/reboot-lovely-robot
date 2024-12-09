@@ -1,9 +1,11 @@
 subprojects {
+
     apply plugin: 'java'
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
     repositories {
         mavenCentral()
+
         maven {
             url "https://cursemaven.com"
             content {
@@ -11,8 +13,6 @@ subprojects {
             }
         }
     }
-
-    java.withSourcesJar()
 
     tasks.withType(JavaCompile).configureEach {
         it.options.encoding = 'UTF-8'

@@ -30,6 +30,8 @@ public class LovelyRobotEntities {
     public static final EntityType<HyperionEntity> HYPERION = register(LovelyRobotID.VARIANT_HYPERION, HyperionEntity::new, SpawnGroup.CREATURE,  LovelyRobotConfig.Common.Width, LovelyRobotConfig.Common.Height);
     public static final EntityType<EmpyriumEntity> EMPYRIUM = register(LovelyRobotID.VARIANT_EMPYRIUM, EmpyriumEntity::new, SpawnGroup.CREATURE,  LovelyRobotConfig.Common.Width, LovelyRobotConfig.Common.Height);
 
+    public static final EntityType<StingerEntity> STINGER = register(LovelyRobotID.VARIANT_STINGER, StingerEntity::new, SpawnGroup.CREATURE,  LovelyRobotConfig.Common.Width, LovelyRobotConfig.Common.Height);
+
     // -- Methods --
 
     /**
@@ -65,6 +67,8 @@ public class LovelyRobotEntities {
         FabricDefaultAttributeRegistry.register(PRIME, PrimeEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(HYPERION, HyperionEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(EMPYRIUM, EmpyriumEntity.createAttributes());
+
+        FabricDefaultAttributeRegistry.register(STINGER,  StingerEntity.createAttributes());
     } // registerAttribute ()
 
     /**
@@ -83,6 +87,8 @@ public class LovelyRobotEntities {
         EntityRendererRegistry.register(PRIME, PrimeRenderer::new);
         EntityRendererRegistry.register(HYPERION, HyperionRenderer::new);
         EntityRendererRegistry.register(EMPYRIUM, EmpyriumRenderer::new);
+
+        EntityRendererRegistry.register(STINGER, StingerRenderer::new);
     } // registerRender ()
 
 } // Class LovelyRobotEntities

@@ -13,6 +13,7 @@
   "item.rlovelyr.empyrium_spawn": "Spawn Empyrium",
   "item.rlovelyr.hyperion_spawn": "Spawn Hyperion",
   "item.rlovelyr.prime_spawn": "Spawn Prime",
+  "item.rlovelyr.stinger_spawn": "Spawn Stinger",
 
   "variant.rlovelyr.bunny": "Bunny",
   "variant.rlovelyr.bunny2": "Bunny 2.0",
@@ -24,6 +25,7 @@
   "variant.rlovelyr.empyrium": "Empyrium",
   "variant.rlovelyr.hyperion": "Hyperion",
   "variant.rlovelyr.prime": "Prime",
+  "variant.rlovelyr.stinger": "Stinger",
 
   "entity.rlovelyr.bunny": "Bunny",
   "entity.rlovelyr.bunny2": "Bunny 2.0",
@@ -35,6 +37,7 @@
   "entity.rlovelyr.empyrium": "Empyrium",
   "entity.rlovelyr.hyperion": "Hyperion",
   "entity.rlovelyr.prime": "Prime",
+  "entity.rlovelyr.stinger": "Stinger",
 
   "msg.rlovelyr.heal": "Heal",
   "msg.rlovelyr.wary": "Wary",

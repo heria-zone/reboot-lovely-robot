@@ -31,6 +31,7 @@ public class LovelyRobotID {
     public static final String PRIME_SPAWN = "prime_spawn";
     public static final String HYPERION_SPAWN = "hyperion_spawn";
     public static final String EMPYRIUM_SPAWN = "empyrium_spawn";
+    public static final String STINGER_SPAWN = "stinger_spawn";
 
     public static final String ITEM_TAG_VARIANT = "variant";
 
@@ -46,6 +47,8 @@ public class LovelyRobotID {
     public static final String VARIANT_PRIME = "prime";
     public static final String VARIANT_HYPERION = "hyperion";
     public static final String VARIANT_EMPYRIUM = "empyrium";
+    public static final String VARIANT_STINGER = "stinger";
+
 
     // -- Stats --
 
