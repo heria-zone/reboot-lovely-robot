@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "rlovelyr:item/dragon_spawn"
+  },
+  "overrides": [
+    { "predicate": {"rlovelyr:variant": 0}, "model": "rlovelyr:item/dragon/dragon00" },
+    { "predicate": {"rlovelyr:variant": 1}, "model": "rlovelyr:item/dragon/dragon01" },
+    { "predicate": {"rlovelyr:variant": 2}, "model": "rlovelyr:item/dragon/dragon02" },
+    { "predicate": {"rlovelyr:variant": 3}, "model": "rlovelyr:item/dragon/dragon03" },
+    { "predicate": {"rlovelyr:variant": 4}, "model": "rlovelyr:item/dragon/dragon04" },
+    { "predicate": {"rlovelyr:variant": 5}, "model": "rlovelyr:item/dragon/dragon05" },
+    { "predicate": {"rlovelyr:variant": 6}, "model": "rlovelyr:item/dragon/dragon06" },
+    { "predicate": {"rlovelyr:variant": 7}, "model": "rlovelyr:item/dragon/dragon07" },
+    { "predicate": {"rlovelyr:variant": 8}, "model": "rlovelyr:item/dragon/dragon08" },
+    { "predicate": {"rlovelyr:variant": 9}, "model": "rlovelyr:item/dragon/dragon09" },
+    { "predicate": {"rlovelyr:variant": 10}, "model": "rlovelyr:item/dragon/dragon10" },
+    { "predicate": {"rlovelyr:variant": 11}, "model": "rlovelyr:item/dragon/dragon11" },
+    { "predicate": {"rlovelyr:variant": 12}, "model": "rlovelyr:item/dragon/dragon12" },
+    { "predicate": {"rlovelyr:variant": 13}, "model": "rlovelyr:item/dragon/dragon13" },
+    { "predicate": {"rlovelyr:variant": 14}, "model": "rlovelyr:item/dragon/dragon14" },
+    { "predicate": {"rlovelyr:variant": 15}, "model": "rlovelyr:item/dragon/dragon15" },
+    { "predicate": {"rlovelyr:variant": 16}, "model": "rlovelyr:item/dragon/dragon16" }
+  ]
+}

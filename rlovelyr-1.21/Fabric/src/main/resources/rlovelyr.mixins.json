@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "net.msymbios.rlovelyr.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"ExampleMixin"
+	],
+	"client": [
+		"LovelyRobotMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
