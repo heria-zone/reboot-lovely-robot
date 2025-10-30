@@ -1,20 +1,20 @@
-# gradle
-
-.gradle/
-build/
-out/
-classes/
-
 # eclipse
-
+bin
 *.launch
+.settings
+.metadata
+.classpath
+.project
 
 # idea
-
-.idea/
-*.iml
+out
 *.ipr
 *.iws
+*.iml
+.idea
+
+# Temporary
+*~
 
 # vscode
 
@@ -24,13 +24,16 @@ bin/
 .classpath
 .project
 
-# macos
+# gradle
+build
+.gradle
 
-*.DS_Store
+# other
+eclipse
+run
 
-# fabric
-
-run/
+# Files from Forge MDK
+forge*changelog.txt
 
 # java
 
