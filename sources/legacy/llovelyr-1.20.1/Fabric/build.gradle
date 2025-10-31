@@ -1,0 +1,103 @@
+plugins {
+    id 'fabric-loom' version "${loom_version}"
+    id 'maven-publish'
+}
+
+version = mod_version
+group = mod_group
+
+base {
+    archivesName = "${mod_id}-fabric-${minecraft_version}"
+}
+
+repositories {
+    // Add repositories to retrieve artifacts from in here.
+}
+
+fabricApi {
+    //configureDataGeneration {
+    //    client = true
+    //}
+}
+
+dependencies {
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings "net.fabricmc:yarn:${fabric_yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+
+    // Fabric API. This is technically optional, but you probably want it anyway.
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    
+    // Add your dependencies here
+    // Example: modImplementation "software.bernie.geckolib:geckolib-fabric-1.20.1:4.2.2"
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mod_id", mod_id
+    inputs.property "mod_name", mod_name
+    inputs.property "mod_version", mod_version
+    inputs.property "mod_description", mod_description
+    inputs.property "mod_authors", mod_authors
+    inputs.property "mod_license", mod_license
+    inputs.property "mod_group", mod_group
+
+    filesMatching("fabric.mod.json") {
+        expand(
+                "version": inputs.properties.version,
+                "mod_id": inputs.properties.mod_id,
+                "mod_name": inputs.properties.mod_name,
+                "mod_version": inputs.properties.mod_version,
+                "mod_description": inputs.properties.mod_description,
+                "mod_authors": inputs.properties.mod_authors,
+                "mod_license": inputs.properties.mod_license,
+                "mod_group": inputs.properties.mod_group
+        )
+    }
+
+    filesMatching("${mod_id}.mixins.json") {
+        expand(
+                "version": inputs.properties.version,
+                "mod_id": inputs.properties.mod_id,
+                "mod_name": inputs.properties.mod_name,
+                "mod_version": inputs.properties.mod_version,
+                "mod_description": inputs.properties.mod_description,
+                "mod_authors": inputs.properties.mod_authors,
+                "mod_license": inputs.properties.mod_license,
+                "mod_group": inputs.properties.mod_group
+        )
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 17
+}
+
+java {
+    withSourcesJar()
+    
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+jar {
+    inputs.property "archivesName", project.base.archivesName
+
+    from("LICENSE") {
+        rename { "${it}_${inputs.properties.archivesName}"}
+    }
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = "${mod_id}-fabric"
+            from components.java
+        }
+    }
+
+    repositories {
+        // Add repositories to publish to here.
+    }
+}
