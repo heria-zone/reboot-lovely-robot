@@ -9,8 +9,8 @@ public class LovelyLegacy implements ModInitializer {
 
 	// -- Variables --
 
-	public static final String MOD_ID = "llovelyr";
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	public static final String MODID = "llovelyr";
+	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
 	// -- Inherited Methods --
 
