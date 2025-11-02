@@ -1,9 +1,9 @@
 package net.msymbios.llovelyr;
 
-import net.msymbios.llovelyr.source.blocks.Blocks;
-import net.msymbios.llovelyr.source.configuration.Configs;
-import net.msymbios.llovelyr.source.groups.ItemsGroup;
-import net.msymbios.llovelyr.source.items.Items;
+import net.msymbios.llovelyr.source.blocks.DefaultBlocks;
+import net.msymbios.llovelyr.source.configuration.DefaultConfigs;
+import net.msymbios.llovelyr.source.groups.DefaultItemsGroup;
+import net.msymbios.llovelyr.source.items.DefaultItems;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -35,20 +35,20 @@ public class LovelyLegacy {
         eventBus.addListener(this::clientSetup);
 
         // Register the Deferred Register to the mod event bus so blocks get registered
-        Blocks.register(eventBus);
+        DefaultBlocks.register(eventBus);
         // Register the Deferred Register to the mod event bus so items get registered
-        Items.register(eventBus);
+        DefaultItems.register(eventBus);
         // Register the Deferred Register to the mod event bus so tabs get registered
-        ItemsGroup.register(eventBus);
+        DefaultItemsGroup.register(eventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
 
         // Register the item to a creative tab
-        ItemsGroup.registerItems(eventBus);
+        DefaultItemsGroup.registerItems(eventBus);
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
-        Configs.register(context);
+        DefaultConfigs.register(context);
     } // LovelyLegacy ()
 
     // -- Custom Methods --
@@ -57,10 +57,10 @@ public class LovelyLegacy {
         // Some common setup code
         LOGGER.info("HELLO FROM COMMON: SETUP");
 
-        if (Configs.logDirtBlock) LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(net.minecraft.world.level.block.Blocks.DIRT));
-        LOGGER.info(Configs.magicNumberIntroduction + Configs.magicNumber);
+        if (DefaultConfigs.logDirtBlock) LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(net.minecraft.world.level.block.Blocks.DIRT));
+        LOGGER.info(DefaultConfigs.magicNumberIntroduction + DefaultConfigs.magicNumber);
 
-        Configs.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
+        DefaultConfigs.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
     } // commonSetup ()
 
     private void clientSetup(final FMLClientSetupEvent event) {

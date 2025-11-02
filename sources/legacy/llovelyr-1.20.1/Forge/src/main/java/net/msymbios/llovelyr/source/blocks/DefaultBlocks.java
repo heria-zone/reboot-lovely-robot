@@ -9,11 +9,11 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-public class Blocks {
+public class DefaultBlocks {
 
     // -- Variables --
 
-    // Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
+    // Create a Deferred Register to hold DefaultBlocks which will all be registered under the "examplemod" namespace
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, LovelyLegacy.MODID);
 
     // Creates a new Block with the id "examplemod:example_block", combining the namespace and path
@@ -27,4 +27,4 @@ public class Blocks {
         BLOCKS.register(eventBus);
     } // register ()
 
-} // Class: Blocks
+} // Class: DefaultBlocks
