@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
 @Mod.EventBusSubscriber(modid = LovelyReboot.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class Configs {
+public class DefaultConfigs {
 
     // -- Constants --
 
@@ -39,7 +39,7 @@ public class Configs {
     // a list of strings that are treated as resource locations for items
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
             .comment("A list of items to log on common setup.")
-            .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), Configs::validateItemName);
+            .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), DefaultConfigs::validateItemName);
 
     public static final ForgeConfigSpec SPEC = BUILDER.build();
 
@@ -54,7 +54,7 @@ public class Configs {
 
     public static void register(FMLJavaModLoadingContext context) {
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
-        context.registerConfig(ModConfig.Type.COMMON, Configs.SPEC);
+        context.registerConfig(ModConfig.Type.COMMON, DefaultConfigs.SPEC);
     } // register ()
 
     private static boolean validateItemName(final Object obj) {
@@ -75,4 +75,4 @@ public class Configs {
                 .collect(Collectors.toSet());
     } // onLoad ()
 
-} // Class: Configs
+} // Class: DefaultConfigs
