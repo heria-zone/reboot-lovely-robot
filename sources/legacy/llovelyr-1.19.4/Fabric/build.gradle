@@ -15,9 +15,9 @@ repositories {
 }
 
 fabricApi {
-    configureDataGeneration {
-        client = true
-    }
+    //configureDataGeneration {
+    //    client = true
+    //}
 }
 
 dependencies {

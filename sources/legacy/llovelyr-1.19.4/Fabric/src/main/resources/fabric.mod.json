@@ -16,10 +16,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"${mod_group}.LovelyRobotLegacy"
+			"${mod_group}.LovelyLegacy"
 		],
 		"fabric-datagen": [
-			"${mod_group}.LovelyRobotLegacyDataGenerator"
+			"${mod_group}.source.data.DataGenerator"
 		]
 	},
 	"mixins": [
