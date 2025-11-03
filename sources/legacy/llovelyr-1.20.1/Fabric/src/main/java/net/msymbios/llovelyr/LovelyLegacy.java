@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public class LovelyLegacy implements ModInitializer {
 
-	// -- Variables --
+	// -- Constants --
 
 	public static final String MODID = "llovelyr";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);

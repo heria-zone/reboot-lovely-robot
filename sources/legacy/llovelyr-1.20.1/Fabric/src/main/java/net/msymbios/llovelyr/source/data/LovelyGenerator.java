@@ -3,13 +3,13 @@ package net.msymbios.llovelyr.source.data;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
-public class DataGenerator implements DataGeneratorEntrypoint {
+public class LovelyGenerator implements DataGeneratorEntrypoint {
 
 	// -- Inherited Methods --
 
 	@Override
-	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
+	public void onInitializeDataGenerator(FabricDataGenerator generator) {
 
 	} // onInitializeDataGenerator ()
 
-} // Class: DataGenerator
+} // Class: LovelyGenerator

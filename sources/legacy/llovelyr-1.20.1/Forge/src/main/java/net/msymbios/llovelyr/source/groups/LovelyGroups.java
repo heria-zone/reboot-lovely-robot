@@ -1,7 +1,7 @@
 package net.msymbios.llovelyr.source.groups;
 
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.source.items.DefaultItems;
+import net.msymbios.llovelyr.source.items.LovelyItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
-public class DefaultItemsGroup {
+public class LovelyGroups {
 
     // -- Variables --
 
@@ -20,9 +20,9 @@ public class DefaultItemsGroup {
     // Creates a creative tab with the id "examplemod:example_tab" for the example item, that is placed after the combat tab
     public static final RegistryObject<CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> DefaultItems.EXAMPLE_ITEM.get().getDefaultInstance())
+            .icon(() -> LovelyItems.EXAMPLE_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(DefaultItems.EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
+                output.accept(LovelyItems.EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
             }).build());
 
     // -- Custom Methods --
@@ -34,13 +34,13 @@ public class DefaultItemsGroup {
 
     public static void registerItems(IEventBus eventBus) {
         // Register the item to a creative tab
-        eventBus.addListener(DefaultItemsGroup::addCreative);
+        eventBus.addListener(LovelyGroups::addCreative);
     } // addItems ()
 
     // Add the example block item to the building blocks tab
     private static void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS)
-            event.accept(DefaultItems.EXAMPLE_BLOCK_ITEM);
+            event.accept(LovelyItems.EXAMPLE_BLOCK_ITEM);
     } // addCreative ()
 
-} // Class: DefaultItemsGroup
+} // Class: LovelyGroups

@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftServer.class)
-public class ExampleMixin {
+public class LovelyMixin {
 
 	// -- Custom Methods --
 
@@ -16,4 +16,4 @@ public class ExampleMixin {
 		// This code is injected into the start of MinecraftServer.loadWorld()V
 	} // init ()
 
-} // Class: ExampleMixin
+} // Class: LovelyMixin
