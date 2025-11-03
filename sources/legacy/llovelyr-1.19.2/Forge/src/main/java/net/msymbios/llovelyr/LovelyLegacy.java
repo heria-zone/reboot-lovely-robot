@@ -1,0 +1,66 @@
+package net.msymbios.llovelyr;
+
+import com.mojang.logging.LogUtils;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.msymbios.llovelyr.source.blocks.LovelyBlocks;
+import net.msymbios.llovelyr.source.configs.LovelyConfigs;
+import net.msymbios.llovelyr.source.items.LovelyItems;
+import org.slf4j.Logger;
+
+// The value here should match an entry in the META-INF/mods.toml file
+@Mod(LovelyLegacy.MODID)
+public class LovelyLegacy {
+
+    // -- Constants --
+
+    public static final String MODID = "llovelyr";
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    // - Constructor --
+
+    public LovelyLegacy(FMLJavaModLoadingContext context) {
+        IEventBus eventBus = context.getModEventBus();
+
+        // Register the commonSetup method for modloading
+        eventBus.addListener(this::commonSetup);
+        eventBus.addListener(this::clientSetup);
+
+        // Register the Deferred Register to the mod event bus so blocks get registered
+        LovelyBlocks.register(eventBus);
+        // Register the Deferred Register to the mod event bus so items get registered
+        LovelyItems.register(eventBus);
+
+        // Register ourselves for server and other game events we are interested in
+        MinecraftForge.EVENT_BUS.register(this);
+
+        // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
+        LovelyConfigs.register(context);
+    } // Constructor: LovelyLegacy ()
+
+    // -- Custom Methods --
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        // Some common setup code
+        LOGGER.info("HELLO FROM COMMON: SETUP");
+
+        if (LovelyConfigs.logDirtBlock)
+            LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
+
+        LOGGER.info(LovelyConfigs.magicNumberIntroduction + LovelyConfigs.magicNumber);
+
+        LovelyConfigs.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
+    } // commonSetup ()
+
+    private void clientSetup(final FMLClientSetupEvent event) {
+        // Some client setup code
+        LOGGER.info("HELLO FROM CLIENT: SETUP");
+    } // clientSetup ()
+
+} // Class: LovelyLegacy

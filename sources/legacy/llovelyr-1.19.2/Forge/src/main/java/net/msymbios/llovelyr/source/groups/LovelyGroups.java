@@ -1,7 +1,7 @@
 package net.msymbios.llovelyr.source.groups;
 
-public class LovelyItemsGroup {
+public class LovelyGroups {
 
 
 
-} // Class: LovelyItemsGroup
+} // Class: LovelyGroups
