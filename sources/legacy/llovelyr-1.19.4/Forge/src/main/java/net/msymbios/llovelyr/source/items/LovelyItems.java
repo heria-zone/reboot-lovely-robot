@@ -7,17 +7,17 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.source.blocks.DefaultBlocks;
+import net.msymbios.llovelyr.source.blocks.LovelyBlocks;
 
-public class DefaultItems {
+public class LovelyItems {
 
     // -- Variables --
 
-    // Create a Deferred Register to hold DefaultItems which will all be registered under the "examplemod" namespace
+    // Create a Deferred Register to hold LovelyItems which will all be registered under the "examplemod" namespace
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, LovelyLegacy.MODID);
 
     // Creates a new BlockItem with the id "examplemod:example_block", combining the namespace and path
-    public static final RegistryObject<Item> EXAMPLE_BLOCK_ITEM = ITEMS.register("example_block", () -> new BlockItem(DefaultBlocks.EXAMPLE_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> EXAMPLE_BLOCK_ITEM = ITEMS.register("example_block", () -> new BlockItem(LovelyBlocks.EXAMPLE_BLOCK.get(), new Item.Properties()));
 
     // -- Custom Methods --
 
@@ -26,4 +26,4 @@ public class DefaultItems {
         ITEMS.register(eventBus);
     } // register ()
 
-} // Class: DefaultItems
+} // Class: LovelyItems

@@ -26,7 +26,7 @@ displayName="${mod_name}" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification https://docs.minecraftforge.net/en/latest/misc/updatechecker/
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
-displayURL="${mod_source}"
+displayURL="${mod_source}" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="assets/${mod_id}/icon.png" #optional
 # A text field displayed in the mod UI
@@ -40,6 +40,8 @@ authors="${mod_authors}" #optional
 # NONE means that no display test is set on your mod. You need to do this yourself, see IExtensionPoint.DisplayTest for more information. You can define any scheme you wish with this value.
 # IMPORTANT NOTE: this is NOT an instruction as to which environments (CLIENT or DEDICATED SERVER) your mod loads on. Your mod should load (and maybe do nothing!) whereever it finds itself.
 #displayTest="MATCH_VERSION" # if nothing is specified, MATCH_VERSION is the default when clientSideOnly=false, otherwise IGNORE_ALL_VERSION when clientSideOnly=true (#optional)
+
+mixinConfigs=["${mod_id}.mixins.json"]
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''${mod_description}'''

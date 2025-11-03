@@ -19,7 +19,7 @@
 			"${mod_group}.LovelyLegacy"
 		],
 		"fabric-datagen": [
-			"${mod_group}.source.data.DataGenerator"
+			"${mod_group}.source.data.LovelyGenerator"
 		]
 	},
 	"mixins": [

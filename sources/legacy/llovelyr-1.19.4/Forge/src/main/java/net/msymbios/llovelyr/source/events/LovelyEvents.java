@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.msymbios.llovelyr.LovelyLegacy;
 
-public class DefaultEvents {
+public class LovelyEvents {
 
     // -- Nested Classes --
 
@@ -27,7 +27,7 @@ public class DefaultEvents {
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = LovelyLegacy.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents {
+    public static class ClientEvents {
 
         // -- Custom Methods --
 
@@ -38,6 +38,6 @@ public class DefaultEvents {
             LovelyLegacy.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
         } // onClientSetup ()
 
-    } // Class: ClientModEvents
+    } // Class: ClientEvents
 
-} // Class: DefaultEvents
+} // Class: LovelyEvents
