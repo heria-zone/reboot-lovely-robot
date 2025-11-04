@@ -1,7 +1,7 @@
 subprojects {
     apply plugin: 'java'
 
-    java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+    //java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
     jar {
         manifest {
@@ -30,16 +30,11 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         it.options.encoding = 'UTF-8'
-        it.options.release = 8
+        //it.options.release = 8
     }
 
     tasks.withType(GenerateModuleMetadata) {
         enabled = false
-    }
-
-    java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     // Shared method to create replace properties map
