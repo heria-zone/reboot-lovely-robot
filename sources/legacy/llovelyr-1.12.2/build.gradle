@@ -1,0 +1,111 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		maven { url = "https://maven.minecraftforge.net/" }
+	}
+	
+	dependencies {
+		classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.+"
+	}
+}
+
+apply plugin: "java"
+apply plugin: "net.minecraftforge.gradle"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
+compileJava {
+	sourceCompatibility = "8"
+	targetCompatibility = "8"
+}
+
+repositories {
+	maven {
+		url = "https://maven.minecraftforge.net/"
+	}
+}
+
+dependencies {
+	minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+	//minecraft "net.minecraftforge:forge:1.12.2-14.23.5.2860"
+}
+
+minecraft {
+	mappings channel: "stable", version: "39-1.12"
+	
+	runs {
+		"client" {
+			workingDirectory file("./run")
+			mods { "${project.mod_name}" { source sourceSets.main } }
+		}
+		
+		"server" {
+			workingDirectory file("./run/server")
+			mods { "${project.mod_name}" { source sourceSets.main } }
+		}
+	}
+}
+
+processResources {
+	inputs.property "version", project.version
+	inputs.property "mcversion", minecraft_version
+	inputs.property "mod_id", mod_id
+	inputs.property "mod_name", mod_name
+	inputs.property "mod_version", mod_version
+	inputs.property "mod_authors", mod_authors
+	inputs.property "mod_description", mod_description
+	inputs.property "mod_page", mod_page
+	inputs.property "mod_update", mod_update
+	inputs.property "mod_group", mod_group
+	inputs.property "mod_source", mod_source
+
+	filesMatching(['mcmod.info', 'pack.mcmeta']) {
+		expand(
+				version: project.version,
+				mcversion: minecraft_version,
+				mod_id: mod_id,
+				mod_name: mod_name,
+				mod_version: mod_version,
+				mod_authors: mod_authors,
+				mod_description: mod_description,
+				mod_page: mod_page,
+				mod_update: mod_update,
+				mod_source: mod_source
+		)
+	}
+
+	filesMatching("${mod_id}.mixins.json") {
+		expand(
+				mod_id: mod_id,
+				refmap: "${mod_id}.refmap.json",
+				mod_group: mod_group
+		)
+	}
+}
+
+jar {
+	manifest {
+		attributes([
+				'Specification-Title'     : mod_id,
+				'Specification-Vendor'    : mod_authors,
+				'Specification-Version'   : '1',
+				'Implementation-Title'    : mod_name,
+				'Implementation-Version'  : mod_version,
+				'Implementation-Vendor'   : mod_authors,
+				'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+				'TweakOrder'              : '0',
+				'FMLCorePluginContainsFMLMod': 'true',
+				'ForceLoadAsMod'          : 'true'
+		])
+	}
+
+	finalizedBy 'reobfJar'
+}
+
+reobf {
+	jar {}
+}
+
+//When Forge 1.12 loads mods from a directory that's been put on the classpath, it expects to find resources in the same directory.
+//Default Gradle behavior puts resources in ./build/resources/main instead of ./build/classes/main/java. Let's change that.
+sourceSets.all { it.output.resourcesDir = it.output.classesDirs.getFiles().iterator().next() }
