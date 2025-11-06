@@ -1,0 +1,10 @@
+// Add any additional repositories for your dependencies here
+
+repositories {
+    // Add custom repositories here if needed
+    // Example:
+    // maven {
+    //     name = "Custom Maven"
+    //     url = "https://example.com/maven"
+    // }
+}

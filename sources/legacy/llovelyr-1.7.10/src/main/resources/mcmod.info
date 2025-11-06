@@ -1,0 +1,15 @@
+[
+    {
+        "modid": "${modId}",
+        "name": "${modName}",
+        "version": "${modVersion}",
+        "mcversion": "${minecraftVersion}",
+        "description": "Example mod description.",
+        "url": "https://github.com/heria-zone/reboot-lovely-robot",
+        "credits": "",
+        "logoFile": "assets/llovelyr/banner.png",
+        "license": "MIT License",
+        "authorList": [ "MSymbios" ],
+        "dependencies": []
+    }
+]
