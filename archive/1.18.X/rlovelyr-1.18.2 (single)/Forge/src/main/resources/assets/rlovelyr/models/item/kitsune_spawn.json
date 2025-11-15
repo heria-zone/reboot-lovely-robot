@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "rlovelyr:item/kitsune_spawn"
+  },
+  "overrides": [
+    { "predicate": {"rlovelyr:variant": 0}, "model": "rlovelyr:item/kitsune/kitsune00" },
+    { "predicate": {"rlovelyr:variant": 1}, "model": "rlovelyr:item/kitsune/kitsune01" },
+    { "predicate": {"rlovelyr:variant": 2}, "model": "rlovelyr:item/kitsune/kitsune02" },
+    { "predicate": {"rlovelyr:variant": 3}, "model": "rlovelyr:item/kitsune/kitsune03" },
+    { "predicate": {"rlovelyr:variant": 4}, "model": "rlovelyr:item/kitsune/kitsune04" },
+    { "predicate": {"rlovelyr:variant": 5}, "model": "rlovelyr:item/kitsune/kitsune05" },
+    { "predicate": {"rlovelyr:variant": 6}, "model": "rlovelyr:item/kitsune/kitsune06" },
+    { "predicate": {"rlovelyr:variant": 7}, "model": "rlovelyr:item/kitsune/kitsune07" },
+    { "predicate": {"rlovelyr:variant": 8}, "model": "rlovelyr:item/kitsune/kitsune08" },
+    { "predicate": {"rlovelyr:variant": 9}, "model": "rlovelyr:item/kitsune/kitsune09" },
+    { "predicate": {"rlovelyr:variant": 10}, "model": "rlovelyr:item/kitsune/kitsune10" },
+    { "predicate": {"rlovelyr:variant": 11}, "model": "rlovelyr:item/kitsune/kitsune11" },
+    { "predicate": {"rlovelyr:variant": 12}, "model": "rlovelyr:item/kitsune/kitsune12" },
+    { "predicate": {"rlovelyr:variant": 13}, "model": "rlovelyr:item/kitsune/kitsune13" },
+    { "predicate": {"rlovelyr:variant": 14}, "model": "rlovelyr:item/kitsune/kitsune14" },
+    { "predicate": {"rlovelyr:variant": 15}, "model": "rlovelyr:item/kitsune/kitsune15" },
+    { "predicate": {"rlovelyr:variant": 16}, "model": "rlovelyr:item/kitsune/kitsune16" }
+  ]
+}
