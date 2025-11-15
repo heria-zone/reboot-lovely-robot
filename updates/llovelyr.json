@@ -1,0 +1,45 @@
+{
+  "homepage": "https://github.com/heria-zone/reboot-lovely-robot",
+  "promos": {
+    "1.7.10-latest": "1.0",
+    "1.7.10-recommended": "1.0",
+    "1.12.2-latest": "1.0",
+    "1.12.2-recommended": "1.0",
+    "1.16.5-latest": "1.0",
+    "1.16.5-recommended": "1.0",
+    "1.17.1-latest": "1.0",
+    "1.17.1-recommended": "1.0",
+    "1.18.2-latest": "1.0",
+    "1.18.2-recommended": "1.0",
+    "1.19.2-latest": "1.0",
+    "1.19.2-recommended": "1.0",
+    "1.19.4-latest": "1.0",
+    "1.19.4-recommended": "1.0",
+    "1.20.1-latest": "1.0",
+    "1.20.1-recommended": "1.0"
+  },
+  "1.7.10": {
+    "1.0": "Initial stable release"
+  },
+  "1.12.2": {
+    "1.0": "Initial stable release"
+  },
+  "1.16.5": {
+    "1.0": "Initial stable release"
+  },
+  "1.17.1": {
+    "1.0": "Initial stable release"
+  },
+  "1.18.2": {
+    "1.0": "Initial stable release"
+  },
+  "1.19.2": {
+    "1.0": "Initial stable release"
+  },
+  "1.19.4": {
+    "1.0": "Initial stable release"
+  },
+  "1.20.1": {
+    "1.0": "Initial stable release"
+  }
+}
