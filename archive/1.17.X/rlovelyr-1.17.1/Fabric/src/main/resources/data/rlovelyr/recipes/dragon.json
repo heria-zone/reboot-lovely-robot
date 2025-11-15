@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "ICI",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:diamond"
+    },
+    "C": {
+      "item": "rlovelyr:robot_core"
+    }
+  },
+  "result": {
+    "item": "rlovelyr:dragon_spawn",
+    "count": 1
+  }
+}

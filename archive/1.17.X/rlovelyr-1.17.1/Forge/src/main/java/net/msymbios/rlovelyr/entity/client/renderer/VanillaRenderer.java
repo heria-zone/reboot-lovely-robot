@@ -1,0 +1,26 @@
+package net.msymbios.rlovelyr.entity.client.renderer;
+
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.msymbios.rlovelyr.entity.client.layer.VanillaLayer;
+import net.msymbios.rlovelyr.entity.client.model.VanillaModel;
+import net.msymbios.rlovelyr.entity.custom.VanillaEntity;
+import net.msymbios.rlovelyr.entity.internal.InternalMetric;
+import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
+
+public class VanillaRenderer extends GeoEntityRenderer<VanillaEntity> {
+
+    // -- Constructor --
+    public VanillaRenderer(EntityRendererProvider.Context renderManager) {
+        super(renderManager, new VanillaModel());
+        this.shadowRadius = InternalMetric.SHADOW_RADIUS.get();
+        addLayer(new VanillaLayer(this));
+    } // Constructor Bunny2Renderer ()
+
+    // -- Inherited Methods --
+    @Override
+    public ResourceLocation getTextureLocation(VanillaEntity instance) {
+        return instance.getTexture();
+    } // getTextureLocation ()
+
+} // Class VanillaRenderer

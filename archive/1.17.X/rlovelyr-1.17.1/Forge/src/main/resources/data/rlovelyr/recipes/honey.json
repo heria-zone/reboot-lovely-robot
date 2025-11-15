@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NNN",
+    "NCN",
+    "NNN"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "C": {
+      "item": "rlovelyr:robot_core"
+    }
+  },
+  "result": {
+    "item": "rlovelyr:honey_spawn",
+    "count": 1
+  }
+}
