@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ABA",
+    "CHC",
+    " I "
+  ],
+  "key": {
+    "A": {
+      "item": "create:electron_tube"
+    },
+    "B": {
+      "item": "create:content_observer"
+    },
+    "C": {
+      "item": "create:precision_mechanism"
+    },
+    "H": {
+      "item": "create:blaze_burner"
+    },
+    "I": {
+      "item": "create:rotation_speed_controller"
+    }
+  },
+  "result": {
+    "item": "rlovelyr:robot_core",
+    "count": 1
+  }
+}

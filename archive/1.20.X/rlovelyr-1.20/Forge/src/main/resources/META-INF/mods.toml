@@ -1,0 +1,30 @@
+modLoader="javafml" #mandatory
+loaderVersion="[46,)" #mandatory
+license="MIT License" # Review your options at https://choosealicense.com/.
+
+# A list of mods - how many allowed here is determined by the individual mod loader
+[[mods.rlovelyr]] #mandatory
+modId="rlovelyr"
+version="${file.jarVersion}"
+displayName="Reboot LovelyRobot"
+displayURL="https://legacy.curseforge.com/minecraft/mc-mods/reboot-lovelyrobot"
+logoFile="examplemod.png"
+credits="Mod originaly made by lilacx02 | Ported by MSymbios"
+authors="MSymbios"
+description='''This mod is a reboot that adds several robots girl to Minecraft as an assistant in battles with various functionalities.'''
+
+# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+[[dependencies.forge]] #optional
+modId="forge"
+mandatory=true
+versionRange="[46,)"
+ordering="NONE"
+side="BOTH"
+
+# Here's another dependency
+[[dependencies.minecraft]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20,1.20)"
+ordering="NONE"
+side="BOTH"

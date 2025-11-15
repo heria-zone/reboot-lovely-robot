@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IDI",
+    "JCJ",
+    "IJI"
+  ],
+  "key": {
+    "I": {
+      "item": "create:mechanical_arm"
+    },
+    "J": {
+      "item": "create:sturdy_sheet"
+    },
+    "C": {
+      "item": "rlovelyr:robot_core"
+    },
+    "D": {
+      "item": "create:sequenced_gearshift"
+    }
+  },
+  "result": {
+    "item": "rlovelyr:sentry_spawn",
+    "count": 1
+  }
+}
