@@ -89,6 +89,7 @@ public class LovelyLegacy implements ModInitializer {
 		LovelyItems.register();
 		LovelyEvents.register();
 		LovelyEntities.register();
+		net.msymbios.llovelyr.source.recipes.LovelyRecipes.register();
 
 		LOGGER.info("Hello Fabric world!");
 	} // onInitialize()
