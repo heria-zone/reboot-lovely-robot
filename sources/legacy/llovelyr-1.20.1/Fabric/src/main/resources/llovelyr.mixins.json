@@ -3,9 +3,7 @@
 	"package": "${mod_group}.source.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ICraftingScreenHandlerAccessor",
-		"IShapedRecipeAccessor",
-		"CraftingResultSlotMixin"
+		"IShapedRecipeAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

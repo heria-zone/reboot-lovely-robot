@@ -1,7 +1,5 @@
 package net.msymbios.llovelyr.source.events;
 
-import net.msymbios.llovelyr.source.events.interfaces.IItemCraftCallback;
-
 /**
  * Centralizes Fabric event handler registration.
  * <p>
@@ -12,6 +10,9 @@ import net.msymbios.llovelyr.source.events.interfaces.IItemCraftCallback;
  * <b>Design Pattern:</b> Uses Fabric's event system with explicit registration
  * rather than annotation-based auto-registration, providing fine-grained control
  * over listener lifecycle.
+ * <p>
+ * <i>Note:</i> NBT transfer during crafting is now handled by custom recipe
+ * system instead of event handlers.
  */
 public class LovelyEvents {
 
@@ -23,14 +24,10 @@ public class LovelyEvents {
      * <b>Timing:</b> Must be called during mod initialization (onInitialize) to
      * ensure handlers are registered before events fire.
      * <p>
-     * <b>Registered Events:</b>
-     * - ItemCraftCallback: Handles spawn egg NBT transfer and color customization
-     * <p>
-     * <i>Note:</i> Additional event registrations should be added here to maintain
-     * centralized event management.
+     * <i>Note:</i> Event handlers removed - NBT transfer now handled by recipe system.
      */
     public static void register() {
-        IItemCraftCallback.EVENT.register(new ItemCraftHandler());
+        // Event handlers removed - NBT transfer now handled by recipe system
     } // register()
 
 } // Class: LovelyEvents
