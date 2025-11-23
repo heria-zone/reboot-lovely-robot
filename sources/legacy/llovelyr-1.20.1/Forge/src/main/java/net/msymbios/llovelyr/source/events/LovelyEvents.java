@@ -1,8 +1,8 @@
 package net.msymbios.llovelyr.source.events;
 
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -85,16 +85,32 @@ public class LovelyEvents {
          * <b>Timing:</b> Fires during FMLClientSetupEvent, after item registration
          * but before rendering initialization. Ideal for model predicate registration.
          * <p>
-         * <b>Thread Safety:</b> Delegates to LovelyItems.registerModel which uses
-         * enqueueWork for main thread execution.
+         * <b>Thread Safety:</b> Uses enqueueWork to ensure registration happens
+         * on the main thread, as required by Minecraft's rendering system.
          *
          * @param event the client setup event
          */
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            //LovelyItems.registerModel(event);
-            //LovelyEntities.registerRender();
+            LovelyItems.registerModel(event);
         } // onClientSetup()
+
+        /**
+         * Registers entity renderers during renderer registration event.
+         * <p>
+         * <b>Architecture:</b> Uses EntityRenderersEvent.RegisterRenderers which is
+         * the proper event for entity renderer registration in Forge 1.20.1+.
+         * This event fires at the correct time and on the correct thread.
+         * <p>
+         * <b>Timing:</b> Fires during client initialization, specifically for
+         * registering entity renderers before world rendering begins.
+         *
+         * @param event the entity renderers registration event
+         */
+        @SubscribeEvent
+        public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+            LovelyEntities.registerRender(event);
+        } // registerRenderers()
 
     } // Class: ClientEvents
 

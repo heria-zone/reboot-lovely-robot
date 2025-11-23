@@ -35,11 +35,11 @@ public class LovelyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = register(LovelyIdentifier.VARIANT_VANILLA, MobCategory.CREATURE, LovelyConfigs.Width, LovelyConfigs.Height, (type, level) -> new VanillaEntity(type, level));
-    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = register(LovelyIdentifier.VARIANT_BUNNY2, MobCategory.CREATURE, LovelyConfigs.Width, LovelyConfigs.Height, (type, level) -> new Bunny2Entity(type, level));
+    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = register(LovelyIdentifier.VARIANT_VANILLA, MobCategory.CREATURE, 0.4F, 1.9F/*LovelyConfigs.Width, LovelyConfigs.Height*/, (type, level) -> new VanillaEntity(type, level));
+    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = register(LovelyIdentifier.VARIANT_BUNNY2, MobCategory.CREATURE, 0.4F, 1.9F/*LovelyConfigs.Width, LovelyConfigs.Height**/, (type, level) -> new Bunny2Entity(type, level));
 
     // -- Registration Methods --
-
+    /**/
     /**
      * Registers an entity type with specified parameters.
      *
@@ -77,12 +77,19 @@ public class LovelyEntities {
         event.put(BUNNY2.get(), Bunny2Entity.createAttributes());
     } // registerAttribute
 
+
     /**
      * Registers entity renderers on client side.
-     */
-    public static void registerRender() {
-        EntityRenderers.register(VANILLA.get(), VanillaRenderer::new);
-        EntityRenderers.register(BUNNY2.get(), Bunny2Renderer::new);
+     * <p>
+     * <b>Architecture:</b> Uses EntityRenderersEvent.RegisterRenderers for proper
+     * renderer registration in Forge 1.20.1+. This ensures renderers are registered
+     * at the correct time and on the correct thread.
+     *
+     * @param event the entity renderers registration event
+    */
+    public static void registerRender(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(VANILLA.get(), VanillaRenderer::new);
+        event.registerEntityRenderer(BUNNY2.get(), Bunny2Renderer::new);
     } // registerRender
 
 } // Class: LovelyEntities

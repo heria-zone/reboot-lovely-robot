@@ -1,5 +1,6 @@
 package net.msymbios.llovelyr;
 
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.msymbios.llovelyr.common.util.ObjectUtil;
 import net.msymbios.llovelyr.common.util.internal.Version;
 import net.msymbios.llovelyr.source.blocks.LovelyBlocks;
@@ -88,10 +89,6 @@ public class LovelyLegacy {
      */
     public LovelyLegacy(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();
-
-        eventBus.addListener(this::commonSetup);
-        eventBus.addListener(this::clientSetup);
-
         GeckoLib.initialize();
 
         LovelyConfigs.register(context);
@@ -101,9 +98,11 @@ public class LovelyLegacy {
         LovelyGroups.register(eventBus);
         LovelyEntities.register(eventBus);
 
-        MinecraftForge.EVENT_BUS.register(this);
-
+        eventBus.addListener(this::commonSetup);
+        eventBus.addListener(this::clientSetup);
         LovelyGroups.registerItems(eventBus);
+
+        MinecraftForge.EVENT_BUS.register(this);
     } // LovelyLegacy()
 
     // -- Custom Methods --
@@ -135,8 +134,6 @@ public class LovelyLegacy {
      */
     private void clientSetup(final FMLClientSetupEvent event) {
         LOGGER.info("HELLO FROM CLIENT: SETUP");
-        LovelyItems.registerModel(event);
-        LovelyEntities.registerRender();
     } // clientSetup()
 
 } // Class: LovelyLegacy
