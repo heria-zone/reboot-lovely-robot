@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "llovelyr:item/vanilla_spawn"
+  },
+  "overrides": [
+    { "predicate": {"llovelyr:variant": 0}, "model": "llovelyr:item/vanilla/vanilla00" },
+    { "predicate": {"llovelyr:variant": 1}, "model": "llovelyr:item/vanilla/vanilla01" },
+    { "predicate": {"llovelyr:variant": 2}, "model": "llovelyr:item/vanilla/vanilla02" },
+    { "predicate": {"llovelyr:variant": 3}, "model": "llovelyr:item/vanilla/vanilla03" },
+    { "predicate": {"llovelyr:variant": 4}, "model": "llovelyr:item/vanilla/vanilla04" },
+    { "predicate": {"llovelyr:variant": 5}, "model": "llovelyr:item/vanilla/vanilla05" },
+    { "predicate": {"llovelyr:variant": 6}, "model": "llovelyr:item/vanilla/vanilla06" },
+    { "predicate": {"llovelyr:variant": 7}, "model": "llovelyr:item/vanilla/vanilla07" },
+    { "predicate": {"llovelyr:variant": 8}, "model": "llovelyr:item/vanilla/vanilla08" },
+    { "predicate": {"llovelyr:variant": 9}, "model": "llovelyr:item/vanilla/vanilla09" },
+    { "predicate": {"llovelyr:variant": 10}, "model": "llovelyr:item/vanilla/vanilla10" },
+    { "predicate": {"llovelyr:variant": 11}, "model": "llovelyr:item/vanilla/vanilla11" },
+    { "predicate": {"llovelyr:variant": 12}, "model": "llovelyr:item/vanilla/vanilla12" },
+    { "predicate": {"llovelyr:variant": 13}, "model": "llovelyr:item/vanilla/vanilla13" },
+    { "predicate": {"llovelyr:variant": 14}, "model": "llovelyr:item/vanilla/vanilla14" },
+    { "predicate": {"llovelyr:variant": 15}, "model": "llovelyr:item/vanilla/vanilla15" },
+    { "predicate": {"llovelyr:variant": 16}, "model": "llovelyr:item/vanilla/vanilla16" }
+  ]
+}
