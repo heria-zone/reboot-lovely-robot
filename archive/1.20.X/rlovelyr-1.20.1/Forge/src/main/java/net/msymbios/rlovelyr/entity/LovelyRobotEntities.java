@@ -55,6 +55,6 @@ public class LovelyRobotEntities {
         EntityRenderers.register(LovelyRobotEntities.KITSUNE.get(), KitsuneRenderer::new);
         EntityRenderers.register(LovelyRobotEntities.NEKO.get(), NekoRenderer::new);
         EntityRenderers.register(LovelyRobotEntities.VANILLA.get(), VanillaRenderer::new);
-    } // registerRenderer (
+    } // registerRenderer ()
 
 } // Class LovelyRobotEntities
