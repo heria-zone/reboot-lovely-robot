@@ -20,7 +20,7 @@ public class Bunny2Renderer extends GeoEntityRenderer<Bunny2Entity> {
 
     public Bunny2Renderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new Bunny2Model());
-        this.shadowRadius = LovelyConfigs.Common.ShadowRadius;
+        this.shadowRadius = LovelyConfigs.Client.ShadowRadius;
         addRenderLayer(new Bunny2Layer(this));
     } // Bunny2Renderer
 

@@ -1,5 +1,6 @@
-package net.msymbios.llovelyr.common.entity;
+package net.msymbios.llovelyr.common.entity.internal;
 
+import net.msymbios.llovelyr.source.entity.LovelyRobot;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityState;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -51,12 +52,12 @@ public class InternalAnimation {
      * <b>Usage:</b> Triggered by entity's swinging flag, synced with damage application.
      * 
      * @param animatable robot entity to animate
-     * @param <T> entity type extending RobotEntity and GeoAnimatable
+     * @param <T> entity type extending LovelyRobot and GeoAnimatable
      * @return configured attack animation controller
      */
-    public static <T extends RobotEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
+    public static <T extends LovelyRobot & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
         return new AnimationController<>(animatable, "Attack", 5, state -> {
-            if (animatable.swinging) {
+            if (animatable.handSwinging) {
                 return state.setAndContinue(ATTACK_SWING);
             }
             state.getController().forceAnimationReset();
@@ -75,10 +76,10 @@ public class InternalAnimation {
      * changes, providing snappy feel for player-controlled robots.
      * 
      * @param entity robot entity to animate
-     * @param <T> entity type extending RobotEntity and GeoAnimatable
+     * @param <T> entity type extending LovelyRobot and GeoAnimatable
      * @return configured locomotion animation controller
      */
-    public static <T extends RobotEntity & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
+    public static <T extends LovelyRobot & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
         return new AnimationController<T>(entity, "Locomotion", 0, state -> {
             if (state.isMoving()) {
                 return state.setAndContinue(WALK);
@@ -101,9 +102,9 @@ public class InternalAnimation {
      * 
      * @param renderer GeoModel containing bone hierarchy
      * @param event animation state with entity data
-     * @param <T> entity type extending RobotEntity and GeoAnimatable
+     * @param <T> entity type extending LovelyRobot and GeoAnimatable
      */
-    public static <T extends RobotEntity & GeoAnimatable> void headAnimation(GeoModel renderer, AnimationState<T> event) {
+    public static <T extends LovelyRobot & GeoAnimatable> void headAnimation(GeoModel renderer, AnimationState<T> event) {
         CoreGeoBone head = renderer.getAnimationProcessor().getBone("head");
         if (head != null) {
             EntityModelData entityData = event.getData(DataTickets.ENTITY_MODEL_DATA);
@@ -126,9 +127,9 @@ public class InternalAnimation {
      * @param entity robot entity with level data
      * @param renderer GeoModel containing tail bones
      * @param event animation state (unused but required by signature)
-     * @param <T> entity type extending RobotEntity and GeoAnimatable
+     * @param <T> entity type extending LovelyRobot and GeoAnimatable
      */
-    public static <T extends RobotEntity & GeoAnimatable> void tailConfigAnimation(RobotEntity entity, GeoModel renderer, AnimationState<T> event) {
+    public static <T extends LovelyRobot & GeoAnimatable> void tailConfigAnimation(LovelyRobot entity, GeoModel renderer, AnimationState<T> event) {
         var maxLevel = entity.nativeEntity.getMaxLevel();
         var maxTails = 8;
         int levelPerTails = maxLevel / maxTails;

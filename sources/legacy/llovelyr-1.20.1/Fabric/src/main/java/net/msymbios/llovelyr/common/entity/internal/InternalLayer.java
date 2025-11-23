@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.entity;
+package net.msymbios.llovelyr.common.entity.internal;
 
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
@@ -7,6 +7,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.msymbios.llovelyr.source.configs.LovelyResource;
+import net.msymbios.llovelyr.source.entity.LovelyRobot;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityState;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -27,7 +28,7 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
  * <b>Performance:</b> Additional render pass per robot, but overlay textures are small
  * and cached. Negligible impact unless rendering 50+ robots simultaneously.
  */
-public abstract class InternalLayer<T extends RobotEntity & GeoEntity> extends GeoRenderLayer<T> {
+public abstract class InternalLayer<T extends LovelyRobot & GeoEntity> extends GeoRenderLayer<T> {
 
     // -- Overlay Textures --
 

@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.entity;
+package net.msymbios.llovelyr.common.entity.internal;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.CreeperEntity;

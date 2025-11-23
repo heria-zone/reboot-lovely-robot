@@ -57,7 +57,7 @@ public enum EntityAnimation {
     EntityAnimation(int id, String name) {
         this.m_id = id;
         this.m_name = name;
-    } // Constructor: EntityAnimation
+    } // Constructor: EntityAnimation ()
 
     // -- Deserialization --
 
@@ -71,11 +71,9 @@ public enum EntityAnimation {
      * @return corresponding EntityAnimation, or Idle if invalid
      */
     public static EntityAnimation byId(int id) {
-        if (id < 0 || id >= CODEC.length) {
-            id = 0;
-        }
+        if (id < 0 || id >= CODEC.length) id = 0;
         return CODEC[id];
-    } // byId
+    } // byId ()
 
     /**
      * Returns persistent identifier for serialization.
@@ -84,7 +82,7 @@ public enum EntityAnimation {
      */
     public int getId() {
         return this.m_id;
-    } // getId
+    } // getId ()
 
     /**
      * Finds animation by GeckoLib animation name.
@@ -101,7 +99,7 @@ public enum EntityAnimation {
             }
         }
         return null;
-    } // byName
+    } // byName ()
 
     /**
      * Returns GeckoLib animation name for rendering.
@@ -110,6 +108,6 @@ public enum EntityAnimation {
      */
     public String getName() {
         return this.m_name;
-    } // getName
+    } // getName ()
 
 } // Enum: EntityAnimation

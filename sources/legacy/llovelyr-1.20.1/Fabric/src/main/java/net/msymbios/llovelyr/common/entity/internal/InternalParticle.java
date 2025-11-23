@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.entity;
+package net.msymbios.llovelyr.common.entity.internal;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.particle.ParticleTypes;

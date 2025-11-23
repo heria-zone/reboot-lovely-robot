@@ -1,6 +1,6 @@
-package net.msymbios.llovelyr.entity.internal.enums;
+package net.msymbios.llovelyr.source.entity.internal.enums;
 
-import net.msymbios.llovelyr.config.LovelyIdentifier;
+import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -21,37 +21,11 @@ public enum EntityVariant {
 
     // -- Original Variants (Base Functionality) --
 
-    /** Fast movement specialist with enhanced speed and agility. */
-    Bunny(0, LovelyIdentifier.VARIANT_BUNNY),
-    
     /** Alternative bunny design with different aesthetic. */
     Bunny2(1, LovelyIdentifier.VARIANT_BUNNY2),
     
-    /** Combat specialist with heavy weapons and high durability. */
-    Dragon(2, LovelyIdentifier.VARIANT_DRAGON),
-    
-    /** House worker with item management and farming capabilities. */
-    Honey(3, LovelyIdentifier.VARIANT_HONEY),
-    
-    /** Support specialist with buff abilities and progressive tail system. */
-    Kitsune(4, LovelyIdentifier.VARIANT_KITSUNE),
-    
-    /** Versatile fighter with gauntlet claws and balanced stats. */
-    Neko(5, LovelyIdentifier.VARIANT_NEKO),
-    
     /** General-purpose companion with belt pouch and patrol abilities. */
-    Vanilla(6, LovelyIdentifier.VARIANT_VANILLA),
-
-    // -- Premium Variants (Advanced Features) --
-
-    /** Advanced variant with enhanced capabilities. */
-    Prime(7, LovelyIdentifier.VARIANT_PRIME),
-    
-    /** High-tier variant with superior stats. */
-    Hyperion(8, LovelyIdentifier.VARIANT_HYPERION),
-    
-    /** Elite variant with unique abilities. */
-    Empyrium(9, LovelyIdentifier.VARIANT_EMPYRIUM);
+    Vanilla(6, LovelyIdentifier.VARIANT_VANILLA);
 
     // -- Deserialization Cache --
 
@@ -75,7 +49,7 @@ public enum EntityVariant {
     EntityVariant(int id, String name) {
         this.m_id = id;
         this.m_name = name;
-    } // Constructor: EntityVariant
+    } // Constructor: EntityVariant ()
 
     // -- Deserialization --
 
@@ -90,7 +64,7 @@ public enum EntityVariant {
             id = 0;
         }
         return CODEC[id];
-    } // byId
+    } // byId ()
 
     /**
      * Returns persistent identifier for serialization.
@@ -99,7 +73,7 @@ public enum EntityVariant {
      */
     public int getId() {
         return this.m_id;
-    } // getId
+    } // getId ()
 
     /**
      * Finds variant by registry name.
@@ -114,7 +88,7 @@ public enum EntityVariant {
             }
         }
         return null;
-    } // byName
+    } // byName ()
 
     /**
      * Returns variant registry name.
@@ -123,6 +97,6 @@ public enum EntityVariant {
      */
     public String getName() {
         return this.m_name;
-    } // getName
+    } // getName ()
 
 } // Enum: EntityVariant

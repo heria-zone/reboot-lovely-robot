@@ -27,6 +27,7 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
+import net.msymbios.llovelyr.source.entity.LovelyRobot;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,13 +46,13 @@ import static net.msymbios.llovelyr.source.items.util.TooltipUtils.*;
  * to spawn in liquid, or use on spawner to configure it. Transfers NBT data
  * (name, color, level, protections) to spawned entity.
  */
-public class LovelySpawn extends SpawnEggItem {
+public class LovelySpawnItem extends SpawnEggItem {
 
     // -- Constructor --
 
-    public LovelySpawn(EntityType<? extends MobEntity> type, Settings settings) {
+    public LovelySpawnItem(EntityType<? extends MobEntity> type, Settings settings) {
         super(type, 0xFFFFFF, 0xFFFFFF, settings);
-    } // Constructor: LovelySpawn()
+    } // Constructor: LovelySpawnItem()
 
     // -- Inherited Methods --
 
@@ -97,7 +98,7 @@ public class LovelySpawn extends SpawnEggItem {
                     user.incrementStat(Stats.USED.getOrCreateStat(this));
                     world.emitGameEvent(user, GameEvent.ENTITY_PLACE, entity.getPos());
 
-                    if (entity instanceof RobotEntity robotEntity) {
+                    if (entity instanceof LovelyRobot robotEntity) {
                         robotEntity.handleTame(user);
                         initialize(itemStack.getOrCreateNbt(), robotEntity);
                     }
@@ -142,7 +143,7 @@ public class LovelySpawn extends SpawnEggItem {
                     itemStack.decrement(1);
                     world.emitGameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
 
-                    if (entity instanceof RobotEntity robotEntity) {
+                    if (entity instanceof LovelyRobot robotEntity) {
                         robotEntity.handleTame(context.getPlayer());
                         initialize(itemStack.getOrCreateNbt(), robotEntity);
                     }
@@ -164,7 +165,7 @@ public class LovelySpawn extends SpawnEggItem {
      * @param dataNBT the NBT compound from spawn egg
      * @param entity the spawned robot entity to initialize
      */
-    private void initialize(NbtCompound dataNBT, RobotEntity entity) {
+    private void initialize(NbtCompound dataNBT, LovelyRobot entity) {
         if (!dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME).isEmpty()) entity.setCustomName(Text.literal(dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME)));
         if (dataNBT.getInt(LovelyIdentifier.STAT_COLOR) != EntityTexture.RANDOM.getId()) entity.setTexture(dataNBT.getInt(LovelyIdentifier.STAT_COLOR));
 
@@ -177,4 +178,4 @@ public class LovelySpawn extends SpawnEggItem {
         if (dataNBT.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION) > 0) entity.setProjectileProtection(dataNBT.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION));
     } // initialize()
 
-} // Class: LovelySpawn
+} // Class: LovelySpawnItem

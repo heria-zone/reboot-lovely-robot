@@ -83,9 +83,7 @@ public enum EntityVariant {
      */
     public static EntityVariant byName(String name) {
         for (EntityVariant item : CODEC) {
-            if (item.getName().equals(name)) {
-                return item;
-            }
+            if (item.getName().equals(name)) return item;
         }
         return null;
     } // byName ()

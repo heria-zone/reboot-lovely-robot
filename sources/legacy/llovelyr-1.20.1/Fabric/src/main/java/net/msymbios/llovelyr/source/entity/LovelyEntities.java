@@ -31,11 +31,11 @@ public class LovelyEntities {
     // -- Entity Type Definitions --
 
     public static final EntityType<VanillaEntity> VANILLA = 
-        register(LovelyIdentifier.VARIANT_VANILLA, VanillaEntity::new, SpawnGroup.CREATURE, 
+        register(LovelyIdentifier.VARIANT_VANILLA, (type, world) -> new VanillaEntity(type, world), SpawnGroup.CREATURE, 
             LovelyConfigs.Common.Width, LovelyConfigs.Common.Height);
 
     public static final EntityType<Bunny2Entity> BUNNY2 = 
-        register(LovelyIdentifier.VARIANT_BUNNY2, Bunny2Entity::new, SpawnGroup.CREATURE, 
+        register(LovelyIdentifier.VARIANT_BUNNY2, (type, world) -> new Bunny2Entity(type, world), SpawnGroup.CREATURE, 
             LovelyConfigs.Common.Width, LovelyConfigs.Common.Height);
 
     // -- Registration Methods --
@@ -62,10 +62,10 @@ public class LovelyEntities {
     /**
      * Registers entity attributes.
      */
-    public static void registerAttribute() {
+    public static void register() {
         FabricDefaultAttributeRegistry.register(VANILLA, VanillaEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(BUNNY2, Bunny2Entity.createAttributes());
-    } // registerAttribute
+    } // register
 
     /**
      * Registers entity renderers on client side.

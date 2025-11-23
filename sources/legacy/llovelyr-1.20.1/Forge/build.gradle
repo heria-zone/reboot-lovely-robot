@@ -76,7 +76,7 @@ mixin {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    // Add additional repositories here
+    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
 
 dependencies {
@@ -86,7 +86,7 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Add your dependencies here
-    // Example: implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:4.2.2")
+    implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
 }
 
 tasks.named('processResources', ProcessResources).configure {

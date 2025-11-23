@@ -20,7 +20,7 @@ import net.minecraft.util.ActionResult;
  * <b>Use Cases:</b> NBT transfer from ingredients, color customization via dyes,
  * conditional crafting modifications based on ingredient properties.
  */
-public interface ItemCraftCallback {
+public interface IItemCraftCallback {
 
     // -- Variable --
 
@@ -34,9 +34,9 @@ public interface ItemCraftCallback {
      * <b>Thread Safety:</b> Event fires on server thread during crafting result
      * retrieval. No synchronization needed for listener registration.
      */
-    Event<ItemCraftCallback> EVENT = EventFactory.createArrayBacked(ItemCraftCallback.class,
+    Event<IItemCraftCallback> EVENT = EventFactory.createArrayBacked(IItemCraftCallback.class,
             (listeners) -> (player, crafted, matrix) -> {
-                for (ItemCraftCallback listener : listeners) {
+                for (IItemCraftCallback listener : listeners) {
                     ActionResult result = listener.onCraft(player, crafted, matrix);
                     if (result != ActionResult.PASS) {
                         return result;
@@ -46,7 +46,7 @@ public interface ItemCraftCallback {
             }
     );
 
-    // -- Method --
+    // -- Methods --
 
     /**
      * Invoked when player takes crafted item from result slot.
@@ -66,4 +66,4 @@ public interface ItemCraftCallback {
      */
     ActionResult onCraft(PlayerEntity player, ItemStack crafted, RecipeInputInventory matrix);
 
-} // Interface: ItemCraftCallback
+} // Interface: IItemCraftCallback

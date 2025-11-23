@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
  * <i>Note:</i> Mixin accessors are compile-time safe alternatives to reflection.
  */
 @Mixin(CraftingScreenHandler.class)
-public interface CraftingScreenHandlerAccessor {
+public interface ICraftingScreenHandlerAccessor {
 
     // -- Methods --
 
@@ -34,4 +34,4 @@ public interface CraftingScreenHandlerAccessor {
     @Accessor("input")
     RecipeInputInventory getInput();
 
-} // Interface: CraftingScreenHandlerAccessor
+} // Interface: ICraftingScreenHandlerAccessor

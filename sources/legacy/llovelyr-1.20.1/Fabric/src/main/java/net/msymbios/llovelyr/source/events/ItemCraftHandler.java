@@ -10,16 +10,16 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.ActionResult;
 import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
-import net.msymbios.llovelyr.source.events.interfaces.ItemCraftCallback;
-import net.msymbios.llovelyr.source.items.custom.LovelyCore;
-import net.msymbios.llovelyr.source.items.custom.LovelySpawn;
+import net.msymbios.llovelyr.source.events.interfaces.IItemCraftCallback;
+import net.msymbios.llovelyr.source.items.custom.LovelyCoreItem;
+import net.msymbios.llovelyr.source.items.custom.LovelySpawnItem;
 
 import java.util.Objects;
 
 /**
  * Handles custom crafting logic for robot spawn eggs and cores.
  * <p>
- * <b>Architecture:</b> Implements ItemCraftCallback to intercept spawn egg
+ * <b>Architecture:</b> Implements IItemCraftCallback to intercept spawn egg
  * crafting, enabling NBT transfer from robot cores and color customization
  * via dye ingredients without custom recipe definitions.
  * <p>
@@ -30,7 +30,7 @@ import java.util.Objects;
  * <b>Design Decision:</b> Uses event-based approach rather than custom recipes
  * to maintain compatibility with vanilla crafting mechanics and recipe viewers.
  */
-public class CraftHandler implements ItemCraftCallback {
+public class ItemCraftHandler implements IItemCraftCallback {
 
     // -- Method --
 
@@ -66,13 +66,14 @@ public class CraftHandler implements ItemCraftCallback {
                 ItemStack ingredient = matrix.getStack(i);
 
                 // Pass NBT data from RobotCoreItem
-                if (ingredient.getItem() instanceof LovelyCore) {
-                    if (ingredient.hasNbt()) crafted.setNbt(ingredient.getNbt().copy());
+                if (ingredient.getItem() instanceof LovelyCoreItem) {
+                    NbtCompound nbt = ingredient.getNbt();
+                    if (nbt != null) crafted.setNbt(nbt.copy());
                     break;
                 }
 
                 // Check for SpawnItem and DyeItem ingredients
-                if (ingredient.getItem() instanceof LovelySpawn) spawn = ingredient;
+                if (ingredient.getItem() instanceof LovelySpawnItem) spawn = ingredient;
                 if (ingredient.getItem() instanceof DyeItem) dye = ingredient;
             }
 
@@ -101,4 +102,4 @@ public class CraftHandler implements ItemCraftCallback {
         return ActionResult.PASS;
     } // Class onCraft ()
 
-} // Class: CraftHandler
+} // Class: ItemCraftHandler

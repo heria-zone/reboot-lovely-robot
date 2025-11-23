@@ -7,6 +7,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.msymbios.llovelyr.source.entity.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityVariant;
 import net.msymbios.llovelyr.source.items.LovelyItems;
 
@@ -22,8 +23,7 @@ public class VanillaEntity extends LovelyRobot {
     // -- Constructor --
 
     public VanillaEntity(EntityType<? extends LovelyRobot> entityType, Level level) {
-        super(entityType, level);
-        this.nativeEntity = EntityVariant.VANILLA;
+        super(entityType, level, NativeEntityType.VANILLA);
     } // VanillaEntity
 
     // -- Inherited Methods --
@@ -47,12 +47,12 @@ public class VanillaEntity extends LovelyRobot {
      */
     public static AttributeSupplier createAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, EntityVariant.VANILLA.getMaxHealth())
-                .add(Attributes.ATTACK_DAMAGE, EntityVariant.VANILLA.getAttackDamage())
-                .add(Attributes.ATTACK_SPEED, EntityVariant.VANILLA.getAttackSpeed())
-                .add(Attributes.MOVEMENT_SPEED, EntityVariant.VANILLA.getMoveSpeed())
-                .add(Attributes.ARMOR, EntityVariant.VANILLA.getArmour())
-                .add(Attributes.ARMOR_TOUGHNESS, EntityVariant.VANILLA.getArmourToughness())
+                .add(Attributes.MAX_HEALTH, NativeEntityType.VANILLA.getMaxHealth())
+                .add(Attributes.ATTACK_DAMAGE, NativeEntityType.VANILLA.getAttackDamage())
+                .add(Attributes.ATTACK_SPEED, NativeEntityType.VANILLA.getAttackSpeed())
+                .add(Attributes.MOVEMENT_SPEED, NativeEntityType.VANILLA.getMoveSpeed())
+                .add(Attributes.ARMOR, NativeEntityType.VANILLA.getArmour())
+                .add(Attributes.ARMOR_TOUGHNESS, NativeEntityType.VANILLA.getArmourToughness())
                 .build();
     } // createAttributes
 

@@ -2,14 +2,14 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "rlovelyr:bunny2_spawn"
+      "item": "llovelyr:bunny2_spawn"
     },
     {
-      "tag": "rlovelyr:dyes"
+      "tag": "llovelyr:dyes"
     }
   ],
   "result": {
     "count": 1,
-    "item": "rlovelyr:bunny2_spawn"
+    "item": "llovelyr:bunny2_spawn"
   }
 }

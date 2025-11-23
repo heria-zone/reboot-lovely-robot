@@ -7,6 +7,7 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.msymbios.llovelyr.source.entity.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityVariant;
 import net.msymbios.llovelyr.source.items.LovelyItems;
 
@@ -22,8 +23,7 @@ public class Bunny2Entity extends LovelyRobot {
     // -- Constructor --
 
     public Bunny2Entity(EntityType<? extends LovelyRobot> entityType, World world) {
-        super(entityType, world);
-        this.nativeEntity = EntityVariant.BUNNY2;
+        super(entityType, world, NativeEntityType.BUNNY2);
     } // Bunny2Entity
 
     // -- Inherited Methods --
@@ -47,12 +47,12 @@ public class Bunny2Entity extends LovelyRobot {
      */
     public static DefaultAttributeContainer createAttributes() {
         return AnimalEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, EntityVariant.BUNNY2.getMaxHealth())
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, EntityVariant.BUNNY2.getAttackDamage())
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, EntityVariant.BUNNY2.getAttackSpeed())
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, EntityVariant.BUNNY2.getMoveSpeed())
-                .add(EntityAttributes.GENERIC_ARMOR, EntityVariant.BUNNY2.getArmour())
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, EntityVariant.BUNNY2.getArmourToughness())
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, NativeEntityType.BUNNY2.getMaxHealth())
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, NativeEntityType.BUNNY2.getAttackDamage())
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, NativeEntityType.BUNNY2.getAttackSpeed())
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, NativeEntityType.BUNNY2.getMoveSpeed())
+                .add(EntityAttributes.GENERIC_ARMOR, NativeEntityType.BUNNY2.getArmour())
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, NativeEntityType.BUNNY2.getArmourToughness())
                 .build();
     } // createAttributes
 

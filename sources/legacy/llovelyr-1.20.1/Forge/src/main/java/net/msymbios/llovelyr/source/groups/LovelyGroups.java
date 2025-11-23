@@ -1,46 +1,73 @@
 package net.msymbios.llovelyr.source.groups;
 
-import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.source.items.LovelyItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
+import net.msymbios.llovelyr.LovelyLegacy;
+import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
+import net.msymbios.llovelyr.source.items.LovelyItems;
 
+/**
+ * Manages creative mode tabs for Legacy variant items.
+ * <p>
+ * <b>Architecture:</b> Uses Forge's DeferredRegister for creative tabs,
+ * organizing items into logical groups for creative inventory browsing.
+ * <p>
+ * <b>Tab Organization:</b> Default tab contains all Legacy variant robots
+ * and related items with localized titles.
+ */
 public class LovelyGroups {
 
     // -- Variables --
 
-    // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "examplemod" namespace
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LovelyLegacy.MODID);
 
-    // Creates a creative tab with the id "examplemod:example_tab" for the example item, that is placed after the combat tab
-    public static final RegistryObject<CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> LovelyItems.EXAMPLE_ITEM.get().getDefaultInstance())
+    /**
+     * Default creative tab for Legacy variant items.
+     * <p>
+     * <b>Contents:</b> Robot cores, spawn eggs, and related items.
+     */
+    public static final RegistryObject<CreativeModeTab> DEFAULT_TAB = CREATIVE_MODE_TABS.register(LovelyIdentifier.DEFAULT_TAB, () -> CreativeModeTab.builder()
+            .title(LovelyIdentifier.getTabTranslation(LovelyIdentifier.DEFAULT_TAB))
+            .icon(() -> new ItemStack(LovelyItems.ROBOT_CORE.get()))
             .displayItems((parameters, output) -> {
-                output.accept(LovelyItems.EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
-            }).build());
+                output.accept(LovelyItems.ROBOT_CORE.get());
+                output.accept(LovelyItems.VANILLA_SPAWN.get());
+                output.accept(LovelyItems.BUNNY2_SPAWN.get());
+            })
+            .build()
+    );
 
     // -- Custom Methods --
 
+    /**
+     * Registers creative tabs with Forge event bus.
+     * <p>
+     * <b>Timing:</b> Must be called during mod construction before registry events fire.
+     *
+     * @param eventBus the mod event bus
+     */
     public static void register(IEventBus eventBus) {
-        // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(eventBus);
-    } // register ()
+        LovelyLegacy.LOGGER.info("Registering CreativeTabs for: " + LovelyLegacy.MODID);
+    } // register()
 
     public static void registerItems(IEventBus eventBus) {
         // Register the item to a creative tab
-        eventBus.addListener(LovelyGroups::addCreative);
+        eventBus.addListener(LovelyGroups::addSpawnEggs);
     } // addItems ()
 
     // Add the example block item to the building blocks tab
-    private static void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS)
-            event.accept(LovelyItems.EXAMPLE_BLOCK_ITEM);
-    } // addCreative ()
+    private static void addSpawnEggs(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS){
+            event.accept(LovelyItems.BUNNY2_SPAWN);
+            event.accept(LovelyItems.VANILLA_SPAWN);
+        }
+    } // addSpawnEggs ()
 
 } // Class: LovelyGroups

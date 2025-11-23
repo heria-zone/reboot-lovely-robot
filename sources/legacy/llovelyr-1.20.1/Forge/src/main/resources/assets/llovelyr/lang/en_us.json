@@ -36,8 +36,9 @@
 
   "msg.llovelyr.owner": "Owner",
   "msg.llovelyr.name": "Name",
-  "msg.llovelyr.type": "Type",
+  "msg.llovelyr.type": "Model",
   "msg.llovelyr.color": "Color",
+  "msg.llovelyr.design": "Design",
   "msg.llovelyr.level": "Level",
 
   "msg.llovelyr.random": "Random",

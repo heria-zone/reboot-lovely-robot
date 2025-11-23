@@ -10,11 +10,11 @@
       "item": "minecraft:iron_ingot"
     },
     "C": {
-      "item": "rlovelyr:robot_core"
+      "item": "llovelyr:robot_core"
     }
   },
   "result": {
-    "item": "rlovelyr:vanilla_spawn",
+    "item": "llovelyr:vanilla_spawn",
     "count": 1
   }
 }

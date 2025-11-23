@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.configs;
+package net.msymbios.llovelyr.source.configs;
 
 import net.minecraft.util.Identifier;
 

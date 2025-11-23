@@ -1,9 +1,13 @@
-package net.msymbios.llovelyr.item;
+package net.msymbios.llovelyr.source.groups;
 
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.RegistryKey;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.common.item.InternalItemsGroup;
+import net.msymbios.llovelyr.source.items.LovelyItems;
 import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 
 /**
@@ -42,7 +46,27 @@ public class LovelyGroups extends InternalItemsGroup {
      * <b>Timing:</b> Must be called during mod initialization.
      */
     public static void register() {
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(LovelyGroups::addSpawnEggs);
+        ItemGroupEvents.modifyEntriesEvent(LovelyGroups.DEFAULT_KEY).register(LovelyGroups::allItemsEntry);
+
         LovelyLegacy.LOGGER.info("Registering CreativeTabs for: " + LovelyLegacy.MODID);
     } // register()
+
+    /**
+     * Adds spawn eggs to vanilla spawn eggs creative tab.
+     */
+    private static void addSpawnEggs(FabricItemGroupEntries entries) {
+        entries.add(LovelyItems.VANILLA_SPAWN);
+        entries.add(LovelyItems.BUNNY2_SPAWN);
+    } // spawnEggItemsEntry()
+
+    /**
+     * Adds all items to mod's default creative tab.
+     */
+    private static void allItemsEntry(FabricItemGroupEntries entries) {
+        entries.add(LovelyItems.ROBOT_CORE);
+        entries.add(LovelyItems.VANILLA_SPAWN);
+        entries.add(LovelyItems.BUNNY2_SPAWN);
+    } // allItemsEntry()
 
 } // Class: LovelyGroups

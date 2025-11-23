@@ -1,10 +1,10 @@
-package net.msymbios.llovelyr.item.util;
+package net.msymbios.llovelyr.source.items.util;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.msymbios.llovelyr.config.LovelyRobotID;
-import net.msymbios.llovelyr.entity.internal.enums.EntityTexture;
+import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
+import net.msymbios.llovelyr.source.entity.internal.enums.*;
 
 import java.util.List;
 
@@ -60,8 +60,8 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addNameTooltip(List<Text> tooltip, NbtCompound nbt) {
-        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyRobotID.STAT_COLOR));
-        String customName = nbt.getString(LovelyRobotID.STAT_CUSTOM_NAME);
+        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyIdentifier.STAT_COLOR));
+        String customName = nbt.getString(LovelyIdentifier.STAT_CUSTOM_NAME);
         Formatting textFormatting = getFormattingColor(texture);
 
         if (!customName.isEmpty()) {
@@ -77,7 +77,7 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addOwnerTooltip(List<Text> tooltip, NbtCompound nbt) {
-        String ownerName = nbt.getString(LovelyRobotID.STAT_OWNER);
+        String ownerName = nbt.getString(LovelyIdentifier.STAT_OWNER);
 
         if (!ownerName.isEmpty()) {
             tooltip.add(Text.literal("Owner: ").copy().formatted(defaultFormatting)
@@ -92,12 +92,12 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addTypeTooltip(List<Text> tooltip, NbtCompound nbt) {
-        String type = nbt.getString(LovelyRobotID.STAT_TYPE);
+        String type = nbt.getString(LovelyIdentifier.STAT_TYPE);
 
         if (!type.isEmpty()) {
-            tooltip.add(Text.translatable(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_TYPE))
+            tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_TYPE)
                 .append(": ").formatted(defaultFormatting)
-                .append(Text.translatable(LovelyRobotID.getVariantTranslation(type)).formatted(Formatting.WHITE)));
+                .append(LovelyIdentifier.getVariantTranslation(type)).formatted(Formatting.WHITE));
         }
     } // addTypeTooltip()
 
@@ -108,12 +108,12 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addColorTooltip(List<Text> tooltip, NbtCompound nbt) {
-        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyRobotID.STAT_COLOR));
+        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyIdentifier.STAT_COLOR));
         Formatting textFormatting = getFormattingColor(texture);
 
-        tooltip.add(Text.translatable(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_DESIGN))
+        tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_DESIGN)
             .append(": ").formatted(defaultFormatting)
-            .append(Text.translatable(LovelyRobotID.getTranslation(texture)).formatted(textFormatting)));
+            .append(LovelyIdentifier.getTranslation(texture)).formatted(textFormatting));
     } // addColorTooltip()
 
     /**
@@ -123,10 +123,10 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addLevelTooltip(List<Text> tooltip, NbtCompound nbt) {
-        int level = nbt.getInt(LovelyRobotID.STAT_LEVEL);
+        int level = nbt.getInt(LovelyIdentifier.STAT_LEVEL);
 
         if (level > 0) {
-            tooltip.add(Text.translatable(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_LEVEL))
+            tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_LEVEL)
                 .append(": ").formatted(defaultFormatting)
                 .append(Text.literal(String.valueOf(level)).formatted(Formatting.GOLD)));
         }

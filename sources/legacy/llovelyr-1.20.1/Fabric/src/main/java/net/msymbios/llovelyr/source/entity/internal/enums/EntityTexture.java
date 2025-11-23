@@ -38,19 +38,7 @@ public enum EntityTexture {
     BLACK(15, LovelyIdentifier.TEX_BLACK),
     
     /** Randomizes texture on spawn. Excludes special textures from random pool. */
-    RANDOM(16, LovelyIdentifier.TEX_RANDOM),
-
-    // -- Special Textures (Premium Variants) --
-
-    DARK_MATTER(17, LovelyIdentifier.TEX_DARK_MATTER),
-    SUPERNOVA(18, LovelyIdentifier.TEX_SUPERNOVA),
-    COLD_GOLD(19, LovelyIdentifier.TEX_COLD_GOLD),
-    EMBRYON(20, LovelyIdentifier.TEX_EMBRYON),
-    DARK_GOLD(21, LovelyIdentifier.TEX_DARK_GOLD),
-    GOLD_MATTER(22, LovelyIdentifier.TEX_GOLD_MATTER),
-    HESTIA(23, LovelyIdentifier.TEX_HESTIA),
-    COMMANDER(24, LovelyIdentifier.TEX_COMMANDER),
-    VALKYRIE(25, LovelyIdentifier.TEX_VALKYRIE);
+    RANDOM(16, LovelyIdentifier.TEX_RANDOM);
 
     // -- Deserialization Cache --
 
@@ -90,9 +78,7 @@ public enum EntityTexture {
      * @return corresponding EntityTexture, or WHITE if invalid
      */
     public static EntityTexture byId(int id) {
-        if (id < 0 || id >= CODEC.length) {
-            id = 0;
-        }
+        if (id < 0 || id >= CODEC.length) id = 0;
         return CODEC[id];
     } // byId ()
 

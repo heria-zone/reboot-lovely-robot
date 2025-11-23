@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.entity.enums;
+package net.msymbios.llovelyr.source.entity.internal.enums;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -59,7 +59,7 @@ public enum EntityState {
      */
     EntityState(int id) {
         this.m_id = id;
-    } // Constructor: EntityState
+    } // Constructor: EntityState ()
 
     // -- Deserialization --
 
@@ -77,7 +77,7 @@ public enum EntityState {
     public static EntityState byId(int id) {
         if (id < 0 || id >= CODEC.length) id = 0;
         return CODEC[id];
-    } // byId
+    } // byId ()
 
     /**
      * Returns persistent identifier for network/NBT serialization.
@@ -86,6 +86,6 @@ public enum EntityState {
      */
     public int getId() {
         return this.m_id;
-    } // getId
+    } // getId ()
 
 } // Enum: EntityState

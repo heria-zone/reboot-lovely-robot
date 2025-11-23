@@ -7,6 +7,7 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.msymbios.llovelyr.source.entity.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityVariant;
 import net.msymbios.llovelyr.source.items.LovelyItems;
 
@@ -22,8 +23,7 @@ public class VanillaEntity extends LovelyRobot {
     // -- Constructor --
 
     public VanillaEntity(EntityType<? extends LovelyRobot> entityType, World world) {
-        super(entityType, world);
-        this.nativeEntity = EntityVariant.VANILLA;
+        super(entityType, world, NativeEntityType.VANILLA);
     } // VanillaEntity
 
     // -- Inherited Methods --
@@ -47,12 +47,12 @@ public class VanillaEntity extends LovelyRobot {
      */
     public static DefaultAttributeContainer createAttributes() {
         return AnimalEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, EntityVariant.VANILLA.getMaxHealth())
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, EntityVariant.VANILLA.getAttackDamage())
-                .add(EntityAttributes.GENERIC_ATTACK_SPEED, EntityVariant.VANILLA.getAttackSpeed())
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, EntityVariant.VANILLA.getMoveSpeed())
-                .add(EntityAttributes.GENERIC_ARMOR, EntityVariant.VANILLA.getArmour())
-                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, EntityVariant.VANILLA.getArmourToughness())
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, NativeEntityType.VANILLA.getMaxHealth())
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, NativeEntityType.VANILLA.getAttackDamage())
+                .add(EntityAttributes.GENERIC_ATTACK_SPEED, NativeEntityType.VANILLA.getAttackSpeed())
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, NativeEntityType.VANILLA.getMoveSpeed())
+                .add(EntityAttributes.GENERIC_ARMOR, NativeEntityType.VANILLA.getArmour())
+                .add(EntityAttributes.GENERIC_ARMOR_TOUGHNESS, NativeEntityType.VANILLA.getArmourToughness())
                 .build();
     } // createAttributes
 

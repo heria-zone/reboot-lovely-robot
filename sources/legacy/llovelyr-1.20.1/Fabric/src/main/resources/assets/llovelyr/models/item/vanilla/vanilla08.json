@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rlovelyr:item/vanilla/vanilla08"
+    "layer0": "llovelyr:item/vanilla/vanilla08"
   }
 }

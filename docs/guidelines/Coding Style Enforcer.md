@@ -29,11 +29,21 @@ package com.lovelyrobot.core.entities;
 
 ```java
 /**
- * Manages robot entity lifecycle and behavioral state transitions.
- * 
- * This class coordinates between the robot's physical representation and its
- * AI decision-making processes, ensuring consistent state management across
- * different interaction contexts.
+ * <p>Coordinates robot entity lifecycle with behavioral state management.<p>
+ * <p>
+ * <b>Architecture:</b> Serves as the bridge between Minecraft's entity system
+ * and the robot's AI decision-making layer. Translates game events (damage, interaction,
+ * tick updates) into behavioral triggers while maintaining state consistency across
+ * client-server boundaries.
+ * <p>
+ * <b>State Management:</b> Maintains behavioral state separate from physical state,
+ * allowing personality and decision-making to persist independently of health,
+ * position, or animation state. This separation enables behavioral continuity
+ * during respawns and dimension transfers.
+ * <p>
+ * <b>Thread Safety:</b> Entity ticks occur on server thread, but behavioral
+ * processing may spawn async tasks. All state mutations are synchronized to
+ * prevent race conditions during concurrent interaction processing.
  */
 public class RobotEntity extends LivingEntity implements IRobotBehavior {
 
@@ -65,10 +75,20 @@ public class RobotEntity extends LivingEntity implements IRobotBehavior {
 
 ```java
 /**
- * Defines the contract for robot behavioral patterns and decision-making.
- * 
- * Implementations should focus on maintaining behavioral consistency while
- * allowing for extensible personality and interaction patterns.
+ * <p>Establishes behavioral contracts for robot decision-making systems.<p>
+ * <p>
+ * <b>Design Intent:</b> Decouples behavioral logic from entity implementation,
+ * enabling multiple robot types to share behavioral patterns while maintaining
+ * distinct personalities. This abstraction allows behavioral systems to evolve
+ * independently of entity mechanics.
+ * <p>
+ * <b>Implementation Requirements:</b> Implementers must ensure behavioral
+ * consistency across state transitions and maintain personality coherence
+ * during interaction processing. Behavioral responses should be deterministic
+ * for identical inputs to enable predictable testing and debugging.
+ * <p>
+ * <b>Extension Strategy:</b> New behavioral patterns can be added without
+ * modifying existing implementations through composition rather than inheritance.
  */
 public interface IRobotBehavior {
 
@@ -89,27 +109,46 @@ public interface IRobotBehavior {
 
 ```java
 /**
- * Represents robot operational states with associated behavioral implications.
- * 
- * State transitions should be validated to prevent invalid behavioral
- * combinations that could compromise robot functionality.
+ * <p>Defines robot operational states with behavioral and resource implications.<p>
+ * <p>
+ * <b>State Hierarchy:</b> States form a capability hierarchy where transitions
+ * must be validated to prevent invalid behavioral combinations. Moving from
+ * SHUTDOWN to ACTIVE requires initialization checks that IDLE to ACTIVE skips.
+ * <p>
+ * <b>Resource Management:</b> Each state has different computational overhead.
+ * ACTIVE runs full AI processing, IDLE maintains awareness with reduced tick
+ * frequency, SHUTDOWN releases all behavioral resources.
+ * <p>
+ * <b>Persistence:</b> State survives world reloads but not entity death. Respawned
+ * robots default to IDLE regardless of pre-death state to ensure clean initialization.
  */
 public enum RobotState {
     /**
-     * Robot is actively processing tasks and responding to interactions.
-     * Enables full behavioral repertoire and decision-making capabilities.
+     * <p>Full operational mode with complete behavioral processing.<p>
+     * <p>
+     * <b>Capabilities:</b> All AI goals active, full interaction processing,
+     * autonomous decision-making enabled.
+     * <p>
+     * <b>Performance:</b> Highest computational cost - runs every tick.
      */
     ACTIVE(true, true),
     
     /**
-     * Robot maintains awareness but limits active behaviors.
-     * Preserves essential functions while reducing computational overhead.
+     * <p>Standby mode maintaining situational awareness.<p>
+     * <p>
+     * <b>Capabilities:</b> Passive observation only, responds to direct interaction
+     * but doesn't initiate behaviors.
+     * <p>
+     * <b>Performance:</b> Reduced cost - processes every 5 ticks.
      */
     IDLE(true, false),
     
     /**
-     * Robot is non-responsive and requires external activation.
-     * All behavioral systems are suspended to conserve resources.
+     * <p>Powered down with all systems suspended.<p>
+     * <p>
+     * <b>Capabilities:</b> No processing, no interaction response, purely decorative.
+     * <p>
+     * <b>Performance:</b> Minimal cost - only renders, no logic processing.
      */
     SHUTDOWN(false, false);
 
@@ -216,13 +255,13 @@ public RobotEntity(RobotConfiguration configuration, RobotState initialState) {
     
     validateConfiguration();
     initializeBehavioralSystems();
-} // Constructor: RobotEntity
+} // Constructor: RobotEntity()
 ```
 
 - Explain initialization impact on system behavior
 - Document parameter relationships and constraints
 - Use Objects.requireNonNull for validation
-- Include closing comment
+- Include closing comment with parentheses
 
 ### Methods
 
@@ -252,13 +291,13 @@ public InteractionResponse processInteraction(InteractionContext interaction) {
     
     updateBehavioralState(interaction, response);
     return response;
-} // processInteraction
+} // processInteraction()
 ```
 
 - Focus on method's role in larger system workflows
 - Explain decision-making processes and state impacts
 - Document exception conditions and recovery strategies
-- Include closing comment with method name
+- Include closing comment with method name and parentheses: `} // methodName()`
 
 ## Code Style and Formatting
 
@@ -329,27 +368,99 @@ public RobotBuilder createRobot(
 
 ## Documentation Standards
 
-### JavaDoc Comments
+### Philosophy: Insightful Over Descriptive, Concise Over Verbose
+
+Documentation should reveal **why** code exists and **how** it fits into the broader architecture, not merely describe **what** it does. However, **be concise** - every sentence must add value. Focus on:
+
+- **Architectural Role**: How this component coordinates with others
+- **Design Decisions**: Why this approach was chosen over alternatives
+- **System Impact**: What happens when this code executes (only if non-obvious)
+- **Trade-offs**: What was sacrificed for what benefit (only significant ones)
+- **Failure Modes**: How the system degrades when things go wrong (only if critical)
+
+**Key Principle**: If it's obvious from the code or method name, don't document it. Document the non-obvious insights.
+
+**Bad Example** (Merely Descriptive):
+```java
+/**
+ * Processes an interaction.
+ * 
+ * @param interaction the interaction to process
+ * @return the response
+ */
+public InteractionResponse processInteraction(InteractionContext interaction) {
+```
+
+**Bad Example** (Too Verbose):
+```java
+/**
+ * <p>Coordinates behavioral response generation through multi-stage evaluation.<p>
+ * <p>
+ * <b>Decision Flow:</b> Interaction requests pass through compatibility filtering,
+ * priority assessment, and behavioral alignment checks before response generation.
+ * This staged approach prevents inappropriate responses while maintaining personality
+ * consistency across varying interaction contexts. The filtering stage ensures that
+ * only valid interactions proceed to evaluation. The priority assessment determines
+ * which interactions should be processed first. The behavioral alignment ensures
+ * responses match the robot's personality profile.
+ * <p>
+ * <b>State Impact:</b> Successful interactions may trigger behavioral adaptation,
+ * updating response patterns based on outcome feedback. Failed interactions are
+ * logged but don't affect core behavioral models to prevent corruption from
+ * malformed requests. The adaptation process is asynchronous to avoid blocking.
+ * <p>
+ * <b>Performance:</b> Response generation is O(1) for cached patterns, O(n) for
+ * novel interactions requiring full behavioral evaluation. Caching is implemented
+ * using a LRU cache with a maximum size of 1000 entries.
+ * 
+ * @param interaction context containing request type, source, and environmental factors
+ * @return response strategy with behavioral tone, content, and follow-up actions
+ * @throws InteractionException if interaction violates behavioral constraints
+ */
+public InteractionResponse processInteraction(InteractionContext interaction) {
+```
+
+**Good Example** (Concise and Insightful):
+```java
+/**
+ * Coordinates behavioral response through multi-stage evaluation.
+ * <p>
+ * <b>Architecture:</b> Filters compatibility, assesses priority, validates behavioral
+ * alignment before generation. Prevents inappropriate responses while maintaining
+ * personality consistency.
+ * <p>
+ * <b>State Impact:</b> Successful interactions trigger adaptation; failures are logged
+ * but don't corrupt behavioral models.
+ * <p>
+ * <b>Performance:</b> O(1) for cached patterns, O(n) for novel interactions.
+ * 
+ * @param interaction context with request type, source, and environmental factors
+ * @return response strategy with behavioral tone and follow-up actions
+ * @throws InteractionException if interaction violates behavioral constraints
+ */
+public InteractionResponse processInteraction(InteractionContext interaction) {
+```
+
+### JavaDoc Formatting for Readability
+
+Use HTML tags to structure documentation for better visual hierarchy, but **keep it concise**:
 
 ```java
 /**
  * Orchestrates robot behavioral adaptation based on environmental feedback.
+ * <p>
+ * <b>Architecture:</b> Monitors interaction outcomes and environmental changes to refine
+ * responses. Balances consistency (dampens rapid changes) with flexibility (adapts to
+ * persistent patterns).
+ * <p>
+ * <b>Performance:</b> Runs asynchronously to avoid blocking. Results cached for 30 minutes.
+ * <p>
+ * <i>Note:</i> Uses exponential moving average with configurable sensitivity thresholds.
  * 
- * This system continuously monitors interaction outcomes and environmental
- * changes to refine behavioral responses, ensuring robots maintain appropriate
- * social dynamics while preserving core personality traits.
- * 
- * The adaptation process balances consistency with flexibility, preventing
- * erratic behavior changes while allowing meaningful personality evolution
- * based on accumulated experience.
- * 
- * @param environmentData current environmental context and constraints
- * @param interactionHistory recent interaction outcomes for pattern analysis
- * @return adaptation strategy that balances consistency with environmental fit
- * @throws AdaptationException if environmental data is incompatible with current behavioral model
- * @since 2.0
- * @see BehaviorProfile
- * @see InteractionContext
+ * @param environmentData current context (time, location, nearby entities)
+ * @param interactionHistory recent outcomes (last 50) for pattern analysis
+ * @return adaptation strategy with behavioral adjustments and confidence levels
+ * @throws AdaptationException if environmental data is incompatible with behavioral model
  */
 public AdaptationStrategy adaptBehavior(
         EnvironmentData environmentData,
@@ -358,10 +469,57 @@ public AdaptationStrategy adaptBehavior(
 }
 ```
 
-- Explain the method's strategic purpose and system impact
-- Describe balancing considerations and trade-offs
-- Document parameter relationships and expected outcomes
-- Include relevant cross-references and version information
+**Formatting Guidelines:**
+- Use `<p>` tags to separate logical sections (improves readability in IDEs)
+- Use `<b>Section Headers:</b>` to create visual anchors for key concepts
+- Use `<i>Note:</i>` for technical details (keep brief)
+- Use `<code>methodName()</code>` for inline code references
+- **Avoid redundancy** - don't repeat what's obvious from code or method names
+- **Be selective** - only include sections that add non-obvious insights
+
+**Common Section Headers** (use sparingly, only when adding value):
+- `<b>Architecture:</b>` - How it fits in the system
+- `<b>Design Decision:</b>` - Why this approach over alternatives
+- `<b>State Impact:</b>` - What changes (only if non-obvious)
+- `<b>Performance:</b>` - Complexity notes (only if critical)
+- `<b>Failure Mode:</b>` - Error handling (only if non-standard)
+- `<i>Note:</i>` - Brief technical details
+
+**Real-World Example** (EntityState enum):
+```java
+/**
+ * Coordinates robot behavioral priorities through discrete operational modes.
+ * <p>
+ * <b>Architecture:</b> States sit above the goal system as the top-level decision layer.
+ * State changes trigger goal set recalculation, allowing owner commands to alter behavior
+ * without modifying individual AI goals.
+ * <p>
+ * <b>Design Decision:</b> Three states balance behavioral variety with player comprehension.
+ * More granular options (Patrol, Guard, Escort) were rejected to avoid subtle distinctions.
+ * <p>
+ * <b>Serialization:</b> ID-based with O(1) CODEC array lookup. Invalid IDs default to
+ * Follow rather than crashing, ensuring robots survive corrupted save data.
+ */
+public enum EntityState {
+    /**
+     * Active companion: FollowOwnerGoal prioritized, combat goals active.
+     * Default state for exploration and combat.
+     */
+    Follow(0),
+    
+    /**
+     * Territorial guardian: FollowOwnerGoal disabled, BaseDefenseGoal anchors to location.
+     * Used for base defense and preventing robots from following into danger.
+     */
+    Defense(1),
+    
+    /**
+     * Passive observer: All movement/combat goals disabled except sitting.
+     * Used for decoration or keeping robots non-threatening to mobs.
+     */
+    Standby(2);
+}
+```
 
 ### Section Headers and Organization
 

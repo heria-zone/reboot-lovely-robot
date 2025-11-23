@@ -1,11 +1,11 @@
-package net.msymbios.llovelyr.config;
+package net.msymbios.llovelyr.source.configs;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.entity.internal.enums.EntityTexture;
-import net.msymbios.llovelyr.entity.internal.enums.EntityVariant;
+import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
+import net.msymbios.llovelyr.source.entity.internal.enums.EntityVariant;
 
 /**
  * Central registry for mod identifiers, translation keys, and resource paths.
@@ -142,7 +142,7 @@ public class LovelyIdentifier {
      */
     public static MutableComponent getVariantTranslation(final String key) {
         return getTranslation("variant.", key);
-    } // getVariantTranslation
+    } // getVariantTranslation ()
 
     /**
      * Creates translation component for creative tab.
@@ -162,7 +162,7 @@ public class LovelyIdentifier {
      */
     public static MutableComponent getMessageTranslation(final String key) {
         return getTranslation("msg.", key);
-    } // getMessageTranslation
+    } // getMessageTranslation ()
 
     /**
      * Creates translation component for entity variant enum.
@@ -178,7 +178,7 @@ public class LovelyIdentifier {
             case Vanilla -> getVariantTranslation(VARIANT_VANILLA);
             default -> getVariantTranslation(VARIANT_VANILLA);
         };
-    } // getTranslation
+    } // getTranslation ()
 
     /**
      * Creates translation component for texture enum.
@@ -209,7 +209,7 @@ public class LovelyIdentifier {
             case BLACK -> getMessageTranslation(TEX_BLACK);
             default -> getMessageTranslation(TEX_PINK);
         };
-    } // getTranslation
+    } // getTranslation ()
 
     /**
      * Creates basic translation component.
@@ -219,7 +219,7 @@ public class LovelyIdentifier {
      */
     public static MutableComponent getTranslation(final String key) {
         return Component.translatable(LovelyLegacy.MODID + "." + key);
-    } // getTranslation
+    } // getTranslation ()
 
     /**
      * Creates translation component with category prefix.
@@ -230,7 +230,7 @@ public class LovelyIdentifier {
      */
     public static MutableComponent getTranslation(final String category, final String key) {
         return Component.translatable(category + LovelyLegacy.MODID + "." + key);
-    } // getTranslation
+    } // getTranslation ()
 
     /**
      * Creates translation component with format arguments.
@@ -241,7 +241,7 @@ public class LovelyIdentifier {
      */
     public static MutableComponent getTranslation(final String key, Object... objects) {
         return Component.translatable(LovelyLegacy.MODID + "." + key, objects);
-    } // getTranslation
+    } // getTranslation ()
 
     /**
      * Creates translation component with category and format arguments.
@@ -253,7 +253,7 @@ public class LovelyIdentifier {
      */
     public static MutableComponent getTranslation(final String category, final String key, Object... objects) {
         return Component.translatable(category + LovelyLegacy.MODID + "." + key, objects);
-    } // getTranslation
+    } // getTranslation ()
 
     /**
      * Creates ResourceLocation for mod resource.
@@ -263,7 +263,7 @@ public class LovelyIdentifier {
      */
     public static ResourceLocation getId(final String path) {
         return new ResourceLocation(LovelyLegacy.MODID, path);
-    } // getId
+    } // getId ()
 
     /**
      * Creates ResourceLocation with custom namespace.
@@ -279,6 +279,6 @@ public class LovelyIdentifier {
             return getId(path);
         }
         return new ResourceLocation(namespace, path);
-    } // getId
+    } // getId ()
 
 } // Class: LovelyIdentifier

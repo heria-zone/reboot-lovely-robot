@@ -20,7 +20,7 @@ public class VanillaRenderer extends GeoEntityRenderer<VanillaEntity> {
 
     public VanillaRenderer(EntityRendererFactory.Context renderManager) {
         super(renderManager, new VanillaModel());
-        this.shadowRadius = LovelyConfigs.Common.ShadowRadius;
+        this.shadowRadius = LovelyConfigs.Client.ShadowRadius;
         addRenderLayer(new VanillaLayer(this));
     } // VanillaRenderer
 

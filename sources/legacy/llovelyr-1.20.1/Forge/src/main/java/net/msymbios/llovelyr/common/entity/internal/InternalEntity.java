@@ -112,8 +112,9 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
     // -- Constructor --
 
-    protected InternalEntity(EntityType<? extends TamableAnimal> entityType, Level world) {
+    protected InternalEntity(EntityType<? extends TamableAnimal> entityType, Level world, InternalEntityType<?> nativeEntityType) {
         super(entityType, world);
+        this.nativeEntity = nativeEntityType;
     } // Constructor InternalEntity ()
 
     // -- Inherited Methods --

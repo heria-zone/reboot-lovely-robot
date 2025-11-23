@@ -43,7 +43,7 @@ public enum EntityAnimator {
     EntityAnimator(int id, String name) {
         this.m_id = id;
         this.m_name = name;
-    } // Constructor: EntityAnimator
+    } // Constructor: EntityAnimator ()
 
     // -- Deserialization --
 
@@ -54,11 +54,9 @@ public enum EntityAnimator {
      * @return corresponding EntityAnimator, or Default if invalid
      */
     public static EntityAnimator byId(int id) {
-        if (id < 0 || id >= CODEC.length) {
-            id = 0;
-        }
+        if (id < 0 || id >= CODEC.length) id = 0;
         return CODEC[id];
-    } // byId
+    } // byId ()
 
     /**
      * Returns persistent identifier for serialization.
@@ -67,7 +65,7 @@ public enum EntityAnimator {
      */
     public int getId() {
         return this.m_id;
-    } // getId
+    } // getId ()
 
     /**
      * Finds animator by resource location name.
@@ -77,12 +75,10 @@ public enum EntityAnimator {
      */
     public static EntityAnimator byName(String name) {
         for (EntityAnimator item : CODEC) {
-            if (item.getName().equals(name)) {
-                return item;
-            }
+            if (item.getName().equals(name)) return item;
         }
         return null;
-    } // byName
+    } // byName ()
 
     /**
      * Returns animation controller resource location.
@@ -91,6 +87,6 @@ public enum EntityAnimator {
      */
     public String getName() {
         return this.m_name;
-    } // getName
+    } // getName ()
 
 } // Enum: EntityAnimator

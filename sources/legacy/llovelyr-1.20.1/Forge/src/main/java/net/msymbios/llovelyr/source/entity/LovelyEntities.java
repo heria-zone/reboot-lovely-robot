@@ -8,7 +8,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import net.msymbios.llovelyr.LovelyRobotLegacy;
+import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
 import net.msymbios.llovelyr.source.configs.LovelyConfigs;
 import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
@@ -31,18 +31,12 @@ public class LovelyEntities {
 
     // -- Entity Type Registry --
 
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = 
-        DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, LovelyRobotLegacy.MODID);
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, LovelyLegacy.MODID);
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = 
-        register(LovelyIdentifier.VARIANT_VANILLA, MobCategory.CREATURE, 
-            LovelyConfigs.Width, LovelyConfigs.Height, VanillaEntity::new);
-
-    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = 
-        register(LovelyIdentifier.VARIANT_BUNNY2, MobCategory.CREATURE, 
-            LovelyConfigs.Width, LovelyConfigs.Height, Bunny2Entity::new);
+    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = register(LovelyIdentifier.VARIANT_VANILLA, MobCategory.CREATURE, LovelyConfigs.Width, LovelyConfigs.Height, (type, level) -> new VanillaEntity(type, level));
+    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = register(LovelyIdentifier.VARIANT_BUNNY2, MobCategory.CREATURE, LovelyConfigs.Width, LovelyConfigs.Height, (type, level) -> new Bunny2Entity(type, level));
 
     // -- Registration Methods --
 

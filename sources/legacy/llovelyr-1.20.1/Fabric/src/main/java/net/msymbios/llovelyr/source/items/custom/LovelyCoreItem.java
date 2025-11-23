@@ -23,13 +23,13 @@ import static net.msymbios.llovelyr.source.items.util.TooltipUtils.*;
  * <b>Usage Pattern:</b> Created when robot is "captured" or crafted, can be
  * used to spawn robot with preserved attributes.
  */
-public class LovelyCore extends Item {
+public class LovelyCoreItem extends Item {
 
     // -- Constructors --
 
-    public LovelyCore(Settings settings) {
+    public LovelyCoreItem(Settings settings) {
         super(settings);
-    } // Constructor: LovelyCore()
+    } // Constructor: LovelyCoreItem()
 
     // -- Inherited Methods --
 
@@ -51,4 +51,4 @@ public class LovelyCore extends Item {
         }
     } // appendTooltip()
 
-} // Class: LovelyCore
+} // Class: LovelyCoreItem

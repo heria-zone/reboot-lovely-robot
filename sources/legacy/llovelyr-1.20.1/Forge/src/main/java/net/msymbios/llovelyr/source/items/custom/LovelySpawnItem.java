@@ -27,6 +27,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
+import net.msymbios.llovelyr.source.entity.LovelyRobot;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,13 +47,13 @@ import static net.msymbios.llovelyr.source.items.util.TooltipUtils.*;
  * to spawn in liquid, or use on spawner to configure it. Transfers NBT data
  * (name, color, level, protections) to spawned entity.
  */
-public class LovelySpawn extends ForgeSpawnEggItem {
+public class LovelySpawnItem extends ForgeSpawnEggItem {
 
     // -- Constructor --
 
-    public LovelySpawn(Supplier<? extends EntityType<? extends Mob>> type, Properties properties) {
+    public LovelySpawnItem(Supplier<? extends EntityType<? extends Mob>> type, Properties properties) {
         super(type, 0xFFFFFF, 0xFFFFFF, properties);
-    } // Constructor: LovelySpawn()
+    } // Constructor: LovelySpawnItem()
 
     // -- Inherited Methods --
 
@@ -98,7 +99,7 @@ public class LovelySpawn extends ForgeSpawnEggItem {
                     player.awardStat(Stats.ITEM_USED.get(this));
                     level.gameEvent(player, GameEvent.ENTITY_PLACE, entity.position());
 
-                    if (entity instanceof RobotEntity robotEntity) {
+                    if (entity instanceof LovelyRobot robotEntity) {
                         robotEntity.handleTame(player);
                         initialize(itemStack.getOrCreateTag(), robotEntity);
                     }
@@ -143,7 +144,7 @@ public class LovelySpawn extends ForgeSpawnEggItem {
                     itemStack.shrink(1);
                     level.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
 
-                    if (entity instanceof RobotEntity robotEntity) {
+                    if (entity instanceof LovelyRobot robotEntity) {
                         robotEntity.handleTame(context.getPlayer());
                         initialize(itemStack.getOrCreateTag(), robotEntity);
                     }
@@ -165,7 +166,7 @@ public class LovelySpawn extends ForgeSpawnEggItem {
      * @param dataNBT the NBT compound from spawn egg
      * @param entity the spawned robot entity to initialize
      */
-    private void initialize(CompoundTag dataNBT, RobotEntity entity) {
+    private void initialize(CompoundTag dataNBT, LovelyRobot entity) {
         if (!dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME).isEmpty()) entity.setCustomName(Component.literal(dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME)));
         if (dataNBT.getInt(LovelyIdentifier.STAT_COLOR) != EntityTexture.RANDOM.getId()) entity.setTexture(dataNBT.getInt(LovelyIdentifier.STAT_COLOR));
 
@@ -178,4 +179,4 @@ public class LovelySpawn extends ForgeSpawnEggItem {
         if (dataNBT.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION) > 0) entity.setProjectileProtection(dataNBT.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION));
     } // initialize()
 
-} // Class: LovelySpawn
+} // Class: LovelySpawnItem

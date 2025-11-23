@@ -1,9 +1,10 @@
-package net.msymbios.llovelyr.common.configs;
+package net.msymbios.llovelyr.source.configs;
 
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.msymbios.llovelyr.LovelyLegacy;
+import net.msymbios.llovelyr.source.entity.internal.enums.*;
 
 public class LovelyIdentifier {
 
@@ -143,8 +144,8 @@ public class LovelyIdentifier {
     public static MutableText getTranslation(EntityVariant variant) {
         var value = getVariantTranslation(LovelyIdentifier.VARIANT_VANILLA);
         switch (variant) {
-            case Bunny2 -> value = getVariantTranslation(LovelyRobotID.VARIANT_BUNNY2);
-            case Vanilla -> value = getVariantTranslation(LovelyRobotID.VARIANT_VANILLA);
+            case Bunny2 -> value = getVariantTranslation(LovelyIdentifier.VARIANT_BUNNY2);
+            case Vanilla -> value = getVariantTranslation(LovelyIdentifier.VARIANT_VANILLA);
         }
         return value;
     } // getTranslation ()
@@ -158,23 +159,23 @@ public class LovelyIdentifier {
     public static MutableText getTranslation(EntityTexture texture) {
         MutableText value = getMessageTranslation(LovelyIdentifier.TEX_PINK);
         switch (texture) {
-            case RANDOM -> value = getMessageTranslation(LovelyRobotID.TEX_RANDOM);
-            case WHITE -> value = getMessageTranslation(LovelyRobotID.TEX_WHITE);
-            case ORANGE -> value = getMessageTranslation(LovelyRobotID.TEX_ORANGE);
-            case MAGENTA -> value = getMessageTranslation(LovelyRobotID.TEX_MAGENTA);
-            case LIGHT_BLUE -> value = getMessageTranslation(LovelyRobotID.TEX_LIGHT_BLUE);
-            case YELLOW -> value = getMessageTranslation(LovelyRobotID.TEX_YELLOW);
-            case LIME -> value = getMessageTranslation(LovelyRobotID.TEX_LIME);
-            case PINK -> value = getMessageTranslation(LovelyRobotID.TEX_PINK);
-            case GRAY -> value = getMessageTranslation(LovelyRobotID.TEX_GRAY);
-            case LIGHT_GRAY -> value = getMessageTranslation(LovelyRobotID.TEX_LIGHT_GRAY);
-            case CYAN -> value = getMessageTranslation(LovelyRobotID.TEX_CYAN);
-            case PURPLE -> value = getMessageTranslation(LovelyRobotID.TEX_PURPLE);
-            case BLUE -> value = getMessageTranslation(LovelyRobotID.TEX_BLUE);
-            case BROWN -> value = getMessageTranslation(LovelyRobotID.TEX_BROWN);
-            case GREEN -> value = getMessageTranslation(LovelyRobotID.TEX_GREEN);
-            case RED -> value = getMessageTranslation(LovelyRobotID.TEX_RED);
-            case BLACK -> value = getMessageTranslation(LovelyRobotID.TEX_BLACK);
+            case RANDOM -> value = getMessageTranslation(LovelyIdentifier.TEX_RANDOM);
+            case WHITE -> value = getMessageTranslation(LovelyIdentifier.TEX_WHITE);
+            case ORANGE -> value = getMessageTranslation(LovelyIdentifier.TEX_ORANGE);
+            case MAGENTA -> value = getMessageTranslation(LovelyIdentifier.TEX_MAGENTA);
+            case LIGHT_BLUE -> value = getMessageTranslation(LovelyIdentifier.TEX_LIGHT_BLUE);
+            case YELLOW -> value = getMessageTranslation(LovelyIdentifier.TEX_YELLOW);
+            case LIME -> value = getMessageTranslation(LovelyIdentifier.TEX_LIME);
+            case PINK -> value = getMessageTranslation(LovelyIdentifier.TEX_PINK);
+            case GRAY -> value = getMessageTranslation(LovelyIdentifier.TEX_GRAY);
+            case LIGHT_GRAY -> value = getMessageTranslation(LovelyIdentifier.TEX_LIGHT_GRAY);
+            case CYAN -> value = getMessageTranslation(LovelyIdentifier.TEX_CYAN);
+            case PURPLE -> value = getMessageTranslation(LovelyIdentifier.TEX_PURPLE);
+            case BLUE -> value = getMessageTranslation(LovelyIdentifier.TEX_BLUE);
+            case BROWN -> value = getMessageTranslation(LovelyIdentifier.TEX_BROWN);
+            case GREEN -> value = getMessageTranslation(LovelyIdentifier.TEX_GREEN);
+            case RED -> value = getMessageTranslation(LovelyIdentifier.TEX_RED);
+            case BLACK -> value = getMessageTranslation(LovelyIdentifier.TEX_BLACK);
         }
         return value;
     } // getTranslation ()

@@ -1,17 +1,15 @@
-package net.msymbios.llovelyr.item;
+package net.msymbios.llovelyr.source.items;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
 import net.minecraft.util.Rarity;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.common.item.InternalItems;
-import net.msymbios.llovelyr.item.custom.LovelyCore;
-import net.msymbios.llovelyr.item.custom.LovelySpawn;
+import net.msymbios.llovelyr.source.entity.LovelyEntities;
+import net.msymbios.llovelyr.source.items.custom.LovelyCoreItem;
+import net.msymbios.llovelyr.source.items.custom.LovelySpawnItem;
 import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 
 /**
@@ -48,7 +46,7 @@ public class LovelyItems extends InternalItems {
      * @return the registered item instance
      */
     private static Item registerItem(String name, Rarity rarity, int stack) {
-        return register(LovelyIdentifier.getId(name), new LovelyCore(new FabricItemSettings().rarity(rarity).fireproof().maxCount(stack)));
+        return register(LovelyIdentifier.getId(name), new LovelyCoreItem(new FabricItemSettings().rarity(rarity).fireproof().maxCount(stack)));
     } // registerItem()
 
     /**
@@ -64,7 +62,7 @@ public class LovelyItems extends InternalItems {
      * @return the registered spawn egg instance
      */
     private static Item registerItem(String name, EntityType<? extends MobEntity> mob, Rarity rarity, int stack) {
-        return register(LovelyIdentifier.getId(name), new LovelySpawn(mob, new FabricItemSettings().rarity(rarity).fireproof().maxCount(stack)));
+        return register(LovelyIdentifier.getId(name), new LovelySpawnItem(mob, new FabricItemSettings().rarity(rarity).fireproof().maxCount(stack)));
     } // registerItem()
 
     /**
@@ -74,26 +72,22 @@ public class LovelyItems extends InternalItems {
      */
     public static void register() {
         LovelyLegacy.LOGGER.info("Registering Items: " + LovelyLegacy.MODID);
-
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(LovelyItems::spawnEggItemsEntry);
-        ItemGroupEvents.modifyEntriesEvent(LovelyGroups.DEFAULT_KEY).register(LovelyItems::allItemsEntry);
     } // register()
 
     /**
-     * Adds spawn eggs to vanilla spawn eggs creative tab.
+     * Registers client-side model predicates for dynamic item appearance.
+     * <p>
+     * <b>Architecture:</b> Enables NBT-based model switching for robot color
+     * variants. Each spawn egg can display different textures based on stored
+     * color value in item NBT.
+     * <p>
+     * <b>Timing:</b> Must be called during client initialization after items
+     * are registered.
      */
-    private static void spawnEggItemsEntry(FabricItemGroupEntries entries) {
-        entries.add(VANILLA_SPAWN);
-        entries.add(BUNNY2_SPAWN);
-    } // spawnEggItemsEntry()
-
-    /**
-     * Adds all items to mod's default creative tab.
-     */
-    private static void allItemsEntry(FabricItemGroupEntries entries) {
-        entries.add(ROBOT_CORE);
-        entries.add(VANILLA_SPAWN);
-        entries.add(BUNNY2_SPAWN);
-    } // allItemsEntry()
+    public static void registerModel() {
+        registerModel(LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+        registerModel(LovelyItems.VANILLA_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+        registerModel(LovelyItems.BUNNY2_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+    } // registerModel()
 
 } // Class: LovelyItems

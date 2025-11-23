@@ -1,10 +1,10 @@
-package net.msymbios.llovelyr.item.util;
+package net.msymbios.llovelyr.source.items.util;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.msymbios.llovelyr.config.LovelyRobotID;
-import net.msymbios.llovelyr.entity.internal.enums.EntityTexture;
+import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
+import net.msymbios.llovelyr.source.entity.internal.enums.*;
 
 import java.util.List;
 
@@ -60,8 +60,8 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addNameTooltip(List<Component> tooltip, CompoundTag nbt) {
-        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyRobotID.STAT_COLOR));
-        String customName = nbt.getString(LovelyRobotID.STAT_CUSTOM_NAME);
+        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyIdentifier.STAT_COLOR));
+        String customName = nbt.getString(LovelyIdentifier.STAT_CUSTOM_NAME);
         ChatFormatting textFormatting = getFormattingColor(texture);
 
         if (!customName.isEmpty()) {
@@ -77,7 +77,7 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addOwnerTooltip(List<Component> tooltip, CompoundTag nbt) {
-        String ownerName = nbt.getString(LovelyRobotID.STAT_OWNER);
+        String ownerName = nbt.getString(LovelyIdentifier.STAT_OWNER);
 
         if (!ownerName.isEmpty()) {
             tooltip.add(Component.literal("Owner: ").withStyle(defaultFormatting)
@@ -92,12 +92,12 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addTypeTooltip(List<Component> tooltip, CompoundTag nbt) {
-        String type = nbt.getString(LovelyRobotID.STAT_TYPE);
+        String type = nbt.getString(LovelyIdentifier.STAT_TYPE);
 
         if (!type.isEmpty()) {
-            tooltip.add(Component.translatable(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_TYPE))
+            tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_TYPE)
                 .append(": ").withStyle(defaultFormatting)
-                .append(Component.translatable(LovelyRobotID.getVariantTranslation(type)).withStyle(ChatFormatting.WHITE)));
+                .append(LovelyIdentifier.getVariantTranslation(type)).withStyle(ChatFormatting.WHITE));
         }
     } // addTypeTooltip()
 
@@ -108,12 +108,12 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addColorTooltip(List<Component> tooltip, CompoundTag nbt) {
-        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyRobotID.STAT_COLOR));
+        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyIdentifier.STAT_COLOR));
         ChatFormatting textFormatting = getFormattingColor(texture);
 
-        tooltip.add(Component.translatable(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_DESIGN))
+        tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_DESIGN)
             .append(": ").withStyle(defaultFormatting)
-            .append(Component.translatable(LovelyRobotID.getTranslation(texture)).withStyle(textFormatting)));
+            .append(LovelyIdentifier.getTranslation(texture)).withStyle(textFormatting));
     } // addColorTooltip()
 
     /**
@@ -123,10 +123,10 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addLevelTooltip(List<Component> tooltip, CompoundTag nbt) {
-        int level = nbt.getInt(LovelyRobotID.STAT_LEVEL);
+        int level = nbt.getInt(LovelyIdentifier.STAT_LEVEL);
 
         if (level > 0) {
-            tooltip.add(Component.translatable(LovelyRobotID.getMessageTranslation(LovelyRobotID.MSG_LEVEL))
+            tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_LEVEL)
                 .append(": ").withStyle(defaultFormatting)
                 .append(Component.literal(String.valueOf(level)).withStyle(ChatFormatting.GOLD)));
         }

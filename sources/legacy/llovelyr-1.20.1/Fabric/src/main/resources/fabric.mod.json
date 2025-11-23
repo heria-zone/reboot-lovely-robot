@@ -20,6 +20,9 @@
 		],
 		"fabric-datagen": [
 			"${mod_group}.source.data.LovelyGenerator"
+		],
+		"client": [
+			"${mod_group}.source.client.LovelyClient"
 		]
 	},
 	"mixins": [

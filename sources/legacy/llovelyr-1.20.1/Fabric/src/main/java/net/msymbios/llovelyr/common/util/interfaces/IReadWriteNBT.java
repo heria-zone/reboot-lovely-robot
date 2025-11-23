@@ -1,9 +1,9 @@
 package net.msymbios.llovelyr.common.util.interfaces;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.msymbios.llovelyr.common.util.internal.Version;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Establishes NBT serialization contract with version-aware upgrade support.
@@ -24,9 +24,9 @@ public interface IReadWriteNBT {
      *
      * @return the tag the object data was written to
      */
-    @Nonnull
-    default CompoundTag writeToNBT() {
-        return writeToNBT(new CompoundTag());
+    @NotNull
+    default NbtCompound writeToNBT() {
+        return writeToNBT(new NbtCompound());
     } // writeToNBT()
 
     /**
@@ -38,8 +38,8 @@ public interface IReadWriteNBT {
      * @param tag the tag to write to
      * @return the tag the object data was written to (same instance as parameter)
      */
-    @Nonnull
-    CompoundTag writeToNBT(@Nonnull CompoundTag tag);
+    @NotNull
+    NbtCompound writeToNBT(@NotNull NbtCompound tag);
 
     /**
      * Deserializes object state from NBT with version-aware upgrade logic.
@@ -50,6 +50,6 @@ public interface IReadWriteNBT {
      * @param tag the tag to read from
      * @param tagVersion the version of the tag (enables upgrade operations)
      */
-    void readFromNBT(@Nonnull CompoundTag tag, @Nonnull Version tagVersion);
+    void readFromNBT(@NotNull NbtCompound tag, @NotNull Version tagVersion);
 
 } // Interface: IReadWriteNBT

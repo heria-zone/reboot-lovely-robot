@@ -1,6 +1,6 @@
-package net.msymbios.llovelyr.entity.internal.enums;
+package net.msymbios.llovelyr.source.entity.internal.enums;
 
-import net.msymbios.llovelyr.config.LovelyIdentifier;
+import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -38,19 +38,7 @@ public enum EntityTexture {
     BLACK(15, LovelyIdentifier.TEX_BLACK),
     
     /** Randomizes texture on spawn. Excludes special textures from random pool. */
-    RANDOM(16, LovelyIdentifier.TEX_RANDOM),
-
-    // -- Special Textures (Premium Variants) --
-
-    DARK_MATTER(17, LovelyIdentifier.TEX_DARK_MATTER),
-    SUPERNOVA(18, LovelyIdentifier.TEX_SUPERNOVA),
-    COLD_GOLD(19, LovelyIdentifier.TEX_COLD_GOLD),
-    EMBRYON(20, LovelyIdentifier.TEX_EMBRYON),
-    DARK_GOLD(21, LovelyIdentifier.TEX_DARK_GOLD),
-    GOLD_MATTER(22, LovelyIdentifier.TEX_GOLD_MATTER),
-    HESTIA(23, LovelyIdentifier.TEX_HESTIA),
-    COMMANDER(24, LovelyIdentifier.TEX_COMMANDER),
-    VALKYRIE(25, LovelyIdentifier.TEX_VALKYRIE);
+    RANDOM(16, LovelyIdentifier.TEX_RANDOM);
 
     // -- Deserialization Cache --
 
@@ -79,7 +67,7 @@ public enum EntityTexture {
     EntityTexture(int id, String name) {
         this.m_id = id;
         this.m_name = name;
-    } // Constructor: EntityTexture
+    } // Constructor: EntityTexture ()
 
     // -- Deserialization --
 
@@ -94,7 +82,7 @@ public enum EntityTexture {
             id = 0;
         }
         return CODEC[id];
-    } // byId
+    } // byId ()
 
     /**
      * Returns persistent identifier for serialization.
@@ -103,7 +91,7 @@ public enum EntityTexture {
      */
     public int getId() {
         return this.m_id;
-    } // getId
+    } // getId ()
 
     /**
      * Finds texture by resource location name.
@@ -118,7 +106,7 @@ public enum EntityTexture {
             }
         }
         return null;
-    } // byName
+    } // byName ()
 
     /**
      * Returns texture resource location.
@@ -127,7 +115,7 @@ public enum EntityTexture {
      */
     public String getName() {
         return this.m_name;
-    } // getName
+    } // getName ()
 
     /**
      * Finds texture by key with fallback to RANDOM.
@@ -143,6 +131,6 @@ public enum EntityTexture {
                 .filter(type -> type.m_name.equals(key))
                 .findFirst()
                 .orElse(EntityTexture.RANDOM);
-    } // find
+    } // find ()
 
 } // Enum: EntityTexture

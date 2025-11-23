@@ -2,14 +2,14 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "rlovelyr:vanilla_spawn"
+      "item": "llovelyr:vanilla_spawn"
     },
     {
-      "tag": "rlovelyr:dyes"
+      "tag": "llovelyr:dyes"
     }
   ],
   "result": {
     "count": 1,
-    "item": "rlovelyr:vanilla_spawn"
+    "item": "llovelyr:vanilla_spawn"
   }
 }

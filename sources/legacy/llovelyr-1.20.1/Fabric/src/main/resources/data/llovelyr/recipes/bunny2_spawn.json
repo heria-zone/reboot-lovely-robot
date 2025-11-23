@@ -13,11 +13,11 @@
       "item": "minecraft:iron_ingot"
     },
     "C": {
-      "item": "rlovelyr:robot_core"
+      "item": "llovelyr:robot_core"
     }
   },
   "result": {
-    "item": "rlovelyr:bunny2_spawn",
+    "item": "llovelyr:bunny2_spawn",
     "count": 1
   }
 }

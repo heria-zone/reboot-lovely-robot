@@ -40,3 +40,7 @@ replay_*.log
 
 # Files from Forge MDK
 forge*changelog.txt
+
+# Assessment files (local development only)
+/scripts/assessment/
+/docs/assessment/

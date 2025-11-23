@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.entity.internal.enums;
+package net.msymbios.llovelyr.source.entity.internal.enums;
 
 /**
  * Identifies which hands are active for robot actions and inventory management.
@@ -46,6 +46,6 @@ public enum EntityHand {
             return OFF;
         }
         return NONE;
-    } // fromBooleans
+    } // fromBooleans ()
 
 } // Enum: EntityHand

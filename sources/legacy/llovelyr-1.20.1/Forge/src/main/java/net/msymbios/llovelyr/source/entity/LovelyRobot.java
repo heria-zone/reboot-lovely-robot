@@ -26,8 +26,8 @@ import net.msymbios.llovelyr.common.util.internal.Utility;
 import net.msymbios.llovelyr.common.util.internal.Version;
 import net.msymbios.llovelyr.source.configs.LovelyConfigs;
 import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
+import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 import net.msymbios.llovelyr.source.entity.internal.enums.*;
-import net.msymbios.llovelyr.source.items.LovelyItems;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -197,8 +197,8 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
 
     // -- Constructor --
 
-    public LovelyRobot(EntityType<? extends InternalEntity> entityType, Level level) {
-        super(entityType, level);
+    public LovelyRobot(EntityType<? extends InternalEntity> entityType, Level level, NativeEntityType nativeEntityType) {
+        super(entityType, level, nativeEntityType);
         rotate(Rotation.getRandom(this.getRandom()));
     } // Constructor LovelyRobot ()
 
@@ -492,35 +492,65 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
 
     // -- Custom Methods --
 
-    public void addExp (int value) {
+    /**
+     * Adds experience points and handles level-up logic.
+     * <p>
+     * <b>Custom Name Bonus:</b> Named robots receive 1.5x experience multiplier
+     * to reward player investment in personalization.
+     * <p>
+     * <b>Level-Up:</b> Automatically levels up when experience threshold reached.
+     * Updates stats and displays notification to owner.
+     * <p>
+     * <b>Safety:</b> Validates input, checks max level cap, and ensures owner
+     * exists before displaying notifications.
+     *
+     * @param value experience points to add
+     */
+    public void addExp(int value) {
+        if (value <= 0) return;
+
         int addExp = value;
-        int exp = getExp();
+        int currentExp = getExp();
+        int currentLevel = this.getCurrentLevel();
+        int maxLevel = this.getMaxLevel();
         String customName = "";
-        try {customName = getCustomName().getString();}
-        catch (Exception ignored) {}
 
-        // if they have a name they earn more exp
-        if(!customName.isEmpty()) addExp = addExp * 3 / 2;
-        exp += addExp;
+        // Get custom name safely
+        try {
+            customName = getCustomName().getString();
+        } catch (Exception ignored) {}
 
-        var oldLevel = this.getCurrentLevel();
-        while (exp >= InternalLogic.calculateNextExp(this.getCurrentLevel())) {
-            exp -= InternalLogic.calculateNextExp(this.getCurrentLevel());
-            setCurrentLevel(this.getCurrentLevel() + 1);
+        // Named robots earn 1.5x experience bonus
+        if (!customName.isEmpty()) {
+            addExp = addExp * 3 / 2;
         }
 
-        setExp(exp);
-        if(oldLevel != this.getCurrentLevel()) {
-            if(!level().isClientSide) {
+        currentExp += addExp;
+
+        // Store old level for change detection
+        var oldLevel = currentLevel;
+
+        // Level up loop with max level cap
+        while (currentLevel < maxLevel && currentExp >= InternalLogic.calculateNextExp(currentLevel)) {
+            currentExp -= InternalLogic.calculateNextExp(currentLevel);
+            currentLevel++;
+            setCurrentLevel(currentLevel);
+        }
+
+        setExp(currentExp);
+
+        // Display level-up notification only if level actually changed
+        if (oldLevel != currentLevel) {
+            if (!level().isClientSide) {
                 try {
                     final LivingEntity owner = getOwner();
-                    if (owner == null) return;
-                    displayGeneralMessage(getNotification(), true);
+                    if (owner != null) {
+                        displayGeneralMessage(getNotification(), true);
+                    }
                 } catch (Exception ignored) {}
             }
         }
     } // addExp ()
-
 
     private boolean canInteractAutoAttack(ItemStack stack) {
         return stack.getItem() instanceof SwordItem;

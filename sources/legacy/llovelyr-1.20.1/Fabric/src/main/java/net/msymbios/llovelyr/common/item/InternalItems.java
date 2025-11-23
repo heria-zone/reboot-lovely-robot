@@ -1,13 +1,13 @@
 package net.msymbios.llovelyr.common.item;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.minecraft.block.Block;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.level.block.Block;
 
 /**
  * Fabric-specific item registration abstraction with model predicate support.
@@ -50,33 +50,57 @@ public class InternalItems {
     } // register()
 
     /**
-     * Registers client-side model predicate for dynamic item appearance.
+     * Registers client-side model predicate for specific item.
      * <p>
      * <b>NBT-Based Switching:</b> Reads integer value from item NBT to select
      * model variant. Returns 16 as default when NBT key missing (fallback model).
      * <p>
+     * <b>Model Selection:</b> Item models should define overrides matching NBT
+     * values (0-15 for colors, 16 for random/default).
+     * <p>
      * <i>Note:</i> Must be called on client-side only during initialization.
-     * 
-     * @param item the item to register predicate for
-     * @param tag the string identifier (converted to Identifier)
-     * @param key the NBT key to read value from
-     */
-    protected static void registerModel(Item item, String tag, String key) {
-        ModelPredicateProviderRegistry.register(item, new Identifier(tag), (stack, world, entity, seed) -> 
-            stack.getNbt() != null && stack.getNbt().contains(key) ? stack.getNbt().getInt(key) : 16
-        );
-    } // registerModel()
-
-    /**
-     * Registers client-side model predicate using Identifier directly.
      * 
      * @param item the item to register predicate for
      * @param tag the identifier for the predicate
      * @param key the NBT key to read value from
      */
     protected static void registerModel(Item item, Identifier tag, String key) {
-        ModelPredicateProviderRegistry.register(item, tag, (stack, world, entity, seed) -> 
-            stack.getNbt() != null && stack.getNbt().contains(key) ? stack.getNbt().getInt(key) : 16
+        ModelPredicateProviderRegistry.register(item, tag, (stack, world, entity, seed) ->
+                stack.getNbt() != null && stack.getNbt().contains(key) ? stack.getNbt().getInt(key) : 16
+        );
+    } // registerModel()
+
+    /**
+     * Registers client-side model predicate using string tag.
+     * <p>
+     * <b>Usage:</b> Convenience overload that converts string to Identifier.
+     * 
+     * @param item the item to register predicate for
+     * @param tag the string identifier (converted to Identifier)
+     * @param key the NBT key to read value from
+     */
+    protected static void registerModel(Item item, String tag, String key) {
+        registerModel(item, new Identifier(tag), key);
+    } // registerModel()
+
+    /**
+     * Registers global model predicate provider for all items.
+     * <p>
+     * <b>Architecture:</b> Registers predicate at registry level rather than
+     * per-item, allowing centralized model switching logic. All items using
+     * this tag will share the same NBT-based model selection behavior.
+     * <p>
+     * <b>Usage Pattern:</b> Call once during client init to establish global
+     * predicate, then register individual items to use it.
+     * <p>
+     * <i>Note:</i> Must be called on client-side only during initialization.
+     * 
+     * @param tag the identifier for the predicate
+     * @param key the NBT key to read value from
+     */
+    protected static void registerModel(Identifier tag, String key) {
+        ModelPredicateProviderRegistry.register(tag, (stack, world, entity, seed) ->
+                stack.getNbt() != null && stack.getNbt().contains(key) ? stack.getNbt().getInt(key) : 16
         );
     } // registerModel()
 

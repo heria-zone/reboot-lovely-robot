@@ -1,6 +1,6 @@
-package net.msymbios.llovelyr.entity.internal.enums;
+package net.msymbios.llovelyr.source.entity.internal.enums;
 
-import net.msymbios.llovelyr.config.LovelyIdentifier;
+import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 
 import java.util.Arrays;
 import java.util.Comparator;

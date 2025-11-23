@@ -1,6 +1,6 @@
-package net.msymbios.llovelyr.entity.internal.enums;
+package net.msymbios.llovelyr.source.entity.internal.enums;
 
-import net.msymbios.llovelyr.config.LovelyIdentifier;
+import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -47,7 +47,7 @@ public enum EntityModel {
     EntityModel(int id, String name) {
         this.m_id = id;
         this.m_name = name;
-    } // Constructor: EntityModel
+    } // Constructor: EntityModel ()
 
     // -- Deserialization --
 
@@ -62,7 +62,7 @@ public enum EntityModel {
             id = 0;
         }
         return CODEC[id];
-    } // byId
+    } // byId ()
 
     /**
      * Returns persistent identifier for serialization.
@@ -71,7 +71,7 @@ public enum EntityModel {
      */
     public int getId() {
         return this.m_id;
-    } // getId
+    } // getId ()
 
     /**
      * Finds model by resource location name.
@@ -86,7 +86,7 @@ public enum EntityModel {
             }
         }
         return null;
-    } // byName
+    } // byName ()
 
     /**
      * Returns model resource location.
@@ -95,6 +95,6 @@ public enum EntityModel {
      */
     public String getName() {
         return this.m_name;
-    } // getName
+    } // getName ()
 
 } // Enum: EntityModel
