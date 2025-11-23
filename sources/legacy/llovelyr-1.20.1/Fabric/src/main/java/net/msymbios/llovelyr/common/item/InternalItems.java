@@ -53,10 +53,10 @@ public class InternalItems {
      * Registers client-side model predicate for specific item.
      * <p>
      * <b>NBT-Based Switching:</b> Reads integer value from item NBT to select
-     * model variant. Returns 16 as default when NBT key missing (fallback model).
+     * model variant. Normalizes to 0.0-1.0 range for proper predicate matching.
      * <p>
-     * <b>Model Selection:</b> Item models should define overrides matching NBT
-     * values (0-15 for colors, 16 for random/default).
+     * <b>Model Selection:</b> Item models should define overrides with normalized
+     * values (0/17, 1/17, 2/17, etc.) for colors 0-16.
      * <p>
      * <i>Note:</i> Must be called on client-side only during initialization.
      * 
@@ -65,9 +65,12 @@ public class InternalItems {
      * @param key the NBT key to read value from
      */
     protected static void registerModel(Item item, Identifier tag, String key) {
-        ModelPredicateProviderRegistry.register(item, tag, (stack, world, entity, seed) ->
-                stack.getNbt() != null && stack.getNbt().contains(key) ? stack.getNbt().getInt(key) : 16
-        );
+        ModelPredicateProviderRegistry.register(item, tag, (stack, world, entity, seed) -> {
+            if (stack.getNbt() != null && stack.getNbt().contains(key)) {
+                return stack.getNbt().getInt(key) / 17.0f;
+            }
+            return 16 / 17.0f;
+        });
     } // registerModel()
 
     /**

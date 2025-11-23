@@ -85,7 +85,6 @@ public class LovelyItems extends InternalItems {
      * are registered.
      */
     public static void registerModel() {
-        registerModel(LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
         registerModel(LovelyItems.VANILLA_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
         registerModel(LovelyItems.BUNNY2_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
     } // registerModel()
