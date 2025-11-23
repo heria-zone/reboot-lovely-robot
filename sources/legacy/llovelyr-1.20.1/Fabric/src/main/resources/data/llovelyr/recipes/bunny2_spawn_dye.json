@@ -1,5 +1,6 @@
 {
-  "type": "minecraft:crafting_shapeless",
+  "type": "llovelyr:lovely_spawn_dye",
+  "category": "misc",
   "ingredients": [
     {
       "item": "llovelyr:bunny2_spawn"
@@ -9,7 +10,7 @@
     }
   ],
   "result": {
-    "count": 1,
-    "item": "llovelyr:bunny2_spawn"
+    "item": "llovelyr:bunny2_spawn",
+    "count": 1
   }
 }
