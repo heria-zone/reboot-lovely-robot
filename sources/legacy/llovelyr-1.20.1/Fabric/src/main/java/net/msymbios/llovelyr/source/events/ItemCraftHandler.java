@@ -50,20 +50,20 @@ public class ItemCraftHandler implements IItemCraftCallback {
      *
      * @param player the player crafting the item
      * @param crafted the crafted spawn egg (NBT will be modified)
-     * @param matrix the crafting input inventory
+     * @param inventory the crafting input inventory
      * @return PASS to continue vanilla crafting flow
      */
     @Override
-    public ActionResult onCraft(PlayerEntity player, ItemStack crafted, RecipeInputInventory matrix) {
+    public ActionResult onCraft(PlayerEntity player, ItemStack crafted, RecipeInputInventory inventory) {
 
         // Check if the crafted item is a SpawnItem
         if (crafted.getItem() instanceof SpawnEggItem) {
             ItemStack spawn = null;
             ItemStack dye = null;
 
-            // Iterate through the crafting matrix to find ingredients
-            for (int i = 0; i < matrix.size(); i++) {
-                ItemStack ingredient = matrix.getStack(i);
+            // Iterate through the crafting inventory to find ingredients
+            for (int i = 0; i < inventory.size(); i++) {
+                ItemStack ingredient = inventory.getStack(i);
 
                 // Pass NBT data from RobotCoreItem
                 if (ingredient.getItem() instanceof LovelyCoreItem) {
