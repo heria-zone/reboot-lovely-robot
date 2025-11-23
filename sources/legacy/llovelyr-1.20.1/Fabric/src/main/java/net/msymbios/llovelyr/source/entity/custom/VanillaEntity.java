@@ -33,11 +33,6 @@ public class VanillaEntity extends LovelyRobot {
         return new ItemStack(LovelyItems.ROBOT_CORE, 1);
     } // setDropItem
 
-    @Override
-    protected void displayExtra() {
-        // Vanilla robots use default display behavior from parent
-    } // displayExtra
-
     // -- Attribute Creation --
 
     /**

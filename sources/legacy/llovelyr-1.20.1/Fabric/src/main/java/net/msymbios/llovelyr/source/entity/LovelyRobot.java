@@ -423,7 +423,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
 
         dropItem.setNbt(nbt);
-        if (!customName.isEmpty()) dropItem.setCustomName(Text.literal(customName).copy().append(Utility.getRandomTitle()).formatted(Formatting.DARK_PURPLE));
+        //if (!customName.isEmpty()) dropItem.setCustomName(Text.literal(customName).copy().append(Utility.getRandomTitle()).formatted(Formatting.DARK_PURPLE)); // TODO: I wonder what to do!
         this.dropStack(dropItem, 0.0F);
     } // handleDropItems ()
 
