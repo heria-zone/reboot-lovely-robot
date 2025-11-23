@@ -1,5 +1,6 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "llovelyr:spawn_egg_crafting",
+  "category": "misc",
   "pattern": [
     "III",
     "ICI",
