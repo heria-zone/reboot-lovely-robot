@@ -54,7 +54,10 @@ public class InternalItems {
      * Registers client-side model predicate for dynamic item appearance.
      * <p>
      * <b>NBT-Based Switching:</b> Reads integer value from item NBT to select
-     * model variant. Returns 16 as default when NBT key missing (fallback model).
+     * model variant. Converts integer (0-16) to float for predicate matching.
+     * <p>
+     * <b>Model Selection:</b> Item models should define overrides with integer
+     * predicates (0-16) directly. The predicate returns the integer as a float.
      * <p>
      * <i>Note:</i> Must be called on client-side only during FMLClientSetupEvent.
      * 
@@ -63,9 +66,12 @@ public class InternalItems {
      * @param key the NBT key to read value from
      */
     protected static void registerModel(Item item, ResourceLocation tag, String key) {
-        ItemProperties.register(item, tag, (stack, world, entity, seed) -> 
-            stack.hasTag() && stack.getTag().contains(key) ? stack.getTag().getInt(key) : 16
-        );
+        ItemProperties.register(item, tag, (stack, world, entity, seed) -> {
+            if (stack.hasTag() && stack.getTag().contains(key)) {
+                return (float) stack.getTag().getInt(key);
+            }
+            return 16.0f;
+        });
     } // registerModel()
 
     /**
