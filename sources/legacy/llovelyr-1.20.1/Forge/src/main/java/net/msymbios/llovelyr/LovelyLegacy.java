@@ -8,6 +8,7 @@ import net.msymbios.llovelyr.source.configs.LovelyConfigs;
 import net.msymbios.llovelyr.source.entity.LovelyEntities;
 import net.msymbios.llovelyr.source.groups.LovelyGroups;
 import net.msymbios.llovelyr.source.items.LovelyItems;
+import net.msymbios.llovelyr.source.recipes.LovelyRecipes;
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -97,6 +98,7 @@ public class LovelyLegacy {
         LovelyItems.register(eventBus);
         LovelyGroups.register(eventBus);
         LovelyEntities.register(eventBus);
+        LovelyRecipes.RECIPE_SERIALIZERS.register(eventBus);
 
         eventBus.addListener(this::commonSetup);
         eventBus.addListener(this::clientSetup);

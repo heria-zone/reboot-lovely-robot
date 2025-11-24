@@ -68,9 +68,9 @@ public class InternalItems {
     protected static void registerModel(Item item, ResourceLocation tag, String key) {
         ItemProperties.register(item, tag, (stack, world, entity, seed) -> {
             if (stack.hasTag() && stack.getTag().contains(key)) {
-                return (float) stack.getTag().getInt(key);
+                return stack.getTag().getInt(key);
             }
-            return 16.0f;
+            return 16;
         });
     } // registerModel()
 
