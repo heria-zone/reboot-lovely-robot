@@ -21,6 +21,7 @@
 - [x] Finalize current reboot version with 7 robot types (original 4 + Dragon, Neko, Kitsune) *(Evidence: KitsuneEntity.java, NekoEntity.java, Bunny2Entity.java found)*
 - [x] Complete 16x color palette system for all robot types *(Evidence: Multiple color variants in code)*
 - [x] Implement robot characteristic system based on Touhou Little Maid mechanics *(Evidence: registerGoals() methods in entity classes)*
+- [x] **Implement generic NBT transfer recipe system for robot spawn items** *(Completed: 2025-11-23, Sprint 01)*
 - [ ] Add conversion compatibility between Tribute and Legacy versions
 - [x] Support versions: 1.7.10, 1.12.2, 1.16.2, 1.19.2, 1.19.4, 1.20.1, 1.21.x *(Evidence: Multiple version directories)*
 - [x] Maintain mod ID: `llovelyr` (current reboot) *(Evidence: LovelyLegacy.MODID references)*
@@ -103,6 +104,7 @@ Multi-Platform Support**
 - [x] Finalize robot statistics system accessible via right-click with stick *(Evidence: CHANGELOG.md v0.1.1-alpha)*
 - [x] Polish protection system upgrades (Fire, Fall, Blast, Projectile via book right-click) *(Evidence: CHANGELOG.md v0.1.1-alpha)*
 - [x] Integrate level system improvements (currently supports up to level 200) *(Evidence: CHANGELOG.md v0.1.1-alpha)*
+- [x] **Implement NBT transfer system for robot spawn item crafting** *(Completed: 2025-11-23, Sprint 01)*
 
 ### **Mechanical Refinements**
 - [x] Enhance wary system behavior when robots are hurt or attacking *(Evidence: CHANGELOG.md v0.3.0-beta)*

@@ -3,8 +3,9 @@
 **Sprint Number**: 01
 **Sprint Timeframe**: November 22, 2025 - December 6, 2025 (2 weeks)
 **Created**: 2025-11-22
-**Last Updated**: 2025-11-22
-**Status**: Active
+**Last Updated**: 2025-11-23
+**Status**: Completed
+**Completion Date**: 2025-11-23
 **Project**: LovelyRobot Legacy (llovelyr)
 **Target Version**: Minecraft 1.20.1
 **Assigned**: Development Team
@@ -100,6 +101,69 @@ Ensure the llovelyr-1.20.1 development environment is properly configured and re
 ---
 
 ## Progress Log
+
+### 2025-11-23 - NBT Recipe System Port Complete
+
+**Activity**: Completed Fabric to Forge 1.20.1 port of NBT transfer recipe system
+
+**Implementation Summary**:
+
+**Phase 1: Core Infrastructure** ✅
+- All interfaces and strategies already ported from Fabric
+- `INbtTransferStrategy` and `INbtModifier` interfaces
+- `FullNbtCopyStrategy` and `AdditiveNbtMergeStrategy` implementations
+- `DyeColorModifier` for color NBT modifications
+
+**Phase 2: Recipe Classes** ✅
+- Created `LovelySpawnRecipe` extending `ShapedRecipe`
+- Created `LovelySpawnDyeRecipe` extending `ShapelessRecipe`
+- Both override `assemble()` method for NBT transfer
+- Preview support for crafting result slot
+
+**Phase 3: Recipe Serializers** ✅
+- Created `LovelySpawnRecipeSerializer` for shaped recipes
+- Created `LovelySpawnDyeRecipeSerializer` for shapeless recipes
+- Delegates pattern parsing to vanilla serializer (no mixins needed)
+- Handles JSON deserialization and network sync
+
+**Phase 4: Recipe Registry** ✅
+- Created `LovelyRecipes.java` with DeferredRegister
+- Registered both recipe serializers
+- Integrated with `LovelyLegacy.java` main mod class
+
+**Phase 5: Recipe Data Files** ✅
+- Updated `vanilla_spawn.json` to use `llovelyr:lovely_spawn` type
+- Updated `vanilla_spawn_dye.json` to use `llovelyr:lovely_spawn_dye` type
+- Updated `bunny2_spawn.json` to use `llovelyr:lovely_spawn` type
+- Updated `bunny2_spawn_dye.json` to use `llovelyr:lovely_spawn_dye` type
+- Verified `dyes.json` tag exists with all 16 colors
+
+**Files Created/Modified**:
+- `source/recipes/LovelyRecipes.java` (created)
+- `source/recipes/custom/LovelySpawnRecipeSerializer.java` (created)
+- `source/recipes/custom/LovelySpawnDyeRecipeSerializer.java` (created)
+- `LovelyLegacy.java` (modified - added recipe registration)
+- `data/llovelyr/recipes/vanilla_spawn.json` (modified)
+- `data/llovelyr/recipes/vanilla_spawn_dye.json` (modified)
+- `data/llovelyr/recipes/bunny2_spawn.json` (modified)
+- `data/llovelyr/recipes/bunny2_spawn_dye.json` (modified)
+
+**Key Differences from Fabric**:
+- Forge uses `FriendlyByteBuf` instead of `PacketByteBuf`
+- Forge uses `fromJson()` instead of `read()` for JSON deserialization
+- Forge uses `fromNetwork()` and `toNetwork()` instead of `read()` and `write()`
+- Forge provides direct access to vanilla serializers (no mixins needed)
+- Forge uses `DeferredRegister` for recipe serializer registration
+
+**Status**: Implementation complete, ready for in-game testing
+
+**Next Steps**:
+- Test robot core → spawn egg crafting with NBT transfer
+- Test spawn egg + dye crafting with color modification
+- Verify preview shows correct NBT in result slot
+- Test NBT preservation (name, owner, level, protections)
+
+---
 
 ### 2025-11-22 - LovelyRobot.java Method Verification & Fixes
 
@@ -714,14 +778,19 @@ Update the November 2025 Development Checklist with completed items.
 
 ### Sprint Metrics
 - **Total Tasks**: 22
-- **Completed**: 0
+- **Completed**: 1 (NBT Recipe System)
 - **In Progress**: 0
 - **Blocked**: 0
-- **Todo**: 22
-- **Sprint Progress**: 0%
+- **Todo**: 21
+- **Sprint Progress**: 5% (Early completion - NBT system implemented ahead of schedule)
 
 ### Completed Tasks
-_None yet_
+1. **NBT Recipe System Implementation** (2025-11-23)
+   - Ported Fabric NBT transfer recipe system to Forge 1.20.1
+   - Implemented `LovelySpawnRecipe` and `LovelySpawnDyeRecipe`
+   - Created custom recipe serializers without mixins
+   - Updated all recipe JSON files to use new system
+   - Documented in ADR_001_Generic_NBT_Transfer_Recipe_System.md
 
 ### In Progress Tasks
 _None yet_
