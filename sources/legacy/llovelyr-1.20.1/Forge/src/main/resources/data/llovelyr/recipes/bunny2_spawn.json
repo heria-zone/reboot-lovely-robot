@@ -1,5 +1,6 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "llovelyr:lovely_spawn",
+  "category": "misc",
   "pattern": [
     "INI",
     "NCN",
