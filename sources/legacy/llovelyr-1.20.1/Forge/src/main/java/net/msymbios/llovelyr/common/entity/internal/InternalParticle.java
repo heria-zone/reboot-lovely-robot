@@ -54,7 +54,63 @@ public class InternalParticle {
             entity.level().addParticle(ParticleTypes.HEART, entity.getX(1.0D), entity.getRandomY() + 0.5D, entity.getZ(1.0D), d0, d1, d2);
         }
         entity.level().broadcastEntityEvent(entity, (byte) 7);
-    } // Heart ()`n    // -- Utility Methods --
+    } // Heart ()
+
+    /**
+     * Spawns poof particles around entity with size-based scaling.
+     * <p>
+     * <b>Usage:</b> Visual feedback for robot spawn, retrieval, or teleportation.
+     * Creates cloud-like effect that scales with entity dimensions.
+     * 
+     * @param entity entity to spawn particles around
+     */
+    public static void Poof(Entity entity) {
+        if (entity.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            for (int i = 0; i < MAXIMUM_NUMBER_PARTICLES; ++i) {
+                double d0 = calculateVelocity();
+                double d1 = calculateVelocity();
+                double d2 = calculateVelocity();
+                serverLevel.sendParticles(
+                    ParticleTypes.POOF,
+                    entity.getX(1.0D), 
+                    entity.getRandomY() + 0.5D, 
+                    entity.getZ(1.0D),
+                    1, // count per iteration
+                    d0, d1, d2, // velocity
+                    0.0 // speed multiplier
+                );
+            }
+        }
+    } // Poof ()
+
+    /**
+     * Spawns happy villager particles around entity with size-based scaling.
+     * <p>
+     * <b>Usage:</b> Visual feedback for robot level-up or positive events.
+     * Creates green sparkle effect that scales with entity dimensions.
+     * 
+     * @param entity entity to spawn particles around
+     */
+    public static void HappyVillager(Entity entity) {
+        if (entity.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            for (int i = 0; i < MAXIMUM_NUMBER_PARTICLES; ++i) {
+                double d0 = calculateVelocity();
+                double d1 = calculateVelocity();
+                double d2 = calculateVelocity();
+                serverLevel.sendParticles(
+                    ParticleTypes.HAPPY_VILLAGER,
+                    entity.getX(1.0D), 
+                    entity.getRandomY() + 0.5D, 
+                    entity.getZ(1.0D),
+                    1, // count per iteration
+                    d0, d1, d2, // velocity
+                    0.0 // speed multiplier
+                );
+            }
+        }
+    } // HappyVillager ()
+
+    // -- Utility Methods --
 
     /**
      * Calculates random particle velocity using Gaussian distribution.

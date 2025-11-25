@@ -56,6 +56,60 @@ public class InternalParticle {
         entity.getWorld().sendEntityStatus(entity, (byte) 7);
     } // Heart ()
 
+    /**
+     * Spawns poof particles around entity with size-based scaling.
+     * <p>
+     * <b>Usage:</b> Visual feedback for robot spawn, retrieval, or teleportation.
+     * Creates cloud-like effect that scales with entity dimensions.
+     * 
+     * @param entity entity to spawn particles around
+     */
+    public static void Poof(Entity entity) {
+        if (entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld) {
+            for (int i = 0; i < MAXIMUM_NUMBER_PARTICLES; ++i) {
+                double d0 = calculateVelocity();
+                double d1 = calculateVelocity();
+                double d2 = calculateVelocity();
+                serverWorld.spawnParticles(
+                    ParticleTypes.POOF,
+                    entity.getParticleX(1.0D), 
+                    entity.getRandomBodyY() + 0.5D, 
+                    entity.getParticleZ(1.0D),
+                    1, // count per iteration
+                    d0, d1, d2, // velocity
+                    0.0 // speed multiplier
+                );
+            }
+        }
+    } // Poof ()
+
+    /**
+     * Spawns happy villager particles around entity with size-based scaling.
+     * <p>
+     * <b>Usage:</b> Visual feedback for robot level-up or positive events.
+     * Creates green sparkle effect that scales with entity dimensions.
+     * 
+     * @param entity entity to spawn particles around
+     */
+    public static void HappyVillager(Entity entity) {
+        if (entity.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld) {
+            for (int i = 0; i < MAXIMUM_NUMBER_PARTICLES; ++i) {
+                double d0 = calculateVelocity();
+                double d1 = calculateVelocity();
+                double d2 = calculateVelocity();
+                serverWorld.spawnParticles(
+                    ParticleTypes.HAPPY_VILLAGER,
+                    entity.getParticleX(1.0D), 
+                    entity.getRandomBodyY() + 0.5D, 
+                    entity.getParticleZ(1.0D),
+                    1, // count per iteration
+                    d0, d1, d2, // velocity
+                    0.0 // speed multiplier
+                );
+            }
+        }
+    } // HappyVillager ()
+
     // -- Utility Methods --
 
     /**
