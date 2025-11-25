@@ -68,6 +68,10 @@ public class LovelyConfigs {
         public static int ProtectionLimitBlast = 80;
         public static int ProtectionLimitProjectile = 80;
 
+        // -- SMART CORE RETRIEVAL --
+        public static boolean EnableSmartCoreRetrieval = true;
+        public static double SmartCoreRetrievalDistance = 16.0;
+
         // -- ENTITY --
 
         // BUNNY2

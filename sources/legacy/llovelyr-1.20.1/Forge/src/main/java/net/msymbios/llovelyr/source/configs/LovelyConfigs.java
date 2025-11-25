@@ -63,6 +63,10 @@ public class LovelyConfigs {
     private static final ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_BLAST;
     private static final ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_PROJECTILE;
 
+    // SMART CORE RETRIEVAL
+    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_CORE_RETRIEVAL;
+    private static final ForgeConfigSpec.ConfigValue<Double> SMART_CORE_RETRIEVAL_DISTANCE;
+
     // -- ENTITY --
 
     // BUNNY2
@@ -202,6 +206,16 @@ public class LovelyConfigs {
                 .define("limit-projectile", 80);
         BUILDER.pop();
 
+        BUILDER.push("Smart Core Retrieval");
+        ENABLE_SMART_CORE_RETRIEVAL = BUILDER
+                .comment("Enable automatic core retrieval when robot dies near owner.", "Example: [true]")
+                .define("enable-smart-core-retrieval", true);
+
+        SMART_CORE_RETRIEVAL_DISTANCE = BUILDER
+                .comment("Maximum distance for automatic core retrieval (in blocks).", "Example: [16.0]")
+                .defineInRange("smart-core-retrieval-distance", 16.0, 0.0, 128.0);
+        BUILDER.pop();
+
         BUILDER.push("Entity");
 
         BUILDER.push("Bunny2");
@@ -307,6 +321,10 @@ public class LovelyConfigs {
     public static int ProtectionLimitBlast;
     public static int ProtectionLimitProjectile;
 
+    // SMART CORE RETRIEVAL
+    public static boolean EnableSmartCoreRetrieval;
+    public static double SmartCoreRetrievalDistance;
+
     // -- ENTITY --
 
     // BUNNY2
@@ -377,6 +395,10 @@ public class LovelyConfigs {
         ProtectionLimitFall = PROTECTION_LIMIT_FALL.get();
         ProtectionLimitBlast = PROTECTION_LIMIT_BLAST.get();
         ProtectionLimitProjectile = PROTECTION_LIMIT_PROJECTILE.get();
+
+        // -- SMART CORE RETRIEVAL --
+        EnableSmartCoreRetrieval = ENABLE_SMART_CORE_RETRIEVAL.get();
+        SmartCoreRetrievalDistance = SMART_CORE_RETRIEVAL_DISTANCE.get();
 
         // -- ENTITY --
 
