@@ -448,6 +448,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     @Override
     protected void handleInteract (ItemStack stack, PlayerEntity player) {
         super.handleInteract(stack, player);
+        handleStickRetrieval(stack, player);
         handleAutoAttack(stack);
         handleDisplayInteraction(stack);
     } // handleInteract ()
@@ -551,6 +552,19 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
                         displayGeneralMessage(getNotification(), true);
                     }
                 } catch (Exception ignored) {}
+                
+                // Spawn level-up particle effects (villager trade refresh particles)
+                InternalParticle.HappyVillager(this);
+                
+                // Play level-up sound effect (player experience level-up sound) - positional at robot location
+                this.getWorld().playSound(
+                    null, 
+                    this.getBlockPos(), 
+                    net.minecraft.sound.SoundEvents.ENTITY_PLAYER_LEVELUP, 
+                    net.minecraft.sound.SoundCategory.NEUTRAL, 
+                    1.0F, 
+                    1.0F
+                );
             }
         }
     } // addExp ()
@@ -618,5 +632,119 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BLAST_PROTECTION).append(": " + this.getBlastProtection()           + "/" + LovelyConfigs.Common.ProtectionLimitBlast), false);
         InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_PROJECTILE_PROTECTION).append(": " + this.getProjectileProtection() + "/" + LovelyConfigs.Common.ProtectionLimitProjectile), false);
     } // displayEnchantmentMessage ()
+
+    /**
+     * Processes stick-based robot retrieval interaction.
+     * <p>
+     * <b>Permission Check:</b> Validates player ownership before allowing retrieval.
+     * Only the robot's owner can retrieve it using a stick.
+     * <p>
+     * <b>Inventory Management:</b> Attempts to add spawn item to player inventory.
+     * If inventory is full, drops item at robot location as fallback.
+     * <p>
+     * <b>Feedback:</b> Spawns particle effects and plays sound to confirm retrieval.
+     * 
+     * @param stack the stick item stack
+     * @param player the player attempting retrieval
+     * @return true if retrieval was successful
+     */
+    protected boolean handleStickRetrieval(ItemStack stack, PlayerEntity player) {
+        // Only process stick items
+        if (!stack.isOf(Items.STICK)) return false;
+        
+        // Validate ownership
+        if (!this.isOwner(player)) return false;
+        
+        // Check if player has inventory space - if not, do nothing
+        if (player.getInventory().getEmptySlot() < 0) {
+            return false;
+        }
+        
+        // Create spawn item from current robot state
+        ItemStack spawnItem = createSpawnItemFromEntity();
+        
+        // Add to player inventory (we already checked there's space)
+        player.getInventory().insertStack(spawnItem);
+        
+        // Spawn particle effects (POOF particles)
+        InternalParticle.Poof(this);
+        
+        // Play sound effect
+        this.getWorld().playSound(
+            null, 
+            this.getBlockPos(), 
+            net.minecraft.sound.SoundEvents.ENTITY_ITEM_PICKUP, 
+            net.minecraft.sound.SoundCategory.PLAYERS, 
+            1.0F, 
+            1.0F
+        );
+        
+        // Consume stick in survival mode
+        if (!player.getAbilities().creativeMode) {
+            stack.decrement(1);
+        }
+        
+        // Remove robot entity
+        this.discard();
+        
+        return true;
+    } // handleStickRetrieval ()
+
+    /**
+     * Creates spawn item from current robot entity with full NBT preservation.
+     * <p>
+     * <b>Architecture:</b> Uses same NBT structure as handleItemDrop() to ensure
+     * consistency with core drop mechanics. Matches LovelySpawnItem.initialize()
+     * expectations for proper data transfer.
+     * <p>
+     * <b>Data Preservation:</b> Transfers all entity state including level, XP,
+     * protections, color, custom name, and owner through NBT compound.
+     * 
+     * @return ItemStack containing spawn item with complete robot data
+     */
+    private ItemStack createSpawnItemFromEntity() {
+        // Determine correct spawn item based on robot variant
+        final ItemStack spawnItem;
+        if (this.nativeEntity.key.equals("bunny2")) {
+            spawnItem = new ItemStack(net.msymbios.llovelyr.source.items.LovelyItems.BUNNY2_SPAWN, 1);
+        } else {
+            spawnItem = new ItemStack(net.msymbios.llovelyr.source.items.LovelyItems.VANILLA_SPAWN, 1);
+        }
+        
+        // Use same NBT structure as handleItemDrop()
+        NbtCompound nbt = spawnItem.getNbt();
+        if(nbt == null) nbt = new NbtCompound();
+
+        String customName = Utility.getEntityCustomName(this);
+        if (!customName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_CUSTOM_NAME, customName);
+
+        String ownerName = Utility.getEntityOwnerName(this);
+        if (!ownerName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
+
+        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.key);
+        nbt.putInt(LovelyIdentifier.STAT_COLOR, this.getTextureID());
+
+        nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
+        nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
+        nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
+
+        nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
+        nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());
+        nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
+        nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
+
+        spawnItem.setNbt(nbt);
+
+        // Apply custom name with title (commented for future use)
+        // if (!customName.isEmpty()) {
+        //     spawnItem.setCustomName(
+        //         Text.literal(customName)
+        //             .append(Utility.getRandomTitle())
+        //             .formatted(Formatting.DARK_PURPLE)
+        //     );
+        // }
+        
+        return spawnItem;
+    } // createSpawnItemFromEntity ()
 
 } // Class LovelyRobot
