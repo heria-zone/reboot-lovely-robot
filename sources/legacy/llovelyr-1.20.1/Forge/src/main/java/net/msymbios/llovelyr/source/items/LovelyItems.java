@@ -103,8 +103,8 @@ public class LovelyItems extends InternalItems {
      */
     public static void registerModel(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            registerModel(LovelyItems.VANILLA_SPAWN.get(), LovelyIdentifier.ITEM_TAG_VARIANT, LovelyIdentifier.STAT_COLOR);
-            registerModel(LovelyItems.BUNNY2_SPAWN.get(), LovelyIdentifier.ITEM_TAG_VARIANT, LovelyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.VANILLA_SPAWN.get(), LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.BUNNY2_SPAWN.get(), LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
         });
     } // registerModel()
 
