@@ -99,8 +99,24 @@ public class LovelySpawnItem extends SpawnEggItem {
                     world.emitGameEvent(user, GameEvent.ENTITY_PLACE, entity.getPos());
 
                     if (entity instanceof LovelyRobot robotEntity) {
-                        robotEntity.handleTame(user);
+                        // Set ownership without taming particles (spawning, not taming)
+                        robotEntity.setOwner(user);
+                        robotEntity.setSitting(false);
                         initialize(itemStack.getOrCreateNbt(), robotEntity);
+                        
+                        // Spawn POOF particles (spawn effect)
+                        net.msymbios.llovelyr.common.entity.internal.InternalParticle.Poof(robotEntity);
+                        
+                        // Play spawn sound effect (totem activation sound) - volume scales with entity size
+                        float volume = (float) Math.max(0.5F, Math.min(2.0F, entity.getWidth() * entity.getHeight()));
+                        world.playSound(
+                            null, 
+                            entity.getBlockPos(), 
+                            net.minecraft.sound.SoundEvents.ITEM_TOTEM_USE, 
+                            net.minecraft.sound.SoundCategory.NEUTRAL, 
+                            volume, 
+                            1.2F
+                        );
                     }
                     return TypedActionResult.consume(itemStack);
                 }
@@ -144,8 +160,24 @@ public class LovelySpawnItem extends SpawnEggItem {
                     world.emitGameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
 
                     if (entity instanceof LovelyRobot robotEntity) {
-                        robotEntity.handleTame(context.getPlayer());
+                        // Set ownership without taming particles (spawning, not taming)
+                        robotEntity.setOwner(context.getPlayer());
+                        robotEntity.setSitting(false);
                         initialize(itemStack.getOrCreateNbt(), robotEntity);
+                        
+                        // Spawn POOF particles (spawn effect)
+                        net.msymbios.llovelyr.common.entity.internal.InternalParticle.Poof(robotEntity);
+                        
+                        // Play spawn sound effect (totem activation sound) - volume scales with entity size
+                        float volume = (float) Math.max(0.5F, Math.min(2.0F, entity.getWidth() * entity.getHeight()));
+                        world.playSound(
+                            null, 
+                            entity.getBlockPos(), 
+                            net.minecraft.sound.SoundEvents.ITEM_TOTEM_USE, 
+                            net.minecraft.sound.SoundCategory.NEUTRAL, 
+                            volume, 
+                            1.2F
+                        );
                     }
                 }
 
