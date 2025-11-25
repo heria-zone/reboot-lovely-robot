@@ -5,7 +5,7 @@
 **Project**: LovelyRobot Multi-Variant Minecraft Mod
 **Related Documents**:
 - [SPRINT_PLANNING.md](SPRINT_PLANNING.md) - Sprint planning and tracking
-- [SPRINT_02_TASK.md](../development/sprints/active/SPRINT_02_TASK.md) - Current sprint tasks
+- [SPRINT_03_TASK.md](../development/sprints/active/SPRINT_03_TASK.md) - Current sprint tasks
 - [November 2025 Development Checklist](../development/tasks/November-2025-Development-Checklist.md) - Monthly goals
 - [CHANGELOG.md](../../CHANGELOG.md) - Historical changes
 - [README.md](../../README.md) - Project overview
@@ -719,7 +719,7 @@ net.msymbios.llovelyr/
 **Issue**: Only 2 of 7 robot types implemented
 **Priority**: High
 **Effort**: High
-**Plan**: Implement Honey, Bunny, Dragon, Neko, Kitsune (Sprint 02+)
+**Plan**: Implement Honey, Bunny, Dragon, Neko, Kitsune (Sprint 04+)
 
 #### Common Resources
 **Area**: Shared resource structure
@@ -1152,7 +1152,15 @@ net.msymbios.llovelyr/
    - Archive Sprint 01 task file
    - Update November checklist
 
-### Short-Term Goals (Sprint 02)
+### Short-Term Goals (Sprint 03 - Current)
+
+1. **New Interactive Features** - HIGH
+   - Robot retrieval system (stick interaction)
+   - Robot command system (admin commands)
+   - Robot core glow effect
+   - Smart core retrieval
+
+### Short-Term Goals (Sprint 04 - Next)
 
 1. **Remaining Robot Types** - HIGH
    - Implement Honey robot
@@ -1368,7 +1376,9 @@ The immediate focus is completing Sprint 01 with in-game testing and bug fixes, 
 
 **Document Status**: Active
 **Last Updated**: 2025-11-25
-**Next Review**: 2025-12-06 (Sprint 02 completion)
+**Next Review**: 2025-12-06 (Sprint 03 completion)
 **Maintained By**: Development Team
-**Related Sprint**: Sprint 02 (November 25 - December 6, 2025)
-**Previous Sprint**: Sprint 01 - NBT Recipe System (Completed 2025-11-23)
+**Related Sprint**: Sprint 03 - New Interactive Features (November 25 - December 6, 2025)
+**Previous Sprints**: 
+- Sprint 02 - NBT Recipe System (Completed 2025-11-23)
+- Sprint 01 - Vanilla & Bunny2 Implementation (Completed 2025-11-25)
