@@ -19,6 +19,7 @@
     { "predicate": {"llovelyr:variant": 12}, "model": "llovelyr:item/bunny2/bunny2_12" },
     { "predicate": {"llovelyr:variant": 13}, "model": "llovelyr:item/bunny2/bunny2_13" },
     { "predicate": {"llovelyr:variant": 14}, "model": "llovelyr:item/bunny2/bunny2_14" },
-    { "predicate": {"llovelyr:variant": 15}, "model": "llovelyr:item/bunny2/bunny2_15" }
+    { "predicate": {"llovelyr:variant": 15}, "model": "llovelyr:item/bunny2/bunny2_15" },
+    { "predicate": {"llovelyr:variant": 16}, "model": "llovelyr:item/bunny2/bunny2_16" }
   ]
 }
