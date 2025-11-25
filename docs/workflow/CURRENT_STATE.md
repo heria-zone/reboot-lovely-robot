@@ -4,7 +4,8 @@
 **Last Updated**: 2025-11-25
 **Project**: LovelyRobot Multi-Variant Minecraft Mod
 **Related Documents**:
-- [SPRINT_01_TASK.md](../development/sprints/active/SPRINT_01_TASK.md) - Current sprint tasks
+- [SPRINT_PLANNING.md](SPRINT_PLANNING.md) - Sprint planning and tracking
+- [SPRINT_02_TASK.md](../development/sprints/active/SPRINT_02_TASK.md) - Current sprint tasks
 - [November 2025 Development Checklist](../development/tasks/November-2025-Development-Checklist.md) - Monthly goals
 - [CHANGELOG.md](../../CHANGELOG.md) - Historical changes
 - [README.md](../../README.md) - Project overview
@@ -1367,6 +1368,7 @@ The immediate focus is completing Sprint 01 with in-game testing and bug fixes, 
 
 **Document Status**: Active
 **Last Updated**: 2025-11-25
-**Next Review**: 2025-12-06 (Sprint 01 completion)
+**Next Review**: 2025-12-06 (Sprint 02 completion)
 **Maintained By**: Development Team
-**Related Sprint**: Sprint 01 (November 22 - December 6, 2025)
+**Related Sprint**: Sprint 02 (November 25 - December 6, 2025)
+**Previous Sprint**: Sprint 01 - NBT Recipe System (Completed 2025-11-23)
