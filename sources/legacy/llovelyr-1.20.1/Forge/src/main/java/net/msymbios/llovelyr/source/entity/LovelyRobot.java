@@ -431,8 +431,78 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
 
         ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY() + (double)0.0F, this.getZ(), dropItem);
         itemEntity.setDefaultPickUpDelay();
+        
+        // Apply glowing effect to make core visible through walls
+        itemEntity.setGlowingTag(true);
+        
+        // Apply custom glow color based on robot variant
+        applyGlowColor(itemEntity, this.getTextureID());
+        
         this.level().addFreshEntity(itemEntity);
     } // handleDropItems ()
+
+    /**
+     * Applies custom glow color to dropped core based on robot texture variant.
+     * <p>
+     * <b>Architecture:</b> Uses Minecraft's scoreboard team system to assign glow colors.
+     * Each texture variant gets a dedicated team with matching color.
+     * <p>
+     * <b>Performance:</b> Teams are created once and reused. Lookup is O(1) hash map access.
+     * <p>
+     * <b>Fallback:</b> If team creation fails, entity retains default white glow.
+     * 
+     * @param itemEntity the dropped core item entity
+     * @param textureId the robot's texture variant ID
+     */
+    private void applyGlowColor(ItemEntity itemEntity, int textureId) {
+        try {
+            net.minecraft.world.scores.Scoreboard scoreboard = this.level().getScoreboard();
+            String teamName = "robot_core_" + textureId;
+            
+            net.minecraft.world.scores.PlayerTeam team = scoreboard.getPlayerTeam(teamName);
+            if (team == null) {
+                team = scoreboard.addPlayerTeam(teamName);
+                team.setColor(getColorForTexture(textureId));
+            }
+            
+            scoreboard.addPlayerToTeam(itemEntity.getStringUUID(), team);
+        } catch (Exception e) {
+            // Fallback to default glow if team creation fails
+            // Entity will still glow, just with default white color
+        }
+    } // applyGlowColor ()
+
+    /**
+     * Maps robot texture variant to Minecraft chat formatting color.
+     * <p>
+     * <b>Design Decision:</b> Uses ChatFormatting enum for color consistency with
+     * Minecraft's existing color system. Provides 16 distinct colors matching dye palette.
+     * 
+     * @param textureId the robot's texture variant ID
+     * @return corresponding ChatFormatting color
+     */
+    private ChatFormatting getColorForTexture(int textureId) {
+        EntityTexture texture = EntityTexture.byId(textureId);
+        return switch (texture) {
+            case WHITE -> ChatFormatting.WHITE;
+            case ORANGE -> ChatFormatting.GOLD;
+            case MAGENTA -> ChatFormatting.LIGHT_PURPLE;
+            case LIGHT_BLUE -> ChatFormatting.AQUA;
+            case YELLOW -> ChatFormatting.YELLOW;
+            case LIME -> ChatFormatting.GREEN;
+            case PINK -> ChatFormatting.LIGHT_PURPLE;
+            case GRAY -> ChatFormatting.DARK_GRAY;
+            case LIGHT_GRAY -> ChatFormatting.GRAY;
+            case CYAN -> ChatFormatting.DARK_AQUA;
+            case PURPLE -> ChatFormatting.DARK_PURPLE;
+            case BLUE -> ChatFormatting.BLUE;
+            case BROWN -> ChatFormatting.GOLD;
+            case GREEN -> ChatFormatting.DARK_GREEN;
+            case RED -> ChatFormatting.RED;
+            case BLACK -> ChatFormatting.BLACK;
+            default -> ChatFormatting.WHITE;
+        };
+    } // getColorForTexture ()
 
     @Override
     protected InteractionResult handleItemInteraction (ItemStack stack, Player player) {
@@ -611,6 +681,56 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         return true;
     } // handleBaseDefenseState ()
 
+    /**
+     * Handles robot death and core dropping with smart retrieval logic.
+     * <p>
+     * <b>Architecture:</b> Overrides parent dropEquipment() to intercept core drop
+     * and implement distance-based auto-retrieval. Falls back to normal drop with
+     * glow effect when retrieval conditions aren't met.
+     * <p>
+     * <b>Smart Retrieval:</b> When enabled, checks owner distance and attempts to
+     * add core directly to owner inventory. Provides feedback via particles, sound,
+     * and chat messages.
+     * <p>
+     * <b>Fallback Logic:</b> Drops core with glow effect when: config disabled,
+     * owner offline, owner too far, or inventory full.
+     */
+    @Override
+    protected void dropEquipment() {
+        // Check if smart retrieval is enabled
+        if (LovelyConfigs.EnableSmartCoreRetrieval && !this.level().isClientSide) {
+            Player owner = (Player) this.getOwner();
+            
+            if (owner != null && owner.isAlive()) {
+                double distance = this.distanceTo(owner);
+                double maxDistance = LovelyConfigs.SmartCoreRetrievalDistance;
+                
+                if (distance <= maxDistance) {
+                    // Attempt auto-retrieval
+                    if (attemptAutoRetrieval(owner)) {
+                        // Success - core retrieved, don't drop anything
+                        return;
+                    }
+                    // Inventory full - drop core with glow effect
+                    handleItemDrop();
+                    return;
+                } else {
+                    // Beyond range - notify owner of drop location
+                    String robotName = getRobotDisplayName();
+                    owner.displayClientMessage(
+                        Component.literal(robotName + " core dropped at ")
+                            .append(Component.literal(this.blockPosition().toShortString())
+                            .withStyle(ChatFormatting.YELLOW)),
+                        false
+                    );
+                }
+            }
+        }
+        
+        // Fallback: normal drop with glow effect (parent calls handleItemDrop)
+        super.dropEquipment();
+    } // dropEquipment ()
+
     public void displayGeneralMessage(boolean canShow, boolean showLevelUp) {
         if(!canShow) return;
         InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BAR)), false);
@@ -641,7 +761,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
      * Only the robot's owner can retrieve it using a stick.
      * <p>
      * <b>Inventory Management:</b> Attempts to add spawn item to player inventory.
-     * If inventory is full, drops item at robot location as fallback.
+     * If inventory is full, does nothing (no retrieval). Creative mode always succeeds.
      * <p>
      * <b>Feedback:</b> Spawns particle effects and plays sound to confirm retrieval.
      * 
@@ -656,16 +776,31 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         // Validate ownership
         if (!this.isOwnedBy(player)) return false;
         
-        // Check if player has inventory space - if not, do nothing
-        if (player.getInventory().getFreeSlot() < 0) {
+        // Check inventory space (creative mode always has space)
+        if (!player.getAbilities().instabuild && player.getInventory().getFreeSlot() < 0) {
+            // Inventory full in survival - do nothing
             return false;
         }
         
         // Create spawn item from current robot state
         ItemStack spawnItem = createSpawnItemFromEntity();
         
-        // Add to player inventory (we already checked there's space)
-        player.getInventory().add(spawnItem);
+        // Try to add to player inventory
+        boolean added = player.getInventory().add(spawnItem);
+        
+        // If item wasn't fully added (shouldn't happen in creative, but safety check)
+        if (!spawnItem.isEmpty()) {
+            // Drop the item at robot location
+            ItemEntity itemEntity = new ItemEntity(
+                this.level(), 
+                this.getX(), 
+                this.getY(), 
+                this.getZ(), 
+                spawnItem
+            );
+            itemEntity.setDefaultPickUpDelay();
+            this.level().addFreshEntity(itemEntity);
+        }
         
         // Spawn particle effects (POOF particles)
         InternalParticle.Poof(this);
@@ -748,5 +883,150 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         
         return spawnItem;
     } // createSpawnItemFromEntity ()
+
+    /**
+     * Attempts to automatically retrieve robot core to owner's inventory.
+     * <p>
+     * <b>Architecture:</b> Creates core item with full NBT data matching handleItemDrop()
+     * format. Attempts inventory addition and provides feedback on success.
+     * <p>
+     * <b>Data Preservation:</b> Uses same NBT structure as handleItemDrop() to ensure
+     * consistency. Core can be used to respawn robot with all stats intact.
+     * <p>
+     * <b>Feedback:</b> On success, spawns particles, plays sound, and sends confirmation
+     * message to owner.
+     * <p>
+     * <b>Creative Mode:</b> In creative mode, always succeeds regardless of inventory state.
+     * 
+     * @param owner the robot's owner player
+     * @return true if core was successfully added to inventory, false if inventory full
+     */
+    private boolean attemptAutoRetrieval(Player owner) {
+        // Creative mode always succeeds (items go to creative inventory)
+        if (owner.getAbilities().instabuild) {
+            spawnRetrievalParticles();
+            playRetrievalSound(owner);
+            
+            String robotName = getRobotDisplayName();
+            owner.displayClientMessage(
+                Component.literal(robotName + " core retrieved")
+                    .withStyle(ChatFormatting.GREEN),
+                true
+            );
+            return true;
+        }
+        
+        // Survival/Adventure mode - check inventory space
+        // Create core item with full NBT data
+        final ItemStack coreStack = setDropItem();
+        CompoundTag nbt = coreStack.getTag();
+        if(nbt == null) nbt = new CompoundTag();
+        
+        // Populate NBT (same as handleItemDrop)
+        String customName = Utility.getEntityCustomName(this);
+        if (!customName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_CUSTOM_NAME, customName);
+        
+        String ownerName = Utility.getEntityOwnerName(this);
+        if (!ownerName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
+        
+        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.key);
+        nbt.putInt(LovelyIdentifier.STAT_COLOR, this.getTextureID());
+        nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
+        nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
+        nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
+        nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
+        nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());
+        nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
+        nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
+        
+        coreStack.setTag(nbt);
+        
+        // Apply custom name with title (commented for future use)
+        // if (!customName.isEmpty()) {
+        //     coreStack.setHoverName(Component.nullToEmpty(customName)
+        //         .copy().append(Utility.getRandomTitle())
+        //         .withStyle(ChatFormatting.DARK_PURPLE));
+        // }
+        
+        // Try to add to inventory
+        boolean added = owner.getInventory().add(coreStack);
+        
+        // Check if the entire stack was added (stack should be empty)
+        if (added && coreStack.isEmpty()) {
+            // Success - spawn particles and send message
+            spawnRetrievalParticles();
+            playRetrievalSound(owner);
+            
+            String robotName = getRobotDisplayName();
+            owner.displayClientMessage(
+                Component.literal(robotName + " core retrieved")
+                    .withStyle(ChatFormatting.GREEN),
+                true
+            );
+            
+            return true;
+        }
+        
+        // Inventory full or couldn't add full stack - will drop normally
+        return false;
+    } // attemptAutoRetrieval ()
+
+    /**
+     * Gets display name for robot including type and custom name if available.
+     * <p>
+     * <b>Format:</b> Returns "CustomName (Type)" if named, otherwise just "Type"
+     * 
+     * @return formatted robot display name
+     */
+    private String getRobotDisplayName() {
+        String customName = Utility.getEntityCustomName(this);
+        String typeName = this.nativeEntity.key.substring(0, 1).toUpperCase() + this.nativeEntity.key.substring(1);
+        
+        if (!customName.isEmpty()) {
+            return customName + " (" + typeName + ")";
+        }
+        return typeName;
+    } // getRobotDisplayName ()
+
+    /**
+     * Spawns particle effects at robot location to indicate successful core retrieval.
+     * <p>
+     * <b>Visual Feedback:</b> Uses HAPPY_VILLAGER particles (green sparkles) to
+     * indicate positive outcome. Particles spawn in a small area around robot.
+     * <p>
+     * <b>Performance:</b> Spawns 10 particles with moderate spread. Minimal
+     * performance impact.
+     */
+    private void spawnRetrievalParticles() {
+        net.minecraft.server.level.ServerLevel serverLevel = (net.minecraft.server.level.ServerLevel) this.level();
+        serverLevel.sendParticles(
+            net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER,
+            this.getX(), this.getY() + 0.5, this.getZ(),
+            10, // count
+            0.5, 0.5, 0.5, // spread
+            0.0 // speed
+        );
+    } // spawnRetrievalParticles ()
+
+    /**
+     * Plays sound effect at owner location to indicate successful core retrieval.
+     * <p>
+     * <b>Audio Feedback:</b> Uses ITEM_PICKUP sound (same as picking up items)
+     * to provide familiar audio cue. Plays at owner's location for immediate feedback.
+     * <p>
+     * <b>Volume:</b> Standard volume (1.0) and pitch (1.0) for clear audibility.
+     * 
+     * @param owner the robot's owner player
+     */
+    private void playRetrievalSound(Player owner) {
+        this.level().playSound(
+            null,
+            owner.blockPosition(),
+            SoundEvents.ITEM_PICKUP,
+            net.minecraft.sounds.SoundSource.PLAYERS,
+            1.0F,
+            1.0F
+        );
+    } // playRetrievalSound ()
 
 } // Class LovelyRobot
