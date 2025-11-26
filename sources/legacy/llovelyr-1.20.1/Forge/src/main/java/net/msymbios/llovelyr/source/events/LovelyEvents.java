@@ -1,6 +1,7 @@
 package net.msymbios.llovelyr.source.events;
 
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.minecraftforge.api.distmarker.Dist;
@@ -8,6 +9,7 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.msymbios.llovelyr.source.commands.LovelyRobotCommand;
 import net.msymbios.llovelyr.source.entity.LovelyEntities;
 import net.msymbios.llovelyr.source.items.LovelyItems;
 
@@ -33,6 +35,38 @@ public class LovelyEvents {
     } // onRegisterEntityAttribute ()
 
     // -- Nested Classes --
+
+    /**
+     * FORGE bus event handlers for gameplay and server events.
+     * <p>
+     * <b>Bus:</b> Subscribes to FORGE bus for gameplay events (not MOD bus
+     * for lifecycle events). Command registration occurs on FORGE bus.
+     */
+    @Mod.EventBusSubscriber(modid = LovelyLegacy.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+    public static class ForgeEvents {
+
+        // -- Custom Methods --
+
+        /**
+         * Registers robot management commands during server initialization.
+         * <p>
+         * <b>Timing:</b> Fires during RegisterCommandsEvent, after command
+         * dispatcher is created but before server accepts connections. Ensures
+         * commands are available immediately when server starts.
+         * <p>
+         * <b>Architecture:</b> Delegates to LovelyRobotCommand for centralized
+         * command tree construction, maintaining separation of concerns between
+         * event handling and command logic.
+         *
+         * @param event the command registration event
+         */
+        @SubscribeEvent
+        public static void onRegisterCommands(RegisterCommandsEvent event) {
+            LovelyRobotCommand.register(event.getDispatcher());
+            LovelyLegacy.LOGGER.info("Registered LovelyRobot commands");
+        } // onRegisterCommands()
+
+    } // Class: ForgeEvents
 
     /**
      * Server-side event handlers for dedicated server lifecycle.

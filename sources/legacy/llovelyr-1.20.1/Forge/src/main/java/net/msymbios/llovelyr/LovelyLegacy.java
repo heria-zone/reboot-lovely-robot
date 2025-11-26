@@ -4,19 +4,27 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.msymbios.llovelyr.common.util.ObjectUtil;
 import net.msymbios.llovelyr.common.util.internal.Version;
 import net.msymbios.llovelyr.source.blocks.LovelyBlocks;
+import net.msymbios.llovelyr.source.commands.ColorArgumentType;
+import net.msymbios.llovelyr.source.commands.ColorArgumentTypeInfo;
 import net.msymbios.llovelyr.source.configs.LovelyConfigs;
 import net.msymbios.llovelyr.source.entity.LovelyEntities;
 import net.msymbios.llovelyr.source.groups.LovelyGroups;
 import net.msymbios.llovelyr.source.items.LovelyItems;
 import net.msymbios.llovelyr.source.recipes.LovelyRecipes;
 import com.mojang.logging.LogUtils;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 import software.bernie.geckolib.GeckoLib;
 
@@ -71,6 +79,24 @@ public class LovelyLegacy {
      */
     public static final Logger LOGGER = LogUtils.getLogger();
 
+    /**
+     * Deferred register for command argument types.
+     * <p>
+     * <b>Architecture:</b> Registers custom argument types with Minecraft's command
+     * system, enabling client-server synchronization of command arguments.
+     */
+    public static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES =
+        DeferredRegister.create(Registries.COMMAND_ARGUMENT_TYPE, MODID);
+
+    /**
+     * Registered ColorArgumentType for robot color selection commands.
+     * <p>
+     * <b>Registration:</b> Enables ColorArgumentType to be used in commands with
+     * proper client-server synchronization.
+     */
+    public static final RegistryObject<ArgumentTypeInfo<?, ?>> COLOR_ARGUMENT_TYPE =
+        COMMAND_ARGUMENT_TYPES.register("color", () -> new ColorArgumentTypeInfo());
+
     // -- Constructor --
 
     /**
@@ -99,6 +125,7 @@ public class LovelyLegacy {
         LovelyGroups.register(eventBus);
         LovelyEntities.register(eventBus);
         LovelyRecipes.RECIPE_SERIALIZERS.register(eventBus);
+        COMMAND_ARGUMENT_TYPES.register(eventBus);
 
         eventBus.addListener(this::commonSetup);
         eventBus.addListener(this::clientSetup);
@@ -122,6 +149,15 @@ public class LovelyLegacy {
      */
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("HELLO FROM COMMON: SETUP");
+        
+        // Register ColorArgumentType with ArgumentTypeInfos for client-server sync
+        event.enqueueWork(() -> {
+            ArgumentTypeInfos.registerByClass(
+                ColorArgumentType.class, 
+                (ArgumentTypeInfo<ColorArgumentType, ?>) COLOR_ARGUMENT_TYPE.get()
+            );
+            LOGGER.info("Registered ColorArgumentType");
+        });
     } // commonSetup()
 
     /**

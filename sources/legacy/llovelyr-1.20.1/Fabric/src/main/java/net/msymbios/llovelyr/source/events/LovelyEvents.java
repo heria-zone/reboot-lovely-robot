@@ -1,5 +1,8 @@
 package net.msymbios.llovelyr.source.events;
 
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.msymbios.llovelyr.source.commands.LovelyCommand;
+
 /**
  * Centralizes Fabric event handler registration.
  * <p>
@@ -24,10 +27,14 @@ public class LovelyEvents {
      * <b>Timing:</b> Must be called during mod initialization (onInitialize) to
      * ensure handlers are registered before events fire.
      * <p>
-     * <i>Note:</i> Event handlers removed - NBT transfer now handled by recipe system.
+     * <b>Command Registration:</b> Uses CommandRegistrationCallback to register
+     * robot management commands with Brigadier command system.
      */
     public static void register() {
-        // Event handlers removed - NBT transfer now handled by recipe system
+        // Register robot management commands
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            LovelyCommand.register(dispatcher);
+        });
     } // register()
 
 } // Class: LovelyEvents
