@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
 
 import java.util.concurrent.CompletableFuture;
@@ -78,7 +78,7 @@ public class ColorArgumentType implements ArgumentType<EntityTexture> {
         }
         
         throw new SimpleCommandExceptionType(
-            Component.literal("Unknown color: " + input + ". Valid colors: " + validColors)
+            Text.literal("Unknown color: " + input + ". Valid colors: " + validColors)
         ).create();
     } // parse()
 
