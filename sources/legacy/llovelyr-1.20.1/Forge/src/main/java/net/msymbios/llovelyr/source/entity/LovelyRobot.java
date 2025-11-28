@@ -32,6 +32,7 @@ import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 import net.msymbios.llovelyr.source.entity.internal.enums.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animatable.instance.SingletonAnimatableInstanceCache;
@@ -261,6 +262,13 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         handleActivateCombatMode();
         super.onEnterCombat();
     } // onEnterCombat ()
+    
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        // Trigger combat mode when acquiring a target (matches Fabric's onAttacking behavior)
+        if (target != null) handleActivateCombatMode();
+        super.setTarget(target);
+    } // setTarget ()
 
     @Override
     public ItemStack getItemBySlot(EquipmentSlot slot) {
