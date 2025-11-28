@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
@@ -21,6 +22,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
+import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.common.entity.goal.*;
 import net.msymbios.llovelyr.common.entity.internal.*;
 import net.msymbios.llovelyr.common.util.internal.Utility;
@@ -201,6 +203,19 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     public LovelyRobot(EntityType<? extends InternalEntity> entityType, Level level, NativeEntityType nativeEntityType) {
         super(entityType, level, nativeEntityType);
         rotate(Rotation.getRandom(this.getRandom()));
+
+        // Apply config-based attributes after construction
+        // Config is guaranteed to be loaded by the time entities spawn
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(nativeEntityType.getMaxHealth());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(nativeEntityType.getAttackDamage());
+        this.getAttribute(Attributes.ATTACK_SPEED).setBaseValue(nativeEntityType.getAttackSpeed());
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(nativeEntityType.getMoveSpeed());
+        this.getAttribute(Attributes.ARMOR).setBaseValue(nativeEntityType.getArmour());
+        this.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(nativeEntityType.getArmourToughness());
+
+        // Refresh navigation to pick up new movement speed
+        // AI goals cache the speed attribute, so we need to refresh after changing it
+        this.getNavigation().stop();
     } // Constructor LovelyRobot ()
 
     // -- Inherited Methods --
@@ -514,14 +529,14 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     protected boolean canInteractWithItems(ItemStack stack) {
         if(stack.getItem() instanceof DyeItem) return false;
         if(stack.getItem() instanceof SwordItem) return false;
-        if(stack.is(Items.STICK) || stack.is(Items.BOOK) || stack.is(Items.WRITABLE_BOOK) || stack.is(Items.OAK_BUTTON)) return false;
+        if(stack.is(Items.BOOK) || stack.is(Items.WRITABLE_BOOK) || stack.is(Items.OAK_BUTTON)) return false;
         return !stack.is(Items.COMPASS) && !stack.is(Items.RECOVERY_COMPASS);
     } // canInteractWithItems ()
 
     @Override
     protected void handleInteract (ItemStack stack, Player player) {
         super.handleInteract(stack, player);
-        handleStickRetrieval(stack, player);
+        handlePickupRetrieval(stack, player);
         handleAutoAttack(stack);
         handleDisplayInteraction(stack);
     } // handleInteract
@@ -755,76 +770,85 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     } // displayEnchantmentMessage ()
 
     /**
-     * Processes stick-based robot retrieval interaction.
+     * Processes robot retrieval interaction using Ctrl+Shift with empty hand.
+     * <p>
+     * <b>Input Requirements:</b> Player must hold Ctrl (crouch) and Shift while
+     * interacting with empty hand. This prevents accidental pickups during normal
+     * interaction.
      * <p>
      * <b>Permission Check:</b> Validates player ownership before allowing retrieval.
-     * Only the robot's owner can retrieve it using a stick.
+     * Only the robot's owner can retrieve it.
      * <p>
      * <b>Inventory Management:</b> Attempts to add spawn item to player inventory.
      * If inventory is full, does nothing (no retrieval). Creative mode always succeeds.
      * <p>
      * <b>Feedback:</b> Spawns particle effects and plays sound to confirm retrieval.
      * 
-     * @param stack the stick item stack
+     * @param stack the item stack in player's hand (must be empty)
      * @param player the player attempting retrieval
      * @return true if retrieval was successful
      */
-    protected boolean handleStickRetrieval(ItemStack stack, Player player) {
-        // Only process stick items
-        if (!stack.is(Items.STICK)) return false;
+    protected boolean handlePickupRetrieval(ItemStack stack, Player player) {
+        // Only process empty hand
+        if (!stack.isEmpty()) return false;
         
+        // Require Ctrl+Shift (crouch + shift)
+        if (!player.isCrouching() || !player.isShiftKeyDown()) return false;
+
         // Validate ownership
         if (!this.isOwnedBy(player)) return false;
-        
+
         // Check inventory space (creative mode always has space)
         if (!player.getAbilities().instabuild && player.getInventory().getFreeSlot() < 0) {
-            // Inventory full in survival - do nothing
+            // Inventory full in survival - notify player
+            if (!this.level().isClientSide) {
+                player.displayClientMessage(
+                    Component.literal("Inventory full - cannot retrieve robot")
+                        .withStyle(ChatFormatting.RED),
+                    true
+                );
+            }
             return false;
         }
-        
+
         // Create spawn item from current robot state
         ItemStack spawnItem = createSpawnItemFromEntity();
-        
+
         // Try to add to player inventory
-        boolean added = player.getInventory().add(spawnItem);
-        
+        boolean added = player.getInventory().add(spawnItem); // TODO: Inspect this later
+
         // If item wasn't fully added (shouldn't happen in creative, but safety check)
         if (!spawnItem.isEmpty()) {
             // Drop the item at robot location
             ItemEntity itemEntity = new ItemEntity(
-                this.level(), 
-                this.getX(), 
-                this.getY(), 
-                this.getZ(), 
+                this.level(),
+                this.getX(),
+                this.getY(),
+                this.getZ(),
                 spawnItem
             );
             itemEntity.setDefaultPickUpDelay();
             this.level().addFreshEntity(itemEntity);
         }
-        
+
         // Spawn particle effects (POOF particles)
         InternalParticle.Poof(this);
-        
+
         // Play sound effect
         this.level().playSound(
-            null, 
-            this.blockPosition(), 
-            SoundEvents.ITEM_PICKUP, 
-            net.minecraft.sounds.SoundSource.PLAYERS, 
-            1.0F, 
+            null,
+            this.blockPosition(),
+            SoundEvents.ITEM_PICKUP,
+            net.minecraft.sounds.SoundSource.PLAYERS,
+            1.0F,
             1.0F
         );
-        
-        // Consume stick in survival mode
-        if (!player.getAbilities().instabuild) {
-            stack.shrink(1);
-        }
-        
+
         // Remove robot entity
         this.discard();
-        
+
         return true;
-    } // handleStickRetrieval ()
+    } // handlePickupRetrieval ()
 
     /**
      * Creates spawn item from current robot entity with full NBT preservation.

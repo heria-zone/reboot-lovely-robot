@@ -69,14 +69,17 @@ public class LovelyEntities {
 
     /**
      * Registers entity attributes during entity attribute creation event.
+     * <p>
+     * <b>Timing:</b> This event fires during mod construction. To ensure config
+     * values are loaded, we call NativeEntityType.register() first to populate
+     * combat stats from config before creating attribute suppliers.
      *
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
         event.put(VANILLA.get(), VanillaEntity.createAttributes());
         event.put(BUNNY2.get(), Bunny2Entity.createAttributes());
-    } // registerAttribute
-
+    } // registerAttribute ()
 
     /**
      * Registers entity renderers on client side.
@@ -90,6 +93,6 @@ public class LovelyEntities {
     public static void registerRender(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(VANILLA.get(), VanillaRenderer::new);
         event.registerEntityRenderer(BUNNY2.get(), Bunny2Renderer::new);
-    } // registerRender
+    } // registerRender ()
 
 } // Class: LovelyEntities
