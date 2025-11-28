@@ -65,6 +65,27 @@ public class LovelyConfigs {
     private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_CORE_RETRIEVAL;
     private static final ForgeConfigSpec.ConfigValue<Double> SMART_CORE_RETRIEVAL_DISTANCE;
 
+    // AI BEHAVIOR
+    private static final ForgeConfigSpec.ConfigValue<Integer> OWNER_STILL_THRESHOLD;
+    private static final ForgeConfigSpec.ConfigValue<Integer> WANDER_CHECK_INTERVAL;
+    private static final ForgeConfigSpec.ConfigValue<Double> WANDER_CHANCE;
+    private static final ForgeConfigSpec.ConfigValue<Double> WANDER_RADIUS_MIN;
+    private static final ForgeConfigSpec.ConfigValue<Double> WANDER_RADIUS_MAX;
+    private static final ForgeConfigSpec.ConfigValue<Integer> WANDER_DURATION_MIN;
+    private static final ForgeConfigSpec.ConfigValue<Integer> WANDER_DURATION_MAX;
+    private static final ForgeConfigSpec.ConfigValue<Integer> WANDER_COOLDOWN_MIN;
+    private static final ForgeConfigSpec.ConfigValue<Integer> WANDER_COOLDOWN_MAX;
+    private static final ForgeConfigSpec.ConfigValue<Integer> PATROL_DURATION_MIN;
+    private static final ForgeConfigSpec.ConfigValue<Integer> PATROL_DURATION_MAX;
+    private static final ForgeConfigSpec.ConfigValue<Integer> GUARD_DURATION_MIN;
+    private static final ForgeConfigSpec.ConfigValue<Integer> GUARD_DURATION_MAX;
+    private static final ForgeConfigSpec.ConfigValue<Integer> PATROL_PAUSE_DURATION_MIN;
+    private static final ForgeConfigSpec.ConfigValue<Integer> PATROL_PAUSE_DURATION_MAX;
+    private static final ForgeConfigSpec.ConfigValue<Double> GUARD_ROTATION_SPEED;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_COMBAT_RADIUS_PARTICLES;
+    private static final ForgeConfigSpec.ConfigValue<Integer> COMBAT_RADIUS_PARTICLE_COUNT;
+    private static final ForgeConfigSpec.ConfigValue<Double> COMBAT_RADIUS_PARTICLE_SPREAD;
+
     // -- ENTITY --
 
     // BUNNY2
@@ -113,7 +134,7 @@ public class LovelyConfigs {
 
         FOLLOW_DISTANCE_MIN = BUILDER
                 .comment("Minimum distance allowed while following.", "Example: [2]")
-                .define("follow-distance-min", 0.2F);
+                .define("follow-distance-min", 2F);
 
         LOOK_RANGE = BUILDER
                 .comment("How much should the head rotate while looking.", "Example: [8]")
@@ -212,6 +233,92 @@ public class LovelyConfigs {
         SMART_CORE_RETRIEVAL_DISTANCE = BUILDER
                 .comment("Maximum distance for automatic core retrieval (in blocks).", "Example: [16.0]")
                 .defineInRange("smart-core-retrieval-distance", 16.0, 0.0, 128.0);
+        BUILDER.pop();
+
+        BUILDER.push("AI Behavior");
+        
+        BUILDER.push("Follow Mode");
+        OWNER_STILL_THRESHOLD = BUILDER
+                .comment("Time (in ticks) owner must be stationary before robot considers wandering.", "Example: [100] (5 seconds)")
+                .defineInRange("owner-still-threshold", 100, 0, 6000);
+
+        WANDER_CHECK_INTERVAL = BUILDER
+                .comment("Interval (in ticks) between wander chance checks.", "Example: [200] (10 seconds)")
+                .defineInRange("wander-check-interval", 200, 100, 6000);
+
+        WANDER_CHANCE = BUILDER
+                .comment("Probability of wandering when owner is stationary (0.0-1.0).", "Example: [0.15] (15%)")
+                .defineInRange("wander-chance", 0.15, 0.0, 1.0);
+
+        WANDER_RADIUS_MIN = BUILDER
+                .comment("Minimum wander radius from owner (in blocks).", "Example: [3.0]")
+                .defineInRange("wander-radius-min", 3.0, 1.0, 32.0);
+
+        WANDER_RADIUS_MAX = BUILDER
+                .comment("Maximum wander radius from owner (in blocks).", "Example: [6.0]")
+                .defineInRange("wander-radius-max", 6.0, 1.0, 32.0);
+
+        WANDER_DURATION_MIN = BUILDER
+                .comment("Minimum wander duration (in ticks).", "Example: [100] (5 seconds)")
+                .defineInRange("wander-duration-min", 100, 20, 6000);
+
+        WANDER_DURATION_MAX = BUILDER
+                .comment("Maximum wander duration (in ticks).", "Example: [200] (10 seconds)")
+                .defineInRange("wander-duration-max", 200, 20, 6000);
+
+        WANDER_COOLDOWN_MIN = BUILDER
+                .comment("Minimum cooldown between wanders (in ticks).", "Example: [400] (20 seconds)")
+                .defineInRange("wander-cooldown-min", 400, 100, 12000);
+
+        WANDER_COOLDOWN_MAX = BUILDER
+                .comment("Maximum cooldown between wanders (in ticks).", "Example: [800] (40 seconds)")
+                .defineInRange("wander-cooldown-max", 800, 100, 12000);
+        BUILDER.pop();
+
+        BUILDER.push("Defense Mode");
+        PATROL_DURATION_MIN = BUILDER
+                .comment("Minimum patrol duration (in ticks).", "Example: [600] (30 seconds)")
+                .defineInRange("patrol-duration-min", 600, 100, 6000);
+
+        PATROL_DURATION_MAX = BUILDER
+                .comment("Maximum patrol duration (in ticks).", "Example: [900] (45 seconds)")
+                .defineInRange("patrol-duration-max", 900, 100, 6000);
+
+        GUARD_DURATION_MIN = BUILDER
+                .comment("Minimum guard duration (in ticks).", "Example: [400] (20 seconds)")
+                .defineInRange("guard-duration-min", 400, 100, 6000);
+
+        GUARD_DURATION_MAX = BUILDER
+                .comment("Maximum guard duration (in ticks).", "Example: [600] (30 seconds)")
+                .defineInRange("guard-duration-max", 600, 100, 6000);
+
+        PATROL_PAUSE_DURATION_MIN = BUILDER
+                .comment("Minimum pause duration at patrol points (in ticks).", "Example: [40] (2 seconds)")
+                .defineInRange("patrol-pause-duration-min", 40, 10, 600);
+
+        PATROL_PAUSE_DURATION_MAX = BUILDER
+                .comment("Maximum pause duration at patrol points (in ticks).", "Example: [80] (4 seconds)")
+                .defineInRange("patrol-pause-duration-max", 80, 10, 600);
+
+        GUARD_ROTATION_SPEED = BUILDER
+                .comment("Rotation speed during guard phase (radians per tick).", "Example: [0.05]")
+                .defineInRange("guard-rotation-speed", 0.05, 0.01, 0.5);
+        BUILDER.pop();
+
+        BUILDER.push("Combat");
+        ENABLE_COMBAT_RADIUS_PARTICLES = BUILDER
+                .comment("Enable smoke particles when robot cannot chase enemy beyond radius.", "Example: [true]")
+                .define("enable-combat-radius-particles", true);
+
+        COMBAT_RADIUS_PARTICLE_COUNT = BUILDER
+                .comment("Number of smoke particles to spawn.", "Example: [8]")
+                .defineInRange("combat-radius-particle-count", 8, 1, 50);
+
+        COMBAT_RADIUS_PARTICLE_SPREAD = BUILDER
+                .comment("Spread radius for smoke particles.", "Example: [0.3]")
+                .defineInRange("combat-radius-particle-spread", 0.3, 0.1, 2.0);
+        BUILDER.pop();
+        
         BUILDER.pop();
 
         BUILDER.push("Entity");
@@ -323,6 +430,27 @@ public class LovelyConfigs {
     public static boolean EnableSmartCoreRetrieval;
     public static double SmartCoreRetrievalDistance;
 
+    // AI BEHAVIOR
+    public static int OwnerStillThreshold;
+    public static int WanderCheckInterval;
+    public static double WanderChance;
+    public static double WanderRadiusMin;
+    public static double WanderRadiusMax;
+    public static int WanderDurationMin;
+    public static int WanderDurationMax;
+    public static int WanderCooldownMin;
+    public static int WanderCooldownMax;
+    public static int PatrolDurationMin;
+    public static int PatrolDurationMax;
+    public static int GuardDurationMin;
+    public static int GuardDurationMax;
+    public static int PatrolPauseDurationMin;
+    public static int PatrolPauseDurationMax;
+    public static double GuardRotationSpeed;
+    public static boolean EnableCombatRadiusParticles;
+    public static int CombatRadiusParticleCount;
+    public static double CombatRadiusParticleSpread;
+
     // -- ENTITY --
 
     // BUNNY2
@@ -399,6 +527,27 @@ public class LovelyConfigs {
         // -- SMART CORE RETRIEVAL --
         EnableSmartCoreRetrieval = ENABLE_SMART_CORE_RETRIEVAL.get();
         SmartCoreRetrievalDistance = SMART_CORE_RETRIEVAL_DISTANCE.get();
+
+        // -- AI BEHAVIOR --
+        OwnerStillThreshold = OWNER_STILL_THRESHOLD.get();
+        WanderCheckInterval = WANDER_CHECK_INTERVAL.get();
+        WanderChance = WANDER_CHANCE.get();
+        WanderRadiusMin = WANDER_RADIUS_MIN.get();
+        WanderRadiusMax = WANDER_RADIUS_MAX.get();
+        WanderDurationMin = WANDER_DURATION_MIN.get();
+        WanderDurationMax = WANDER_DURATION_MAX.get();
+        WanderCooldownMin = WANDER_COOLDOWN_MIN.get();
+        WanderCooldownMax = WANDER_COOLDOWN_MAX.get();
+        PatrolDurationMin = PATROL_DURATION_MIN.get();
+        PatrolDurationMax = PATROL_DURATION_MAX.get();
+        GuardDurationMin = GUARD_DURATION_MIN.get();
+        GuardDurationMax = GUARD_DURATION_MAX.get();
+        PatrolPauseDurationMin = PATROL_PAUSE_DURATION_MIN.get();
+        PatrolPauseDurationMax = PATROL_PAUSE_DURATION_MAX.get();
+        GuardRotationSpeed = GUARD_ROTATION_SPEED.get();
+        EnableCombatRadiusParticles = ENABLE_COMBAT_RADIUS_PARTICLES.get();
+        CombatRadiusParticleCount = COMBAT_RADIUS_PARTICLE_COUNT.get();
+        CombatRadiusParticleSpread = COMBAT_RADIUS_PARTICLE_SPREAD.get();
 
         // -- ENTITY --
 

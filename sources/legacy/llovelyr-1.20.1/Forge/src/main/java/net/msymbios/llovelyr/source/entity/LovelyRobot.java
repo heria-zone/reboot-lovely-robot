@@ -213,6 +213,8 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         this.getAttribute(Attributes.ARMOR).setBaseValue(nativeEntityType.getArmour());
         this.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(nativeEntityType.getArmourToughness());
 
+        this.setHealth(this.getMaxHealth());
+
         // Refresh navigation to pick up new movement speed
         // AI goals cache the speed attribute, so we need to refresh after changing it
         this.getNavigation().stop();
@@ -234,12 +236,12 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new MeleeAttackGoal(this, LovelyConfigs.MovementMeleeAttack, true));
-        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, LovelyConfigs.MovementFollowOwner, LovelyConfigs.FollowDistanceMax, LovelyConfigs.FollowDistanceMin, false));
+        this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, LovelyConfigs.MovementFollowOwner, LovelyConfigs.FollowDistanceMin, LovelyConfigs.FollowDistanceMax, false));
         this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, LovelyConfigs.MovementFollowOwner, LovelyConfigs.BaseDefenceRange, LovelyConfigs.BaseDefenceWarpRange));
-        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, LovelyConfigs.MovementWanderAround));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, LovelyConfigs.LookRange));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, LivingEntity.class, LovelyConfigs.LookRange));
-        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(6, new AiConditionalWanderGoal(this, LovelyConfigs.MovementWanderAround));
+        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, LovelyConfigs.LookRange));
+        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, LovelyConfigs.LookRange));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));

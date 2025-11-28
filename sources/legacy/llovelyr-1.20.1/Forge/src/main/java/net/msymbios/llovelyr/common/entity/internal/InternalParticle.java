@@ -110,6 +110,32 @@ public class InternalParticle {
         }
     } // HappyVillager ()
 
+    /**
+     * Spawns smoke particles around entity to indicate combat radius limitation.
+     * <p>
+     * <b>Usage:</b> Visual feedback when robot cannot chase enemy beyond allowed radius.
+     * Indicates robot is at maximum pursuit distance from owner or base position.
+     * <p>
+     * <b>Configuration:</b> Particle count and spread controlled by config values.
+     * 
+     * @param entity entity to spawn particles around
+     * @param particleCount number of smoke particles to spawn
+     * @param spread particle spread radius
+     */
+    public static void Smoke(Entity entity, int particleCount, double spread) {
+        if (entity.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+                ParticleTypes.SMOKE,
+                entity.getX(),
+                entity.getY() + 0.5,
+                entity.getZ(),
+                particleCount,
+                spread, spread, spread, // spread in x, y, z
+                0.01 // speed
+            );
+        }
+    } // Smoke ()
+
     // -- Utility Methods --
 
     /**
