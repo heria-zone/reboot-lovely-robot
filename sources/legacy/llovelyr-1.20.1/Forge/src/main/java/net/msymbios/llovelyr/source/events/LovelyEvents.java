@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.msymbios.llovelyr.source.commands.LovelyRobotCommand;
 import net.msymbios.llovelyr.source.entity.LovelyEntities;
+import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 import net.msymbios.llovelyr.source.items.LovelyItems;
 
 /**

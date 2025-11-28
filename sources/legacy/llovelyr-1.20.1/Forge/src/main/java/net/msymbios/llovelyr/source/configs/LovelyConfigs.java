@@ -3,7 +3,6 @@ package net.msymbios.llovelyr.source.configs;
 import com.electronwill.nightconfig.core.Config;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -12,9 +11,8 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
@@ -345,6 +343,8 @@ public class LovelyConfigs {
     public static float VanillaArmor;
     public static float VanillaArmorToughness;
 
+    private static final List<Runnable> onLoadCallbacks = new ArrayList<>();
+
     // -- Custom Methods --
 
     public static void register(FMLJavaModLoadingContext context) {
@@ -419,6 +419,12 @@ public class LovelyConfigs {
         VanillaMovementSpeed = VANILLA_MOVEMENT_SPEED.get();
         VanillaArmor = VANILLA_ARMOR.get();
         VanillaArmorToughness = VANILLA_ARMOR_TOUGHNESS.get();
+
+        onLoadCallbacks.forEach(Runnable::run);
     } // onLoad ()
+
+    public static void onLoadCallback(Runnable callback) {
+        onLoadCallbacks.add(callback);
+    } // onLoadCallback ()
 
 } // Class: LovelyConfigs

@@ -1,6 +1,5 @@
 package net.msymbios.llovelyr;
 
-import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.msymbios.llovelyr.common.util.ObjectUtil;
 import net.msymbios.llovelyr.common.util.internal.Version;
 import net.msymbios.llovelyr.source.blocks.LovelyBlocks;
@@ -8,6 +7,7 @@ import net.msymbios.llovelyr.source.commands.ColorArgumentType;
 import net.msymbios.llovelyr.source.commands.ColorArgumentTypeInfo;
 import net.msymbios.llovelyr.source.configs.LovelyConfigs;
 import net.msymbios.llovelyr.source.entity.LovelyEntities;
+import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 import net.msymbios.llovelyr.source.groups.LovelyGroups;
 import net.msymbios.llovelyr.source.items.LovelyItems;
 import net.msymbios.llovelyr.source.recipes.LovelyRecipes;
@@ -15,7 +15,6 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -23,7 +22,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 import software.bernie.geckolib.GeckoLib;
@@ -119,6 +117,7 @@ public class LovelyLegacy {
         GeckoLib.initialize();
 
         LovelyConfigs.register(context);
+        LovelyConfigs.onLoadCallback(NativeEntityType::register);
 
         LovelyBlocks.register(eventBus);
         LovelyItems.register(eventBus);
