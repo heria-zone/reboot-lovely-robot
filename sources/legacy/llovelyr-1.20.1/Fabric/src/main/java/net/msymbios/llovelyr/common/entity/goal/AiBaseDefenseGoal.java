@@ -247,22 +247,39 @@ public class AiBaseDefenseGoal extends Goal {
      * <p>
      * <b>Head Stabilization:</b> Only updates look direction when paused to prevent
      * head bobbing during movement. Maintains forward-facing orientation while walking.
+     * <p>
+     * <b>Directional Looking:</b> Looks horizontally around the area and toward the
+     * next patrol destination for purposeful, natural scanning behavior.
      */
     private void tickPatrol() {
         // Check if pausing at patrol point
         if (patrolPauseTimer > 0) {
             patrolPauseTimer--;
             
-            // Look around while paused - but only change direction every 20 ticks (1 second)
+            // Look toward next patrol target or scan horizontally around the area
             if (--lookTimer <= 0) {
-                lookTimer = 20; // Reset look timer (1 second between look changes)
-                entity.getLookControl().lookAt(
-                    entity.getBaseX() + (entity.getRandom().nextDouble() - 0.5) * minDistance,
-                    entity.getBaseY(),
-                    entity.getBaseZ() + (entity.getRandom().nextDouble() - 0.5) * minDistance,
-                    10.0F,
-                    (float) entity.getMaxLookPitchChange()
-                );
+                lookTimer = 40; // Reset look timer (2 seconds between look changes)
+                
+                if (currentPatrolTarget != null) {
+                    // Look toward the next patrol destination
+                    entity.getLookControl().lookAt(
+                        currentPatrolTarget.getX() + 0.5,
+                        entity.getY(), // Keep Y at entity level for horizontal looking
+                        currentPatrolTarget.getZ() + 0.5,
+                        5.0F,  // Slow, smooth head turning
+                        (float) entity.getMaxLookPitchChange()
+                    );
+                } else {
+                    // If no target yet, look around horizontally in the patrol area
+                    double lookRadius = minDistance * 0.6;
+                    entity.getLookControl().lookAt(
+                        entity.getX() + (entity.getRandom().nextDouble() - 0.5) * lookRadius,
+                        entity.getY(), // Keep Y at entity level for horizontal looking
+                        entity.getZ() + (entity.getRandom().nextDouble() - 0.5) * lookRadius,
+                        5.0F,
+                        (float) entity.getMaxLookPitchChange()
+                    );
+                }
             }
             return;
         }
@@ -280,6 +297,17 @@ public class AiBaseDefenseGoal extends Goal {
                 // Set random pause duration for when we reach this point
                 int pauseRange = LovelyConfigs.Common.PatrolPauseDurationMax - LovelyConfigs.Common.PatrolPauseDurationMin;
                 patrolPauseTimer = LovelyConfigs.Common.PatrolPauseDurationMin + entity.getRandom().nextInt(pauseRange + 1);
+                
+                // Initialize look timer and immediately set look direction to prevent head snap
+                lookTimer = 40; // Will trigger on next pause tick
+                // Pre-set look direction toward next target to avoid transition glitch
+                entity.getLookControl().lookAt(
+                    currentPatrolTarget.getX() + 0.5,
+                    entity.getY(),
+                    currentPatrolTarget.getZ() + 0.5,
+                    5.0F,
+                    (float) entity.getMaxLookPitchChange()
+                );
             }
         }
     } // tickPatrol

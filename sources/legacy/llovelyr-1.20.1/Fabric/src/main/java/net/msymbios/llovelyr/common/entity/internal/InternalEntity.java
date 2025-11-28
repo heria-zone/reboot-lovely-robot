@@ -338,7 +338,11 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
     } // handleActivateCombatMode ()
 
     protected void handleCombatMode() {
-        if(this.isAttacking()) handleActivateCombatMode();
+        // Check if robot is attacking or has a target and activate combat mode
+        if(this.isAttacking() || this.getTarget() != null) {
+            handleActivateCombatMode();
+        }
+        
         if(this.getWorld().isClient && !combatMode) return;
 
         if(waryTimer != 0) {
