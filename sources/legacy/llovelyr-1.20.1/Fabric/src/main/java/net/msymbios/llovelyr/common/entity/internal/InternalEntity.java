@@ -46,7 +46,7 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
     protected static final TrackedData<Boolean> NOTIFICATION = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
     protected int waryTimer = 0, autoHealTimer = 0;
-    protected boolean combatMode = false, autoHeal = false;
+    protected boolean combatMode = false, autoHeal = false, canWander = false;
     public InternalEntityType<?> nativeEntity;
     protected EntityModel model = EntityModel.Default;
 
@@ -111,6 +111,53 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
     public void setNotification(boolean value) {
         this.dataTracker.set(NOTIFICATION, value);
     } // setNotification ()
+
+    // COMBAT MODE
+
+    /**
+     * Checks if robot is in combat (wary) mode.
+     * <p>
+     * <b>Usage:</b> Determines if robot is actively engaged in combat or recently
+     * was in combat. Combat mode is activated when robot attacks or is attacked,
+     * and persists for WaryTime ticks after combat ends.
+     * <p>
+     * <b>Behavior Impact:</b> Affects follow distance, movement priorities, and
+     * visual model (armed vs default stance).
+     *
+     * @return true if robot is in combat mode (wary)
+     */
+    public boolean isWary() {
+        return combatMode;
+    } // isWary ()
+
+    // WANDER PERMISSION
+
+    /**
+     * Checks if robot is allowed to wander.
+     * <p>
+     * <b>Usage:</b> Controlled by AiConditionalWanderGoal to signal when wandering
+     * is active. When true, AiFollowOwnerGoal yields priority to allow wandering.
+     * <p>
+     * <b>Behavior Impact:</b> Disables follow goal when owner is stationary and
+     * robot is wandering nearby.
+     *
+     * @return true if robot can wander (owner stationary, conditions met)
+     */
+    public boolean canWander() {
+        return canWander;
+    } // canWander ()
+
+    /**
+     * Sets whether robot is allowed to wander.
+     * <p>
+     * <b>Usage:</b> Set by AiConditionalWanderGoal when wander conditions are met
+     * or when owner starts moving again.
+     *
+     * @param value true to allow wandering, false to disable
+     */
+    public void setCanWander(boolean value) {
+        canWander = value;
+    } // setCanWander ()
 
     // -- Constructor --
 

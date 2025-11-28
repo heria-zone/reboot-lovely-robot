@@ -220,12 +220,12 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         this.goalSelector.add(1, new SwimGoal(this));
         this.goalSelector.add(2, new SitGoal(this));
         this.goalSelector.add(3, new MeleeAttackGoal(this, LovelyConfigs.Common.MovementMeleeAttack, true));
-        this.goalSelector.add(4, new AiFollowOwnerGoal(this, LovelyConfigs.Common.MovementFollowOwner, LovelyConfigs.Common.FollowDistanceMax, LovelyConfigs.Common.FollowDistanceMin, false));
+        this.goalSelector.add(4, new AiFollowOwnerGoal(this, LovelyConfigs.Common.MovementFollowOwner, LovelyConfigs.Common.FollowDistanceMin, LovelyConfigs.Common.FollowDistanceMax, false));
         this.goalSelector.add(4, new AiBaseDefenseGoal(this, LovelyConfigs.Common.MovementFollowOwner, LovelyConfigs.Common.BaseDefenceRange, LovelyConfigs.Common.BaseDefenceWarpRange));
-        this.goalSelector.add(5, new WanderAroundFarGoal(this, LovelyConfigs.Common.MovementWanderAround));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, LovelyConfigs.Common.LookRange));
-        this.goalSelector.add(6, new LookAtEntityGoal(this, LivingEntity.class, LovelyConfigs.Common.LookRange));
-        this.goalSelector.add(7, new LookAroundGoal(this));
+        this.goalSelector.add(6, new AiConditionalWanderGoal(this, LovelyConfigs.Common.MovementWanderAround));
+        this.goalSelector.add(7, new LookAtEntityGoal(this, PlayerEntity.class, LovelyConfigs.Common.LookRange));
+        this.goalSelector.add(7, new LookAtEntityGoal(this, LivingEntity.class, LovelyConfigs.Common.LookRange));
+        this.goalSelector.add(8, new LookAroundGoal(this));
         this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
         this.targetSelector.add(3, new RevengeGoal(this));

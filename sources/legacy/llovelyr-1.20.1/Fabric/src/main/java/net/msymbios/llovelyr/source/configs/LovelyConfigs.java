@@ -39,7 +39,7 @@ public class LovelyConfigs {
         public static float MovementFollowOwner = 0.7F;
         public static double MovementWanderAround = 0.6F;
         public static float FollowDistanceMax = 10F;
-        public static float FollowDistanceMin = 0.1F;
+        public static float FollowDistanceMin = 2F;
         public static float LookRange = 8F;
 
         // -- RENDERER --
@@ -71,6 +71,35 @@ public class LovelyConfigs {
         // -- SMART CORE RETRIEVAL --
         public static boolean EnableSmartCoreRetrieval = true;
         public static double SmartCoreRetrievalDistance = 16.0;
+
+        // -- AI BEHAVIOR --
+        
+        // Follow Mode - Owner Stationary Detection
+        public static int OwnerStillThreshold = 100; // ticks (5 seconds)
+        
+        // Follow Mode - Wander Behavior
+        public static int WanderCheckInterval = 200; // ticks (10 seconds)
+        public static double WanderChance = 0.15; // 15% chance
+        public static double WanderRadiusMin = 3.0; // blocks
+        public static double WanderRadiusMax = 6.0; // blocks
+        public static int WanderDurationMin = 100; // ticks (5 seconds)
+        public static int WanderDurationMax = 200; // ticks (10 seconds)
+        public static int WanderCooldownMin = 400; // ticks (20 seconds)
+        public static int WanderCooldownMax = 800; // ticks (40 seconds)
+        
+        // Defense Mode - Patrol Behavior
+        public static int PatrolDurationMin = 600; // ticks (30 seconds)
+        public static int PatrolDurationMax = 900; // ticks (45 seconds)
+        public static int GuardDurationMin = 400; // ticks (20 seconds)
+        public static int GuardDurationMax = 600; // ticks (30 seconds)
+        public static int PatrolPauseDurationMin = 40; // ticks (2 seconds)
+        public static int PatrolPauseDurationMax = 80; // ticks (4 seconds)
+        public static double GuardRotationSpeed = 0.05; // radians per tick
+        
+        // Combat - Radius Enforcement
+        public static boolean EnableCombatRadiusParticles = true;
+        public static int CombatRadiusParticleCount = 8;
+        public static double CombatRadiusParticleSpread = 0.3;
 
         // -- ENTITY --
 
