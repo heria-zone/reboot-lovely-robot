@@ -521,14 +521,14 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     protected boolean canInteractWithItems(ItemStack stack) {
         if(stack.getItem() instanceof DyeItem) return false;
         if(stack.getItem() instanceof SwordItem) return false;
-        if(stack.isOf(Items.STICK) || stack.isOf(Items.BOOK) || stack.isOf(Items.WRITABLE_BOOK) || stack.isOf(Items.OAK_BUTTON)) return false;
+        if(stack.isOf(Items.BOOK) || stack.isOf(Items.WRITABLE_BOOK) || stack.isOf(Items.OAK_BUTTON)) return false;
         return !stack.isOf(Items.COMPASS) && !stack.isOf(Items.RECOVERY_COMPASS);
     } // canInteractWithItems ()
 
     @Override
     protected void handleInteract (ItemStack stack, PlayerEntity player) {
         super.handleInteract(stack, player);
-        handleStickRetrieval(stack, player);
+        handlePickupRetrieval(stack, player);
         handleAutoAttack(stack);
         handleDisplayInteraction(stack);
     } // handleInteract ()
@@ -764,30 +764,44 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     } // displayEnchantmentMessage ()
 
     /**
-     * Processes stick-based robot retrieval interaction.
+     * Processes robot retrieval interaction using Ctrl+Shift with empty hand.
+     * <p>
+     * <b>Input Requirements:</b> Player must hold Ctrl (crouch) and Shift while
+     * interacting with empty hand. This prevents accidental pickups during normal
+     * interaction.
      * <p>
      * <b>Permission Check:</b> Validates player ownership before allowing retrieval.
-     * Only the robot's owner can retrieve it using a stick.
+     * Only the robot's owner can retrieve it.
      * <p>
      * <b>Inventory Management:</b> Attempts to add spawn item to player inventory.
      * If inventory is full, does nothing (no retrieval). Creative mode always succeeds.
      * <p>
      * <b>Feedback:</b> Spawns particle effects and plays sound to confirm retrieval.
      * 
-     * @param stack the stick item stack
+     * @param stack the item stack in player's hand (must be empty)
      * @param player the player attempting retrieval
      * @return true if retrieval was successful
      */
-    protected boolean handleStickRetrieval(ItemStack stack, PlayerEntity player) {
-        // Only process stick items
-        if (!stack.isOf(Items.STICK)) return false;
+    protected boolean handlePickupRetrieval(ItemStack stack, PlayerEntity player) {
+        // Only process empty hand
+        if (!stack.isEmpty()) return false;
+        
+        // Require Ctrl+Shift (crouch + shift)
+        if (!player.isSneaking() || !player.isSprinting()) return false;
         
         // Validate ownership
         if (!this.isOwner(player)) return false;
         
         // Check inventory space (creative mode always has space)
         if (!player.getAbilities().creativeMode && player.getInventory().getEmptySlot() < 0) {
-            // Inventory full in survival - do nothing
+            // Inventory full in survival - notify player
+            if (!this.getWorld().isClient) {
+                player.sendMessage(
+                    Text.literal("Inventory full - cannot retrieve robot")
+                        .formatted(Formatting.RED),
+                    true
+                );
+            }
             return false;
         }
         
@@ -824,16 +838,11 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
             1.0F
         );
         
-        // Consume stick in survival mode
-        if (!player.getAbilities().creativeMode) {
-            stack.decrement(1);
-        }
-        
         // Remove robot entity
         this.discard();
         
         return true;
-    } // handleStickRetrieval ()
+    } // handlePickupRetrieval ()
 
     /**
      * Creates spawn item from current robot entity with full NBT preservation.
