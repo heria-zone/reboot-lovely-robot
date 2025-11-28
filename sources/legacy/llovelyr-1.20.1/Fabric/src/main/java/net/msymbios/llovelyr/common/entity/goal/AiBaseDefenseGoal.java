@@ -45,6 +45,19 @@ public class AiBaseDefenseGoal extends Goal {
         PATROL,  // Wandering within base radius
         GUARD    // Standing at base, rotating to scan
     } // Enum: DefenseState
+    
+    /**
+     * Scan pattern variations for guard state.
+     * <p>
+     * <b>Design Decision:</b> Multiple scan patterns create organic, varied behavior
+     * instead of repetitive 360° spins. Patterns selected randomly each guard cycle.
+     */
+    private enum GuardScanPattern {
+        FULL_SCAN,      // Single 360° rotation
+        DOUBLE_SWEEP,   // Two 180° sweeps in opposite directions
+        QUADRANT_CHECK, // Four 90° checks of cardinal directions
+        RANDOM_POINTS   // Look at 4-6 random points around perimeter
+    } // Enum: GuardScanPattern
 
     // -- Fields --
 
@@ -65,6 +78,13 @@ public class AiBaseDefenseGoal extends Goal {
     private int lookTimer = 0;
     private float guardRotation = 0.0f;
     private BlockPos currentPatrolTarget = null;
+    
+    // Guard scan pattern fields
+    private GuardScanPattern currentScanPattern = GuardScanPattern.FULL_SCAN;
+    private int scanStep = 0;
+    private int scanStepDuration = 0;
+    private float scanStartRotation = 0.0f;
+    private float scanTargetRotation = 0.0f;
 
     // -- Constructor --
 
@@ -224,6 +244,9 @@ public class AiBaseDefenseGoal extends Goal {
      * <p>
      * <b>Pause Mechanic:</b> Pauses for 2-4 seconds at each patrol point before
      * selecting next destination. Prevents constant movement.
+     * <p>
+     * <b>Head Stabilization:</b> Only updates look direction when paused to prevent
+     * head bobbing during movement. Maintains forward-facing orientation while walking.
      */
     private void tickPatrol() {
         // Check if pausing at patrol point
@@ -244,6 +267,9 @@ public class AiBaseDefenseGoal extends Goal {
             return;
         }
         
+        // While moving, don't update look control - let entity look in movement direction
+        // This prevents head bobbing and maintains natural forward-facing orientation
+        
         // Check if need new patrol target
         if (currentPatrolTarget == null || navigation.isIdle() || entity.squaredDistanceTo(currentPatrolTarget.getX(), currentPatrolTarget.getY(), currentPatrolTarget.getZ()) < 4.0) {
             // Select new random patrol point within base radius
@@ -259,13 +285,14 @@ public class AiBaseDefenseGoal extends Goal {
     } // tickPatrol
 
     /**
-     * Executes guard state behavior.
+     * Executes guard state behavior with varied scan patterns.
      * <p>
-     * <b>Behavior:</b> Returns to base position and performs slow 360° rotation
-     * scan. Creates vigilant guard appearance.
+     * <b>Behavior:</b> Returns to base position and performs scan pattern selected
+     * at state start. Patterns include full 360° scan, double 180° sweeps, quadrant
+     * checks, or random point inspection.
      * <p>
-     * <b>Rotation:</b> Rotates at configured speed (default 0.05 radians/tick)
-     * for smooth, continuous scanning motion.
+     * <b>Organic Variation:</b> Different patterns prevent repetitive behavior and
+     * create more lifelike, attentive guard appearance.
      */
     private void tickGuard() {
         // Return to base position if not there
@@ -275,23 +302,126 @@ public class AiBaseDefenseGoal extends Goal {
                 updateCountdownTicks = 10;
                 navigation.startMovingTo(entity.getBaseX(), entity.getBaseY(), entity.getBaseZ(), speed);
             }
-        } else {
-            // At base, stop moving and rotate
-            navigation.stop();
-            
-            // Perform slow 360° rotation scan
-            guardRotation += (float) LovelyConfigs.Common.GuardRotationSpeed;
-            if (guardRotation >= Math.PI * 2) {
-                guardRotation -= (float) (Math.PI * 2);
-            }
-            
-            // Calculate look target based on rotation
-            double lookX = entity.getBaseX() + Math.cos(guardRotation) * 5.0;
-            double lookZ = entity.getBaseZ() + Math.sin(guardRotation) * 5.0;
-            
-            entity.getLookControl().lookAt(lookX, entity.getBaseY(), lookZ, 10.0F, (float) entity.getMaxLookPitchChange());
+            return;
         }
+        
+        // At base, stop moving and execute scan pattern
+        navigation.stop();
+        executeScanPattern();
     } // tickGuard
+    
+    /**
+     * Executes current scan pattern behavior.
+     * <p>
+     * <b>Pattern Execution:</b> Each pattern has multiple steps with specific
+     * durations and rotation targets. Smoothly interpolates between targets.
+     */
+    private void executeScanPattern() {
+        scanStepDuration--;
+        
+        // Check if current scan step completed
+        if (scanStepDuration <= 0) {
+            advanceScanStep();
+        }
+        
+        // Smoothly rotate toward target
+        float rotationDelta = scanTargetRotation - guardRotation;
+        
+        // Normalize angle difference to [-PI, PI]
+        while (rotationDelta > Math.PI) rotationDelta -= (float) (Math.PI * 2);
+        while (rotationDelta < -Math.PI) rotationDelta += (float) (Math.PI * 2);
+        
+        // Apply rotation step
+        float rotationStep = (float) LovelyConfigs.Common.GuardRotationSpeed;
+        if (Math.abs(rotationDelta) < rotationStep) {
+            guardRotation = scanTargetRotation;
+        } else {
+            guardRotation += Math.signum(rotationDelta) * rotationStep;
+        }
+        
+        // Normalize rotation to [0, 2PI]
+        while (guardRotation >= Math.PI * 2) guardRotation -= (float) (Math.PI * 2);
+        while (guardRotation < 0) guardRotation += (float) (Math.PI * 2);
+        
+        // Calculate look target based on current rotation
+        double lookX = entity.getBaseX() + Math.cos(guardRotation) * 5.0;
+        double lookZ = entity.getBaseZ() + Math.sin(guardRotation) * 5.0;
+        
+        entity.getLookControl().lookAt(lookX, entity.getBaseY(), lookZ, 10.0F, (float) entity.getMaxLookPitchChange());
+    } // executeScanPattern
+    
+    /**
+     * Advances to next step in current scan pattern.
+     * <p>
+     * <b>Pattern Steps:</b> Each pattern defines sequence of rotation targets
+     * and durations. Cycles through steps, looping when pattern completes.
+     */
+    private void advanceScanStep() {
+        scanStep++;
+        
+        switch (currentScanPattern) {
+            case FULL_SCAN:
+                // Single 360° rotation - smooth continuous scan, then repeat
+                scanTargetRotation = guardRotation + (float) (Math.PI * 2);
+                scanStepDuration = 120; // 6 seconds for full rotation
+                scanStep = 0; // Reset to loop continuously
+                break;
+                
+            case DOUBLE_SWEEP:
+                // Two 180° sweeps in opposite directions, then repeat
+                if (scanStep % 2 == 0) {
+                    scanTargetRotation = scanStartRotation + (float) Math.PI;
+                    scanStepDuration = 60; // 3 seconds
+                } else {
+                    scanTargetRotation = scanStartRotation;
+                    scanStepDuration = 60; // 3 seconds back
+                }
+                if (scanStep >= 2) scanStep = 0; // Loop after completing both sweeps
+                break;
+                
+            case QUADRANT_CHECK:
+                // Four 90° checks of cardinal directions with pauses, then repeat
+                int quadrant = scanStep % 4;
+                scanTargetRotation = scanStartRotation + (float) (quadrant * Math.PI / 2);
+                scanStepDuration = 40; // 2 seconds per direction
+                if (scanStep >= 4) scanStep = 0; // Loop after all 4 quadrants
+                break;
+                
+            case RANDOM_POINTS:
+                // Look at random points around perimeter continuously
+                scanTargetRotation = (float) (entity.getRandom().nextDouble() * Math.PI * 2);
+                scanStepDuration = 30; // 1.5 seconds per point
+                // Keep generating new random points indefinitely
+                break;
+        }
+    } // advanceScanStep
+    
+    /**
+     * Initializes new scan pattern for guard state.
+     * <p>
+     * <b>Pattern Selection:</b> Randomly selects pattern with weighted probabilities
+     * favoring more interesting patterns over simple full scans.
+     */
+    private void initializeScanPattern() {
+        // Select random scan pattern (weighted toward more interesting patterns)
+        int patternRoll = entity.getRandom().nextInt(100);
+        
+        if (patternRoll < 25) {
+            currentScanPattern = GuardScanPattern.FULL_SCAN;
+        } else if (patternRoll < 55) {
+            currentScanPattern = GuardScanPattern.DOUBLE_SWEEP;
+        } else if (patternRoll < 80) {
+            currentScanPattern = GuardScanPattern.QUADRANT_CHECK;
+        } else {
+            currentScanPattern = GuardScanPattern.RANDOM_POINTS;
+        }
+        
+        // Initialize scan state
+        scanStep = -1; // Will be incremented to 0 on first advanceScanStep
+        scanStartRotation = guardRotation;
+        scanStepDuration = 0; // Trigger immediate first step
+        advanceScanStep();
+    } // initializeScanPattern
 
     /**
      * Transitions between patrol and guard states.
@@ -300,6 +430,8 @@ public class AiBaseDefenseGoal extends Goal {
      * <p>
      * <b>Duration:</b> Each state has random duration within configured range
      * for natural behavior variation.
+     * <p>
+     * <b>Scan Pattern:</b> Selects new random scan pattern when entering guard state.
      */
     private void transitionState() {
         switch (currentDefenseState) {
@@ -307,10 +439,11 @@ public class AiBaseDefenseGoal extends Goal {
                 currentDefenseState = DefenseState.GUARD;
                 currentPatrolTarget = null;
                 navigation.stop();
+                guardRotation = entity.getYaw();
+                initializeScanPattern(); // Select and initialize new scan pattern
                 break;
             case GUARD:
                 currentDefenseState = DefenseState.PATROL;
-                guardRotation = entity.getYaw();
                 break;
         }
         
