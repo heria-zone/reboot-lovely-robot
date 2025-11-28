@@ -23,6 +23,7 @@
 - [x] Implement robot characteristic system based on Touhou Little Maid mechanics *(Evidence: registerGoals() methods in entity classes)*
 - [x] **Implement generic NBT transfer recipe system for robot spawn items** *(Completed: 2025-11-23, Sprint 01)*
 - [x] **Robot Retrieval System - Changed from stick interaction to Ctrl+Shift with empty hand (Forge & Fabric)** *(Completed: 2025-11-28)*
+- [x] **Enhanced Robot AI Behavior System - Follow/wander balance, patrol/guard defense mode, owner movement detection** *(Completed: 2025-11-28)*
 - [ ] **Robot Command System - Admin commands for stats, enchantments, protections, design, owner, name** *(Sprint 03: 2025-11-25)*
 - [ ] **Robot Core Glow Effect - Glowing outline on dropped cores** *(Sprint 03: 2025-11-25)*
 - [ ] **Smart Core Retrieval - Distance-based auto-retrieval to inventory** *(Sprint 03: 2025-11-25)*
