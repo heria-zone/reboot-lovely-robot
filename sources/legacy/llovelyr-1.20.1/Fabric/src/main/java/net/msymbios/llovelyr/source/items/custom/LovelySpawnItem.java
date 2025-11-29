@@ -203,6 +203,7 @@ public class LovelySpawnItem extends SpawnEggItem {
 
         if (dataNBT.getInt(LovelyIdentifier.STAT_LEVEL) > 0) entity.setCurrentLevel(dataNBT.getInt(LovelyIdentifier.STAT_LEVEL));
         if (dataNBT.getInt(LovelyIdentifier.STAT_EXP) > 0) entity.setExp(dataNBT.getInt(LovelyIdentifier.STAT_EXP));
+        if (dataNBT.contains(LovelyIdentifier.STAT_HP)) entity.setCurrentHealthValue(dataNBT.getFloat(LovelyIdentifier.STAT_HP));
 
         if (dataNBT.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION) > 0) entity.setFireProtection(dataNBT.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION));
         if (dataNBT.getInt(LovelyIdentifier.STAT_FALL_PROTECTION) > 0) entity.setFallProtection(dataNBT.getInt(LovelyIdentifier.STAT_FALL_PROTECTION));

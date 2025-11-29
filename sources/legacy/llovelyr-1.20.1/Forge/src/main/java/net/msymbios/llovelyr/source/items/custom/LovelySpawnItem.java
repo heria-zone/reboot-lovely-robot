@@ -26,6 +26,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.msymbios.llovelyr.common.entity.internal.InternalParticle;
 import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
 import net.msymbios.llovelyr.source.entity.LovelyRobot;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
@@ -104,9 +105,10 @@ public class LovelySpawnItem extends ForgeSpawnEggItem {
                         robotEntity.tame(player);
                         robotEntity.setTame(true);
                         initialize(itemStack.getOrCreateTag(), robotEntity);
+
                         
                         // Spawn POOF particles (spawn effect)
-                        net.msymbios.llovelyr.common.entity.internal.InternalParticle.Poof(robotEntity);
+                        InternalParticle.Poof(robotEntity);
                         
                         // Play spawn sound effect (totem activation sound) - volume scales with entity size
                         float volume = (float) Math.max(0.5F, Math.min(2.0F, entity.getBbWidth() * entity.getBbHeight()));
@@ -204,6 +206,7 @@ public class LovelySpawnItem extends ForgeSpawnEggItem {
 
         if (dataNBT.getInt(LovelyIdentifier.STAT_LEVEL) > 0) entity.setCurrentLevel(dataNBT.getInt(LovelyIdentifier.STAT_LEVEL));
         if (dataNBT.getInt(LovelyIdentifier.STAT_EXP) > 0) entity.setExp(dataNBT.getInt(LovelyIdentifier.STAT_EXP));
+        if (dataNBT.contains(LovelyIdentifier.STAT_HP)) entity.setCurrentHealthValue(dataNBT.getFloat(LovelyIdentifier.STAT_HP));
 
         if (dataNBT.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION) > 0) entity.setFireProtection(dataNBT.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION));
         if (dataNBT.getInt(LovelyIdentifier.STAT_FALL_PROTECTION) > 0) entity.setFallProtection(dataNBT.getInt(LovelyIdentifier.STAT_FALL_PROTECTION));
