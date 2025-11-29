@@ -24,7 +24,7 @@ public enum EntityAnimation {
     /** Movement animation, speed scales with entity velocity. */
     Walk(1, "walk"),
     
-    /** Lying down pose for sleeping or resting. Plays once then holds final frame. */
+    /** Lying down pose for sleeping or resting. Loops indefinitely. */
     Rest(2, "rest"),
     
     /** Sitting pose when commanded to stay. Loops with subtle breathing animation. */

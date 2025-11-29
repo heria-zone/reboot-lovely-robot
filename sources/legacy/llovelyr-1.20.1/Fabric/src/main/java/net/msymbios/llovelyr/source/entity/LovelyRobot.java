@@ -58,9 +58,16 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     protected static final TrackedData<Float> BASE_Y = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);
     protected static final TrackedData<Float> BASE_Z = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);
 
+    protected static final TrackedData<Boolean> IS_IN_SITTING_POSE = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+    protected static final TrackedData<Float> CURRENT_HEALTH = DataTracker.registerData(InternalEntity.class, TrackedDataHandlerRegistry.FLOAT);
+
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
     protected boolean changeWeapon = false;
+    
+    // -- Standby Animation State (not persisted) --
+    private int standbyTicks = 0;
+    private int standbyTargetTicks = 0;
 
     // -- Properties --
 
@@ -250,12 +257,164 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     } // getEquippedStack ()
 
     @Override
+    public EntityDimensions getDimensions(EntityPose pose) {
+        if (isInSittingPose()) {
+            return EntityDimensions.changing(
+                LovelyConfigs.EntityDimensions.SITTING_WIDTH,
+                LovelyConfigs.EntityDimensions.SITTING_HEIGHT
+            );
+        }
+        return EntityDimensions.changing(
+            LovelyConfigs.EntityDimensions.DEFAULT_WIDTH,
+            LovelyConfigs.EntityDimensions.DEFAULT_HEIGHT
+        );
+    } // getDimensions ()
+
+    @Override
     public void tick() {
         super.tick();
+        handleStandbyAnimation();
         handleCombatMode();
         handleAutoHeal();
+        handleHealthSync();
         displayExtra();
     } // tick ()
+    
+    /**
+     * Synchronizes current health to data tracker for proper persistence.
+     * <p>
+     * <b>Architecture:</b> Minecraft's health system doesn't automatically sync to
+     * EntityData, causing health to reset on world reload. This method ensures
+     * current health is stored in the data tracker every tick.
+     * <p>
+     * <b>Performance:</b> Only updates data tracker when health value changes,
+     * minimizing network traffic.
+     */
+    private void handleHealthSync() {
+        float currentHealth = this.getHealth();
+        float storedHealth = getCurrentHealthValue();
+        
+        // Only update if health changed
+        if (Math.abs(currentHealth - storedHealth) > 0.01F) {
+            setCurrentHealthValue(currentHealth);
+        }
+    } // handleHealthSync ()
+    
+    /**
+     * Manages standby animation transitions between REST and SIT poses.
+     * <p>
+     * <b>Architecture:</b> Tracks time spent stationary in standby mode. After
+     * random delay (between min/max config values), transitions robot from REST
+     * (standing idle) to SIT (sitting pose with smaller hitbox). Movement resets
+     * timer and exits sitting.
+     * <p>
+     * <b>State Flow:</b>
+     * - Enter Standby → REST animation, timer starts, random target set
+     * - Timer reaches random threshold → SIT animation, hitbox shrinks
+     * - Start moving → WALK animation, timer resets, hitbox restores
+     * - Stop moving → REST animation, timer restarts with new random target
+     * - Exit Standby → IDLE animation, timer resets, hitbox restores
+     * <p>
+     * <b>Performance:</b> Runs every tick but only performs calculations when in
+     * standby mode. Hitbox refresh is called only on state transitions.
+     */
+    private void handleStandbyAnimation() {
+        if (getCurrentState() == EntityState.Standby) {
+            // Check movement with velocity for extra safety
+            boolean isMoving = this.getVelocity().lengthSquared() > 0.0001;
+
+            if (!isMoving) {
+                // Set random target on first tick or when target is 0
+                if (standbyTargetTicks == 0) {
+                    standbyTargetTicks = LovelyConfigs.Common.StandbyToSitDelayMin + 
+                        this.random.nextInt(LovelyConfigs.Common.StandbyToSitDelayMax - LovelyConfigs.Common.StandbyToSitDelayMin + 1);
+                }
+                
+                // Stationary in standby - increment timer
+                standbyTicks++;
+                
+                // Transition to sitting pose after random delay
+                if (standbyTicks >= standbyTargetTicks && !isInSittingPose()) {
+                    enterSittingPose();
+                }
+            } else {
+                // Moving - exit sitting pose and reset timer
+                if (isInSittingPose()) {
+                    exitSittingPose();
+                }
+                standbyTicks = 0;
+                standbyTargetTicks = 0;
+            }
+        } else {
+            // Not in standby - reset everything
+            if (isInSittingPose()) {
+                exitSittingPose();
+            }
+            standbyTicks = 0;
+            standbyTargetTicks = 0;
+        }
+    } // handleStandbyAnimation ()
+    
+    /**
+     * Transitions robot into sitting pose with smaller hitbox.
+     * <p>
+     * <b>Architecture:</b> Sets sitting flag and triggers hitbox refresh. Animation
+     * controller detects flag change and switches to SIT animation with 5-tick blend.
+     * <p>
+     * <b>Hitbox Change:</b> Shrinks from default (0.6 x 1.8) to sitting (0.6 x 0.9).
+     * Prevents collision issues when robot is in low-profile sitting animation.
+     */
+    private void enterSittingPose() {
+        setInSittingPose(true);
+        calculateDimensions();
+    } // enterSittingPose ()
+    
+    /**
+     * Exits sitting pose and restores default hitbox.
+     * <p>
+     * <b>Architecture:</b> Clears sitting flag, resets timer, and triggers hitbox
+     * refresh. Animation controller switches back to REST or WALK based on movement.
+     * <p>
+     * <b>Hitbox Restoration:</b> Returns to default dimensions (0.6 x 1.8).
+     */
+    private void exitSittingPose() {
+        setInSittingPose(false);
+        standbyTicks = 0;
+        calculateDimensions();
+    } // exitSittingPose ()
+    
+    /**
+     * Checks if robot is currently in sitting pose.
+     * <p>
+     * <b>Usage:</b> Called by InternalAnimation.locomotionAnimation() to determine
+     * which animation to play in standby mode.
+     * 
+     * @return true if robot is in sitting pose (smaller hitbox)
+     */
+    public boolean isInSittingPose() {
+        boolean value = false;
+        try {
+            value = this.dataTracker.get(IS_IN_SITTING_POSE);
+        } catch (Exception ignored) {}
+        return value;
+    } // isInSittingPose ()
+
+    public void setInSittingPose(boolean value) {
+        this.dataTracker.set(IS_IN_SITTING_POSE, value);
+    } // setInSittingPose ()
+
+    public float getCurrentHealthValue() {
+        float value = 1.0F;
+        try {
+            value = this.dataTracker.get(CURRENT_HEALTH);
+        } catch (Exception ignored) {}
+        return value;
+    } // getCurrentHealthValue ()
+
+    public void setCurrentHealthValue(float value) {
+        this.dataTracker.set(CURRENT_HEALTH, value);
+        this.setHealth(value);
+    } // setCurrentHealthValue ()
 
     // DATA
 
@@ -274,6 +433,9 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         this.dataTracker.startTracking(BASE_X, 0F);
         this.dataTracker.startTracking(BASE_Y, 0F);
         this.dataTracker.startTracking(BASE_Z, 0F);
+        
+        this.dataTracker.startTracking(IS_IN_SITTING_POSE, false);
+        this.dataTracker.startTracking(CURRENT_HEALTH, 1.0F);
     } // initDataTracker ()
 
     @Override
@@ -290,6 +452,9 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         dataNBT.putFloat("BaseX", this.getBaseX());
         dataNBT.putFloat("BaseY", this.getBaseY());
         dataNBT.putFloat("BaseZ", this.getBaseZ());
+        
+        dataNBT.putBoolean("IsInSittingPose", isInSittingPose());
+        dataNBT.putFloat("CurrentHealth", this.getHealth());
 
         super.writeCustomDataToNbt(dataNBT);
     } // writeCustomDataToNbt ()
@@ -308,6 +473,27 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         this.setBaseY(dataNBT.getFloat("BaseY"));
         this.setBaseZ(dataNBT.getFloat("BaseZ"));
         this.setBaseX(dataNBT.getFloat("BaseX"));
+        
+        setInSittingPose(dataNBT.getBoolean("IsInSittingPose"));
+        if (!isInSittingPose()) enterSittingPose();
+        
+        // Restore health
+        float savedHealth = dataNBT.getFloat("CurrentHealth");
+        if (savedHealth > 0) {
+            this.setHealth(savedHealth);
+            setCurrentHealthValue(savedHealth);
+        }
+        
+        // Refresh dimensions on next tick to ensure proper hitbox after world load
+        if (isInSittingPose() && !this.getWorld().isClient) {
+            // Schedule dimension refresh for next tick
+            this.getWorld().getServer().execute(() -> {
+                if (this.isAlive()) {
+                    calculateDimensions();
+                }
+            });
+        }
+        
         super.readCustomDataFromNbt(dataNBT);
     } // readCustomDataFromNbt ()
 
@@ -326,6 +512,10 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         dataNBT.putFloat("BaseX", this.getBaseX());
         dataNBT.putFloat("BaseY", this.getBaseY());
         dataNBT.putFloat("BaseZ", this.getBaseZ());
+        
+        dataNBT.putBoolean("IsInSittingPose", isInSittingPose());
+        dataNBT.putFloat("CurrentHealth", this.getHealth());
+        
         return dataNBT;
     } // writeToNBT
 
@@ -344,6 +534,23 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         this.setBaseY(dataNBT.getFloat("BaseY"));
         this.setBaseZ(dataNBT.getFloat("BaseZ"));
         this.setBaseX(dataNBT.getFloat("BaseX"));
+        
+        setInSittingPose(dataNBT.getBoolean("IsInSittingPose"));
+        
+        // Restore health
+        float savedHealth = dataNBT.getFloat("CurrentHealth");
+        if (savedHealth > 0) {
+            this.setHealth(savedHealth);
+            setCurrentHealthValue(savedHealth);
+        }
+        
+        // Refresh dimensions on next tick to ensure proper hitbox after world load
+        if (isInSittingPose() && !this.getWorld().isClient) {
+            // Schedule dimension refresh for next tick
+            this.getWorld().getServer().execute(() -> {
+                if (this.isAlive()) calculateDimensions();
+            });
+        }
     } // readFromNBT ()
 
     // HANDLERS
@@ -881,6 +1088,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
         nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
+        nbt.putFloat(LovelyIdentifier.STAT_HP, this.getCurrentHealthValue());
 
         nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
         nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());

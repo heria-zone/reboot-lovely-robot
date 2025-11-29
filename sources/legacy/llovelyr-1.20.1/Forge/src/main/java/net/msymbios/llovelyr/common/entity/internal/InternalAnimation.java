@@ -1,6 +1,7 @@
 package net.msymbios.llovelyr.common.entity.internal;
 
 import net.msymbios.llovelyr.source.entity.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.internal.enums.EntityAnimation;
 import net.msymbios.llovelyr.source.entity.internal.enums.EntityState;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -30,16 +31,19 @@ public class InternalAnimation {
     // -- Animation Definitions --
 
     /** Neutral standing animation, loops indefinitely. */
-    public static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+    public static final RawAnimation IDLE = RawAnimation.begin().thenLoop(EntityAnimation.Idle.getName());
     
     /** Walking animation, loops while entity is moving. */
-    public static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
+    public static final RawAnimation WALK = RawAnimation.begin().thenLoop(EntityAnimation.Walk.getName());
     
-    /** Resting/sitting animation, loops while in rest state. */
-    public static final RawAnimation REST = RawAnimation.begin().thenLoop("rest");
+    /** Standing idle animation in standby mode, loops indefinitely. */
+    public static final RawAnimation REST = RawAnimation.begin().thenLoop(EntityAnimation.Rest.getName());
+    
+    /** Sitting/resting animation in standby mode after delay, loops indefinitely. */
+    public static final RawAnimation SIT = RawAnimation.begin().thenLoop(EntityAnimation.Sit.getName());
     
     /** Attack swing animation, plays once per attack. */
-    public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then("attack", Animation.LoopType.PLAY_ONCE);
+    public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then(EntityAnimation.Attack.getName(), Animation.LoopType.PLAY_ONCE);
 
     // -- Animation Controllers --
 
@@ -56,7 +60,7 @@ public class InternalAnimation {
      * @return configured attack animation controller
      */
     public static <T extends LovelyRobot & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
-        return new AnimationController<>(animatable, "Attack", 5, state -> {
+        return new AnimationController<>(animatable, "Attack", 0, state -> {
             if (animatable.swinging) {
                 return state.setAndContinue(ATTACK_SWING);
             }
@@ -69,27 +73,43 @@ public class InternalAnimation {
      * Creates locomotion animation controller for movement and idle states.
      * <p>
      * <b>Architecture:</b> Handles all non-combat animations with priority order:
-     * moving > resting > idle. State checks run every tick to ensure responsive
-     * animation transitions.
+     * moving > sitting (in standby) > resting (in standby) > idle. State checks
+     * run every tick to ensure responsive animation transitions.
      * <p>
-     * <b>Design Decision:</b> Zero transition time for instant response to movement
-     * changes, providing snappy feel for player-controlled robots.
+     * <b>Standby Animation Flow:</b> When in standby mode, robot starts with REST
+     * (standing idle). After configurable delay without movement, transitions to
+     * SIT (sitting pose with smaller hitbox). Movement interrupts sitting and
+     * returns to REST after stopping.
+     * <p>
+     * <b>Design Decision:</b> 5-tick blend time provides smooth transitions between
+     * REST and SIT animations. Movement detection includes velocity check for
+     * extra safety against animation glitches.
      * 
      * @param entity robot entity to animate
      * @param <T> entity type extending LovelyRobot and GeoAnimatable
      * @return configured locomotion animation controller
      */
     public static <T extends LovelyRobot & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
-        return new AnimationController<T>(entity, "Locomotion", 0, state -> {
-            if (state.isMoving()) {
+        return new AnimationController<T>(entity, "Locomotion", 2, state -> {
+            // Check movement with both animation state and velocity
+            boolean isMoving = state.isMoving();
+            
+            if (isMoving) {
                 return state.setAndContinue(WALK);
             } else if (entity.getCurrentState() == EntityState.Standby) {
-                return state.setAndContinue(REST);
+                // In standby mode - check if should be sitting or resting
+                if (entity.isInSittingPose()) {
+                    return state.setAndContinue(SIT);
+                } else {
+                    return state.setAndContinue(REST);
+                }
             } else {
                 return state.setAndContinue(IDLE);
             }
         });
-    } // locomotionAnimation ()`n    // -- Bone Transformations --
+    } // locomotionAnimation ()
+
+    // -- Bone Transformations --
 
     /**
      * Applies head rotation to follow entity's look direction.
