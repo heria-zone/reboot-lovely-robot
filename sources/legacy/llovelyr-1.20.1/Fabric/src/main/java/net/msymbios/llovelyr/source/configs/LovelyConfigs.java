@@ -101,6 +101,10 @@ public class LovelyConfigs {
         public static int CombatRadiusParticleCount = 8;
         public static double CombatRadiusParticleSpread = 0.3;
 
+        // -- ANIMATION --
+        public static int StandbyToSitDelayMin = 600; // ticks (30 seconds)
+        public static int StandbyToSitDelayMax = 1800; // ticks (90 seconds)
+
         // -- ENTITY --
 
         // BUNNY2
@@ -122,5 +126,29 @@ public class LovelyConfigs {
         public static float VanillaArmorToughness = 0F;
 
     } // Class Common
+
+    /**
+     * Static dimension constants for entity hitboxes.
+     * <p>
+     * <b>Architecture:</b> Defined as constants to ensure availability before config
+     * loading completes. Entity constructors run before config events fire, requiring
+     * fallback values for initial dimension setup.
+     * <p>
+     * <b>Usage:</b> Referenced by entity getDimensions() for hitbox sizing. Config
+     * values override these at runtime, but these ensure entities spawn correctly.
+     */
+    public static class EntityDimensions {
+        /** Default entity width (blocks). */
+        public static final float DEFAULT_WIDTH = 0.6f;
+        
+        /** Default entity height (blocks). */
+        public static final float DEFAULT_HEIGHT = 1.8f;
+        
+        /** Sitting pose width (blocks). */
+        public static final float SITTING_WIDTH = 0.6f;
+        
+        /** Sitting pose height (blocks) - half of default height. */
+        public static final float SITTING_HEIGHT = 0.9f;
+    } // Class: EntityDimensions
 
 } // Class: LovelyConfigs

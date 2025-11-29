@@ -38,6 +38,7 @@ public class LovelyIdentifier {
     public static final String STAT_MAX_LEVEL = "max_level";
     public static final String STAT_LEVEL = "level";
     public static final String STAT_EXP = "exp";
+    public static final String STAT_HP = "hp";
     public static final String STAT_FIRE_PROTECTION = "fire_protection";
     public static final String STAT_FALL_PROTECTION = "fall_protection";
     public static final String STAT_BLAST_PROTECTION = "blast_protection";

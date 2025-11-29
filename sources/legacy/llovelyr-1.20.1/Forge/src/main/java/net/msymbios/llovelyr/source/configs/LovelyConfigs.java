@@ -86,6 +86,10 @@ public class LovelyConfigs {
     private static final ForgeConfigSpec.ConfigValue<Integer> COMBAT_RADIUS_PARTICLE_COUNT;
     private static final ForgeConfigSpec.ConfigValue<Double> COMBAT_RADIUS_PARTICLE_SPREAD;
 
+    // ANIMATION
+    private static final ForgeConfigSpec.ConfigValue<Integer> STANDBY_TO_SIT_DELAY_MIN;
+    private static final ForgeConfigSpec.ConfigValue<Integer> STANDBY_TO_SIT_DELAY_MAX;
+
     // -- ENTITY --
 
     // BUNNY2
@@ -319,6 +323,16 @@ public class LovelyConfigs {
                 .defineInRange("combat-radius-particle-spread", 0.3, 0.1, 2.0);
         BUILDER.pop();
         
+        BUILDER.push("Animation");
+        STANDBY_TO_SIT_DELAY_MIN = BUILDER
+                .comment("Minimum time (in ticks) before robot transitions from rest to sit animation in standby mode.", "Example: [600] (30 seconds)")
+                .defineInRange("standby-to-sit-delay-min", 600, 100, 12000);
+        
+        STANDBY_TO_SIT_DELAY_MAX = BUILDER
+                .comment("Maximum time (in ticks) before robot transitions from rest to sit animation in standby mode.", "Example: [1800] (90 seconds)")
+                .defineInRange("standby-to-sit-delay-max", 1800, 100, 12000);
+        BUILDER.pop();
+        
         BUILDER.pop();
 
         BUILDER.push("Entity");
@@ -451,6 +465,10 @@ public class LovelyConfigs {
     public static int CombatRadiusParticleCount;
     public static double CombatRadiusParticleSpread;
 
+    // ANIMATION
+    public static int StandbyToSitDelayMin;
+    public static int StandbyToSitDelayMax;
+
     // -- ENTITY --
 
     // BUNNY2
@@ -549,6 +567,10 @@ public class LovelyConfigs {
         CombatRadiusParticleCount = COMBAT_RADIUS_PARTICLE_COUNT.get();
         CombatRadiusParticleSpread = COMBAT_RADIUS_PARTICLE_SPREAD.get();
 
+        // -- ANIMATION --
+        StandbyToSitDelayMin = STANDBY_TO_SIT_DELAY_MIN.get();
+        StandbyToSitDelayMax = STANDBY_TO_SIT_DELAY_MAX.get();
+
         // -- ENTITY --
 
         // BUNNY2
@@ -575,5 +597,29 @@ public class LovelyConfigs {
     public static void onLoadCallback(Runnable callback) {
         onLoadCallbacks.add(callback);
     } // onLoadCallback ()
+
+    /**
+     * Static dimension constants for entity hitboxes.
+     * <p>
+     * <b>Architecture:</b> Defined as constants to ensure availability before config
+     * loading completes. Entity constructors run before config events fire, requiring
+     * fallback values for initial dimension setup.
+     * <p>
+     * <b>Usage:</b> Referenced by entity getDimensions() for hitbox sizing. Config
+     * values override these at runtime, but these ensure entities spawn correctly.
+     */
+    public static class EntityDimensions {
+        /** Default entity width (blocks). */
+        public static final float DEFAULT_WIDTH = 0.6f;
+        
+        /** Default entity height (blocks). */
+        public static final float DEFAULT_HEIGHT = 1.8f;
+        
+        /** Sitting pose width (blocks). */
+        public static final float SITTING_WIDTH = 0.6f;
+        
+        /** Sitting pose height (blocks) - half of default height. */
+        public static final float SITTING_HEIGHT = 0.9f;
+    } // Class: EntityDimensions
 
 } // Class: LovelyConfigs
