@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.entity;
+package net.msymbios.llovelyr.source.entity.common;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;

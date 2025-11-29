@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.util;
+package net.msymbios.llovelyr.framework.utils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

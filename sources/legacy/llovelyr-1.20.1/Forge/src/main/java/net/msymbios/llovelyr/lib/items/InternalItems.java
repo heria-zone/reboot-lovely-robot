@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.item;
+package net.msymbios.llovelyr.lib.items;
 
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;

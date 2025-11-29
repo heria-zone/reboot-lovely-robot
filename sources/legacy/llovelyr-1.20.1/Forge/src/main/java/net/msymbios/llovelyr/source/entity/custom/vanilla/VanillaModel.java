@@ -1,7 +1,6 @@
-package net.msymbios.llovelyr.source.entity.client.model;
+package net.msymbios.llovelyr.source.entity.custom.vanilla;
 
 import net.msymbios.llovelyr.common.entity.internal.InternalModel;
-import net.msymbios.llovelyr.source.entity.custom.VanillaEntity;
 
 /**
  * GeckoLib model for Vanilla robot entity.

@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.commands;
+package net.msymbios.llovelyr.common.commands;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.network.chat.Component;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
+import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
 
 import java.util.concurrent.CompletableFuture;
 

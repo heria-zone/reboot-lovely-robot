@@ -1,7 +1,6 @@
-package net.msymbios.llovelyr.source.entity.client.layer;
+package net.msymbios.llovelyr.source.entity.custom.bunny2;
 
 import net.msymbios.llovelyr.common.entity.internal.InternalLayer;
-import net.msymbios.llovelyr.source.entity.custom.Bunny2Entity;
 import software.bernie.geckolib.renderer.GeoRenderer;
 
 /**

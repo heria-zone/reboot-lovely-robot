@@ -1,7 +1,6 @@
-package net.msymbios.llovelyr.source.entity.client.model;
+package net.msymbios.llovelyr.source.entity.custom.bunny2;
 
 import net.msymbios.llovelyr.common.entity.internal.InternalModel;
-import net.msymbios.llovelyr.source.entity.custom.Bunny2Entity;
 
 /**
  * GeckoLib model for Bunny2 robot entity.

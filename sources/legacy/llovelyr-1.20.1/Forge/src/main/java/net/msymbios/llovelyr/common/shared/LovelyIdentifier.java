@@ -1,11 +1,12 @@
-package net.msymbios.llovelyr.source.configs;
+package net.msymbios.llovelyr.common.shared;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityVariant;
+import net.msymbios.llovelyr.framework.common.InternalIdentifier;
+import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
 
 /**
  * Central registry for mod identifiers, translation keys, and resource paths.
@@ -103,25 +104,7 @@ public class LovelyIdentifier {
     public static final String MOD_DEFAULT = "default";
     public static final String MOD_ARMED = "armed";
 
-    // -- Textures --
 
-    public static final String TEX_WHITE = "white";
-    public static final String TEX_ORANGE = "orange";
-    public static final String TEX_MAGENTA = "magenta";
-    public static final String TEX_LIGHT_BLUE = "light_blue";
-    public static final String TEX_YELLOW = "yellow";
-    public static final String TEX_LIME = "lime";
-    public static final String TEX_PINK = "pink";
-    public static final String TEX_GRAY = "gray";
-    public static final String TEX_LIGHT_GRAY = "light_gray";
-    public static final String TEX_CYAN = "cyan";
-    public static final String TEX_PURPLE = "purple";
-    public static final String TEX_BLUE = "blue";
-    public static final String TEX_BROWN = "brown";
-    public static final String TEX_GREEN = "green";
-    public static final String TEX_RED = "red";
-    public static final String TEX_BLACK = "black";
-    public static final String TEX_RANDOM = "random";
 
     public static final String TEX_DARK_MATTER = "dark_matter";
     public static final String TEX_SUPERNOVA = "supernova";
@@ -191,24 +174,24 @@ public class LovelyIdentifier {
      */
     public static MutableComponent getTranslation(EntityTexture texture) {
         return switch (texture) {
-            case RANDOM -> getMessageTranslation(TEX_RANDOM);
-            case WHITE -> getMessageTranslation(TEX_WHITE);
-            case ORANGE -> getMessageTranslation(TEX_ORANGE);
-            case MAGENTA -> getMessageTranslation(TEX_MAGENTA);
-            case LIGHT_BLUE -> getMessageTranslation(TEX_LIGHT_BLUE);
-            case YELLOW -> getMessageTranslation(TEX_YELLOW);
-            case LIME -> getMessageTranslation(TEX_LIME);
-            case PINK -> getMessageTranslation(TEX_PINK);
-            case GRAY -> getMessageTranslation(TEX_GRAY);
-            case LIGHT_GRAY -> getMessageTranslation(TEX_LIGHT_GRAY);
-            case CYAN -> getMessageTranslation(TEX_CYAN);
-            case PURPLE -> getMessageTranslation(TEX_PURPLE);
-            case BLUE -> getMessageTranslation(TEX_BLUE);
-            case BROWN -> getMessageTranslation(TEX_BROWN);
-            case GREEN -> getMessageTranslation(TEX_GREEN);
-            case RED -> getMessageTranslation(TEX_RED);
-            case BLACK -> getMessageTranslation(TEX_BLACK);
-            default -> getMessageTranslation(TEX_PINK);
+            case RANDOM -> getMessageTranslation(InternalIdentifier.TEX_RANDOM);
+            case WHITE -> getMessageTranslation(InternalIdentifier.TEX_WHITE);
+            case ORANGE -> getMessageTranslation(InternalIdentifier.TEX_ORANGE);
+            case MAGENTA -> getMessageTranslation(InternalIdentifier.TEX_MAGENTA);
+            case LIGHT_BLUE -> getMessageTranslation(InternalIdentifier.TEX_LIGHT_BLUE);
+            case YELLOW -> getMessageTranslation(InternalIdentifier.TEX_YELLOW);
+            case LIME -> getMessageTranslation(InternalIdentifier.TEX_LIME);
+            case PINK -> getMessageTranslation(InternalIdentifier.TEX_PINK);
+            case GRAY -> getMessageTranslation(InternalIdentifier.TEX_GRAY);
+            case LIGHT_GRAY -> getMessageTranslation(InternalIdentifier.TEX_LIGHT_GRAY);
+            case CYAN -> getMessageTranslation(InternalIdentifier.TEX_CYAN);
+            case PURPLE -> getMessageTranslation(InternalIdentifier.TEX_PURPLE);
+            case BLUE -> getMessageTranslation(InternalIdentifier.TEX_BLUE);
+            case BROWN -> getMessageTranslation(InternalIdentifier.TEX_BROWN);
+            case GREEN -> getMessageTranslation(InternalIdentifier.TEX_GREEN);
+            case RED -> getMessageTranslation(InternalIdentifier.TEX_RED);
+            case BLACK -> getMessageTranslation(InternalIdentifier.TEX_BLACK);
+            default -> getMessageTranslation(InternalIdentifier.TEX_PINK);
         };
     } // getTranslation ()
 

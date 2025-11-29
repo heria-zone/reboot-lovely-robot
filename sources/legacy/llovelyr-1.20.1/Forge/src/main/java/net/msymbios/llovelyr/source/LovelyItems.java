@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.items;
+package net.msymbios.llovelyr.source;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -10,12 +10,10 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.common.item.InternalItems;
-import net.msymbios.llovelyr.source.entity.LovelyEntities;
-import net.msymbios.llovelyr.source.items.custom.LovelyCoreItem;
-import net.msymbios.llovelyr.source.items.custom.LovelySpawnItem;
-import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
-import software.bernie.example.registry.ItemRegistry;
+import net.msymbios.llovelyr.lib.items.InternalItems;
+import net.msymbios.llovelyr.common.items.custom.LovelyCoreItem;
+import net.msymbios.llovelyr.common.items.custom.LovelySpawnItem;
+import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 
 import java.util.function.Supplier;
 

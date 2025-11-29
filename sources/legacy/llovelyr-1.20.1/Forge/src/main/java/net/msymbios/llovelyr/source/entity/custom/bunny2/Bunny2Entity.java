@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.entity.custom;
+package net.msymbios.llovelyr.source.entity.custom.bunny2;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -6,8 +6,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.NativeEntityType;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.NativeEntityType;
 import net.msymbios.llovelyr.source.LovelyItems;
 
 /**

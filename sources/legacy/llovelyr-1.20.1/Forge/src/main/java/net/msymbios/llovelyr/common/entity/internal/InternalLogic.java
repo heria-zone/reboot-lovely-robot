@@ -7,7 +7,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.msymbios.llovelyr.source.configs.LovelyConfigs;
+import net.msymbios.llovelyr.source.LovelyConfigs;
 
 /**
  * Centralizes robot stat calculation and attribute management logic.

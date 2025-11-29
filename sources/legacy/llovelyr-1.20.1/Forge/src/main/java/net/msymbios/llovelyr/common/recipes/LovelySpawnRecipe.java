@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.recipes;
+package net.msymbios.llovelyr.common.recipes;
 
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;

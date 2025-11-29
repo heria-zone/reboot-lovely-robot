@@ -1,6 +1,6 @@
-package net.msymbios.llovelyr.source.entity.internal.enums;
+package net.msymbios.llovelyr.common.entity.enums;
 
-import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
+import net.msymbios.llovelyr.framework.common.InternalIdentifier;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -20,25 +20,25 @@ public enum EntityTexture {
 
     // -- Standard Colors (Minecraft Dye Palette) --
 
-    WHITE(0, LovelyIdentifier.TEX_WHITE),
-    ORANGE(1, LovelyIdentifier.TEX_ORANGE),
-    MAGENTA(2, LovelyIdentifier.TEX_MAGENTA),
-    LIGHT_BLUE(3, LovelyIdentifier.TEX_LIGHT_BLUE),
-    YELLOW(4, LovelyIdentifier.TEX_YELLOW),
-    LIME(5, LovelyIdentifier.TEX_LIME),
-    PINK(6, LovelyIdentifier.TEX_PINK),
-    GRAY(7, LovelyIdentifier.TEX_GRAY),
-    LIGHT_GRAY(8, LovelyIdentifier.TEX_LIGHT_GRAY),
-    CYAN(9, LovelyIdentifier.TEX_CYAN),
-    PURPLE(10, LovelyIdentifier.TEX_PURPLE),
-    BLUE(11, LovelyIdentifier.TEX_BLUE),
-    BROWN(12, LovelyIdentifier.TEX_BROWN),
-    GREEN(13, LovelyIdentifier.TEX_GREEN),
-    RED(14, LovelyIdentifier.TEX_RED),
-    BLACK(15, LovelyIdentifier.TEX_BLACK),
+    WHITE(0, InternalIdentifier.TEX_WHITE),
+    ORANGE(1, InternalIdentifier.TEX_ORANGE),
+    MAGENTA(2, InternalIdentifier.TEX_MAGENTA),
+    LIGHT_BLUE(3, InternalIdentifier.TEX_LIGHT_BLUE),
+    YELLOW(4, InternalIdentifier.TEX_YELLOW),
+    LIME(5, InternalIdentifier.TEX_LIME),
+    PINK(6, InternalIdentifier.TEX_PINK),
+    GRAY(7, InternalIdentifier.TEX_GRAY),
+    LIGHT_GRAY(8, InternalIdentifier.TEX_LIGHT_GRAY),
+    CYAN(9, InternalIdentifier.TEX_CYAN),
+    PURPLE(10, InternalIdentifier.TEX_PURPLE),
+    BLUE(11, InternalIdentifier.TEX_BLUE),
+    BROWN(12, InternalIdentifier.TEX_BROWN),
+    GREEN(13, InternalIdentifier.TEX_GREEN),
+    RED(14, InternalIdentifier.TEX_RED),
+    BLACK(15, InternalIdentifier.TEX_BLACK),
     
     /** Randomizes texture on spawn. Excludes special textures from random pool. */
-    RANDOM(16, LovelyIdentifier.TEX_RANDOM);
+    RANDOM(16, InternalIdentifier.TEX_RANDOM);
 
     // -- Deserialization Cache --
 

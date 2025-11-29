@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.recipes;
+package net.msymbios.llovelyr.common.recipes;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.NonNullList;

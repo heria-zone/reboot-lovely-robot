@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.events;
+package net.msymbios.llovelyr.source;
 
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -9,10 +9,6 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.msymbios.llovelyr.source.commands.LovelyRobotCommand;
-import net.msymbios.llovelyr.source.entity.LovelyEntities;
-import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
-import net.msymbios.llovelyr.source.items.LovelyItems;
 
 /**
  * Centralizes Forge event handler registration with side-specific subscribers.
@@ -55,7 +51,7 @@ public class LovelyEvents {
          * dispatcher is created but before server accepts connections. Ensures
          * commands are available immediately when server starts.
          * <p>
-         * <b>Architecture:</b> Delegates to LovelyRobotCommand for centralized
+         * <b>Architecture:</b> Delegates to LovelyCommands for centralized
          * command tree construction, maintaining separation of concerns between
          * event handling and command logic.
          *
@@ -63,7 +59,7 @@ public class LovelyEvents {
          */
         @SubscribeEvent
         public static void onRegisterCommands(RegisterCommandsEvent event) {
-            LovelyRobotCommand.register(event.getDispatcher());
+            LovelyCommands.register(event.getDispatcher());
             LovelyLegacy.LOGGER.info("Registered LovelyRobot commands");
         } // onRegisterCommands()
 

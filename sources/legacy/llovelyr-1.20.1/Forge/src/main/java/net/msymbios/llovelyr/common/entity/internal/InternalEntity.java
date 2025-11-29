@@ -23,11 +23,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.common.util.interfaces.*;
-import net.msymbios.llovelyr.common.util.internal.*;
-import net.msymbios.llovelyr.source.configs.LovelyConfigs;
-import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.internal.enums.*;
+import net.msymbios.llovelyr.common.entity.enums.EntityModel;
+import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
+import net.msymbios.llovelyr.common.utils.internal.*;
+import net.msymbios.llovelyr.framework.entity.enums.EntityState;
+import net.msymbios.llovelyr.framework.utils.Version;
+import net.msymbios.llovelyr.lib.utils.interfaces.IReadWriteNBT;
+import net.msymbios.llovelyr.source.LovelyConfigs;
+import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -35,7 +39,7 @@ import javax.annotation.Nullable;
 
 import java.util.Objects;
 
-import static net.msymbios.llovelyr.common.util.internal.Utility.invertBoolean;
+import static net.msymbios.llovelyr.common.utils.internal.Utility.invertBoolean;
 
 public abstract class InternalEntity extends TamableAnimal implements IReadWriteNBT {
 

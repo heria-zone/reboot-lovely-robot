@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.items.custom;
+package net.msymbios.llovelyr.common.items.custom;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -6,13 +6,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
+import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
+import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static net.msymbios.llovelyr.source.items.util.TooltipUtils.*;
+import static net.msymbios.llovelyr.common.items.utils.TooltipUtils.*;
 
 /**
  * Robot core item storing entity data for crafting and storage.

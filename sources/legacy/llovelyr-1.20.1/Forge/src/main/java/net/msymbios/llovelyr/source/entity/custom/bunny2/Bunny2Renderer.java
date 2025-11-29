@@ -1,11 +1,8 @@
-package net.msymbios.llovelyr.source.entity.client.renderer;
+package net.msymbios.llovelyr.source.entity.custom.bunny2;
 
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.llovelyr.source.LovelyConfigs;
-import net.msymbios.llovelyr.source.entity.client.layer.Bunny2Layer;
-import net.msymbios.llovelyr.source.entity.client.model.Bunny2Model;
-import net.msymbios.llovelyr.source.entity.custom.Bunny2Entity;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 

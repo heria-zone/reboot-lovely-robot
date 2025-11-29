@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.configs;
+package net.msymbios.llovelyr.common.shared;
 
 import net.minecraft.resources.ResourceLocation;
 

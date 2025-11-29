@@ -1,16 +1,16 @@
 package net.msymbios.llovelyr;
 
-import net.msymbios.llovelyr.common.util.ObjectUtil;
-import net.msymbios.llovelyr.common.util.internal.Version;
-import net.msymbios.llovelyr.source.blocks.LovelyBlocks;
-import net.msymbios.llovelyr.source.commands.ColorArgumentType;
-import net.msymbios.llovelyr.source.commands.ColorArgumentTypeInfo;
-import net.msymbios.llovelyr.source.configs.LovelyConfigs;
-import net.msymbios.llovelyr.source.entity.LovelyEntities;
-import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
-import net.msymbios.llovelyr.source.groups.LovelyGroups;
-import net.msymbios.llovelyr.source.items.LovelyItems;
-import net.msymbios.llovelyr.source.recipes.LovelyRecipes;
+import net.msymbios.llovelyr.framework.utils.ObjectUtil;
+import net.msymbios.llovelyr.framework.utils.Version;
+import net.msymbios.llovelyr.source.LovelyBlocks;
+import net.msymbios.llovelyr.common.commands.ColorArgumentType;
+import net.msymbios.llovelyr.common.commands.ColorArgumentTypeInfo;
+import net.msymbios.llovelyr.source.LovelyConfigs;
+import net.msymbios.llovelyr.source.LovelyEntities;
+import net.msymbios.llovelyr.source.entity.common.NativeEntityType;
+import net.msymbios.llovelyr.source.LovelyGroups;
+import net.msymbios.llovelyr.source.LovelyItems;
+import net.msymbios.llovelyr.source.LovelyRecipes;
 import com.mojang.logging.LogUtils;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;

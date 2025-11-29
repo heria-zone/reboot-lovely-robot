@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.entity;
+package net.msymbios.llovelyr.source;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -10,10 +10,11 @@ import net.minecraftforge.registries.RegistryObject;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.client.renderer.Bunny2Renderer;
-import net.msymbios.llovelyr.source.entity.client.renderer.VanillaRenderer;
-import net.msymbios.llovelyr.source.entity.custom.Bunny2Entity;
-import net.msymbios.llovelyr.source.entity.custom.VanillaEntity;
+import net.msymbios.llovelyr.source.entity.common.NativeEntityType;
+import net.msymbios.llovelyr.source.entity.custom.bunny2.Bunny2Renderer;
+import net.msymbios.llovelyr.source.entity.custom.vanilla.VanillaRenderer;
+import net.msymbios.llovelyr.source.entity.custom.bunny2.Bunny2Entity;
+import net.msymbios.llovelyr.source.entity.custom.vanilla.VanillaEntity;
 
 /**
  * Registry for LovelyRobot Legacy entity types.

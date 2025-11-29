@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.items.custom;
+package net.msymbios.llovelyr.common.items.custom;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,16 +27,16 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.msymbios.llovelyr.common.entity.internal.InternalParticle;
-import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
+import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static net.msymbios.llovelyr.source.items.util.TooltipUtils.*;
+import static net.msymbios.llovelyr.common.items.utils.TooltipUtils.*;
 
 /**
  * Spawn egg for summoning robots with NBT-stored customization.

@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.groups;
+package net.msymbios.llovelyr.source;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
@@ -9,8 +9,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
-import net.msymbios.llovelyr.source.items.LovelyItems;
+import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 
 /**
  * Manages creative mode tabs for Legacy variant items.

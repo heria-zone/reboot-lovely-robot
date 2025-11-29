@@ -1,10 +1,10 @@
-package net.msymbios.llovelyr.source.items.util;
+package net.msymbios.llovelyr.common.items.utils;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.internal.enums.*;
+import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 
 import java.util.List;
 

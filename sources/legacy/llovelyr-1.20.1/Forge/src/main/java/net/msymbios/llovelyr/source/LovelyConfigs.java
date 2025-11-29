@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.configs;
+package net.msymbios.llovelyr.source;
 
 import com.electronwill.nightconfig.core.Config;
 import net.msymbios.llovelyr.LovelyLegacy;

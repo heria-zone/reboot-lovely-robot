@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.util.internal;
+package net.msymbios.llovelyr.common.utils.internal;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;

@@ -1,8 +1,8 @@
 package net.msymbios.llovelyr.common.entity.internal;
 
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityAnimation;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityState;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.common.entity.enums.EntityAnimation;
+import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.model.CoreGeoBone;

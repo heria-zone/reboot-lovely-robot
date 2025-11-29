@@ -4,14 +4,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.*;
-import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityState;
-import net.msymbios.llovelyr.source.configs.LovelyConfigs;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.framework.entity.enums.EntityState;
+import net.msymbios.llovelyr.source.LovelyConfigs;
 
 import java.util.EnumSet;
 

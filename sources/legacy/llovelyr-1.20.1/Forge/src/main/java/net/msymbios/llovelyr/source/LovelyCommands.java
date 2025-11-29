@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.commands;
+package net.msymbios.llovelyr.source;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -7,7 +7,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -23,8 +22,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityTexture;
+import net.msymbios.llovelyr.common.commands.ColorArgumentType;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
 
 import java.util.Optional;
 
@@ -47,7 +47,7 @@ import java.util.List;
  * flexible entity selection (@e, @p, @a, @r with type filters), enabling
  * batch operations on multiple robots simultaneously.
  */
-public class LovelyRobotCommand {
+public class LovelyCommands {
 
     // -- Public Methods --
 
@@ -343,12 +343,12 @@ public class LovelyRobotCommand {
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.literal("looting")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 3))
-                            .executes(LovelyRobotCommand::executeSetLooting)
+                            .executes(LovelyCommands::executeSetLooting)
                         )
                     )
                     .then(Commands.literal("all")
                         .then(Commands.argument("looting", IntegerArgumentType.integer(0, 3))
-                            .executes(LovelyRobotCommand::executeSetAllEnchants)
+                            .executes(LovelyCommands::executeSetAllEnchants)
                         )
                     )
                 )
@@ -376,22 +376,22 @@ public class LovelyRobotCommand {
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.literal("fire")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyRobotCommand::executeSetFireProtection)
+                            .executes(LovelyCommands::executeSetFireProtection)
                         )
                     )
                     .then(Commands.literal("fall")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyRobotCommand::executeSetFallProtection)
+                            .executes(LovelyCommands::executeSetFallProtection)
                         )
                     )
                     .then(Commands.literal("blast")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyRobotCommand::executeSetBlastProtection)
+                            .executes(LovelyCommands::executeSetBlastProtection)
                         )
                     )
                     .then(Commands.literal("projectile")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyRobotCommand::executeSetProjectileProtection)
+                            .executes(LovelyCommands::executeSetProjectileProtection)
                         )
                     )
                     .then(Commands.literal("all")
@@ -399,7 +399,7 @@ public class LovelyRobotCommand {
                             .then(Commands.argument("fall", IntegerArgumentType.integer(0, 80))
                                 .then(Commands.argument("blast", IntegerArgumentType.integer(0, 80))
                                     .then(Commands.argument("projectile", IntegerArgumentType.integer(0, 80))
-                                        .executes(LovelyRobotCommand::executeSetAllProtections)
+                                        .executes(LovelyCommands::executeSetAllProtections)
                                     )
                                 )
                             )
@@ -674,7 +674,7 @@ public class LovelyRobotCommand {
             .then(Commands.literal("set")
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.argument("color", ColorArgumentType.color())
-                        .executes(LovelyRobotCommand::executeSetDesign)
+                        .executes(LovelyCommands::executeSetDesign)
                     )
                 )
             );
@@ -696,13 +696,13 @@ public class LovelyRobotCommand {
         return Commands.literal("owner")
             .then(Commands.literal("get")
                 .then(Commands.argument("target", EntityArgument.entity())
-                    .executes(LovelyRobotCommand::executeGetOwner)
+                    .executes(LovelyCommands::executeGetOwner)
                 )
             )
             .then(Commands.literal("set")
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.argument("player", EntityArgument.player())
-                        .executes(LovelyRobotCommand::executeSetOwner)
+                        .executes(LovelyCommands::executeSetOwner)
                     )
                 )
             );
@@ -724,7 +724,7 @@ public class LovelyRobotCommand {
             .then(Commands.literal("set")
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.argument("name", ComponentArgument.textComponent())
-                        .executes(LovelyRobotCommand::executeSetName)
+                        .executes(LovelyCommands::executeSetName)
                     )
                 )
             );
@@ -917,7 +917,7 @@ public class LovelyRobotCommand {
                     
                     return builder.buildFuture();
                 })
-                .executes(LovelyRobotCommand::executeTeleport)
+                .executes(LovelyCommands::executeTeleport)
             );
     } // buildTeleportCommand()
 
@@ -1207,24 +1207,24 @@ public class LovelyRobotCommand {
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.literal("level")
                         .then(Commands.argument("value", IntegerArgumentType.integer(1, 200))
-                            .executes(LovelyRobotCommand::executeSetLevel)
+                            .executes(LovelyCommands::executeSetLevel)
                         )
                     )
                     .then(Commands.literal("exp")
                         .then(Commands.argument("value", IntegerArgumentType.integer(0))
-                            .executes(LovelyRobotCommand::executeSetXP)
+                            .executes(LovelyCommands::executeSetXP)
                         )
                     )
                 )
                 // Branch 2: Crosshair targeting path
                 .then(Commands.literal("level")
                     .then(Commands.argument("value", IntegerArgumentType.integer(1, 200))
-                        .executes(LovelyRobotCommand::executeCrosshairSetLevel)
+                        .executes(LovelyCommands::executeCrosshairSetLevel)
                     )
                 )
                 .then(Commands.literal("exp")
                     .then(Commands.argument("value", IntegerArgumentType.integer(0))
-                        .executes(LovelyRobotCommand::executeCrosshairSetXP)
+                        .executes(LovelyCommands::executeCrosshairSetXP)
                     )
                 )
             );
@@ -1247,22 +1247,22 @@ public class LovelyRobotCommand {
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.literal("hp")
                         .then(Commands.argument("value", IntegerArgumentType.integer(1))
-                            .executes(LovelyRobotCommand::executeSetHP)
+                            .executes(LovelyCommands::executeSetHP)
                         )
                     )
                     .then(Commands.literal("attack")
                         .then(Commands.argument("value", IntegerArgumentType.integer(1))
-                            .executes(LovelyRobotCommand::executeSetAttack)
+                            .executes(LovelyCommands::executeSetAttack)
                         )
                     )
                     .then(Commands.literal("defense")
                         .then(Commands.argument("value", IntegerArgumentType.integer(0))
-                            .executes(LovelyRobotCommand::executeSetDefense)
+                            .executes(LovelyCommands::executeSetDefense)
                         )
                     )
                     .then(Commands.literal("speed")
                         .then(Commands.argument("value", IntegerArgumentType.integer(1))
-                            .executes(LovelyRobotCommand::executeSetSpeed)
+                            .executes(LovelyCommands::executeSetSpeed)
                         )
                     )
                     .then(Commands.literal("all")
@@ -1270,7 +1270,7 @@ public class LovelyRobotCommand {
                             .then(Commands.argument("attack", IntegerArgumentType.integer(1))
                                 .then(Commands.argument("defense", IntegerArgumentType.integer(0))
                                     .then(Commands.argument("speed", IntegerArgumentType.integer(1))
-                                        .executes(LovelyRobotCommand::executeSetAllAttributes)
+                                        .executes(LovelyCommands::executeSetAllAttributes)
                                     )
                                 )
                             )
@@ -1280,22 +1280,22 @@ public class LovelyRobotCommand {
                 // Branch 2: Crosshair targeting path
                 .then(Commands.literal("hp")
                     .then(Commands.argument("value", IntegerArgumentType.integer(1))
-                        .executes(LovelyRobotCommand::executeCrosshairSetHP)
+                        .executes(LovelyCommands::executeCrosshairSetHP)
                     )
                 )
                 .then(Commands.literal("attack")
                     .then(Commands.argument("value", IntegerArgumentType.integer(1))
-                        .executes(LovelyRobotCommand::executeCrosshairSetAttack)
+                        .executes(LovelyCommands::executeCrosshairSetAttack)
                     )
                 )
                 .then(Commands.literal("defense")
                     .then(Commands.argument("value", IntegerArgumentType.integer(0))
-                        .executes(LovelyRobotCommand::executeCrosshairSetDefense)
+                        .executes(LovelyCommands::executeCrosshairSetDefense)
                     )
                 )
                 .then(Commands.literal("speed")
                     .then(Commands.argument("value", IntegerArgumentType.integer(1))
-                        .executes(LovelyRobotCommand::executeCrosshairSetSpeed)
+                        .executes(LovelyCommands::executeCrosshairSetSpeed)
                     )
                 )
                 .then(Commands.literal("all")
@@ -1303,7 +1303,7 @@ public class LovelyRobotCommand {
                         .then(Commands.argument("attack", IntegerArgumentType.integer(1))
                             .then(Commands.argument("defense", IntegerArgumentType.integer(0))
                                 .then(Commands.argument("speed", IntegerArgumentType.integer(1))
-                                    .executes(LovelyRobotCommand::executeCrosshairSetAllAttributes)
+                                    .executes(LovelyCommands::executeCrosshairSetAllAttributes)
                                 )
                             )
                         )
@@ -1322,24 +1322,24 @@ public class LovelyRobotCommand {
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.literal("looting")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 3))
-                            .executes(LovelyRobotCommand::executeSetLooting)
+                            .executes(LovelyCommands::executeSetLooting)
                         )
                     )
                     .then(Commands.literal("all")
                         .then(Commands.argument("looting", IntegerArgumentType.integer(0, 3))
-                            .executes(LovelyRobotCommand::executeSetAllEnchants)
+                            .executes(LovelyCommands::executeSetAllEnchants)
                         )
                     )
                 )
                 // Crosshair targeting path
                 .then(Commands.literal("looting")
                     .then(Commands.argument("level", IntegerArgumentType.integer(0, 3))
-                        .executes(LovelyRobotCommand::executeCrosshairSetLooting)
+                        .executes(LovelyCommands::executeCrosshairSetLooting)
                     )
                 )
                 .then(Commands.literal("all")
                     .then(Commands.argument("looting", IntegerArgumentType.integer(0, 3))
-                        .executes(LovelyRobotCommand::executeCrosshairSetAllEnchants)
+                        .executes(LovelyCommands::executeCrosshairSetAllEnchants)
                     )
                 )
             );
@@ -1355,22 +1355,22 @@ public class LovelyRobotCommand {
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.literal("fire")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyRobotCommand::executeSetFireProtection)
+                            .executes(LovelyCommands::executeSetFireProtection)
                         )
                     )
                     .then(Commands.literal("fall")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyRobotCommand::executeSetFallProtection)
+                            .executes(LovelyCommands::executeSetFallProtection)
                         )
                     )
                     .then(Commands.literal("blast")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyRobotCommand::executeSetBlastProtection)
+                            .executes(LovelyCommands::executeSetBlastProtection)
                         )
                     )
                     .then(Commands.literal("projectile")
                         .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyRobotCommand::executeSetProjectileProtection)
+                            .executes(LovelyCommands::executeSetProjectileProtection)
                         )
                     )
                     .then(Commands.literal("all")
@@ -1378,7 +1378,7 @@ public class LovelyRobotCommand {
                             .then(Commands.argument("fall", IntegerArgumentType.integer(0, 80))
                                 .then(Commands.argument("blast", IntegerArgumentType.integer(0, 80))
                                     .then(Commands.argument("projectile", IntegerArgumentType.integer(0, 80))
-                                        .executes(LovelyRobotCommand::executeSetAllProtections)
+                                        .executes(LovelyCommands::executeSetAllProtections)
                                     )
                                 )
                             )
@@ -1388,22 +1388,22 @@ public class LovelyRobotCommand {
                 // Crosshair targeting path
                 .then(Commands.literal("fire")
                     .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                        .executes(LovelyRobotCommand::executeCrosshairSetFireProtection)
+                        .executes(LovelyCommands::executeCrosshairSetFireProtection)
                     )
                 )
                 .then(Commands.literal("fall")
                     .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                        .executes(LovelyRobotCommand::executeCrosshairSetFallProtection)
+                        .executes(LovelyCommands::executeCrosshairSetFallProtection)
                     )
                 )
                 .then(Commands.literal("blast")
                     .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                        .executes(LovelyRobotCommand::executeCrosshairSetBlastProtection)
+                        .executes(LovelyCommands::executeCrosshairSetBlastProtection)
                     )
                 )
                 .then(Commands.literal("projectile")
                     .then(Commands.argument("level", IntegerArgumentType.integer(0, 80))
-                        .executes(LovelyRobotCommand::executeCrosshairSetProjectileProtection)
+                        .executes(LovelyCommands::executeCrosshairSetProjectileProtection)
                     )
                 )
                 .then(Commands.literal("all")
@@ -1411,7 +1411,7 @@ public class LovelyRobotCommand {
                         .then(Commands.argument("fall", IntegerArgumentType.integer(0, 80))
                             .then(Commands.argument("blast", IntegerArgumentType.integer(0, 80))
                                 .then(Commands.argument("projectile", IntegerArgumentType.integer(0, 80))
-                                    .executes(LovelyRobotCommand::executeCrosshairSetAllProtections)
+                                    .executes(LovelyCommands::executeCrosshairSetAllProtections)
                                 )
                             )
                         )
@@ -1429,13 +1429,13 @@ public class LovelyRobotCommand {
                 // Entity selector path
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.argument("color", ColorArgumentType.color())
-                        .executes(LovelyRobotCommand::executeSetDesign)
+                        .executes(LovelyCommands::executeSetDesign)
                     )
                 )
                 // Crosshair targeting path (using "here" literal to avoid ambiguity)
                 .then(Commands.literal("here")
                     .then(Commands.argument("color", ColorArgumentType.color())
-                        .executes(LovelyRobotCommand::executeCrosshairSetDesign)
+                        .executes(LovelyCommands::executeCrosshairSetDesign)
                     )
                 )
             );
@@ -1449,24 +1449,24 @@ public class LovelyRobotCommand {
             .then(Commands.literal("get")
                 // Entity selector path
                 .then(Commands.argument("target", EntityArgument.entity())
-                    .executes(LovelyRobotCommand::executeGetOwner)
+                    .executes(LovelyCommands::executeGetOwner)
                 )
                 // Crosshair targeting path (no arguments)
                 .then(Commands.literal("here")
-                    .executes(LovelyRobotCommand::executeCrosshairGetOwner)
+                    .executes(LovelyCommands::executeCrosshairGetOwner)
                 )
             )
             .then(Commands.literal("set")
                 // Entity selector path
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.argument("player", EntityArgument.player())
-                        .executes(LovelyRobotCommand::executeSetOwner)
+                        .executes(LovelyCommands::executeSetOwner)
                     )
                 )
                 // Crosshair targeting path (using "here" literal to avoid ambiguity)
                 .then(Commands.literal("here")
                     .then(Commands.argument("player", EntityArgument.player())
-                        .executes(LovelyRobotCommand::executeCrosshairSetOwner)
+                        .executes(LovelyCommands::executeCrosshairSetOwner)
                     )
                 )
             );
@@ -1481,13 +1481,13 @@ public class LovelyRobotCommand {
                 // Entity selector path
                 .then(Commands.argument("target", EntityArgument.entities())
                     .then(Commands.argument("name", StringArgumentType.greedyString())
-                        .executes(LovelyRobotCommand::executeSetName)
+                        .executes(LovelyCommands::executeSetName)
                     )
                 )
                 // Crosshair targeting path (using "here" literal to avoid ambiguity)
                 .then(Commands.literal("here")
                     .then(Commands.argument("name", StringArgumentType.greedyString())
-                        .executes(LovelyRobotCommand::executeCrosshairSetName)
+                        .executes(LovelyCommands::executeCrosshairSetName)
                     )
                 )
             );
@@ -1506,7 +1506,7 @@ public class LovelyRobotCommand {
     private static ArgumentBuilder<CommandSourceStack, ?> buildHybridTeleportCommand() {
         return Commands.literal("teleport")
             // Crosshair targeting path (no arguments)
-            .executes(LovelyRobotCommand::executeCrosshairTeleport)
+            .executes(LovelyCommands::executeCrosshairTeleport)
             // Robot identifier path (with autocomplete)
             .then(Commands.argument("robot", StringArgumentType.word())
                 .suggests((ctx, builder) -> {
@@ -1539,7 +1539,7 @@ public class LovelyRobotCommand {
                     
                     return builder.buildFuture();
                 })
-                .executes(LovelyRobotCommand::executeTeleport)
+                .executes(LovelyCommands::executeTeleport)
             );
     } // buildHybridTeleportCommand()
 
@@ -2126,4 +2126,4 @@ public class LovelyRobotCommand {
         return closestRobot;
     } // findCrosshairRobot()
 
-} // Class: LovelyRobotCommand
+} // Class: LovelyCommands

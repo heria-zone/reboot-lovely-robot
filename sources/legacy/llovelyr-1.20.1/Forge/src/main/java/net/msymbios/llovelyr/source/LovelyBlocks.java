@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.blocks;
+package net.msymbios.llovelyr.source;
 
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.minecraft.world.level.block.Block;

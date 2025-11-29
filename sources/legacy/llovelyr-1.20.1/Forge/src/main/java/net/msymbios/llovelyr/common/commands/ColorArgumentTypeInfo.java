@@ -1,7 +1,7 @@
-package net.msymbios.llovelyr.source.commands;
+package net.msymbios.llovelyr.common.commands;
 
 import com.google.gson.JsonObject;
-import com.mojang.brigadier.arguments.ArgumentType;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -88,7 +88,7 @@ public class ColorArgumentTypeInfo implements ArgumentTypeInfo<ColorArgumentType
          * @return new ColorArgumentType instance
          */
         @Override
-        public ColorArgumentType instantiate(net.minecraft.commands.CommandBuildContext context) {
+        public ColorArgumentType instantiate(CommandBuildContext context) {
             return ColorArgumentType.color();
         } // instantiate()
 

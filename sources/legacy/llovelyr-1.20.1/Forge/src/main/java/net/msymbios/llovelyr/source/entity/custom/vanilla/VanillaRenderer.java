@@ -1,11 +1,8 @@
-package net.msymbios.llovelyr.source.entity.client.renderer;
+package net.msymbios.llovelyr.source.entity.custom.vanilla;
 
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.llovelyr.source.LovelyConfigs;
-import net.msymbios.llovelyr.source.entity.client.layer.VanillaLayer;
-import net.msymbios.llovelyr.source.entity.client.model.VanillaModel;
-import net.msymbios.llovelyr.source.entity.custom.VanillaEntity;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
