@@ -15,11 +15,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Rotation;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.common.util.interfaces.*;
 import net.msymbios.llovelyr.common.util.internal.*;
@@ -162,6 +164,21 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     protected InternalEntity(EntityType<? extends TamableAnimal> entityType, Level world, InternalEntityType<?> nativeEntityType) {
         super(entityType, world);
         this.nativeEntity = nativeEntityType;
+
+        rotate(Rotation.getRandom(this.getRandom()));
+
+        // Apply config-based attributes after construction
+        // Config is guaranteed to be loaded by the time entities spawn
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(nativeEntityType.getMaxHealth());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(nativeEntityType.getAttackDamage());
+        this.getAttribute(Attributes.ATTACK_SPEED).setBaseValue(nativeEntityType.getAttackSpeed());
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(nativeEntityType.getMoveSpeed());
+        this.getAttribute(Attributes.ARMOR).setBaseValue(nativeEntityType.getArmour());
+        this.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(nativeEntityType.getArmourToughness());
+
+        // Refresh navigation to pick up new movement speed
+        // AI goals cache the speed attribute, so we need to refresh after changing it
+        this.getNavigation().stop();
     } // Constructor InternalEntity ()
 
     // -- Inherited Methods --
@@ -183,6 +200,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setTexture(nativeEntity.getRandomTextureID());
+        this.setHealth(this.getMaxHealth());
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
 
