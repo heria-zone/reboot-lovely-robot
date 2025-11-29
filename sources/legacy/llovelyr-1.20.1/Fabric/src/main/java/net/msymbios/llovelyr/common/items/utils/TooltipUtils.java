@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.items.utils;
+package net.msymbios.llovelyr.common.items.utils;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;

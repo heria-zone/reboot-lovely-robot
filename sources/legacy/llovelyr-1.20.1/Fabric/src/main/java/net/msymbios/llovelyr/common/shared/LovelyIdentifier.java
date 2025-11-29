@@ -1,10 +1,12 @@
-package net.msymbios.llovelyr.source.configs;
+package net.msymbios.llovelyr.common.shared;
 
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.source.entity.internal.enums.*;
+import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
+import net.msymbios.llovelyr.framework.common.InternalIdentifier;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 
 public class LovelyIdentifier {
 
@@ -93,26 +95,6 @@ public class LovelyIdentifier {
     public static final String MOD_DEFAULT = "default";
     public static final String MOD_ARMED = "armed";
 
-    // -- Textures --
-
-    public static final String TEX_WHITE = "white";
-    public static final String TEX_ORANGE = "orange";
-    public static final String TEX_MAGENTA = "magenta";
-    public static final String TEX_LIGHT_BLUE = "light_blue";
-    public static final String TEX_YELLOW = "yellow";
-    public static final String TEX_LIME = "lime";
-    public static final String TEX_PINK = "pink";
-    public static final String TEX_GRAY = "gray";
-    public static final String TEX_LIGHT_GRAY = "light_gray";
-    public static final String TEX_CYAN = "cyan";
-    public static final String TEX_PURPLE = "purple";
-    public static final String TEX_BLUE = "blue";
-    public static final String TEX_BROWN = "brown";
-    public static final String TEX_GREEN = "green";
-    public static final String TEX_RED = "red";
-    public static final String TEX_BLACK = "black";
-    public static final String TEX_RANDOM = "random";
-
     // -- Methods --
 
     /**
@@ -158,25 +140,25 @@ public class LovelyIdentifier {
      * @return         the message key corresponding to the EntityTexture
      */
     public static MutableText getTranslation(EntityTexture texture) {
-        MutableText value = getMessageTranslation(LovelyIdentifier.TEX_PINK);
+        MutableText value = getMessageTranslation(InternalIdentifier.TEX_PINK);
         switch (texture) {
-            case RANDOM -> value = getMessageTranslation(LovelyIdentifier.TEX_RANDOM);
-            case WHITE -> value = getMessageTranslation(LovelyIdentifier.TEX_WHITE);
-            case ORANGE -> value = getMessageTranslation(LovelyIdentifier.TEX_ORANGE);
-            case MAGENTA -> value = getMessageTranslation(LovelyIdentifier.TEX_MAGENTA);
-            case LIGHT_BLUE -> value = getMessageTranslation(LovelyIdentifier.TEX_LIGHT_BLUE);
-            case YELLOW -> value = getMessageTranslation(LovelyIdentifier.TEX_YELLOW);
-            case LIME -> value = getMessageTranslation(LovelyIdentifier.TEX_LIME);
-            case PINK -> value = getMessageTranslation(LovelyIdentifier.TEX_PINK);
-            case GRAY -> value = getMessageTranslation(LovelyIdentifier.TEX_GRAY);
-            case LIGHT_GRAY -> value = getMessageTranslation(LovelyIdentifier.TEX_LIGHT_GRAY);
-            case CYAN -> value = getMessageTranslation(LovelyIdentifier.TEX_CYAN);
-            case PURPLE -> value = getMessageTranslation(LovelyIdentifier.TEX_PURPLE);
-            case BLUE -> value = getMessageTranslation(LovelyIdentifier.TEX_BLUE);
-            case BROWN -> value = getMessageTranslation(LovelyIdentifier.TEX_BROWN);
-            case GREEN -> value = getMessageTranslation(LovelyIdentifier.TEX_GREEN);
-            case RED -> value = getMessageTranslation(LovelyIdentifier.TEX_RED);
-            case BLACK -> value = getMessageTranslation(LovelyIdentifier.TEX_BLACK);
+            case RANDOM -> value = getMessageTranslation(InternalIdentifier.TEX_RANDOM);
+            case WHITE -> value = getMessageTranslation(InternalIdentifier.TEX_WHITE);
+            case ORANGE -> value = getMessageTranslation(InternalIdentifier.TEX_ORANGE);
+            case MAGENTA -> value = getMessageTranslation(InternalIdentifier.TEX_MAGENTA);
+            case LIGHT_BLUE -> value = getMessageTranslation(InternalIdentifier.TEX_LIGHT_BLUE);
+            case YELLOW -> value = getMessageTranslation(InternalIdentifier.TEX_YELLOW);
+            case LIME -> value = getMessageTranslation(InternalIdentifier.TEX_LIME);
+            case PINK -> value = getMessageTranslation(InternalIdentifier.TEX_PINK);
+            case GRAY -> value = getMessageTranslation(InternalIdentifier.TEX_GRAY);
+            case LIGHT_GRAY -> value = getMessageTranslation(InternalIdentifier.TEX_LIGHT_GRAY);
+            case CYAN -> value = getMessageTranslation(InternalIdentifier.TEX_CYAN);
+            case PURPLE -> value = getMessageTranslation(InternalIdentifier.TEX_PURPLE);
+            case BLUE -> value = getMessageTranslation(InternalIdentifier.TEX_BLUE);
+            case BROWN -> value = getMessageTranslation(InternalIdentifier.TEX_BROWN);
+            case GREEN -> value = getMessageTranslation(InternalIdentifier.TEX_GREEN);
+            case RED -> value = getMessageTranslation(InternalIdentifier.TEX_RED);
+            case BLACK -> value = getMessageTranslation(InternalIdentifier.TEX_BLACK);
         }
         return value;
     } // getTranslation ()

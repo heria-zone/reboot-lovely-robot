@@ -1,7 +1,7 @@
-package net.msymbios.llovelyr.common.util.interfaces;
+package net.msymbios.llovelyr.lib.utils.interfaces;
 
 import net.minecraft.nbt.NbtCompound;
-import net.msymbios.llovelyr.common.util.internal.Version;
+import net.msymbios.llovelyr.framework.utils.Version;
 
 import org.jetbrains.annotations.NotNull;
 

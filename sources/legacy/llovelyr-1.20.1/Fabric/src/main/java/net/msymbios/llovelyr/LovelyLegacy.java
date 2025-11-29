@@ -2,14 +2,14 @@ package net.msymbios.llovelyr;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.msymbios.llovelyr.common.util.ObjectUtil;
-import net.msymbios.llovelyr.common.util.internal.Version;
-import net.msymbios.llovelyr.source.commands.LovelyCommandArguments;
-import net.msymbios.llovelyr.source.entity.LovelyEntities;
-import net.msymbios.llovelyr.source.events.LovelyEvents;
-import net.msymbios.llovelyr.source.groups.LovelyGroups;
-import net.msymbios.llovelyr.source.items.LovelyItems;
-import net.msymbios.llovelyr.source.recipes.LovelyRecipes;
+import net.msymbios.llovelyr.framework.utils.ObjectUtil;
+import net.msymbios.llovelyr.framework.utils.Version;
+import net.msymbios.llovelyr.common.commands.LovelyCommandArguments;
+import net.msymbios.llovelyr.source.LovelyEntities;
+import net.msymbios.llovelyr.source.LovelyEvents;
+import net.msymbios.llovelyr.source.LovelyGroups;
+import net.msymbios.llovelyr.source.LovelyItems;
+import net.msymbios.llovelyr.source.LovelyRecipes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.GeckoLib;

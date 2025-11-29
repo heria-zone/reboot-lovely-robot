@@ -1,11 +1,11 @@
-package net.msymbios.llovelyr.source.recipes.internal.strategies;
+package net.msymbios.llovelyr.lib.recipes.strategies;
 
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.msymbios.llovelyr.source.recipes.interfaces.INbtTransferStrategy;
-import net.msymbios.llovelyr.source.recipes.interfaces.INbtModifier;
+import net.msymbios.llovelyr.lib.recipes.interfaces.INbtTransferStrategy;
+import net.msymbios.llovelyr.lib.recipes.interfaces.INbtModifier;
 
 import java.util.List;
 

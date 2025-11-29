@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.item;
+package net.msymbios.llovelyr.lib.items;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.item.Item;

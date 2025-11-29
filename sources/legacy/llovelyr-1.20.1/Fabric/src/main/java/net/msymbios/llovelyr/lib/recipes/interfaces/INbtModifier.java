@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.recipes.interfaces;
+package net.msymbios.llovelyr.lib.recipes.interfaces;
 
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.nbt.NbtCompound;

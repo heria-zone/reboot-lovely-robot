@@ -2,7 +2,7 @@ package net.msymbios.llovelyr.common.entity.internal;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.particle.ParticleTypes;
-import net.msymbios.llovelyr.common.util.internal.Utility;
+import net.msymbios.llovelyr.common.utils.internal.Utility;
 
 /**
  * Manages particle effect spawning for robot entities.

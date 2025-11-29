@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.items.custom;
+package net.msymbios.llovelyr.common.items.custom;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FluidBlock;
@@ -27,14 +27,14 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 
-import static net.msymbios.llovelyr.source.items.utils.TooltipUtils.*;
+import static net.msymbios.llovelyr.common.items.utils.TooltipUtils.*;
 
 /**
  * Spawn egg for summoning robots with NBT-stored customization.

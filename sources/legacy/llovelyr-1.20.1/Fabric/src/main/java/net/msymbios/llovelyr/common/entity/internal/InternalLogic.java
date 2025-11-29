@@ -8,7 +8,7 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.msymbios.llovelyr.source.configs.LovelyConfigs;
+import net.msymbios.llovelyr.source.LovelyConfigs;
 
 /**
  * Centralizes robot stat calculation and attribute management logic.

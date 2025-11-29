@@ -1,7 +1,7 @@
 package net.msymbios.llovelyr.common.entity.internal;
 
 import net.minecraft.util.Identifier;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.model.GeoModel;

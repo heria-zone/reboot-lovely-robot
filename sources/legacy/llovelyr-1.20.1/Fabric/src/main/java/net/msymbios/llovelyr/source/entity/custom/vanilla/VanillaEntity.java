@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.entity.custom;
+package net.msymbios.llovelyr.source.entity.custom.vanilla;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -6,8 +6,8 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.NativeEntityType;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.NativeEntityType;
 import net.msymbios.llovelyr.source.LovelyItems;
 
 /**

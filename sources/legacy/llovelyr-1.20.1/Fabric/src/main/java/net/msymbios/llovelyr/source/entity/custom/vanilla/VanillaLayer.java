@@ -1,7 +1,6 @@
-package net.msymbios.llovelyr.source.entity.client.layer;
+package net.msymbios.llovelyr.source.entity.custom.vanilla;
 
 import net.msymbios.llovelyr.common.entity.internal.InternalLayer;
-import net.msymbios.llovelyr.source.entity.custom.VanillaEntity;
 import software.bernie.geckolib.renderer.GeoRenderer;
 
 /**

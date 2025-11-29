@@ -3,10 +3,9 @@ package net.msymbios.llovelyr.common.entity.goal;
 import net.minecraft.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.LivingEntity;
-import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
-import net.msymbios.llovelyr.source.configs.LovelyConfigs;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityState;
+import net.msymbios.llovelyr.source.LovelyConfigs;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 
 /**
  * Enhanced owner following goal with movement detection and dynamic distance adjustment.

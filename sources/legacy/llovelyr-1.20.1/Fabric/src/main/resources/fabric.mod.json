@@ -19,10 +19,10 @@
 			"${mod_group}.LovelyLegacy"
 		],
 		"fabric-datagen": [
-			"${mod_group}.source.data.LovelyGenerator"
+			"${mod_group}.source.LovelyGenerator"
 		],
 		"client": [
-			"${mod_group}.source.client.LovelyClient"
+			"${mod_group}.source.LovelyClient"
 		]
 	},
 	"mixins": [

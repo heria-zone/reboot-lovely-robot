@@ -1,13 +1,13 @@
-package net.msymbios.llovelyr.source.recipes;
+package net.msymbios.llovelyr.source;
 
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.recipes.custom.LovelySpawnDyeRecipe;
-import net.msymbios.llovelyr.source.recipes.custom.LovelySpawnDyeRecipeSerializer;
-import net.msymbios.llovelyr.source.recipes.custom.LovelySpawnRecipe;
-import net.msymbios.llovelyr.source.recipes.custom.LovelySpawnRecipeSerializer;
+import net.msymbios.llovelyr.common.recipes.LovelySpawnDyeRecipe;
+import net.msymbios.llovelyr.common.recipes.LovelySpawnDyeRecipeSerializer;
+import net.msymbios.llovelyr.common.recipes.LovelySpawnRecipe;
+import net.msymbios.llovelyr.common.recipes.LovelySpawnRecipeSerializer;
 
 /**
  * Registry for custom recipe types and serializers.

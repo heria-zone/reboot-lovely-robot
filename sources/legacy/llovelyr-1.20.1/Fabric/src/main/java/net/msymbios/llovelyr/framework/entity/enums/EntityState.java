@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.entity.internal.enums;
+package net.msymbios.llovelyr.framework.entity.enums;
 
 import java.util.Arrays;
 import java.util.Comparator;

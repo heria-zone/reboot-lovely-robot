@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.recipes.custom;
+package net.msymbios.llovelyr.common.recipes;
 
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
@@ -10,10 +10,10 @@ import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.recipes.LovelyRecipes;
-import net.msymbios.llovelyr.source.recipes.interfaces.INbtTransferStrategy;
-import net.msymbios.llovelyr.source.recipes.internal.modifiers.DyeColorModifier;
-import net.msymbios.llovelyr.source.recipes.internal.strategies.AdditiveNbtMergeStrategy;
+import net.msymbios.llovelyr.source.LovelyRecipes;
+import net.msymbios.llovelyr.lib.recipes.interfaces.INbtTransferStrategy;
+import net.msymbios.llovelyr.lib.recipes.modifiers.DyeColorModifier;
+import net.msymbios.llovelyr.lib.recipes.strategies.AdditiveNbtMergeStrategy;
 
 import java.util.List;
 

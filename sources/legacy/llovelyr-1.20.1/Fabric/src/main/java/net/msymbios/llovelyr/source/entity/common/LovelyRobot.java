@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.entity;
+package net.msymbios.llovelyr.source.entity.common;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.*;

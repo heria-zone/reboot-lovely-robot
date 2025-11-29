@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.item;
+package net.msymbios.llovelyr.lib.items;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.block.Block;

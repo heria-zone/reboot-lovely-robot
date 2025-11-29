@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.recipes.custom;
+package net.msymbios.llovelyr.common.recipes;
 
 import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
@@ -10,7 +10,7 @@ import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
-import net.msymbios.llovelyr.source.mixin.IShapedRecipeAccessor;
+import net.msymbios.llovelyr.lib.mixin.IShapedRecipeAccessor;
 
 import java.util.Map;
 

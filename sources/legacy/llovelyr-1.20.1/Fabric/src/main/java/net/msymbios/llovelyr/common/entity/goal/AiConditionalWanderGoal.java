@@ -2,9 +2,9 @@ package net.msymbios.llovelyr.common.entity.goal;
 
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.LivingEntity;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.internal.enums.EntityState;
-import net.msymbios.llovelyr.source.configs.LovelyConfigs;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.framework.entity.enums.EntityState;
+import net.msymbios.llovelyr.source.LovelyConfigs;
 
 /**
  * State-aware conditional wander goal with owner movement detection.

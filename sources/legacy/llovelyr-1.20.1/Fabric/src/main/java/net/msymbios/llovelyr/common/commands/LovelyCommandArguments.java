@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.commands;
+package net.msymbios.llovelyr.common.commands;
 
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;

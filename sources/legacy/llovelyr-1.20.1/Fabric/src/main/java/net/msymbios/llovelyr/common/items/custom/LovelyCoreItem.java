@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.items.custom;
+package net.msymbios.llovelyr.common.items.custom;
 
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static net.msymbios.llovelyr.source.items.utils.TooltipUtils.*;
+import static net.msymbios.llovelyr.common.items.utils.TooltipUtils.*;
 
 /**
  * Robot core item storing entity data for crafting and storage.

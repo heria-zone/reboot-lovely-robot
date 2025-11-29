@@ -2,8 +2,7 @@ package net.msymbios.llovelyr.common.entity.goal;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
-import net.msymbios.llovelyr.source.entity.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;

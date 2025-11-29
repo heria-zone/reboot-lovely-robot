@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.items;
+package net.msymbios.llovelyr.source;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.EntityType;
@@ -7,9 +7,8 @@ import net.minecraft.item.Item;
 import net.minecraft.util.Rarity;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.lib.items.InternalItems;
-import net.msymbios.llovelyr.source.entity.LovelyEntities;
-import net.msymbios.llovelyr.source.items.custom.LovelyCoreItem;
-import net.msymbios.llovelyr.source.items.custom.LovelySpawnItem;
+import net.msymbios.llovelyr.common.items.custom.LovelyCoreItem;
+import net.msymbios.llovelyr.common.items.custom.LovelySpawnItem;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 
 /**

@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.mixin;
+package net.msymbios.llovelyr.lib.mixin;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

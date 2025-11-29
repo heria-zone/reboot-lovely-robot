@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.groups;
+package net.msymbios.llovelyr.source;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -7,7 +7,6 @@ import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.RegistryKey;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.lib.items.InternalItemsGroup;
-import net.msymbios.llovelyr.source.items.LovelyItems;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 
 /**

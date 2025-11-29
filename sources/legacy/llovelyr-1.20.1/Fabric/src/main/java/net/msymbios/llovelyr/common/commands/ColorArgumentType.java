@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.commands;
+package net.msymbios.llovelyr.common.commands;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;

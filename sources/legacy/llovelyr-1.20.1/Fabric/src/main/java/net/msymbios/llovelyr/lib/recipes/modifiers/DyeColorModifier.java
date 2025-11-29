@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.recipes.internal.modifiers;
+package net.msymbios.llovelyr.lib.recipes.modifiers;
 
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.DyeItem;
@@ -7,7 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
-import net.msymbios.llovelyr.source.recipes.interfaces.INbtModifier;
+import net.msymbios.llovelyr.lib.recipes.interfaces.INbtModifier;
 
 /**
  * Modifies color NBT key based on dye item in crafting grid.

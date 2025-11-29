@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.source.recipes.custom;
+package net.msymbios.llovelyr.common.recipes;
 
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.ItemStack;
@@ -9,10 +9,10 @@ import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
-import net.msymbios.llovelyr.source.items.LovelyItems;
-import net.msymbios.llovelyr.source.recipes.LovelyRecipes;
-import net.msymbios.llovelyr.source.recipes.interfaces.INbtTransferStrategy;
-import net.msymbios.llovelyr.source.recipes.internal.strategies.FullNbtCopyStrategy;
+import net.msymbios.llovelyr.source.LovelyItems;
+import net.msymbios.llovelyr.source.LovelyRecipes;
+import net.msymbios.llovelyr.lib.recipes.interfaces.INbtTransferStrategy;
+import net.msymbios.llovelyr.lib.recipes.strategies.FullNbtCopyStrategy;
 
 /**
  * Shaped recipe for crafting spawn eggs from robot cores with full NBT transfer.

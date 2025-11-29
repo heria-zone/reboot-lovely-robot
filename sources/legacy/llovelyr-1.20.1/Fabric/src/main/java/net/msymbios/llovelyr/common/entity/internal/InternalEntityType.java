@@ -5,8 +5,11 @@ import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Identifier;
-import net.msymbios.llovelyr.source.configs.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.internal.enums.*;
+import net.msymbios.llovelyr.common.entity.enums.EntityAnimator;
+import net.msymbios.llovelyr.common.entity.enums.EntityModel;
+import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
