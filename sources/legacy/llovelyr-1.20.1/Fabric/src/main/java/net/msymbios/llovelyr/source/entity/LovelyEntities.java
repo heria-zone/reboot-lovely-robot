@@ -15,6 +15,7 @@ import net.msymbios.llovelyr.source.entity.client.renderer.Bunny2Renderer;
 import net.msymbios.llovelyr.source.entity.client.renderer.VanillaRenderer;
 import net.msymbios.llovelyr.source.entity.custom.Bunny2Entity;
 import net.msymbios.llovelyr.source.entity.custom.VanillaEntity;
+import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 
 /**
  * Registry for LovelyRobot Legacy entity types (Fabric).
@@ -31,11 +32,11 @@ public class LovelyEntities {
     // -- Entity Type Definitions --
 
     public static final EntityType<VanillaEntity> VANILLA = 
-        register(LovelyIdentifier.VARIANT_VANILLA, (type, world) -> new VanillaEntity(type, world), SpawnGroup.CREATURE, 
+        register(LovelyIdentifier.VARIANT_VANILLA, (type, world) -> new VanillaEntity(type, world, NativeEntityType.VANILLA), SpawnGroup.CREATURE,
             LovelyConfigs.Common.Width, LovelyConfigs.Common.Height);
 
     public static final EntityType<Bunny2Entity> BUNNY2 = 
-        register(LovelyIdentifier.VARIANT_BUNNY2, (type, world) -> new Bunny2Entity(type, world), SpawnGroup.CREATURE, 
+        register(LovelyIdentifier.VARIANT_BUNNY2, (type, world) -> new Bunny2Entity(type, world, NativeEntityType.BUNNY2), SpawnGroup.CREATURE, 
             LovelyConfigs.Common.Width, LovelyConfigs.Common.Height);
 
     // -- Registration Methods --

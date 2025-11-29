@@ -78,55 +78,6 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
         );
     } // register ()
 
-    static { // TODO: This can't get the values of config, because it was not loaded yet
-        // Configure Bunny2 stats from config
-        /*BUNNY2.addCombat(
-                LovelyConfigs.Bunny2MaxLevel,
-                LovelyConfigs.Bunny2MaxHealth,
-                LovelyConfigs.Bunny2AttackDamage,
-                LovelyConfigs.Bunny2AttackSpeed,
-                LovelyConfigs.Bunny2Armor,
-                LovelyConfigs.Bunny2ArmorToughness,
-                0.1F,
-                LovelyConfigs.Bunny2MovementSpeed
-        );
-
-        // Configure Vanilla stats from config
-        VANILLA.addCombat(
-            LovelyConfigs.VanillaMaxLevel,
-            LovelyConfigs.VanillaMaxHealth,
-            LovelyConfigs.VanillaAttackDamage,
-            LovelyConfigs.VanillaAttackSpeed,
-            LovelyConfigs.VanillaArmor,
-            LovelyConfigs.VanillaArmorToughness,
-            0F,
-            LovelyConfigs.VanillaMovementSpeed
-        );*/
-
-        /*BUNNY2.addCombat(
-                200,
-                24,
-                4F,
-                1.8F,
-                6F,
-                1F,
-                0.1F,
-                0.37F
-        );
-
-        // Configure Vanilla stats from config
-        VANILLA.addCombat(
-                200,
-                16,
-                2F,
-                1F,
-                2F,
-                0F,
-                0F,
-                0.37F // 0.25F is too slow
-        );*/
-    }
-
     // -- Constructor --
 
     /**

@@ -16,6 +16,7 @@ import net.msymbios.llovelyr.source.entity.client.renderer.Bunny2Renderer;
 import net.msymbios.llovelyr.source.entity.client.renderer.VanillaRenderer;
 import net.msymbios.llovelyr.source.entity.custom.Bunny2Entity;
 import net.msymbios.llovelyr.source.entity.custom.VanillaEntity;
+import net.msymbios.llovelyr.source.entity.internal.NativeEntityType;
 
 /**
  * Registry for LovelyRobot Legacy entity types.
@@ -35,8 +36,8 @@ public class LovelyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = register(LovelyIdentifier.VARIANT_VANILLA, MobCategory.CREATURE, 0.4F, 1.9F/*LovelyConfigs.Width, LovelyConfigs.Height*/, (type, level) -> new VanillaEntity(type, level));
-    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = register(LovelyIdentifier.VARIANT_BUNNY2, MobCategory.CREATURE, 0.4F, 1.9F/*LovelyConfigs.Width, LovelyConfigs.Height**/, (type, level) -> new Bunny2Entity(type, level));
+    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = register(LovelyIdentifier.VARIANT_VANILLA, MobCategory.CREATURE, 0.4F, 1.9F/*LovelyConfigs.Width, LovelyConfigs.Height*/, (type, level) -> new VanillaEntity(type, level, NativeEntityType.VANILLA));
+    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = register(LovelyIdentifier.VARIANT_BUNNY2, MobCategory.CREATURE, 0.4F, 1.9F/*LovelyConfigs.Width, LovelyConfigs.Height**/, (type, level) -> new Bunny2Entity(type, level, NativeEntityType.BUNNY2));
 
     // -- Registration Methods --
     /**/

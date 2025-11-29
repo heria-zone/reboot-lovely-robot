@@ -22,8 +22,8 @@ public class Bunny2Entity extends LovelyRobot {
 
     // -- Constructor --
 
-    public Bunny2Entity(EntityType<? extends LovelyRobot> entityType, Level level) {
-        super(entityType, level, NativeEntityType.BUNNY2);
+    public Bunny2Entity(EntityType<? extends LovelyRobot> entityType, Level level, NativeEntityType nativeEntityType) {
+        super(entityType, level, nativeEntityType);
     } // Bunny2Entity
 
     // -- Inherited Methods --

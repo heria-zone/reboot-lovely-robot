@@ -22,8 +22,8 @@ public class VanillaEntity extends LovelyRobot {
 
     // -- Constructor --
 
-    public VanillaEntity(EntityType<? extends LovelyRobot> entityType, World world) {
-        super(entityType, world, NativeEntityType.VANILLA);
+    public VanillaEntity(EntityType<? extends LovelyRobot> entityType, World world, NativeEntityType nativeEntityType) {
+        super(entityType, world, nativeEntityType);
     } // VanillaEntity
 
     // -- Inherited Methods --
