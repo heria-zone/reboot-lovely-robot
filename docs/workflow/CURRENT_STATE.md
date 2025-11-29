@@ -914,7 +914,7 @@ net.msymbios.llovelyr/
 **Status**: ✅ Comprehensive
 
 **Structure**:
-- `.kiro/steering/` - AI agent guidance
+- `steering/` - guidance
 - `docs/project/` - Vision documents
 - `docs/workflow/` - Strategy documents (this file)
 - `docs/development/` - Execution tracking

@@ -25,12 +25,15 @@
 - [x] **Robot Retrieval System - Changed from stick interaction to Ctrl+Shift with empty hand (Forge & Fabric)** *(Completed: 2025-11-28)*
 - [x] **Enhanced Robot AI Behavior System - Follow/wander balance, patrol/guard defense mode, owner movement detection** *(Completed: 2025-11-28)*
 - [x] **Base Defense Scan Pattern Improvements - Varied scan patterns (360°, 180° sweeps, quadrant checks, random points) and head stabilization during movement (Forge & Fabric 1.20.1)** *(Completed: 2025-11-28)*
-- [ ] **Robot Command System - Admin commands for stats, enchantments, protections, design, owner, name** *(Sprint 03: 2025-11-25)*
-- [ ] **Robot Core Glow Effect - Glowing outline on dropped cores** *(Sprint 03: 2025-11-25)*
-- [ ] **Smart Core Retrieval - Distance-based auto-retrieval to inventory** *(Sprint 03: 2025-11-25)*
+- [x] **Robot Command System - Admin commands for stats, enchantments, protections, design, owner, name (Forge 1.20.1)** *(Completed: 2025-11-29 - LovelyRobotCommand.java with full command tree)*
+- [x] **Robot Core Glow Effect - Glowing outline on dropped cores with color-coded teams (Forge & Fabric 1.20.1)** *(Completed: 2025-11-29 - applyGlowColor() with scoreboard team system)*
+- [x] **Smart Core Retrieval - Distance-based auto-retrieval to inventory (Forge & Fabric 1.20.1)** *(Completed: 2025-11-29 - attemptAutoRetrieval() with configurable distance)*
+- [x] **Sitting Pose Animation System - Random delay standby-to-sit transitions with dynamic hitbox (Forge & Fabric 1.20.1)** *(Completed: 2025-11-29 - handleStandbyAnimation() with configurable timing)*
+- [x] **Health Persistence System - Proper health sync across world reloads (Forge & Fabric 1.20.1)** *(Completed: 2025-11-29 - handleHealthSync() with data tracker)*
 - [ ] Add conversion compatibility between Tribute and Legacy versions
 - [x] Support versions: 1.7.10, 1.12.2, 1.16.2, 1.19.2, 1.19.4, 1.20.1, 1.21.x *(Evidence: Multiple version directories)*
 - [x] Maintain mod ID: `llovelyr` (current reboot) *(Evidence: LovelyLegacy.MODID references)*
+- [x] **Multi-loader architecture with shared codebase (1.20.1)** *(Completed: Common/, Shared/, Forge/, Fabric/ structure)*
 
 ### **LovelyRobot: Reboot 2.0 Planning**
 - [ ] Design robot creator system with assembly, recall, and terminal features
@@ -117,9 +120,12 @@ Multi-Platform Support**
 - [x] Improve base defense mode functionality and state transitions *(Evidence: CHANGELOG.md v0.2.5-beta)*
 - [x] Refine auto attack system and movement speed variations by state *(Evidence: CHANGELOG.md v0.2.5-beta)*
 - [x] Polish robot core drop system and spawn item information display *(Evidence: CHANGELOG.md v1.1.0, v1.1.1)*
+- [x] **Enhanced core drop with glow effect and smart retrieval (1.20.1)** *(Completed: 2025-11-29 - Color-coded glow + distance-based auto-retrieval)*
 - [x] Complete heart particles when robots are tamed *(Evidence: CHANGELOG.md v1.1.0)*
 - [x] Finalize blink animation for natural blinking behavior *(Evidence: CHANGELOG.md v1.1.0)*
 - [x] Polish functional spawn items with information display *(Evidence: CHANGELOG.md v1.1.0)*
+- [x] **Experience bonus for named robots (1.20.1)** *(Completed: 2025-11-29 - 1.5x XP multiplier for custom-named robots)*
+- [x] **Level-up visual and audio feedback (1.20.1)** *(Completed: 2025-11-29 - Particles + sound effects)*
 
 ---
 
@@ -193,7 +199,7 @@ Multi-Platform Support**
 
 ### **Item Animation System**
 - [ ] Create "Animated" texture pack inspired animations for robot cores
-- [ ] Implement glowing animation for cores with moving redstone components
+- [x] **Implement glowing animation for cores with moving redstone components (1.20.1)** *(Completed: 2025-11-29 - Core glow effect with color-coded teams)*
 - [ ] Design color transition animations for random spawn items
 - [ ] Add blinking eyes, moving ears, and mouth animations to spawn items
 - [ ] Create smooth transformation animations for future Mermaid robots
@@ -202,9 +208,11 @@ Multi-Platform Support**
 - [x] Develop robot-specific animation sets for each characteristic type *(Evidence: CHANGELOG.md v1.1.0 enhanced animations)*
 - [ ] Design UI elements for robot creator system and terminal interface
 - [x] Create enhanced idle, walk, and rest animations *(Evidence: CHANGELOG.md v1.1.0)*
+- [x] **Implement sitting pose animation with dynamic hitbox (1.20.1)** *(Completed: 2025-11-29 - SIT animation with 0.6x0.9 hitbox)*
 - [x] Improve tail animations for Dragon and Kitsune robots *(Evidence: CHANGELOG.md v1.1.0)*
 - [x] Fix sword rendering when equipped by robots *(Evidence: CHANGELOG.md v1.1.0)*
 - [x] Ensure Dragon robot wings render properly *(Evidence: CHANGELOG.md v1.1.0)*
+- [x] **Animation architecture documentation (1.20.1)** *(Completed: 2025-11-29 - Animation-Pose-System-Architecture.md)*
 
 ---
 
@@ -228,13 +236,14 @@ Multi-Platform Support**
 # **Technical Infrastructure**
 
 ### **Development Infrastructure**
-- [ ] Complete IDE configuration for IntelliJ IDEA across all versions
+- [x] **Complete IDE configuration for IntelliJ IDEA (1.20.1)** *(Completed: 2025-11-29 - .idea/ configuration with run configs)*
 - [ ] Set up debugging and hot-reload functionality for rapid development
-- [ ] Implement consistent run configurations for client/server testing
+- [x] **Implement consistent run configurations for client/server testing (1.20.1)** *(Completed: 2025-11-29 - .idea/runConfigurations/)*
 - [ ] Create automation scripts for repetitive setup tasks
-- [ ] Establish version isolation while maintaining shared resources
+- [x] **Establish version isolation while maintaining shared resources (1.20.1)** *(Completed: 2025-11-29 - Common/, Shared/, Forge/, Fabric/ structure)*
 
 ### **Build System Enhancement**
+- [x] **Multi-loader Gradle build system (1.20.1)** *(Completed: 2025-11-29 - Root + subproject build.gradle with shared dependencies)*
 - [ ] Implement proper publishing configurations for all platforms
 - [ ] Add performance testing for builds with multiple robots
 - [ ] Create release pipeline documentation and quality gates
@@ -242,9 +251,10 @@ Multi-Platform Support**
 - [ ] Create development environment setup guides
 
 ### **Cross-Version Compatibility**
+- [x] **NBT-based robot data persistence (1.20.1)** *(Completed: 2025-11-29 - Full NBT read/write with version support)*
 - [ ] Ensure robot data conversion works seamlessly between variants
 - [ ] Test performance with multiple robots across all Minecraft versions
-- [ ] Implement save/load systems for robot progression and characteristics
+- [x] **Save/load systems for robot progression and characteristics (1.20.1)** *(Completed: 2025-11-29 - Level, XP, protections, health, color, owner)*
 - [ ] Create debugging tools for robot behavior and conversion issues
 
 ---
@@ -263,8 +273,10 @@ Multi-Platform Support**
 - [ ] Create troubleshooting guides for common development and user issues
 - [ ] Document migration process for future Minecraft versions
 - [ ] Create comprehensive build documentation
-- [ ] Establish coding standards document
+- [x] **Establish coding standards document** *(Completed: 2025-11-29 - steering/project-coding-style.md)*
+- [x] **Animation system architecture documentation (1.20.1)** *(Completed: 2025-11-29 - Animation-Pose-System-Architecture.md with phase 1 & 2 plans)*
 - [ ] Document version-specific considerations
+- [x] **Command system documentation (1.20.1 Forge)** *(Completed: 2025-11-29 - Comprehensive JavaDoc in LovelyRobotCommand.java)*
 
 ### **Content Creation**
 - [ ] Document conversion processes between mod variants for user guides

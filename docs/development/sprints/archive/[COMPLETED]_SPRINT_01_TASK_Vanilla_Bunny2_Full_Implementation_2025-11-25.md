@@ -285,7 +285,7 @@ Create the necessary package structure and placeholder files for Vanilla and Bun
 - [ ] Goal package structure ready
 
 **Notes**:
-- Follow project structure guidelines from `.kiro/steering/project-structure.md`
+- Follow project structure guidelines from `steering/project-structure.md`
 - Maintain consistency with existing Legacy codebase structure
 
 ---
@@ -887,8 +887,8 @@ _To be determined at sprint end_
 ## Notes
 
 ### Reference Documentation
-- Project Coding Style: `.kiro/steering/project-coding-style.md`
-- Project Structure: `.kiro/steering/project-structure.md`
+- Project Coding Style: `steering/project-coding-style.md`
+- Project Structure: `steering/project-structure.md`
 - Coding Style Enforcer: `docs/guidelines/Coding Style Enforcer.md`
 - November Checklist: `docs/development/tasks/November-2025-Development-Checklist.md`
 

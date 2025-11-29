@@ -217,7 +217,7 @@ LovelyRecipes.RECIPE_SERIALIZERS.register(eventBus);
 ## Code Quality
 
 ### Style Compliance ✅
-- ✅ 100% adherence to `.kiro/steering/project-coding-style.md`
+- ✅ 100% adherence to `steering/project-coding-style.md`
 - ✅ JavaDoc comments on all public classes and methods
 - ✅ Section headers (`// -- Section --`)
 - ✅ Closing comments on methods and classes
@@ -351,8 +351,8 @@ LovelyRecipes.RECIPE_SERIALIZERS.register(eventBus);
 ### Primary References
 - **ADR**: `docs/development/decisions/ADR_001_Generic_NBT_Transfer_Recipe_System.md`
 - **Sprint**: `docs/development/sprints/archive/[COMPLETED]_SPRINT_01_NBT_Recipe_System_Implementation_2025-11-23.md`
-- **Coding Style**: `.kiro/steering/project-coding-style.md`
-- **Project Structure**: `.kiro/steering/project-structure.md`
+- **Coding Style**: `steering/project-coding-style.md`
+- **Project Structure**: `steering/project-structure.md`
 
 ### Related Documents
 - **Current State**: `docs/workflow/CURRENT_STATE.md`

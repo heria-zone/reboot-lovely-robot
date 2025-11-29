@@ -253,9 +253,9 @@ The system provides clear error messages:
 - **Brigadier:** Command tree structure
 
 ### Related Documents
-- `.kiro/specs/sprint-03-interactive-features/design.md` - Original design
-- `.kiro/specs/sprint-03-interactive-features/requirements.md` - Requirements
-- `.kiro/specs/sprint-03-interactive-features/tasks.md` - Task tracking
+- `specs/sprint-03-interactive-features/design.md` - Original design
+- `specs/sprint-03-interactive-features/requirements.md` - Requirements
+- `specs/sprint-03-interactive-features/tasks.md` - Task tracking
 
 ---
 

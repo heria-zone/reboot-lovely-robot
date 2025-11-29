@@ -4,9 +4,9 @@
 **Last Updated**: 2025-11-14  
 **Related Documents**: 
 - [Synchronize Documentation](./Synchronize%20Documentation.md) - Efficient sync protocol
-- [.kiro/steering/workflows.md](../../../.kiro/steering/workflows.md) - Document navigation
-- [.kiro/steering/development.md](../../../.kiro/steering/development.md) - File modification rules
-- [.kiro/steering/documentation.md](../../../.kiro/steering/documentation.md) - Documentation standards
+- [steering/workflows.md](../../../steering/workflows.md) - Document navigation
+- [steering/development.md](../../../steering/development.md) - File modification rules
+- [steering/documentation.md](../../../steering/documentation.md) - Documentation standards
 
 ## Purpose
 
@@ -31,7 +31,7 @@ Document drift occurs when implementation realities diverge from planned documen
 - **Steering documents define the rules**, maintenance follows them
 
 ### 2. The Change Propagation Rule
-When you encounter unforeseen development needs, follow this cascade (from `.kiro/steering/workflows.md`):
+When you encounter unforeseen development needs, follow this cascade (from `steering/workflows.md`):
 
 ```
 Unforeseen Task → TASK.md → CURRENT_STATE.md → SPRINT_PLANNING.md → ROADMAP.md → ARCHITECTURE.md
@@ -40,7 +40,7 @@ Unforeseen Task → TASK.md → CURRENT_STATE.md → SPRINT_PLANNING.md → ROAD
 
 ## Document Hierarchy & Modification Rules
 
-### Document Categories (from `.kiro/steering/development.md`)
+### Document Categories (from `steering/development.md`)
 
 #### Always Safe to Modify (Frequent Updates)
 - `docs/development/sprints/active/TASK.md` - **Daily**
@@ -53,16 +53,16 @@ Unforeseen Task → TASK.md → CURRENT_STATE.md → SPRINT_PLANNING.md → ROAD
 - `docs/workflow/SPRINT_PLANNING.md` - **Sprint boundaries only**
 - `docs/workflow/ROADMAP.md` - **Milestone changes only**
 - `docs/workflow/ARCHITECTURE.md` - **Architectural decisions only**
-- `.kiro/specs/` - **Maintain accuracy**
+- `specs/` - **Maintain accuracy**
 
 #### Never Modify Without Approval (Immutable)
 - `docs/project/CONCEPT.md` - **Immutable project vision**
 - `docs/project/DESIGN.md` - **Immutable solution design**
 - `docs/project/PLANNING.md` - **Immutable technical strategy**
 - `docs/guidelines/` - **Requires team approval**
-- `.kiro/hooks/` - **Requires explicit approval**
+- `hooks/` - **Requires explicit approval**
 
-### Codebase Structure (from `.kiro/steering/project-structure.md`)
+### Codebase Structure (from `steering/project-structure.md`)
 
 ```
 sources/                       # Source code - Multi-version structure
@@ -156,7 +156,7 @@ archive/                       # Archived versions
 ```
 
 #### Step 2: Assessment and Decision (< 10 minutes)
-Ask these questions (from `.kiro/steering/project-product.md`):
+Ask these questions (from `steering/project-product.md`):
 - **Does this block current sprint goals?** → If yes, it becomes immediate priority
 - **Is this a dependency for planned work?** → Adjust task sequence
 - **Can this be deferred?** → Add to backlog with clear rationale
@@ -184,7 +184,7 @@ Integrate the unforeseen task into your current workflow:
 
 ## Document Update Triggers
 
-Use this decision matrix for what to update when (aligned with `.kiro/steering/documentation.md`):
+Use this decision matrix for what to update when (aligned with `steering/documentation.md`):
 
 | Change Type | TASK.md | SPRINT_PLANNING.md | CURRENT_STATE.md | ROADMAP.md | ARCHITECTURE.md | ADR |
 |-------------|---------|-------------------|------------------|------------|-----------------|-----|
@@ -277,7 +277,7 @@ Scan `src/uncogest/lib/features/` and update:
 - [ ] CHANGELOG.md updated if releasing
 - [ ] ADRs created for architectural decisions
 
-#### 2. Sprint Archival (from `.kiro/steering/workflows.md`)
+#### 2. Sprint Archival (from `steering/workflows.md`)
 ```bash
 # Move completed sprint to archive
 cd docs/development/sprints
@@ -292,7 +292,7 @@ mv active/SPRINT_X_TASK.md archive/[COMPLETED]_SPRINT_X_$(date +%Y-%m-%d).md
 
 ## Change Propagation Framework
 
-### Document Relationship Flow (from `.kiro/steering/workflows.md`)
+### Document Relationship Flow (from `steering/workflows.md`)
 
 ```
 CONCEPT (vision - immutable)
@@ -359,12 +359,12 @@ TASK (execution) → Implementation → Code
 **Approval Required**:
 - Changes to `docs/project/` (vision documents are immutable)
 - Changes to `docs/guidelines/` (requires team consensus)
-- Changes to `.kiro/hooks/` (requires explicit approval)
+- Changes to `hooks/` (requires explicit approval)
 
 ## Practical Implementation Strategy
 
 ### 1. The "Documentation First" Approach
-When encountering unforeseen work (from `.kiro/steering/readme.md`):
+When encountering unforeseen work (from `steering/readme.md`):
 1. **Stop** - Don't proceed with assumptions
 2. **Document** - Record discovery in TASK.md (< 5 minutes)
 3. **Assess** - Impact on current sprint (< 10 minutes)
@@ -390,7 +390,7 @@ Instead of big documentation sessions:
   - Documentation quality audit
 
 ### 3. The "Good Enough" Principle
-Your documentation should be (from `.kiro/steering/documentation.md`):
+Your documentation should be (from `steering/documentation.md`):
 - **Accurate enough** to guide work without misleading
 - **Current enough** to reflect reality within 1 week
 - **Detailed enough** to be useful for decision-making
@@ -406,7 +406,7 @@ This maintenance guide provides **strategic guidance**, while the **Documentatio
 - How to handle unforeseen work
 - Long-term maintenance routines
 
-**Synchronization Hook** (`.kiro/hooks/sync-docs-implementation.kiro.hook`):
+**Synchronization Hook** (`hooks/sync-docs-implementation`):
 - Scans codebase for changes
 - Identifies documentation gaps
 - Updates CURRENT_STATE.md
@@ -434,7 +434,7 @@ This maintenance guide provides **strategic guidance**, while the **Documentatio
 8. **Check test coverage** - What's tested vs. what's implemented
 
 #### Step 2: Document Triage (Priority Order)
-Update in this priority order (from `.kiro/steering/development.md`):
+Update in this priority order (from `steering/development.md`):
 
 1. **TASK.md** (`docs/development/sprints/active/`)
    - Mark completed tasks with actual completion dates
@@ -496,14 +496,14 @@ Compare current reality against documents:
 
 ### 1. Agent Hooks Integration
 
-**Documentation Synchronization Monitor** (`.kiro/hooks/sync-docs-implementation.kiro.hook`)
+**Documentation Synchronization Monitor** (`hooks/sync-docs-implementation`)
 - **Purpose**: Efficient tactical synchronization of docs with code
 - **Trigger**: Manual (user-triggered)
 - **Focus**: CURRENT_STATE.md, SPRINT_PLANNING.md, component catalog
 - **Duration**: ~5-10 minutes
 - **Use when**: Weekly sync, after major implementation, before sprint review
 
-**Project Documentation Maintenance** (`.kiro/hooks/project-doc-maintenance.kiro.hook`)
+**Project Documentation Maintenance** (`hooks/project-doc-maintenance`)
 - **Purpose**: Comprehensive strategic maintenance guidance
 - **Trigger**: Manual (user-triggered)
 - **Focus**: All document types, unforeseen work, gap analysis
@@ -582,7 +582,7 @@ Keep these ready for quick updates:
 - **MC 1.20.1-1.21.x**: [Z] story points
 ```
 
-**ADR Template** (from `.kiro/steering/documentation.md`):
+**ADR Template** (from `steering/documentation.md`):
 ```markdown
 # ADR [NUMBER]: [Title]
 
@@ -646,18 +646,18 @@ What other options were considered and why were they rejected?
 
 This maintenance guide integrates with:
 
-1. **`.kiro/steering/workflows.md`** - Document navigation and relationships
-2. **`.kiro/steering/development.md`** - File modification rules and workflows
-3. **`.kiro/steering/documentation.md`** - Documentation standards and formatting
-4. **`.kiro/steering/project-product.md`** - Quality standards and Definition of Done
-5. **`.kiro/steering/project-structure.md`** - Directory organization rules
-6. **`.kiro/steering/readme.md`** - Serge Maia command center and decision matrix
+1. **`steering/workflows.md`** - Document navigation and relationships
+2. **`steering/development.md`** - File modification rules and workflows
+3. **`steering/documentation.md`** - Documentation standards and formatting
+4. **`steering/project-product.md`** - Quality standards and Definition of Done
+5. **`steering/project-structure.md`** - Directory organization rules
+6. **`steering/readme.md`** - Serge Maia command center and decision matrix
 
 **Key Principle**: This guide provides the "how" and "when" of maintenance, while steering documents provide the "what" and "why" of the documentation system.
 
 ## Variant-Specific Considerations
 
-### Multi-Variant Architecture (from `.kiro/steering/project-structure.md`)
+### Multi-Variant Architecture (from `steering/project-structure.md`)
 The LovelyRobot mod uses a multi-variant, multi-version architecture:
 - **Tribute**: Faithful recreation of original mod (4 robot types, original colors)
 - **Legacy**: Enhanced version (7 robot types, 16x color palette)
@@ -670,7 +670,7 @@ The LovelyRobot mod uses a multi-variant, multi-version architecture:
 - Each version folder is self-contained with its own build system
 - Loader-specific code (Forge/Fabric/NeoForge) is handled within each version
 
-### Version Organization (from `.kiro/steering/project-structure.md`)
+### Version Organization (from `steering/project-structure.md`)
 The project supports multiple Minecraft versions:
 - **MC 1.7.10 - 1.16.5**: Java 8-16, Forge (and Fabric for 1.16.5+)
 - **MC 1.17.1 - 1.20.1**: Java 17, Forge/Fabric
@@ -682,14 +682,14 @@ The project supports multiple Minecraft versions:
 - Version-specific implementations are documented in CURRENT_STATE.md
 - Cross-version compatibility is tracked in ARCHITECTURE.md
 
-### Documentation Hierarchy (from `.kiro/steering/project-structure.md`)
+### Documentation Hierarchy (from `steering/project-structure.md`)
 - **Project Level** (`docs/`): High-level, cross-variant, cross-version concerns
 - **Source Code** (`sources/`): Variant and version-specific implementations
 - **Archive** (`archive/`): Completed/released versions (historical reference only)
 
 ## Remember: Documents Serve You
 
-The ultimate goal isn't perfect documentation—it's **effective development** (from `.kiro/steering/project-product.md`). Your documents should:
+The ultimate goal isn't perfect documentation—it's **effective development** (from `steering/project-product.md`). Your documents should:
 
 1. **Help you work better**, not create more work
 2. **Adapt to reality**, not fight against it
@@ -701,11 +701,11 @@ The ultimate goal isn't perfect documentation—it's **effective development** (
 
 When documents feel like they're holding you back, that's a signal to:
 1. **Consult steering documents** - Are you following the right process?
-   - `.kiro/steering/workflows.md` - Document navigation
-   - `.kiro/steering/development.md` - File modification rules
-   - `.kiro/steering/documentation.md` - Documentation standards
-   - `.kiro/steering/project-structure.md` - Directory organization
-   - `.kiro/steering/project-product.md` - Quality standards
+   - `steering/workflows.md` - Document navigation
+   - `steering/development.md` - File modification rules
+   - `steering/documentation.md` - Documentation standards
+   - `steering/project-structure.md` - Directory organization
+   - `steering/project-product.md` - Quality standards
 2. **Use automation** - Run the synchronization hooks
 3. **Simplify approach** - Focus on high-value updates
 4. **Request guidance** - Flag for human review if needed
@@ -716,7 +716,7 @@ When documents feel like they're holding you back, that's a signal to:
 
 ## Quick Reference: Steering Documents
 
-For detailed guidance, consult these steering documents in `.kiro/steering/`:
+For detailed guidance, consult these steering documents in `steering/`:
 
 | Document | Purpose | When to Consult |
 |----------|---------|----------------|
@@ -728,7 +728,7 @@ For detailed guidance, consult these steering documents in `.kiro/steering/`:
 | **project-coding-style.md** | Code style enforcement | Before writing any code (non-negotiable) |
 | **readme.md** | Serge Maia command center | Quick reference for all steering documents |
 
-**Key Principle from `.kiro/steering/readme.md`**: Follow the commandments in these steering documents religiously. They represent the collective wisdom of the project and the requirements for success.
+**Key Principle from `steering/readme.md`**: Follow the commandments in these steering documents religiously. They represent the collective wisdom of the project and the requirements for success.
 
 ---
 

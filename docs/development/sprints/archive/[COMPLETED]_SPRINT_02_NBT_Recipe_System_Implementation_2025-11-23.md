@@ -330,7 +330,7 @@ RECIPE_SERIALIZERS.register("lovely_spawn", () -> serializer);
 ## Code Quality Assessment
 
 ### Style Compliance ✅
-- ✅ Follows `.kiro/steering/project-coding-style.md` exactly
+- ✅ Follows `steering/project-coding-style.md` exactly
 - ✅ JavaDoc comments on all public classes and methods
 - ✅ Section headers (`// -- Section --`) present
 - ✅ Closing comments on methods and classes
@@ -490,9 +490,9 @@ RECIPE_SERIALIZERS.register("lovely_spawn", () -> serializer);
 
 ### Primary Documents
 - **ADR**: `docs/development/decisions/ADR_001_Generic_NBT_Transfer_Recipe_System.md`
-- **Coding Style**: `.kiro/steering/project-coding-style.md`
-- **Project Structure**: `.kiro/steering/project-structure.md`
-- **Development Guide**: `.kiro/steering/development.md`
+- **Coding Style**: `steering/project-coding-style.md`
+- **Project Structure**: `steering/project-structure.md`
+- **Development Guide**: `steering/development.md`
 
 ### Sprint Documents
 - **Main Sprint**: `docs/development/sprints/active/SPRINT_01_TASK.md` (ongoing)
