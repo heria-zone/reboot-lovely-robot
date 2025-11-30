@@ -402,12 +402,13 @@ public class SimpleConfig {
 
     // Modification by Kaupenjoe
     private void parseConfigEntry( String entry, int line ) {
-        if( !entry.isEmpty() && !entry.startsWith( "#" ) ) {
+        if( !entry.isEmpty() && !entry.trim().startsWith( "#" ) ) {
             String[] parts = entry.split("=", 2);
             if( parts.length == 2 ) {
                 // Recognizes comments after a value
-                String temp = parts[1].split(" #")[0];
-                config.put( parts[0], temp );
+                String value = parts[1].split(" #")[0].trim();
+                String key = parts[0].trim();
+                config.put( key, value );
             }else{
                 throw new RuntimeException("Syntax error in config file on line " + line + "!");
             }
