@@ -1,5 +1,6 @@
 package net.msymbios.llovelyr.source;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -20,6 +21,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -72,6 +74,7 @@ public class LovelyCommands {
                         .then(buildHybridOwnerCommands())
                         .then(buildHybridNameCommands())
                         .then(buildHybridTeleportCommand())
+                        .then(buildReloadCommand())
         );
     } // register()
 
@@ -2081,6 +2084,52 @@ public class LovelyCommands {
         
         return closestRobot;
     } // findCrosshairRobot()
+
+    // ========================================
+    // CONFIG RELOAD COMMAND
+    // ========================================
+
+    /**
+     * Builds config reload command for runtime configuration updates.
+     * <p>
+     * <b>Usage:</b> `/llovely reload` - Reloads configuration from disk
+     * <p>
+     * <b>Permissions:</b> Requires operator level 2 (same as other llovely commands)
+     * <p>
+     * <b>Behavior:</b> Reloads configuration from disk and applies all values
+     * immediately without server restart.
+     */
+    private static ArgumentBuilder<ServerCommandSource, ?> buildReloadCommand() {
+        return CommandManager.literal("reload")
+            .executes(LovelyCommands::executeReload);
+    } // buildReloadCommand()
+
+    /**
+     * Executes config reload command.
+     * <p>
+     * <b>Behavior:</b> Triggers configuration reload from disk.
+     * All config values are re-read and applied immediately.
+     * <p>
+     * <b>Feedback:</b> Sends success message to command source confirming reload.
+     *
+     * @param ctx command context with source
+     * @return command success code (1)
+     */
+    private static int executeReload(CommandContext<ServerCommandSource> ctx) {
+        try {
+            LovelyConfigs.reload();
+            ctx.getSource().sendFeedback(
+                () -> Text.literal("Configuration reloaded successfully!").formatted(Formatting.GREEN),
+                true
+            );
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            ctx.getSource().sendError(
+                Text.literal("Failed to reload configuration: " + e.getMessage()).formatted(Formatting.RED)
+            );
+            return 0;
+        }
+    } // executeReload()
 
 } // Class: LovelyCommands
 
