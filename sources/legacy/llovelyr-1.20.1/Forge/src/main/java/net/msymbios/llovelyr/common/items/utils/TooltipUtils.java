@@ -3,7 +3,7 @@ package net.msymbios.llovelyr.common.items.utils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 
 import java.util.List;

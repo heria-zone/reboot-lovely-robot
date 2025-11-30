@@ -1,28 +1,17 @@
 package net.msymbios.llovelyr;
 
-import net.msymbios.llovelyr.framework.utils.ObjectUtil;
-import net.msymbios.llovelyr.framework.utils.Version;
-import net.msymbios.llovelyr.source.LovelyBlocks;
-import net.msymbios.llovelyr.common.commands.ColorArgumentType;
-import net.msymbios.llovelyr.common.commands.ColorArgumentTypeInfo;
-import net.msymbios.llovelyr.source.LovelyConfigs;
-import net.msymbios.llovelyr.source.LovelyEntities;
-import net.msymbios.llovelyr.source.entity.common.NativeEntityType;
-import net.msymbios.llovelyr.source.LovelyGroups;
-import net.msymbios.llovelyr.source.LovelyItems;
-import net.msymbios.llovelyr.source.LovelyRecipes;
+import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
+import net.msymbios.llovelyr.framework.utils.*;
+import net.msymbios.llovelyr.common.commands.*;
+import net.msymbios.llovelyr.source.*;
 import com.mojang.logging.LogUtils;
-import net.minecraft.commands.synchronization.ArgumentTypeInfo;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.core.registries.Registries;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+
 import org.slf4j.Logger;
 import software.bernie.geckolib.GeckoLib;
 
@@ -77,24 +66,6 @@ public class LovelyLegacy {
      */
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    /**
-     * Deferred register for command argument types.
-     * <p>
-     * <b>Architecture:</b> Registers custom argument types with Minecraft's command
-     * system, enabling client-server synchronization of command arguments.
-     */
-    public static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES =
-        DeferredRegister.create(Registries.COMMAND_ARGUMENT_TYPE, MODID);
-
-    /**
-     * Registered ColorArgumentType for robot color selection commands.
-     * <p>
-     * <b>Registration:</b> Enables ColorArgumentType to be used in commands with
-     * proper client-server synchronization.
-     */
-    public static final RegistryObject<ArgumentTypeInfo<?, ?>> COLOR_ARGUMENT_TYPE =
-        COMMAND_ARGUMENT_TYPES.register("color", () -> new ColorArgumentTypeInfo());
-
     // -- Constructor --
 
     /**
@@ -113,22 +84,22 @@ public class LovelyLegacy {
      * @param context Forge mod loading context providing event bus access
      */
     public LovelyLegacy(FMLJavaModLoadingContext context) {
-        IEventBus eventBus = context.getModEventBus();
+        IEventBus events = context.getModEventBus();
         GeckoLib.initialize();
 
         LovelyConfigs.register(context);
-        LovelyConfigs.onLoadCallback(NativeEntityType::register);
+        LovelyConfigs.onLoadCallback(NativeRobotType::reloadFromConfig);
 
-        LovelyBlocks.register(eventBus);
-        LovelyItems.register(eventBus);
-        LovelyGroups.register(eventBus);
-        LovelyEntities.register(eventBus);
-        LovelyRecipes.RECIPE_SERIALIZERS.register(eventBus);
-        COMMAND_ARGUMENT_TYPES.register(eventBus);
+        LovelyBlocks.register(events);
+        LovelyItems.register(events);
+        LovelyGroups.register(events);
+        LovelyEntities.register(events);
+        LovelyRecipes.register(events);
+        LovelyCommandArguments.register(events);
 
-        eventBus.addListener(this::commonSetup);
-        eventBus.addListener(this::clientSetup);
-        LovelyGroups.registerItems(eventBus);
+        events.addListener(this::commonSetup);
+        events.addListener(this::clientSetup);
+        LovelyGroups.registerItems(events);
 
         MinecraftForge.EVENT_BUS.register(this);
     } // LovelyLegacy()
@@ -147,16 +118,7 @@ public class LovelyLegacy {
      * @param event the common setup event
      */
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LOGGER.info("HELLO FROM COMMON: SETUP");
-        
-        // Register ColorArgumentType with ArgumentTypeInfos for client-server sync
-        event.enqueueWork(() -> {
-            ArgumentTypeInfos.registerByClass(
-                ColorArgumentType.class, 
-                (ArgumentTypeInfo<ColorArgumentType, ?>) COLOR_ARGUMENT_TYPE.get()
-            );
-            LOGGER.info("Registered ColorArgumentType");
-        });
+        LovelyCommandArguments.register(event);
     } // commonSetup()
 
     /**
@@ -169,8 +131,6 @@ public class LovelyLegacy {
      *
      * @param event the client setup event
      */
-    private void clientSetup(final FMLClientSetupEvent event) {
-        LOGGER.info("HELLO FROM CLIENT: SETUP");
-    } // clientSetup()
+    private void clientSetup(final FMLClientSetupEvent event) {} // clientSetup()
 
 } // Class: LovelyLegacy

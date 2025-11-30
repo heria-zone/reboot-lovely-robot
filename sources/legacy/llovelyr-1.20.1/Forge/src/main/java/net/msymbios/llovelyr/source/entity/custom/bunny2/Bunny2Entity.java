@@ -7,11 +7,12 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.common.NativeEntityType;
+import net.msymbios.llovelyr.common.entity.type.RobotEntityType;
+import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
 import net.msymbios.llovelyr.source.LovelyItems;
 
 /**
- * Bunny2 robot entity - bunny-themed robot variant.
+ * Bunny2 robot entity - bunny-themed robot variant (Forge).
  * <p>
  * <b>Variant:</b> Bunny-themed robot with unique appearance.
  * <p>
@@ -21,8 +22,8 @@ public class Bunny2Entity extends LovelyRobot {
 
     // -- Constructor --
 
-    public Bunny2Entity(EntityType<? extends LovelyRobot> entityType, Level level, NativeEntityType nativeEntityType) {
-        super(entityType, level, nativeEntityType);
+    public Bunny2Entity(EntityType<? extends LovelyRobot> entityType, Level level, RobotEntityType robotEntityType) {
+        super(entityType, level, robotEntityType);
     } // Bunny2Entity
 
     // -- Inherited Methods --
@@ -35,18 +36,21 @@ public class Bunny2Entity extends LovelyRobot {
     // -- Attribute Creation --
 
     /**
-     * Creates attribute supplier for Bunny2 robot.
+     * Creates attribute supplier for Bunny2 robot using new RobotEntityType system.
+     * <p>
+     * <b>Architecture:</b> Retrieves stats from CombatData in RobotEntityType,
+     * which is populated from config values during initialization.
      *
-     * @return attribute supplier with Bunny2 stats
+     * @return attribute supplier with Bunny2 stats from config
      */
     public static AttributeSupplier createAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, NativeEntityType.BUNNY2.getMaxHealth())
-                .add(Attributes.ATTACK_DAMAGE, NativeEntityType.BUNNY2.getAttackDamage())
-                .add(Attributes.ATTACK_SPEED, NativeEntityType.BUNNY2.getAttackSpeed())
-                .add(Attributes.MOVEMENT_SPEED, NativeEntityType.BUNNY2.getMoveSpeed())
-                .add(Attributes.ARMOR, NativeEntityType.BUNNY2.getArmour())
-                .add(Attributes.ARMOR_TOUGHNESS, NativeEntityType.BUNNY2.getArmourToughness())
+                .add(Attributes.MAX_HEALTH, NativeRobotType.BUNNY2.getData().getMaxHealth())
+                .add(Attributes.ATTACK_DAMAGE, NativeRobotType.BUNNY2.getData().getAttackDamage())
+                .add(Attributes.ATTACK_SPEED, NativeRobotType.BUNNY2.getData().getAttackSpeed())
+                .add(Attributes.MOVEMENT_SPEED, NativeRobotType.BUNNY2.getData().getMoveSpeed())
+                .add(Attributes.ARMOR, NativeRobotType.BUNNY2.getData().getArmor())
+                .add(Attributes.ARMOR_TOUGHNESS, NativeRobotType.BUNNY2.getData().getArmorToughness())
                 .build();
     } // createAttributes
 

@@ -24,13 +24,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.msymbios.llovelyr.common.commands.ColorArgumentType;
 import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
-import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 
-import java.util.Optional;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Centralizes command registration and execution for robot management.
@@ -756,7 +752,7 @@ public class LovelyCommands {
         }
 
         final int finalCount = count;
-        final String colorName = color.getName().toLowerCase();
+        final String colorName = color.Name().toLowerCase();
         ctx.getSource().sendSuccess(
             () -> Component.literal("Set color to " + colorName + " for " + finalCount + " robot(s)"),
             true
@@ -1180,10 +1176,9 @@ public class LovelyCommands {
      * @return display name string
      */
     private static String getRobotDisplayName(LovelyRobot robot) {
-        if (robot.hasCustomName()) {
-            return robot.getCustomName().getString();
-        }
-        return robot.nativeEntity.key + " Robot";
+        if (robot.hasCustomName())
+            return Objects.requireNonNull(robot.getCustomName()).getString();
+        return robot.nativeEntity.getKey();
     } // getRobotDisplayName()
 
     // ========================================
@@ -1925,7 +1920,7 @@ public class LovelyCommands {
         
         robot.setTexture(color);
         
-        final String colorName = color.getName().toLowerCase();
+        final String colorName = color.Name().toLowerCase();
         ctx.getSource().sendSuccess(
             () -> Component.literal("Set color to " + colorName + " for " + getRobotDisplayName(robot)),
             true

@@ -29,7 +29,7 @@ import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.msymbios.llovelyr.common.entity.internal.InternalParticle;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
-import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

@@ -1,6 +1,7 @@
 package net.msymbios.llovelyr.source;
 
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -44,8 +45,8 @@ public class LovelyRecipes {
      * <p>
      * <i>Note:</i> Actual registration happens automatically via DeferredRegister.
      */
-    public static void register() {
-        // Registration happens via DeferredRegister
+    public static void register(IEventBus events) {
+        RECIPE_SERIALIZERS.register(events);
     } // register()
 
 } // Class: LovelyRecipes

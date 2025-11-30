@@ -27,6 +27,8 @@ public class LovelyIdentifier {
     // -- Entities --
 
     public static final String VARIANT_BUNNY2 = "bunny2";
+    public static final String VARIANT_DRAGON = "dragon";
+    public static final String VARIANT_KITSUNE = "kitsune";
     public static final String VARIANT_VANILLA = "vanilla";
 
     // -- Stats --
@@ -128,6 +130,8 @@ public class LovelyIdentifier {
         var value = getVariantTranslation(LovelyIdentifier.VARIANT_VANILLA);
         switch (variant) {
             case Bunny2 -> value = getVariantTranslation(LovelyIdentifier.VARIANT_BUNNY2);
+            case Dragon -> value = getVariantTranslation(LovelyIdentifier.VARIANT_DRAGON);
+            case Kitsune -> value = getVariantTranslation(LovelyIdentifier.VARIANT_KITSUNE);
             case Vanilla -> value = getVariantTranslation(LovelyIdentifier.VARIANT_VANILLA);
         }
         return value;

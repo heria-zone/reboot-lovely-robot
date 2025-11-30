@@ -24,10 +24,9 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.common.entity.enums.EntityModel;
-import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.framework.entity.enums.*;
 import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
 import net.msymbios.llovelyr.common.utils.internal.*;
-import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.framework.utils.Version;
 import net.msymbios.llovelyr.lib.utils.interfaces.IReadWriteNBT;
 import net.msymbios.llovelyr.source.LovelyConfigs;
@@ -51,33 +50,59 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
     protected int waryTimer = 0, autoHealTimer = 0;
     protected boolean combatMode = false, autoHeal = false, canWander = false;
-    public InternalEntityType<?> nativeEntity;
+    public net.msymbios.llovelyr.lib.entity.type.InternalEntityType<?> nativeEntity;
     protected EntityModel model = EntityModel.Default;
 
     // -- Properties --
 
     // TEXTURE
 
-    public ResourceLocation getTexture() { return nativeEntity.getTexture(EntityTexture.byId(getTextureID())); } // getTexture ()
+    public ResourceLocation getTexture() { 
+        // Use RobotEntityType's color texture system
+        if (nativeEntity instanceof net.msymbios.llovelyr.common.entity.type.RobotEntityType) {
+            return ((net.msymbios.llovelyr.common.entity.type.RobotEntityType) nativeEntity).getColorTexture(EntityTexture.byId(getTextureID()));
+        }
+        // Fallback for non-robot entities
+        return nativeEntity.getTextures().get(EntityVariantTexture.DEFAULT);
+    } // getTexture ()
 
     public int getTextureID() {
-        int value = nativeEntity.getRandomTextureID();
+        int value = 0;  // Default to WHITE
+        // Use RobotEntityType's random color system
+        if (nativeEntity instanceof net.msymbios.llovelyr.common.entity.type.RobotEntityType) {
+            value = ((net.msymbios.llovelyr.common.entity.type.RobotEntityType) nativeEntity).getRandomColorId();
+        }
         try {value = this.entityData.get(TEXTURE_ID);}
         catch (Exception ignored) {}
         return value;
     } // getTextureID ()
 
-    public void setTexture(int value) { if(nativeEntity.checkTexture(EntityTexture.byId(value))) this.entityData.set(TEXTURE_ID, value); } // setTexture ()
+    public void setTexture(int value) { 
+        // Use RobotEntityType's color checking system
+        if (nativeEntity instanceof net.msymbios.llovelyr.common.entity.type.RobotEntityType) {
+            if (((net.msymbios.llovelyr.common.entity.type.RobotEntityType) nativeEntity).hasColor(EntityTexture.byId(value))) {
+                this.entityData.set(TEXTURE_ID, value);
+            }
+        } else {
+            this.entityData.set(TEXTURE_ID, value);
+        }
+    } // setTexture ()
 
     public void setTexture(EntityTexture value) { setTexture(value.getId()); } // setTexture ()
 
     // MODEL
 
-    public ResourceLocation getCurrentModel() { return nativeEntity.getModel(model); } // getCurrentModel ()
+    public ResourceLocation getCurrentModel() { 
+        // Map EntityModel to EntityVariantModel
+        EntityVariantModel variant = (model == EntityModel.Armed) ? EntityVariantModel.ARMED : EntityVariantModel.DEFAULT;
+        return nativeEntity.getModels().get(variant);
+    } // getCurrentModel ()
 
     // ANIMATOR
 
-    public ResourceLocation getAnimator() { return nativeEntity.getAnimator(); } // getAnimator ()
+    public ResourceLocation getAnimator() { 
+        return nativeEntity.getAnimators().get(EntityVariantAnimator.DEFAULT);
+    } // getAnimator ()
 
     // STATE
 
@@ -165,7 +190,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
     // -- Constructor --
 
-    protected InternalEntity(EntityType<? extends TamableAnimal> entityType, Level world, InternalEntityType<?> nativeEntityType) {
+    protected InternalEntity(EntityType<? extends TamableAnimal> entityType, Level world, net.msymbios.llovelyr.lib.entity.type.InternalEntityType<?> nativeEntityType) {
         super(entityType, world);
         this.nativeEntity = nativeEntityType;
 
@@ -173,12 +198,12 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
         // Apply config-based attributes after construction
         // Config is guaranteed to be loaded by the time entities spawn
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(nativeEntityType.getMaxHealth());
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(nativeEntityType.getAttackDamage());
-        this.getAttribute(Attributes.ATTACK_SPEED).setBaseValue(nativeEntityType.getAttackSpeed());
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(nativeEntityType.getMoveSpeed());
-        this.getAttribute(Attributes.ARMOR).setBaseValue(nativeEntityType.getArmour());
-        this.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(nativeEntityType.getArmourToughness());
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(nativeEntityType.getData().getMaxHealth());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(nativeEntityType.getData().getAttackDamage());
+        this.getAttribute(Attributes.ATTACK_SPEED).setBaseValue(nativeEntityType.getData().getAttackSpeed());
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(nativeEntityType.getData().getMoveSpeed());
+        this.getAttribute(Attributes.ARMOR).setBaseValue(nativeEntityType.getData().getArmor());
+        this.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(nativeEntityType.getData().getArmorToughness());
 
         // Refresh navigation to pick up new movement speed
         // AI goals cache the speed attribute, so we need to refresh after changing it
@@ -203,7 +228,12 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setTexture(nativeEntity.getRandomTextureID());
+        // Use RobotEntityType's random color system
+        if (nativeEntity instanceof net.msymbios.llovelyr.common.entity.type.RobotEntityType) {
+            this.setTexture(((net.msymbios.llovelyr.common.entity.type.RobotEntityType) nativeEntity).getRandomColorId());
+        } else {
+            this.setTexture(0);  // Default to WHITE
+        }
         this.setHealth(this.getMaxHealth());
         return super.finalizeSpawn(levelAccessor, instance, mobSpawnType, spawnGroupData, compoundTag);
     } // finalizeSpawn ()
@@ -429,7 +459,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
     protected void displayExtra() {
         Component debug = null;
-        MutableComponent entityName = !Utility.getEntityCustomName(this).isEmpty() ? Component.literal(Utility.getEntityCustomName(this)) : LovelyIdentifier.getTranslation(Objects.requireNonNull(EntityVariant.byName(nativeEntity.key)));
+        MutableComponent entityName = !Utility.getEntityCustomName(this).isEmpty() ? Component.literal(Utility.getEntityCustomName(this)) : LovelyIdentifier.getTranslation(Objects.requireNonNull(EntityVariant.byName(nativeEntity.getKey())));
         if(combatMode && getNotification()) {
             debug = entityName.append(Component.nullToEmpty(": ").copy().append(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_WARY)));
             if(waryTimer < 10) debug = debug.copy().append(": 0" + waryTimer + " ");

@@ -574,7 +574,7 @@ public class LovelyCommands {
         }
 
         final int finalCount = count;
-        final String colorName = color.getName().toLowerCase();
+        final String colorName = color.Name().toLowerCase();
         ctx.getSource().sendFeedback(
                 () -> Text.literal("Set color to " + colorName + " for " + finalCount + " robot(s)"),
                 true
@@ -930,7 +930,7 @@ public class LovelyCommands {
         if (robot.hasCustomName()) {
             return robot.getCustomName().getString();
         }
-        return robot.nativeEntity.key + " Robot";
+        return robot.nativeEntity.getKey() + " Robot";
     } // getRobotDisplayName()
 
     // ========================================
@@ -1881,7 +1881,7 @@ public class LovelyCommands {
         
         robot.setTexture(color);
         
-        final String colorName = color.getName().toLowerCase();
+        final String colorName = color.Name().toLowerCase();
         ctx.getSource().sendFeedback(
             () -> Text.literal("Set color to " + colorName + " for " + getRobotDisplayName(robot)),
             true
@@ -2083,3 +2083,4 @@ public class LovelyCommands {
     } // findCrosshairRobot()
 
 } // Class: LovelyCommands
+

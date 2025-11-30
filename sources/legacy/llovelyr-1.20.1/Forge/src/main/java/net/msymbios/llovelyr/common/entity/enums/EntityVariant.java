@@ -24,6 +24,12 @@ public enum EntityVariant {
     /** Alternative bunny design with different aesthetic. */
     Bunny2(1, LovelyIdentifier.VARIANT_BUNNY2),
     
+    /** Dragon variant with enhanced combat capabilities and knockback resistance. */
+    Dragon(2, LovelyIdentifier.VARIANT_DRAGON),
+    
+    /** Kitsune variant with tail-unlock progression system. */
+    Kitsune(4, LovelyIdentifier.VARIANT_KITSUNE),
+    
     /** General-purpose companion with belt pouch and patrol abilities. */
     Vanilla(6, LovelyIdentifier.VARIANT_VANILLA);
 

@@ -119,18 +119,6 @@ public class InternalLogic {
         return enchantmentLevel;
     } // calculateLooting()
 
-    /**
-     * Calculates experience required for next level.
-     * <p>
-     * <b>Formula:</b> base + (level * multiplier) provides increasing XP curve.
-     *
-     * @param level the current level
-     * @return the experience needed for next level
-     */
-    public static int calculateNextExp(int level) {
-        return LovelyConfigs.ExperienceBase + level * LovelyConfigs.ExperienceMultiplier;
-    } // calculateNextExp()
-
     // LOGIC
 
     /**
@@ -151,17 +139,6 @@ public class InternalLogic {
         updateEntityAttribute(entity, Attributes.ARMOR, armorLevel);
         updateEntityAttribute(entity, Attributes.ARMOR_TOUGHNESS, armorToughness);
     } // handleLevel()
-
-    /**
-     * Checks if level-up is permitted.
-     *
-     * @param level the current level
-     * @param maxLevel the maximum level allowed
-     * @return true if level < maxLevel
-     */
-    public static boolean handleLevelUp(int level, int maxLevel) {
-        return level < maxLevel;
-    } // handleLevelUp()
 
     /**
      * Checks if fire protection can be upgraded.

@@ -150,7 +150,7 @@ public class InternalAnimation {
      * @param <T> entity type extending LovelyRobot and GeoAnimatable
      */
     public static <T extends LovelyRobot & GeoAnimatable> void tailConfigAnimation(LovelyRobot entity, GeoModel renderer, AnimationState<T> event) {
-        var maxLevel = entity.nativeEntity.getMaxLevel();
+        var maxLevel = entity.getMaxLevel();
         var maxTails = 8;
         int levelPerTails = maxLevel / maxTails;
         boolean[] tailVisibility = new boolean[maxTails];

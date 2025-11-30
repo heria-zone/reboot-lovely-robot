@@ -7,7 +7,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.msymbios.llovelyr.common.entity.enums.EntityAnimator;
 import net.msymbios.llovelyr.common.entity.enums.EntityModel;
-import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 
@@ -185,7 +185,7 @@ public abstract class InternalEntityType<T> {
     /**
      * Populates animator map for this variant.
      * <p>
-     * <b>Implementation:</b> Concrete types should create HashMap mapping EntityAnimator
+     * <b>Implementation:</b> Concrete types should create HashMap mapping EntityVariantAnimator
      * enums to ResourceLocation paths. Most types use single Default animator.
      * 
      * @param variant entity variant enum

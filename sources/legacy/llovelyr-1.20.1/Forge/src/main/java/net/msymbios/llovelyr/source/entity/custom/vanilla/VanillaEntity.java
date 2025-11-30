@@ -7,11 +7,12 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
-import net.msymbios.llovelyr.source.entity.common.NativeEntityType;
+import net.msymbios.llovelyr.common.entity.type.RobotEntityType;
+import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
 import net.msymbios.llovelyr.source.LovelyItems;
 
 /**
- * Vanilla robot entity - basic robot type.
+ * Vanilla robot entity - basic robot type (Forge).
  * <p>
  * <b>Variant:</b> Standard robot with balanced stats.
  * <p>
@@ -21,8 +22,8 @@ public class VanillaEntity extends LovelyRobot {
 
     // -- Constructor --
 
-    public VanillaEntity(EntityType<? extends LovelyRobot> entityType, Level level, NativeEntityType nativeEntityType) {
-        super(entityType, level, nativeEntityType);
+    public VanillaEntity(EntityType<? extends LovelyRobot> entityType, Level level, RobotEntityType robotEntityType) {
+        super(entityType, level, robotEntityType);
     } // VanillaEntity
 
     // -- Inherited Methods --
@@ -35,18 +36,21 @@ public class VanillaEntity extends LovelyRobot {
     // -- Attribute Creation --
 
     /**
-     * Creates attribute supplier for Vanilla robot.
+     * Creates attribute supplier for Vanilla robot using new RobotEntityType system.
+     * <p>
+     * <b>Architecture:</b> Retrieves stats from CombatData in RobotEntityType,
+     * which is populated from config values during initialization.
      *
-     * @return attribute supplier with Vanilla stats
+     * @return attribute supplier with Vanilla stats from config
      */
     public static AttributeSupplier createAttributes() {
         return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, NativeEntityType.VANILLA.getMaxHealth())
-                .add(Attributes.ATTACK_DAMAGE, NativeEntityType.VANILLA.getAttackDamage())
-                .add(Attributes.ATTACK_SPEED, NativeEntityType.VANILLA.getAttackSpeed())
-                .add(Attributes.MOVEMENT_SPEED, NativeEntityType.VANILLA.getMoveSpeed())
-                .add(Attributes.ARMOR, NativeEntityType.VANILLA.getArmour())
-                .add(Attributes.ARMOR_TOUGHNESS, NativeEntityType.VANILLA.getArmourToughness())
+                .add(Attributes.MAX_HEALTH, NativeRobotType.VANILLA.getData().getMaxHealth())
+                .add(Attributes.ATTACK_DAMAGE, NativeRobotType.VANILLA.getData().getAttackDamage())
+                .add(Attributes.ATTACK_SPEED, NativeRobotType.VANILLA.getData().getAttackSpeed())
+                .add(Attributes.MOVEMENT_SPEED, NativeRobotType.VANILLA.getData().getMoveSpeed())
+                .add(Attributes.ARMOR, NativeRobotType.VANILLA.getData().getArmor())
+                .add(Attributes.ARMOR_TOUGHNESS, NativeRobotType.VANILLA.getData().getArmorToughness())
                 .build();
     } // createAttributes
 

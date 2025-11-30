@@ -10,7 +10,7 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.common.NativeEntityType;
+import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
 import net.msymbios.llovelyr.source.entity.custom.bunny2.Bunny2Renderer;
 import net.msymbios.llovelyr.source.entity.custom.vanilla.VanillaRenderer;
 import net.msymbios.llovelyr.source.entity.custom.bunny2.Bunny2Entity;
@@ -31,11 +31,11 @@ public class LovelyEntities {
     // -- Entity Type Definitions --
 
     public static final EntityType<VanillaEntity> VANILLA = 
-        register(LovelyIdentifier.VARIANT_VANILLA, (type, world) -> new VanillaEntity(type, world, NativeEntityType.VANILLA), SpawnGroup.CREATURE,
+        register(LovelyIdentifier.VARIANT_VANILLA, (type, world) -> new VanillaEntity(type, world, NativeRobotType.VANILLA), SpawnGroup.CREATURE,
             LovelyConfigs.Common.Width, LovelyConfigs.Common.Height);
 
     public static final EntityType<Bunny2Entity> BUNNY2 = 
-        register(LovelyIdentifier.VARIANT_BUNNY2, (type, world) -> new Bunny2Entity(type, world, NativeEntityType.BUNNY2), SpawnGroup.CREATURE, 
+        register(LovelyIdentifier.VARIANT_BUNNY2, (type, world) -> new Bunny2Entity(type, world, NativeRobotType.BUNNY2), SpawnGroup.CREATURE, 
             LovelyConfigs.Common.Width, LovelyConfigs.Common.Height);
 
     // -- Registration Methods --

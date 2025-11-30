@@ -6,7 +6,7 @@ import net.msymbios.llovelyr.source.LovelyConfigs;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.common.entity.enums.EntityAnimator;
 import net.msymbios.llovelyr.common.entity.enums.EntityModel;
-import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
 
 import javax.annotation.Nonnull;

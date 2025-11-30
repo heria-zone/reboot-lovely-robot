@@ -20,12 +20,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
-import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.common.entity.type.RobotEntityType;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.common.entity.goal.*;
 import net.msymbios.llovelyr.common.entity.internal.*;
 import net.msymbios.llovelyr.common.utils.internal.Utility;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.framework.utils.Version;
+import net.msymbios.llovelyr.lib.entity.type.features.LevelFeature;
 import net.msymbios.llovelyr.source.LovelyConfigs;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.source.LovelyItems;
@@ -85,14 +87,20 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
 
     // STATS
 
-    public int getMaxLevel() { return nativeEntity.getMaxLevel(); } // getMaxLevel ()
+    public int getMaxLevel() { 
+        // Use RobotEntityType's convenience accessor which delegates to LevelFeature
+        if (nativeEntity instanceof RobotEntityType) {
+            return ((RobotEntityType) nativeEntity).getMaxLevel();
+        }
+        return 0;
+    } // getMaxLevel ()
 
-    public int getHp() { return InternalLogic.calculateHp(this.getCurrentLevel(), (int)this.nativeEntity.getMaxHealth()); } // getHp ()
+    public int getHp() { return InternalLogic.calculateHp(this.getCurrentLevel(), (int)this.nativeEntity.getData().getMaxHealth()); } // getHp ()
 
-    public int getAttackDamage() { return InternalLogic.calculateAttack(this.getCurrentLevel(), (int)nativeEntity.getAttackDamage()); } // getAttackDamage ()
+    public int getAttackDamage() { return InternalLogic.calculateAttack(this.getCurrentLevel(), (int)nativeEntity.getData().getAttackDamage()); } // getAttackDamage ()
 
     public int getArmorLevel() {
-        var defence = InternalLogic.calculateDefense(this.getCurrentLevel(), (int)nativeEntity.getArmour());
+        var defence = InternalLogic.calculateDefense(this.getCurrentLevel(), (int)nativeEntity.getData().getArmor());
         return (int) InternalLogic.calculateArmor(defence);
     } // getArmorLevel ()
 
@@ -206,8 +214,8 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
 
     // -- Constructor --
 
-    public LovelyRobot(EntityType<? extends InternalEntity> entityType, Level level, NativeEntityType nativeEntityType) {
-        super(entityType, level, nativeEntityType);
+    public LovelyRobot(EntityType<? extends InternalEntity> entityType, Level level, RobotEntityType robotEntityType) {
+        super(entityType, level, robotEntityType);
     } // Constructor LovelyRobot ()
 
     // -- Inherited Methods --
@@ -568,7 +576,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     @Override
     protected void handleAttackTarget(@NotNull Entity target) {
         handleActivateCombatMode();
-        if(InternalLogic.handleLevelUp(this.getCurrentLevel(), this.getMaxLevel()) && !(target instanceof Player) && !this.level().isClientSide) {
+        if(this.getCurrentLevel() < this.getMaxLevel() && !(target instanceof Player) && !this.level().isClientSide) {
             final int maxHp = (int)((LivingEntity)target).getMaxHealth();
             addExp(maxHp / 4);
         }
@@ -607,7 +615,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
 
         final Entity entity = source.getEntity();
 
-        if (InternalLogic.handleLevelUp(this.getCurrentLevel(), this.getMaxLevel()) && !(entity instanceof Player) && entity instanceof LivingEntity && !this.level().isClientSide) {
+        if (this.getCurrentLevel() < this.getMaxLevel() && !(entity instanceof Player) && entity instanceof LivingEntity && !this.level().isClientSide) {
             final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
             addExp(maxHp / 6);
         }
@@ -627,7 +635,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         String ownerName = Utility.getEntityOwnerName(this);
         if (!ownerName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
 
-        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.key);
+        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.getKey());
         nbt.putInt(LovelyIdentifier.STAT_COLOR, this.getTextureID());
 
         nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
@@ -779,6 +787,103 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     // -- Custom Methods --
 
     /**
+     * Calculates total experience after applying bonuses and adding to current XP.
+     * <p>
+     * <b>Custom Name Bonus:</b> Named robots receive 1.5x experience multiplier
+     * (50% bonus) to reward player investment in personalization. This encourages
+     * players to name their robots and creates stronger attachment.
+     * <p>
+     * <b>Formula:</b> 
+     * <ul>
+     * <li>Unnamed: currentExp + value</li>
+     * <li>Named: currentExp + (value * 3 / 2)</li>
+     * </ul>
+     * <p>
+     * <b>Design Decision:</b> Bonus is multiplicative rather than additive to
+     * maintain consistent scaling across all XP gains. Integer division (3/2)
+     * avoids floating-point precision issues.
+     * <p>
+     * <b>Safety:</b> Handles missing custom names gracefully with try-catch to
+     * prevent crashes from null or malformed name data.
+     * 
+     * @param value base experience points to add (before bonuses)
+     * @return total experience after applying bonuses and adding to current XP
+     */
+    private int calculateEarnedExp (int value) {
+        int addExp = value;
+        int currentExp = getExp();
+        String customName = "";
+
+        // Get custom name safely
+        try {
+            customName = getCustomName().getString();
+        } catch (Exception ignored) {}
+
+        // Named robots earn 1.5x experience bonus
+        if (!customName.isEmpty()) {
+            addExp = addExp * 3 / 2;
+        }
+
+        currentExp += addExp;
+
+        return currentExp;
+    } // calculateEarnedExp ()
+
+    /**
+     * Checks if this robot has a level system attached.
+     * <p>
+     * <b>Architecture:</b> Verifies that the robot's entity type is a RobotEntityType
+     * with an attached LevelFeature. This check is essential before accessing level
+     * system functionality to prevent ClassCastException or NullPointerException.
+     * <p>
+     * <b>Use Case:</b> Call this before using getLevelSystem() or any level-related
+     * operations that depend on LevelFeature being present.
+     * <p>
+     * <b>Performance:</b> Lightweight check - only performs instanceof and Optional.isPresent().
+     * Safe to call frequently.
+     * 
+     * @return true if robot has RobotEntityType with LevelFeature attached, false otherwise
+     */
+    private boolean hasLevelSystem() {
+        if (!(nativeEntity instanceof RobotEntityType)) {
+            return false;
+        }
+        RobotEntityType robotType =
+            (RobotEntityType) nativeEntity;
+        return robotType.getFeature(LevelFeature.class).isPresent();
+    } // hasLevelSystem ()
+
+    /**
+     * Retrieves the LevelFeature for this robot.
+     * <p>
+     * <b>Architecture:</b> Provides convenient access to the robot's LevelFeature
+     * without requiring repeated instanceof checks and Optional handling at call sites.
+     * Centralizes the feature retrieval logic.
+     * <p>
+     * <b>Safety:</b> Returns Optional.empty() if robot doesn't have RobotEntityType
+     * or if LevelFeature is not attached. Callers should check with hasLevelSystem()
+     * first or handle empty Optional appropriately.
+     * <p>
+     * <b>Usage Pattern:</b>
+     * <pre>
+     * getLevelSystem().ifPresent(levelFeature -> {
+     *     int expRequired = levelFeature.getExpForNextLevel();
+     *     // ... use levelFeature
+     * });
+     * </pre>
+     * 
+     * @return Optional containing LevelFeature if present, empty Optional otherwise
+     */
+    private java.util.Optional<LevelFeature> getLevelSystem() {
+        if (!(nativeEntity instanceof RobotEntityType)) {
+            return java.util.Optional.empty();
+        }
+        RobotEntityType robotType =
+            (RobotEntityType) nativeEntity;
+        return robotType.getFeature(LevelFeature.class);
+    } // getLevelSystem ()
+
+    /**
      * Adds experience points and handles level-up logic.
      * <p>
      * <b>Custom Name Bonus:</b> Named robots receive 1.5x experience multiplier
@@ -795,38 +900,26 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     public void addExp(int value) {
         if (value <= 0) return;
 
-        int addExp = value;
-        int currentExp = getExp();
-        int currentLevel = this.getCurrentLevel();
-        int maxLevel = this.getMaxLevel();
-        String customName = "";
-
-        // Get custom name safely
-        try {
-            customName = getCustomName().getString();
-        } catch (Exception ignored) {}
-
-        // Named robots earn 1.5x experience bonus
-        if (!customName.isEmpty()) {
-            addExp = addExp * 3 / 2;
-        }
-
-        currentExp += addExp;
-
         // Store old level for change detection
-        var oldLevel = currentLevel;
+        var oldLevel = this.getCurrentLevel();
 
-        // Level up loop with max level cap
-        while (currentLevel < maxLevel && currentExp >= InternalLogic.calculateNextExp(currentLevel)) {
-            currentExp -= InternalLogic.calculateNextExp(currentLevel);
-            currentLevel++;
-            setCurrentLevel(currentLevel);
-        }
-
-        setExp(currentExp);
+        // Level up loop with max level cap - using LevelFeature for XP calculation
+        getLevelSystem().ifPresent(levelFeature -> {
+            // Sync current state to LevelFeature
+            levelFeature.setCurrentLevel(this.getCurrentLevel());
+            levelFeature.setExperience(this.calculateEarnedExp(value));
+            
+            // Use LevelFeature's level-up logic
+            while (levelFeature.tryLevelUp()) {
+                setCurrentLevel(levelFeature.getCurrentLevel());
+            }
+            
+            // Sync back the final experience
+            setExp(levelFeature.getExperience());
+        });
 
         // Display level-up notification only if level actually changed
-        if (oldLevel != currentLevel) {
+        if (oldLevel != this.getCurrentLevel()) {
             if (!level().isClientSide) {
                 try {
                     final LivingEntity owner = getOwner();
@@ -949,10 +1042,10 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         if(!canShow) return;
         InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BAR)), false);
         if(showLevelUp) InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_LEVEL_UP)), false);
-        if(this.getCustomName() != null) InternalLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.key).append(": " + this.getCustomName().getString()), false);
-        else InternalLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.key), false);
+        if(this.getCustomName() != null) InternalLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.getKey()).append(": " + this.getCustomName().getString()), false);
+        else InternalLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.getKey()), false);
         InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_LEVEL).append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_EXPERIENCE).append(": " + this.getExp()                 + "/" + InternalLogic.calculateNextExp(this.getExp())), false);
+        getLevelSystem().ifPresent(feature -> InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_EXPERIENCE).append(": " + this.getExp()                 + "/" + feature.getExpForLevel(this.getCurrentLevel())), false));
         InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_HEALTH).append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
         InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_ATTACK).append(": " + this.getAttackDamage()), false);
         InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_DEFENCE).append(": " + this.getArmorLevel()), false);
@@ -1064,7 +1157,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     private ItemStack createSpawnItemFromEntity() {
         // Determine correct spawn item based on robot variant
         final ItemStack spawnItem;
-        if (this.nativeEntity.key.equals("bunny2")) {
+        if (this.nativeEntity.getKey().equals("bunny2")) {
             spawnItem = new ItemStack(LovelyItems.BUNNY2_SPAWN.get(), 1);
         } else {
             spawnItem = new ItemStack(LovelyItems.VANILLA_SPAWN.get(), 1);
@@ -1080,7 +1173,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         String ownerName = Utility.getEntityOwnerName(this);
         if (!ownerName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
 
-        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.key);
+        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.getKey());
         nbt.putInt(LovelyIdentifier.STAT_COLOR, this.getTextureID());
 
         nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
@@ -1153,7 +1246,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         String ownerName = Utility.getEntityOwnerName(this);
         if (!ownerName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
         
-        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.key);
+        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.getKey());
         nbt.putInt(LovelyIdentifier.STAT_COLOR, this.getTextureID());
         nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
@@ -1204,7 +1297,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
      */
     private String getRobotDisplayName() {
         String customName = Utility.getEntityCustomName(this);
-        String typeName = this.nativeEntity.key.substring(0, 1).toUpperCase() + this.nativeEntity.key.substring(1);
+        String typeName = this.nativeEntity.getKey().substring(0, 1).toUpperCase() + this.nativeEntity.getKey().substring(1);
         
         if (!customName.isEmpty()) {
             return customName + " (" + typeName + ")";

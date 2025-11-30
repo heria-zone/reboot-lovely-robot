@@ -2,14 +2,10 @@ package net.msymbios.llovelyr;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.msymbios.llovelyr.framework.utils.ObjectUtil;
-import net.msymbios.llovelyr.framework.utils.Version;
-import net.msymbios.llovelyr.common.commands.LovelyCommandArguments;
-import net.msymbios.llovelyr.source.LovelyEntities;
-import net.msymbios.llovelyr.source.LovelyEvents;
-import net.msymbios.llovelyr.source.LovelyGroups;
-import net.msymbios.llovelyr.source.LovelyItems;
-import net.msymbios.llovelyr.source.LovelyRecipes;
+import net.msymbios.llovelyr.framework.utils.*;
+import net.msymbios.llovelyr.common.commands.*;
+import net.msymbios.llovelyr.source.*;
+import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.GeckoLib;
@@ -87,6 +83,8 @@ public class LovelyLegacy implements ModInitializer {
 	public void onInitialize() {
 		GeckoLib.initialize();
 
+		LovelyConfigs.register();
+		NativeRobotType.reloadFromConfig();
 		LovelyGroups.register();
 		LovelyItems.register();
 		LovelyEvents.register();
@@ -94,7 +92,6 @@ public class LovelyLegacy implements ModInitializer {
 		LovelyRecipes.register();
 
 		LovelyCommandArguments.register();
-		LOGGER.info("Hello Fabric world!");
 	} // onInitialize()
 
 } // Class: LovelyLegacy

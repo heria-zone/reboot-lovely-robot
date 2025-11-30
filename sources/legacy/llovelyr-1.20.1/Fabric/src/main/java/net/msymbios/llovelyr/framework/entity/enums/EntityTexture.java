@@ -7,14 +7,13 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Defines color and texture variants for robot customization.
+ * <p>Defines 16-color texture palette for customization.<p>
  * <p>
- * <b>Architecture:</b> Texture variants enable visual customization without creating
- * separate entity types. Rendering system swaps texture files based on variant selection.
+ * <b>Architecture:</b> Pure Java enum with zero Minecraft dependencies. Provides
+ * type-safe keys for color texture mappings.
  * <p>
- * <b>Design Decision:</b> 16 standard colors match Minecraft dye system for intuitive
- * customization. Special textures (Dark Matter, Supernova, etc.) provide premium variants
- * for progression rewards or special achievements.
+ * <b>Design Decision:</b> 16 colors match Minecraft's dye system, enabling intuitive
+ * color selection and crafting recipes. RANDOM variant supports procedural generation.
  */
 public enum EntityTexture {
 
@@ -36,7 +35,7 @@ public enum EntityTexture {
     GREEN(13, InternalIdentifier.TEX_GREEN),
     RED(14, InternalIdentifier.TEX_RED),
     BLACK(15, InternalIdentifier.TEX_BLACK),
-    
+
     /** Randomizes texture on spawn. Excludes special textures from random pool. */
     RANDOM(16, InternalIdentifier.TEX_RANDOM);
 
@@ -45,13 +44,13 @@ public enum EntityTexture {
     private static final EntityTexture[] CODEC = Arrays.stream(values())
             .sorted(Comparator.comparingInt(EntityTexture::getId))
             .toArray(EntityTexture[]::new);
-    
+
     /** Immutable list for iteration. Avoids repeated array-to-list conversions. */
     public static final List<EntityTexture> VALUES = Arrays.stream(values())
             .sorted(Comparator.comparingInt(EntityTexture::getId))
             .toList();
 
-    // -- Texture Identity --
+    // -- Color Identity --
 
     private final int m_id;
     private final String m_name;
@@ -60,9 +59,9 @@ public enum EntityTexture {
 
     /**
      * Binds texture to persistent identifier and resource location.
-     * 
+     *
      * @param id persistent identifier for serialization
-     * @param name resource location of texture file
+     * @param name color name for resource paths
      */
     EntityTexture(int id, String name) {
         this.m_id = id;
@@ -72,9 +71,9 @@ public enum EntityTexture {
     // -- Deserialization --
 
     /**
-     * Recovers texture from serialized identifier.
-     * 
-     * @param id serialized texture identifier
+     * Recovers color from serialized identifier.
+     *
+     * @param id serialized color identifier
      * @return corresponding EntityTexture, or WHITE if invalid
      */
     public static EntityTexture byId(int id) {
@@ -84,43 +83,39 @@ public enum EntityTexture {
 
     /**
      * Returns persistent identifier for serialization.
-     * 
-     * @return texture identifier
+     *
+     * @return color identifier
      */
-    public int getId() {
-        return this.m_id;
-    } // getId ()
+    public int getId() {return this.m_id;} // getId ()
 
     /**
-     * Finds texture by resource location name.
-     * 
-     * @param name resource location of texture file
+     * Finds color by name.
+     *
+     * @param name color name
      * @return matching EntityTexture, or null if not found
      */
     public static EntityTexture byName(String name) {
         for (EntityTexture item : CODEC) {
-            if (item.getName().equals(name)) {
-                return item;
-            }
+            if (item.Name().equals(name)) return item;
         }
         return null;
     } // byName ()
 
     /**
-     * Returns texture resource location.
-     * 
-     * @return resource location for texture file lookup
+     * Returns color name for resource paths.
+     *
+     * @return color name
      */
-    public String getName() {
+    public String Name() {
         return this.m_name;
-    } // getName ()
+    } // Name ()
 
     /**
      * Finds texture by key with fallback to RANDOM.
      * <p>
      * <b>Usage:</b> Safe texture lookup for user input or config files. Returns RANDOM
-     * instead of null to ensure robots always have a valid texture.
-     * 
+     * instead of null to ensure it always have a valid texture.
+     *
      * @param key texture identifier key
      * @return matching EntityTexture, or RANDOM if not found
      */

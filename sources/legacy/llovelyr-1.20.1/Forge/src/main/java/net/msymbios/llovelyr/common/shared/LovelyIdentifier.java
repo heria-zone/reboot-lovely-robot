@@ -5,7 +5,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.framework.common.InternalIdentifier;
-import net.msymbios.llovelyr.common.entity.enums.EntityTexture;
+import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
 
 /**
@@ -36,6 +36,8 @@ public class LovelyIdentifier {
     // -- Entities --
 
     public static final String VARIANT_BUNNY2 = "bunny2";
+    public static final String VARIANT_DRAGON = "dragon";
+    public static final String VARIANT_KITSUNE = "kitsune";
     public static final String VARIANT_VANILLA = "vanilla";
 
     // -- Stats --
@@ -159,6 +161,8 @@ public class LovelyIdentifier {
     public static MutableComponent getTranslation(EntityVariant variant) {
         return switch (variant) {
             case Bunny2 -> getVariantTranslation(VARIANT_BUNNY2);
+            case Dragon -> getVariantTranslation(VARIANT_DRAGON);
+            case Kitsune -> getVariantTranslation(VARIANT_KITSUNE);
             case Vanilla -> getVariantTranslation(VARIANT_VANILLA);
             default -> getVariantTranslation(VARIANT_VANILLA);
         };
