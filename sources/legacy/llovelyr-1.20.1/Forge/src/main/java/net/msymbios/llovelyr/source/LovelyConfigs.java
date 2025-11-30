@@ -135,125 +135,125 @@ public class LovelyConfigs {
 
         BUILDER.push("General");
         OWNER_MAX_ROBOT_NUM = BUILDER
-                .comment("Maximum number of robots owned by an owner.", "Note: [-1] means unlimited!", "Example: [30]")
+                .comment("How many robots each player can own at once.", "Set to -1 for unlimited robots.", "Range: -1 to no upper limit", "Example: [30]")
                 .define("owner-max-robot", 30);
 
         MOVEMENT_MELEE_ATTACK = BUILDER
-                .comment("Movement speed when it is melee attacking.", "Example: [0.8]")
+                .comment("How fast robots move when attacking enemies in melee combat.", "Higher values make robots move faster during attacks.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.8]")
                 .define("movement-melee-attack", 0.8F);
 
         MOVEMENT_FOLLOW_OWNER = BUILDER
-                .comment("Movement speed when following player.", "Example: [0.7]")
+                .comment("How fast robots move when following their owner.", "Higher values make robots keep up with you better.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.7]")
                 .define("movement-follow-owner", 0.7F);
 
         MOVEMENT_WANDER_AROUND = BUILDER
-                .comment("Movement speed while it is wandering around.", "Example: [0.6]")
+                .comment("How fast robots move when wandering around on their own.", "Lower than follow speed to make wandering look more relaxed.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.6]")
                 .define("movement-wander-around", 0.6F);
 
         FOLLOW_DISTANCE_MAX = BUILDER
-                .comment("Maximum distance allowed while following.", "Example: [10]")
+                .comment("Maximum distance (in blocks) robots will stay from their owner before teleporting.", "If you get too far, your robot will teleport to you.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [10.0]")
                 .define("follow-distance-max", 10.0F);
 
         FOLLOW_DISTANCE_MIN = BUILDER
-                .comment("Minimum distance allowed while following.", "Example: [2]")
+                .comment("Minimum distance (in blocks) robots try to maintain from their owner.", "Robots won't crowd you closer than this distance.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
                 .define("follow-distance-min", 2F);
 
         LOOK_RANGE = BUILDER
-                .comment("How much should the head rotate while looking.", "Example: [8]")
+                .comment("How far (in blocks) robots can look at and track entities.", "Affects head rotation and attention behavior.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [8.0]")
                 .define("look-range", 8.0F);
         BUILDER.pop();
 
         BUILDER.push("Renderer");
         WIDTH = BUILDER
-                .comment("Entity hit-box width.", "Example: [0.4]")
+                .comment("Width of the robot's collision box (in blocks).", "Affects how much space robots take up and what gaps they can fit through.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.4]")
                 .define("width", 0.4F);
 
         HEIGHT = BUILDER
-                .comment("Entity hit-box height.", "Example: [1.9]")
+                .comment("Height of the robot's collision box (in blocks).", "Affects what spaces robots can fit under.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.9]")
                 .define("height", 1.9F);
 
         SHADOW_RADIUS = BUILDER
-                .comment("Entity shadow, the cast size on the ground.", "Example: [0.4]")
+                .comment("Size of the shadow rendered under robots.", "Purely visual - doesn't affect gameplay.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.4]")
                 .define("shadow-radius", 0.4F);
         BUILDER.pop();
 
         BUILDER.push("Level & Experience");
         EXPERIENCE_BASE = BUILDER
-                .comment("Basic experience required to level up.", "Example: [50]")
+                .comment("Base experience points needed for a robot to reach level 1.", "Each level requires more XP based on the multiplier below.", "Range: 0 to no upper limit (does not accept negative values)", "Example: [50]")
                 .define("experience-base", 50);
 
         EXPERIENCE_MULTIPLIER = BUILDER
-                .comment("Increase level experience multiplier.", "Example: [2]")
+                .comment("How much more XP each level requires compared to the previous level.", "Level 2 needs base × multiplier, Level 3 needs base × multiplier², etc.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
                 .define("experience-multiplier", 2);
         BUILDER.pop();
 
         BUILDER.push("Combat");
         FRIENDLY_FIRE = BUILDER
-                .comment("Enable/Disable Robots owners attack on their own robots.", "Example: [false]")
+                .comment("Whether players can damage their own robots.", "Set to true to allow accidentally hitting your robots, false to prevent it.", "Example: [false]")
                 .define("friendly-fire", false);
 
         ATTACK_CHANCE = BUILDER
-                .comment("Probability of attacking when attacked.", "Example: [5]")
+                .comment("How likely robots are to counter-attack when hit (higher = more aggressive).", "Affects how quickly robots retaliate when damaged.", "Range: 0 to no upper limit (does not accept negative values)", "Example: [5]")
                 .define("attack-chance", 5);
 
         HEAL_INTERVAL = BUILDER
-                .comment("Automatic recovery interval.", "Example: [50]")
+                .comment("How often (in ticks) robots automatically heal themselves.", "20 ticks = 1 second. Lower values = faster healing.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [50]")
                 .define("heal-interval", 50);
 
         WARY_TIME = BUILDER
-                .comment("Time while being in combat mode.", "Example: [50]")
+                .comment("How long (in ticks) robots stay alert after combat ends.", "20 ticks = 1 second. During this time, robots remain ready to fight.", "Range: 0 to no upper limit (does not accept negative values)", "Example: [50]")
                 .define("wary-time", 50);
 
         GLOBAL_AUTO_HEAL = BUILDER
-                .comment("Enable/disable global robots healing.", "Example: [true/false]")
+                .comment("Whether robots automatically heal over time.", "Set to false to disable automatic healing entirely.", "Example: [true]")
                 .define("global-heal", true);
 
         LOOT_ENCHANTMENT = BUILDER
-                .comment("Enable looting enchantments.", "Example: [true/false]")
+                .comment("Whether robots can benefit from Looting enchantment on their weapon.", "When enabled, higher level robots get better mob drops.", "Example: [true]")
                 .define("loot-enchantment", true);
 
         LOOT_ENCHANTMENT_LEVEL = BUILDER
-                .comment("Levels required for looting enchantments.", "Example: [10]")
+                .comment("What robot level is needed to gain Looting I enchantment effect.", "Looting II at 2× this level, Looting III at 3× this level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [10]")
                 .define("loot-enchantment-level", 10);
 
         MAX_LOOT_ENCHANTMENT = BUILDER
-                .comment("Maximum level of looting enchantments.", "Example: [3]")
+                .comment("Maximum Looting enchantment level robots can have.", "Limits how much bonus loot high-level robots can get.", "Range: 0 to 3", "Example: [3]")
                 .define("max-loot-enchantment", 3);
 
         BASE_DEFENCE_RANGE = BUILDER
-                .comment("Base range to defend.", "Example: [15F]")
+                .comment("How far (in blocks) robots will chase enemies from their guard position.", "In Defense mode, robots won't chase beyond this distance.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [15.0]")
                 .define("base-defence-range", 15.0F);
 
         BASE_DEFENCE_WARP_RANGE = BUILDER
-                .comment("Range till teleport back to base.", "Example: [10F]")
+                .comment("How far (in blocks) robots can be from guard position before teleporting back.", "Prevents robots from getting stuck too far from their post.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [10.0]")
                 .define("base-defence-warp-range", 10.0F);
         BUILDER.pop();
 
         BUILDER.push("Protection");
         PROTECTION_LIMIT_FIRE = BUILDER
-                .comment("Fire protection upper limit.", "Example: [80]")
+                .comment("Maximum percentage of fire damage robots can resist.", "At 80%, robots take only 20% of fire damage. At 100%, they're immune to fire.", "Range: 0 to 100", "Example: [80]")
                 .define("limit-fire", 80);
 
         PROTECTION_LIMIT_FALL = BUILDER
-                .comment("Fall protection upper limit.", "Example: [80]")
+                .comment("Maximum percentage of fall damage robots can resist.", "At 80%, robots take only 20% of fall damage. At 100%, they never take fall damage.", "Range: 0 to 100", "Example: [80]")
                 .define("limit-fall", 80);
 
         PROTECTION_LIMIT_BLAST = BUILDER
-                .comment("Blast protection upper limit.", "Example: [80]")
+                .comment("Maximum percentage of explosion damage robots can resist.", "At 80%, robots take only 20% of explosion damage. At 100%, they're immune to explosions.", "Range: 0 to 100", "Example: [80]")
                 .define("limit-blast", 80);
 
         PROTECTION_LIMIT_PROJECTILE = BUILDER
-                .comment("Projectile protection upper limit.", "Example: [80]")
+                .comment("Maximum percentage of projectile damage robots can resist.", "At 80%, robots take only 20% of arrow/projectile damage. At 100%, they're immune.", "Range: 0 to 100", "Example: [80]")
                 .define("limit-projectile", 80);
         BUILDER.pop();
 
         BUILDER.push("Smart Core Retrieval");
         ENABLE_SMART_CORE_RETRIEVAL = BUILDER
-                .comment("Enable automatic core retrieval when robot dies near owner.", "Example: [true]")
+                .comment("Whether robot cores automatically go to your inventory when robots die nearby.", "When enabled, you don't need to pick up cores manually if you're close enough.", "Example: [true]")
                 .define("enable-smart-core-retrieval", true);
 
         SMART_CORE_RETRIEVAL_DISTANCE = BUILDER
-                .comment("Maximum distance for automatic core retrieval (in blocks).", "Example: [16.0]")
+                .comment("How close (in blocks) you need to be for automatic core retrieval to work.", "If your robot dies within this distance, the core goes straight to your inventory.", "Range: 0.0 to 128.0", "Example: [16.0]")
                 .defineInRange("smart-core-retrieval-distance", 16.0, 0.0, 128.0);
         BUILDER.pop();
 
@@ -261,93 +261,93 @@ public class LovelyConfigs {
         
         BUILDER.push("Follow Mode");
         OWNER_STILL_THRESHOLD = BUILDER
-                .comment("Time (in ticks) owner must be stationary before robot considers wandering.", "Example: [100] (5 seconds)")
+                .comment("How long (in ticks) their owner must stand still before robots start wandering.", "20 ticks = 1 second. Robots stay put if you keep moving.", "Range: 0 to 6000", "Example: [100] (5 seconds)")
                 .defineInRange("owner-still-threshold", 100, 0, 6000);
 
         WANDER_CHECK_INTERVAL = BUILDER
-                .comment("Interval (in ticks) between wander chance checks.", "Example: [200] (10 seconds)")
+                .comment("How often (in ticks) robots check if they should wander.", "20 ticks = 1 second. Lower values make robots more responsive.", "Range: 100 to 6000", "Example: [200] (10 seconds)")
                 .defineInRange("wander-check-interval", 200, 100, 6000);
 
         WANDER_CHANCE = BUILDER
-                .comment("Probability of wandering when owner is stationary (0.0-1.0).", "Example: [0.15] (15%)")
+                .comment("Chance robots will wander when their owner is standing still.", "0.15 = 15% chance per check. Higher values make robots wander more often.", "Range: 0.0 to 1.0", "Example: [0.15] (15%)")
                 .defineInRange("wander-chance", 0.15, 0.0, 1.0);
 
         WANDER_RADIUS_MIN = BUILDER
-                .comment("Minimum wander radius from owner (in blocks).", "Example: [3.0]")
+                .comment("Minimum distance (in blocks) robots will wander from their owner.", "Robots won't wander closer than this.", "Range: 1.0 to 32.0", "Example: [3.0]")
                 .defineInRange("wander-radius-min", 3.0, 1.0, 32.0);
 
         WANDER_RADIUS_MAX = BUILDER
-                .comment("Maximum wander radius from owner (in blocks).", "Example: [6.0]")
+                .comment("Maximum distance (in blocks) robots will wander from their owner.", "Robots won't wander farther than this.", "Range: 1.0 to 32.0", "Example: [6.0]")
                 .defineInRange("wander-radius-max", 6.0, 1.0, 32.0);
 
         WANDER_DURATION_MIN = BUILDER
-                .comment("Minimum wander duration (in ticks).", "Example: [100] (5 seconds)")
+                .comment("Minimum time (in ticks) robots will wander before returning.", "20 ticks = 1 second. Shorter wanders feel more cautious.", "Range: 20 to 6000", "Example: [100] (5 seconds)")
                 .defineInRange("wander-duration-min", 100, 20, 6000);
 
         WANDER_DURATION_MAX = BUILDER
-                .comment("Maximum wander duration (in ticks).", "Example: [200] (10 seconds)")
+                .comment("Maximum time (in ticks) robots will wander before returning.", "20 ticks = 1 second. Longer wanders make robots more independent.", "Range: 20 to 6000", "Example: [200] (10 seconds)")
                 .defineInRange("wander-duration-max", 200, 20, 6000);
 
         WANDER_COOLDOWN_MIN = BUILDER
-                .comment("Minimum cooldown between wanders (in ticks).", "Example: [400] (20 seconds)")
+                .comment("Minimum time (in ticks) before robots can wander again.", "20 ticks = 1 second. Prevents constant wandering.", "Range: 100 to 12000", "Example: [400] (20 seconds)")
                 .defineInRange("wander-cooldown-min", 400, 100, 12000);
 
         WANDER_COOLDOWN_MAX = BUILDER
-                .comment("Maximum cooldown between wanders (in ticks).", "Example: [800] (40 seconds)")
+                .comment("Maximum time (in ticks) before robots can wander again.", "20 ticks = 1 second. Adds variety to wandering behavior.", "Range: 100 to 12000", "Example: [800] (40 seconds)")
                 .defineInRange("wander-cooldown-max", 800, 100, 12000);
         BUILDER.pop();
 
         BUILDER.push("Defense Mode");
         PATROL_DURATION_MIN = BUILDER
-                .comment("Minimum patrol duration (in ticks).", "Example: [600] (30 seconds)")
+                .comment("Minimum time (in ticks) robots patrol around their guard position.", "20 ticks = 1 second. In Defense mode, robots walk around looking for threats.", "Range: 100 to 6000", "Example: [600] (30 seconds)")
                 .defineInRange("patrol-duration-min", 600, 100, 6000);
 
         PATROL_DURATION_MAX = BUILDER
-                .comment("Maximum patrol duration (in ticks).", "Example: [900] (45 seconds)")
+                .comment("Maximum time (in ticks) robots patrol around their guard position.", "20 ticks = 1 second. Longer patrols make robots cover more area.", "Range: 100 to 6000", "Example: [900] (45 seconds)")
                 .defineInRange("patrol-duration-max", 900, 100, 6000);
 
         GUARD_DURATION_MIN = BUILDER
-                .comment("Minimum guard duration (in ticks).", "Example: [400] (20 seconds)")
+                .comment("Minimum time (in ticks) robots stand guard and look around.", "20 ticks = 1 second. In Defense mode, robots alternate between patrolling and guarding.", "Range: 100 to 6000", "Example: [400] (20 seconds)")
                 .defineInRange("guard-duration-min", 400, 100, 6000);
 
         GUARD_DURATION_MAX = BUILDER
-                .comment("Maximum guard duration (in ticks).", "Example: [600] (30 seconds)")
+                .comment("Maximum time (in ticks) robots stand guard and look around.", "20 ticks = 1 second. Longer guard times make robots more watchful.", "Range: 100 to 6000", "Example: [600] (30 seconds)")
                 .defineInRange("guard-duration-max", 600, 100, 6000);
 
         PATROL_PAUSE_DURATION_MIN = BUILDER
-                .comment("Minimum pause duration at patrol points (in ticks).", "Example: [40] (2 seconds)")
+                .comment("Minimum time (in ticks) robots pause at each patrol point.", "20 ticks = 1 second. Brief pauses make patrolling look more natural.", "Range: 10 to 600", "Example: [40] (2 seconds)")
                 .defineInRange("patrol-pause-duration-min", 40, 10, 600);
 
         PATROL_PAUSE_DURATION_MAX = BUILDER
-                .comment("Maximum pause duration at patrol points (in ticks).", "Example: [80] (4 seconds)")
+                .comment("Maximum time (in ticks) robots pause at each patrol point.", "20 ticks = 1 second. Longer pauses make robots more observant.", "Range: 10 to 600", "Example: [80] (4 seconds)")
                 .defineInRange("patrol-pause-duration-max", 80, 10, 600);
 
         GUARD_ROTATION_SPEED = BUILDER
-                .comment("Rotation speed during guard phase (radians per tick).", "Example: [0.05]")
+                .comment("How fast robots rotate their head while guarding.", "Higher values make robots scan faster. Lower values look more deliberate.", "Range: 0.01 to 0.5", "Example: [0.05]")
                 .defineInRange("guard-rotation-speed", 0.05, 0.01, 0.5);
         BUILDER.pop();
 
-        BUILDER.push("Combat");
+        BUILDER.push("Combat Radius");
         ENABLE_COMBAT_RADIUS_PARTICLES = BUILDER
-                .comment("Enable smoke particles when robot cannot chase enemy beyond radius.", "Example: [true]")
+                .comment("Whether to show smoke particles when robots can't chase enemies further.", "Visual feedback when robots hit their chase distance limit in Defense mode.", "Example: [true]")
                 .define("enable-combat-radius-particles", true);
 
         COMBAT_RADIUS_PARTICLE_COUNT = BUILDER
-                .comment("Number of smoke particles to spawn.", "Example: [8]")
+                .comment("How many smoke particles appear when robots hit chase limit.", "More particles make the effect more visible.", "Range: 1 to 50", "Example: [8]")
                 .defineInRange("combat-radius-particle-count", 8, 1, 50);
 
         COMBAT_RADIUS_PARTICLE_SPREAD = BUILDER
-                .comment("Spread radius for smoke particles.", "Example: [0.3]")
+                .comment("How spread out the smoke particles are.", "Higher values create a wider particle cloud.", "Range: 0.1 to 2.0", "Example: [0.3]")
                 .defineInRange("combat-radius-particle-spread", 0.3, 0.1, 2.0);
         BUILDER.pop();
         
         BUILDER.push("Animation");
         STANDBY_TO_SIT_DELAY_MIN = BUILDER
-                .comment("Minimum time (in ticks) before robot transitions from rest to sit animation in standby mode.", "Example: [600] (30 seconds)")
+                .comment("Minimum time (in ticks) before idle robots sit down.", "20 ticks = 1 second. In Standby mode, robots eventually sit if nothing is happening.", "Range: 100 to 12000", "Example: [600] (30 seconds)")
                 .defineInRange("standby-to-sit-delay-min", 600, 100, 12000);
         
         STANDBY_TO_SIT_DELAY_MAX = BUILDER
-                .comment("Maximum time (in ticks) before robot transitions from rest to sit animation in standby mode.", "Example: [1800] (90 seconds)")
+                .comment("Maximum time (in ticks) before idle robots sit down.", "20 ticks = 1 second. Adds variety to when robots decide to sit.", "Range: 100 to 12000", "Example: [1800] (90 seconds)")
                 .defineInRange("standby-to-sit-delay-max", 1800, 100, 12000);
         BUILDER.pop();
         
@@ -357,122 +357,122 @@ public class LovelyConfigs {
 
         BUILDER.push("Bunny2");
         BUNNY2_MAX_LEVEL = BUILDER
-                .comment("Maximum Level", "Example: [200]")
-                .define("max-level", 200);
+                .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
+                .define("bunny2-max-level", 200);
 
         BUNNY2_MAX_HEALTH = BUILDER
-                .comment("Maximum Health", "Example: [30.0]")
-                .define("max-health", 24.0F);
+                .comment("Maximum health points this robot type can have.", "Each heart = 2 health points. Higher values make robots more durable.", "Range: 1.0 to no upper limit (does not accept negative values or zero)", "Example: [24.0]")
+                .define("bunny2-max-health", 24.0F);
 
         BUNNY2_ATTACK_DAMAGE = BUILDER
-                .comment("Attack Damage", "Example: [5.0]")
-                .define("attack-damage", 4.0F);
+                .comment("How much damage this robot type deals per hit.", "Higher values make robots stronger in combat.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [4.0]")
+                .define("bunny2-attack-damage", 4.0F);
 
         BUNNY2_ATTACK_SPEED = BUILDER
-                .comment("Attack Speed", "Example: [ 1.2]")
-                .define("attack-speed",  1.8F);
+                .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.8]")
+                .define("bunny2-attack-speed",  1.8F);
 
         BUNNY2_MOVEMENT_SPEED = BUILDER
-                .comment("Movement Speed", "Example: [0.4]")
-                .define("movement-speed", 0.37F);
+                .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
+                .define("bunny2-movement-speed", 0.37F);
 
         BUNNY2_ARMOR = BUILDER
-                .comment("Armor", "Example: [0.0]")
-                .define("armor", 6.0F);
+                .comment("Armor points for this robot type.", "Each armor point reduces damage. Full diamond armor = 20 points.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [6.0]")
+                .define("bunny2-armor", 6.0F);
 
         BUNNY2_ARMOR_TOUGHNESS = BUILDER
-                .comment("Armor Toughness", "Example: [0.0]")
-                .define("armor-toughness",1.0F);
+                .comment("Armor toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
+                .define("bunny2-armor-toughness",1.0F);
         BUILDER.pop();
 
         BUILDER.push("Vanilla");
         VANILLA_MAX_LEVEL = BUILDER
-                .comment("Maximum Level", "Example: [200.0]")
-                .define("max-level", 200);
+                .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
+                .define("vanilla-max-level", 200);
 
         VANILLA_MAX_HEALTH = BUILDER
-                .comment("Maximum Health", "Example: [30.0]")
-                .define("max-health", 16.0F);
+                .comment("Maximum health points this robot type can have.", "Each heart = 2 health points. Higher values make robots more durable.", "Range: 1.0 to no upper limit (does not accept negative values or zero)", "Example: [16.0]")
+                .define("vanilla-max-health", 16.0F);
 
         VANILLA_ATTACK_DAMAGE = BUILDER
-                .comment("Attack Damage", "Example: [5.0]")
-                .define("attack-damage", 2.0F);
+                .comment("How much damage this robot type deals per hit.", "Higher values make robots stronger in combat.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
+                .define("vanilla-attack-damage", 2.0F);
 
         VANILLA_ATTACK_SPEED = BUILDER
-                .comment("Attack Speed", "Example: [ 1.2]")
-                .define("attack-speed",  1.0F);
+                .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.0]")
+                .define("vanilla-attack-speed",  1.0F);
 
         VANILLA_MOVEMENT_SPEED = BUILDER
-                .comment("Movement Speed", "Example: [0.6]")
-                .define("movement-speed", 0.37F); // 0.25F is too slow
+                .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
+                .define("vanilla-movement-speed", 0.37F);
 
         VANILLA_ARMOR = BUILDER
-                .comment("Armor", "Example: [0.0]")
-                .define("armor", 2.0F);
+                .comment("Armor points for this robot type.", "Each armor point reduces damage. Full diamond armor = 20 points.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
+                .define("vanilla-armor", 2.0F);
 
         VANILLA_ARMOR_TOUGHNESS = BUILDER
-                .comment("Armor Toughness", "Example: [0.0]")
-                .define("armor-toughness",0.0F);
+                .comment("Armor toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
+                .define("vanilla-armor-toughness",0.0F);
         BUILDER.pop();
 
         BUILDER.push("Dragon");
         DRAGON_MAX_LEVEL = BUILDER
-                .comment("Maximum Level", "Example: [300]")
-                .define("max-level", 300);
+                .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [300]")
+                .define("dragon-max-level", 300);
 
         DRAGON_MAX_HEALTH = BUILDER
-                .comment("Maximum Health", "Example: [30.0]")
-                .define("max-health", 30.0F);
+                .comment("Maximum health points this robot type can have.", "Each heart = 2 health points. Higher values make robots more durable.", "Range: 1.0 to no upper limit (does not accept negative values or zero)", "Example: [30.0]")
+                .define("dragon-max-health", 30.0F);
 
         DRAGON_ATTACK_DAMAGE = BUILDER
-                .comment("Attack Damage", "Example: [8.0]")
-                .define("attack-damage", 8.0F);
+                .comment("How much damage this robot type deals per hit.", "Higher values make robots stronger in combat.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [8.0]")
+                .define("dragon-attack-damage", 8.0F);
 
         DRAGON_ATTACK_SPEED = BUILDER
-                .comment("Attack Speed", "Example: [0.8]")
-                .define("attack-speed", 0.8F);
+                .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [0.8]")
+                .define("dragon-attack-speed", 0.8F);
 
         DRAGON_MOVEMENT_SPEED = BUILDER
-                .comment("Movement Speed", "Example: [0.22]")
-                .define("movement-speed", 0.22F);
+                .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.22]")
+                .define("dragon-movement-speed", 0.22F);
 
         DRAGON_ARMOR = BUILDER
-                .comment("Armor", "Example: [4.0]")
-                .define("armor", 4.0F);
+                .comment("Armor points for this robot type.", "Each armor point reduces damage. Full diamond armor = 20 points.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [4.0]")
+                .define("dragon-armor", 4.0F);
 
         DRAGON_ARMOR_TOUGHNESS = BUILDER
-                .comment("Armor Toughness", "Example: [2.0]")
-                .define("armor-toughness", 2.0F);
+                .comment("Armor toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
+                .define("dragon-armor-toughness", 2.0F);
         BUILDER.pop();
 
         BUILDER.push("Kitsune");
         KITSUNE_MAX_LEVEL = BUILDER
-                .comment("Maximum Level", "Example: [250]")
-                .define("max-level", 250);
+                .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [250]")
+                .define("kitsune-max-level", 250);
 
         KITSUNE_MAX_HEALTH = BUILDER
-                .comment("Maximum Health", "Example: [22.0]")
-                .define("max-health", 22.0F);
+                .comment("Maximum health points this robot type can have.", "Each heart = 2 health points. Higher values make robots more durable.", "Range: 1.0 to no upper limit (does not accept negative values or zero)", "Example: [22.0]")
+                .define("kitsune-max-health", 22.0F);
 
         KITSUNE_ATTACK_DAMAGE = BUILDER
-                .comment("Attack Damage", "Example: [6.0]")
-                .define("attack-damage", 6.0F);
+                .comment("How much damage this robot type deals per hit.", "Higher values make robots stronger in combat.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [6.0]")
+                .define("kitsune-attack-damage", 6.0F);
 
         KITSUNE_ATTACK_SPEED = BUILDER
-                .comment("Attack Speed", "Example: [1.1]")
-                .define("attack-speed", 1.1F);
+                .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.1]")
+                .define("kitsune-attack-speed", 1.1F);
 
         KITSUNE_MOVEMENT_SPEED = BUILDER
-                .comment("Movement Speed", "Example: [0.28]")
-                .define("movement-speed", 0.28F);
+                .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.28]")
+                .define("kitsune-movement-speed", 0.28F);
 
         KITSUNE_ARMOR = BUILDER
-                .comment("Armor", "Example: [2.0]")
-                .define("armor", 2.0F);
+                .comment("Armor points for this robot type.", "Each armor point reduces damage. Full diamond armor = 20 points.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
+                .define("kitsune-armor", 2.0F);
 
         KITSUNE_ARMOR_TOUGHNESS = BUILDER
-                .comment("Armor Toughness", "Example: [1.0]")
-                .define("armor-toughness", 1.0F);
+                .comment("Armor toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
+                .define("kitsune-armor-toughness", 1.0F);
         BUILDER.pop();
 
         BUILDER.pop();
