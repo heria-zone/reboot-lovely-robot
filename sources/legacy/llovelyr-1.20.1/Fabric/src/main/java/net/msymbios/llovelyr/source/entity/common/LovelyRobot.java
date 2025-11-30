@@ -1086,8 +1086,8 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         // Only process empty hand
         if (!stack.isEmpty()) return false;
         
-        // Require Ctrl+Shift (crouch + shift)
-        if (!player.isSneaking() || !player.isSprinting()) return false;
+        // Require Shift (sneak/crouch)
+        if (!player.isSneaking()) return false;
         
         // Validate ownership
         if (!this.isOwner(player)) return false;
