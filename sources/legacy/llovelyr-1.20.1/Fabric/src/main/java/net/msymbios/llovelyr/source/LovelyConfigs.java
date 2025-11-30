@@ -1,22 +1,22 @@
 package net.msymbios.llovelyr.source;
 
+import com.mojang.datafixers.util.Pair;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.fabricmc.loader.api.FabricLoader;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Properties;
+import net.msymbios.llovelyr.config.internal.SimpleConfig;
+import net.msymbios.llovelyr.config.internal.ConfigProvider;
 
 /**
  * Configuration management for Legacy LovelyRobot mod.
  * <p>
- * <b>Architecture:</b> Provides static config values loaded from properties file,
- * with automatic file creation and validation. Supports runtime reload for server
- * administration without restart.
+ * <b>Architecture:</b> Uses SimpleConfig for file handling and ConfigProvider for
+ * structured config generation. Provides static config values with automatic file
+ * creation, validation, and runtime reload support.
+ * <p>
+ * <b>Config System:</b> ConfigProvider defines all entries with comments and defaults.
+ * SimpleConfig handles file I/O, parsing, and type-safe retrieval with fallbacks.
  * <p>
  * <b>Config Location:</b> config/llovelyr.properties in game directory. Created
- * with defaults if missing.
+ * with organized sections and inline comments if missing.
  * <p>
  * <b>Error Handling:</b> Invalid values fall back to defaults with warning logs.
  * Parse errors use defaults and log errors. Missing file creates new with defaults.
@@ -25,8 +25,8 @@ public class LovelyConfigs {
 
     // -- Constants --
 
-    private static final String CONFIG_FILE_NAME = "llovelyr.properties";
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE_NAME);
+    private static final String CONFIG_FILE_NAME = "llovelyr";
+    private static SimpleConfig config;
 
     // -- Methods --
 
@@ -34,345 +34,415 @@ public class LovelyConfigs {
      * Loads configuration from file or creates default config if missing.
      * <p>
      * <b>Initialization:</b> Called during mod initialization to populate static
-     * config fields. Creates config file with defaults if not present.
+     * config fields. Uses ConfigProvider to define structure and SimpleConfig for
+     * file operations.
      * <p>
      * <b>Error Recovery:</b> Missing file triggers creation with defaults. Invalid
      * values use defaults with warnings. Parse errors use defaults with error logs.
      */
     public static void register() {
-        loadConfig();
+        ConfigProvider provider = new ConfigProvider();
+        buildConfigProvider(provider);
+        
+        config = SimpleConfig.of(CONFIG_FILE_NAME).provider(provider).request();
+        
+        loadConfigValues();
+        
+        LovelyLegacy.LOGGER.info("Configuration loaded successfully");
     } // register()
 
     /**
-     * Loads config values from properties file with validation and error handling.
+     * Builds ConfigProvider with all config entries organized into sections.
      * <p>
-     * <b>File Handling:</b> Creates config with defaults if missing. Reads existing
-     * config and validates each value. Falls back to defaults for invalid entries.
+     * <b>Organization:</b> Groups related settings with section headers and inline
+     * comments. Each entry includes description and default value for user reference.
      * <p>
-     * <b>Validation:</b> Checks numeric ranges, ensures positive values where required.
-     * Logs warnings for invalid values, errors for parse failures.
+     * <b>Maintainability:</b> Centralizes config definition for easy updates and
+     * ensures consistency between code and config file.
      */
-    private static void loadConfig() {
-        Properties properties = new Properties();
+    private static void buildConfigProvider(ConfigProvider provider) {
+        // ===== GENERAL SETTINGS =====
+        provider.addComment("===== GENERAL SETTINGS =====");
+        provider.addKeyValuePair(Pair.of("OwnerMaxRobotNum", Common.OwnerMaxRobotNum),
+                "Maximum robots per owner");
+        provider.addKeyValuePair(Pair.of("MovementMeleeAttack", Common.MovementMeleeAttack),
+                "Movement speed during melee attack");
+        provider.addKeyValuePair(Pair.of("MovementFollowOwner", Common.MovementFollowOwner),
+                "Movement speed when following owner");
+        provider.addKeyValuePair(Pair.of("MovementWanderAround", Common.MovementWanderAround),
+                "Movement speed when wandering");
+        provider.addKeyValuePair(Pair.of("FollowDistanceMax", Common.FollowDistanceMax),
+                "Maximum follow distance in blocks");
+        provider.addKeyValuePair(Pair.of("FollowDistanceMin", Common.FollowDistanceMin),
+                "Minimum follow distance in blocks");
+        provider.addKeyValuePair(Pair.of("LookRange", Common.LookRange),
+                "Range for looking at entities");
         
-        // Create config file with defaults if it doesn't exist
-        if (!Files.exists(CONFIG_PATH)) {
-            LovelyLegacy.LOGGER.info("Config file not found, creating with defaults: {}", CONFIG_PATH);
-            saveDefaultConfig();
-            return; // Defaults already set in static fields
-        }
+        // ===== RENDERER SETTINGS =====
+        provider.addComment("");
+        provider.addComment("===== RENDERER SETTINGS =====");
+        provider.addKeyValuePair(Pair.of("Width", Common.Width), "Entity hitbox width");
+        provider.addKeyValuePair(Pair.of("Height", Common.Height), "Entity hitbox height");
+        provider.addKeyValuePair(Pair.of("ShadowRadius", Client.ShadowRadius),
+                "Shadow rendering radius");
         
-        // Load existing config file
-        try (InputStream input = Files.newInputStream(CONFIG_PATH)) {
-            properties.load(input);
-            LovelyLegacy.LOGGER.info("Loading config from: {}", CONFIG_PATH);
-            
-            // Load and validate each config value
-            loadCommonConfig(properties);
-            loadClientConfig(properties);
-            
-        } catch (IOException e) {
-            LovelyLegacy.LOGGER.error("Failed to load config file, using defaults", e);
-        }
-    } // loadConfig()
+        // ===== LEVEL AND EXPERIENCE =====
+        provider.addComment("");
+        provider.addComment("===== LEVEL AND EXPERIENCE =====");
+        provider.addKeyValuePair(Pair.of("ExperienceBase", Common.ExperienceBase),
+                "Base experience for level 1");
+        provider.addKeyValuePair(Pair.of("ExperienceMultiplier", Common.ExperienceMultiplier),
+                "Experience multiplier per level");
+        
+        // ===== COMBAT SETTINGS =====
+        provider.addComment("");
+        provider.addComment("===== COMBAT SETTINGS =====");
+        provider.addKeyValuePair(Pair.of("FriendlyFire", Common.FriendlyFire),
+                "Enable friendly fire between robots");
+        provider.addKeyValuePair(Pair.of("AttackChance", Common.AttackChance),
+                "Attack chance modifier");
+        provider.addKeyValuePair(Pair.of("HealInterval", Common.HealInterval),
+                "Ticks between heal attempts");
+        provider.addKeyValuePair(Pair.of("WaryTime", Common.WaryTime),
+                "Ticks to remain wary after combat");
+        provider.addKeyValuePair(Pair.of("GlobalAutoHeal", Common.GlobalAutoHeal),
+                "Enable automatic healing");
+        provider.addKeyValuePair(Pair.of("LootEnchantment", Common.LootEnchantment),
+                "Enable looting enchantment");
+        provider.addKeyValuePair(Pair.of("LootEnchantmentLevel", Common.LootEnchantmentLevel),
+                "Level requirement for looting enchantment");
+        provider.addKeyValuePair(Pair.of("MaxLootEnchantment", Common.MaxLootEnchantment),
+                "Maximum looting enchantment level");
+        provider.addKeyValuePair(Pair.of("BaseDefenceRange", Common.BaseDefenceRange),
+                "Base defense range in blocks");
+        provider.addKeyValuePair(Pair.of("BaseDefenceWarpRange", Common.BaseDefenceWarpRange),
+                "Base defense warp range in blocks");
+        
+        // ===== PROTECTION SETTINGS =====
+        provider.addComment("");
+        provider.addComment("===== PROTECTION SETTINGS =====");
+        provider.addKeyValuePair(Pair.of("ProtectionLimitFire", Common.ProtectionLimitFire),
+                "Fire protection limit");
+        provider.addKeyValuePair(Pair.of("ProtectionLimitFall", Common.ProtectionLimitFall),
+                "Fall protection limit");
+        provider.addKeyValuePair(Pair.of("ProtectionLimitBlast", Common.ProtectionLimitBlast),
+                "Blast protection limit");
+        provider.addKeyValuePair(Pair.of("ProtectionLimitProjectile", Common.ProtectionLimitProjectile),
+                "Projectile protection limit");
+        
+        // ===== SMART CORE RETRIEVAL =====
+        provider.addComment("");
+        provider.addComment("===== SMART CORE RETRIEVAL =====");
+        provider.addKeyValuePair(Pair.of("EnableSmartCoreRetrieval", Common.EnableSmartCoreRetrieval),
+                "Enable smart core retrieval feature");
+        provider.addKeyValuePair(Pair.of("SmartCoreRetrievalDistance", Common.SmartCoreRetrievalDistance),
+                "Smart core retrieval distance in blocks");
+        
+        // ===== AI BEHAVIOR SETTINGS =====
+        provider.addComment("");
+        provider.addComment("===== AI BEHAVIOR SETTINGS =====");
+        provider.addComment("Follow Mode - Owner Stationary Detection");
+        provider.addKeyValuePair(Pair.of("OwnerStillThreshold", Common.OwnerStillThreshold),
+                "Ticks before owner considered stationary (5 seconds = 100 ticks)");
+        
+        provider.addComment("");
+        provider.addComment("Follow Mode - Wander Behavior");
+        provider.addKeyValuePair(Pair.of("WanderCheckInterval", Common.WanderCheckInterval),
+                "Ticks between wander checks (10 seconds = 200 ticks)");
+        provider.addKeyValuePair(Pair.of("WanderChance", Common.WanderChance),
+                "Chance to wander (0.15 = 15%)");
+        provider.addKeyValuePair(Pair.of("WanderRadiusMin", Common.WanderRadiusMin),
+                "Minimum wander radius in blocks");
+        provider.addKeyValuePair(Pair.of("WanderRadiusMax", Common.WanderRadiusMax),
+                "Maximum wander radius in blocks");
+        provider.addKeyValuePair(Pair.of("WanderDurationMin", Common.WanderDurationMin),
+                "Minimum wander duration in ticks (5 seconds = 100 ticks)");
+        provider.addKeyValuePair(Pair.of("WanderDurationMax", Common.WanderDurationMax),
+                "Maximum wander duration in ticks (10 seconds = 200 ticks)");
+        provider.addKeyValuePair(Pair.of("WanderCooldownMin", Common.WanderCooldownMin),
+                "Minimum wander cooldown in ticks (20 seconds = 400 ticks)");
+        provider.addKeyValuePair(Pair.of("WanderCooldownMax", Common.WanderCooldownMax),
+                "Maximum wander cooldown in ticks (40 seconds = 800 ticks)");
+        
+        provider.addComment("");
+        provider.addComment("Defense Mode - Patrol Behavior");
+        provider.addKeyValuePair(Pair.of("PatrolDurationMin", Common.PatrolDurationMin),
+                "Minimum patrol duration in ticks (30 seconds = 600 ticks)");
+        provider.addKeyValuePair(Pair.of("PatrolDurationMax", Common.PatrolDurationMax),
+                "Maximum patrol duration in ticks (45 seconds = 900 ticks)");
+        provider.addKeyValuePair(Pair.of("GuardDurationMin", Common.GuardDurationMin),
+                "Minimum guard duration in ticks (20 seconds = 400 ticks)");
+        provider.addKeyValuePair(Pair.of("GuardDurationMax", Common.GuardDurationMax),
+                "Minimum guard duration in ticks (30 seconds = 600 ticks)");
+        provider.addKeyValuePair(Pair.of("PatrolPauseDurationMin", Common.PatrolPauseDurationMin),
+                "Minimum patrol pause duration in ticks (2 seconds = 40 ticks)");
+        provider.addKeyValuePair(Pair.of("PatrolPauseDurationMax", Common.PatrolPauseDurationMax),
+                "Maximum patrol pause duration in ticks (4 seconds = 80 ticks)");
+        provider.addKeyValuePair(Pair.of("GuardRotationSpeed", Common.GuardRotationSpeed),
+                "Guard rotation speed in radians per tick");
+        
+        provider.addComment("");
+        provider.addComment("Combat - Radius Enforcement");
+        provider.addKeyValuePair(Pair.of("EnableCombatRadiusParticles", Common.EnableCombatRadiusParticles),
+                "Enable combat radius particle effects");
+        provider.addKeyValuePair(Pair.of("CombatRadiusParticleCount", Common.CombatRadiusParticleCount),
+                "Number of particles for combat radius");
+        provider.addKeyValuePair(Pair.of("CombatRadiusParticleSpread", Common.CombatRadiusParticleSpread),
+                "Particle spread for combat radius");
+        
+        // ===== ANIMATION SETTINGS =====
+        provider.addComment("");
+        provider.addComment("===== ANIMATION SETTINGS =====");
+        provider.addKeyValuePair(Pair.of("StandbyToSitDelayMin", Common.StandbyToSitDelayMin),
+                "Minimum delay before sitting in ticks (30 seconds = 600 ticks)");
+        provider.addKeyValuePair(Pair.of("StandbyToSitDelayMax", Common.StandbyToSitDelayMax),
+                "Maximum delay before sitting in ticks (90 seconds = 1800 ticks)");
+        
+        // ===== ENTITY-SPECIFIC SETTINGS =====
+        provider.addComment("");
+        provider.addComment("===== ENTITY-SPECIFIC SETTINGS =====");
+        
+        // BUNNY2
+        provider.addComment("");
+        provider.addComment("BUNNY2 Robot");
+        provider.addKeyValuePair(Pair.of("Bunny2MaxLevel", Common.Bunny2MaxLevel),
+                "Maximum level for Bunny2");
+        provider.addKeyValuePair(Pair.of("Bunny2MaxHealth", Common.Bunny2MaxHealth),
+                "Maximum health for Bunny2");
+        provider.addKeyValuePair(Pair.of("Bunny2AttackDamage", Common.Bunny2AttackDamage),
+                "Attack damage for Bunny2");
+        provider.addKeyValuePair(Pair.of("Bunny2AttackSpeed", Common.Bunny2AttackSpeed),
+                "Attack speed for Bunny2");
+        provider.addKeyValuePair(Pair.of("Bunny2MovementSpeed", Common.Bunny2MovementSpeed),
+                "Movement speed for Bunny2");
+        provider.addKeyValuePair(Pair.of("Bunny2Armor", Common.Bunny2Armor),
+                "Armor value for Bunny2");
+        provider.addKeyValuePair(Pair.of("Bunny2ArmorToughness", Common.Bunny2ArmorToughness),
+                "Armor toughness for Bunny2");
+        
+        // VANILLA
+        provider.addComment("");
+        provider.addComment("VANILLA Robot");
+        provider.addKeyValuePair(Pair.of("VanillaMaxLevel", Common.VanillaMaxLevel),
+                "Maximum level for Vanilla");
+        provider.addKeyValuePair(Pair.of("VanillaMaxHealth", Common.VanillaMaxHealth),
+                "Maximum health for Vanilla");
+        provider.addKeyValuePair(Pair.of("VanillaAttackDamage", Common.VanillaAttackDamage),
+                "Attack damage for Vanilla");
+        provider.addKeyValuePair(Pair.of("VanillaAttackSpeed", Common.VanillaAttackSpeed),
+                "Attack speed for Vanilla");
+        provider.addKeyValuePair(Pair.of("VanillaMovementSpeed", Common.VanillaMovementSpeed),
+                "Movement speed for Vanilla");
+        provider.addKeyValuePair(Pair.of("VanillaArmor", Common.VanillaArmor),
+                "Armor value for Vanilla");
+        provider.addKeyValuePair(Pair.of("VanillaArmorToughness", Common.VanillaArmorToughness),
+                "Armor toughness for Vanilla");
+        
+        // DRAGON
+        provider.addComment("");
+        provider.addComment("DRAGON Robot");
+        provider.addKeyValuePair(Pair.of("DragonMaxLevel", Common.DragonMaxLevel),
+                "Maximum level for Dragon");
+        provider.addKeyValuePair(Pair.of("DragonMaxHealth", Common.DragonMaxHealth),
+                "Maximum health for Dragon");
+        provider.addKeyValuePair(Pair.of("DragonAttackDamage", Common.DragonAttackDamage),
+                "Attack damage for Dragon");
+        provider.addKeyValuePair(Pair.of("DragonAttackSpeed", Common.DragonAttackSpeed),
+                "Attack speed for Dragon");
+        provider.addKeyValuePair(Pair.of("DragonMovementSpeed", Common.DragonMovementSpeed),
+                "Movement speed for Dragon");
+        provider.addKeyValuePair(Pair.of("DragonArmor", Common.DragonArmor),
+                "Armor value for Dragon");
+        provider.addKeyValuePair(Pair.of("DragonArmorToughness", Common.DragonArmorToughness),
+                "Armor toughness for Dragon");
+        
+        // KITSUNE
+        provider.addComment("");
+        provider.addComment("KITSUNE Robot");
+        provider.addKeyValuePair(Pair.of("KitsuneMaxLevel", Common.KitsuneMaxLevel),
+                "Maximum level for Kitsune");
+        provider.addKeyValuePair(Pair.of("KitsuneMaxHealth", Common.KitsuneMaxHealth),
+                "Maximum health for Kitsune");
+        provider.addKeyValuePair(Pair.of("KitsuneAttackDamage", Common.KitsuneAttackDamage),
+                "Attack damage for Kitsune");
+        provider.addKeyValuePair(Pair.of("KitsuneAttackSpeed", Common.KitsuneAttackSpeed),
+                "Attack speed for Kitsune");
+        provider.addKeyValuePair(Pair.of("KitsuneMovementSpeed", Common.KitsuneMovementSpeed),
+                "Movement speed for Kitsune");
+        provider.addKeyValuePair(Pair.of("KitsuneArmor", Common.KitsuneArmor),
+                "Armor value for Kitsune");
+        provider.addKeyValuePair(Pair.of("KitsuneArmorToughness", Common.KitsuneArmorToughness),
+                "Armor toughness for Kitsune");
+    } // buildConfigProvider()
 
     /**
-     * Loads common (shared) config values with validation.
+     * Loads config values from SimpleConfig with type-safe retrieval.
      * <p>
-     * <b>Validation Strategy:</b> Attempts to parse each value, falls back to default
-     * on failure. Logs warnings for invalid values to aid troubleshooting.
+     * <b>Type Safety:</b> Uses SimpleConfig's type-safe getters with automatic
+     * fallback to defaults on parse failure. Logs warnings for invalid values.
+     * <p>
+     * <b>Validation:</b> SimpleConfig handles validation and error logging,
+     * ensuring robust config loading without manual error handling.
      */
-    private static void loadCommonConfig(Properties properties) {
+    private static void loadConfigValues() {
         // General settings
-        Common.OwnerMaxRobotNum = getIntProperty(properties, "OwnerMaxRobotNum", Common.OwnerMaxRobotNum);
-        Common.MovementMeleeAttack = getDoubleProperty(properties, "MovementMeleeAttack", Common.MovementMeleeAttack);
-        Common.MovementFollowOwner = getFloatProperty(properties, "MovementFollowOwner", Common.MovementFollowOwner);
-        Common.MovementWanderAround = getDoubleProperty(properties, "MovementWanderAround", Common.MovementWanderAround);
-        Common.FollowDistanceMax = getFloatProperty(properties, "FollowDistanceMax", Common.FollowDistanceMax);
-        Common.FollowDistanceMin = getFloatProperty(properties, "FollowDistanceMin", Common.FollowDistanceMin);
-        Common.LookRange = getFloatProperty(properties, "LookRange", Common.LookRange);
+        Common.OwnerMaxRobotNum = config.getOrDefault("OwnerMaxRobotNum", Common.OwnerMaxRobotNum);
+        Common.MovementMeleeAttack = config.getOrDefault("MovementMeleeAttack", Common.MovementMeleeAttack);
+        Common.MovementFollowOwner = config.getOrDefault("MovementFollowOwner", Common.MovementFollowOwner);
+        Common.MovementWanderAround = config.getOrDefault("MovementWanderAround", Common.MovementWanderAround);
+        Common.FollowDistanceMax = config.getOrDefault("FollowDistanceMax", Common.FollowDistanceMax);
+        Common.FollowDistanceMin = config.getOrDefault("FollowDistanceMin", Common.FollowDistanceMin);
+        Common.LookRange = config.getOrDefault("LookRange", Common.LookRange);
         
         // Renderer settings
-        Common.Width = getFloatProperty(properties, "Width", Common.Width);
-        Common.Height = getFloatProperty(properties, "Height", Common.Height);
+        Common.Width = config.getOrDefault("Width", Common.Width);
+        Common.Height = config.getOrDefault("Height", Common.Height);
+        Client.ShadowRadius = config.getOrDefault("ShadowRadius", Client.ShadowRadius);
         
         // Level/Experience settings
-        Common.ExperienceBase = getIntProperty(properties, "ExperienceBase", Common.ExperienceBase);
-        Common.ExperienceMultiplier = getIntProperty(properties, "ExperienceMultiplier", Common.ExperienceMultiplier);
+        Common.ExperienceBase = config.getOrDefault("ExperienceBase", Common.ExperienceBase);
+        Common.ExperienceMultiplier = config.getOrDefault("ExperienceMultiplier", Common.ExperienceMultiplier);
         
         // Combat settings
-        Common.FriendlyFire = getBooleanProperty(properties, "FriendlyFire", Common.FriendlyFire);
-        Common.AttackChance = getIntProperty(properties, "AttackChance", Common.AttackChance);
-        Common.HealInterval = getIntProperty(properties, "HealInterval", Common.HealInterval);
-        Common.WaryTime = getIntProperty(properties, "WaryTime", Common.WaryTime);
-        Common.GlobalAutoHeal = getBooleanProperty(properties, "GlobalAutoHeal", Common.GlobalAutoHeal);
-        Common.LootEnchantment = getBooleanProperty(properties, "LootEnchantment", Common.LootEnchantment);
-        Common.LootEnchantmentLevel = getIntProperty(properties, "LootEnchantmentLevel", Common.LootEnchantmentLevel);
-        Common.MaxLootEnchantment = getIntProperty(properties, "MaxLootEnchantment", Common.MaxLootEnchantment);
-        Common.BaseDefenceRange = getFloatProperty(properties, "BaseDefenceRange", Common.BaseDefenceRange);
-        Common.BaseDefenceWarpRange = getFloatProperty(properties, "BaseDefenceWarpRange", Common.BaseDefenceWarpRange);
+        Common.FriendlyFire = config.getOrDefault("FriendlyFire", Common.FriendlyFire);
+        Common.AttackChance = config.getOrDefault("AttackChance", Common.AttackChance);
+        Common.HealInterval = config.getOrDefault("HealInterval", Common.HealInterval);
+        Common.WaryTime = config.getOrDefault("WaryTime", Common.WaryTime);
+        Common.GlobalAutoHeal = config.getOrDefault("GlobalAutoHeal", Common.GlobalAutoHeal);
+        Common.LootEnchantment = config.getOrDefault("LootEnchantment", Common.LootEnchantment);
+        Common.LootEnchantmentLevel = config.getOrDefault("LootEnchantmentLevel", Common.LootEnchantmentLevel);
+        Common.MaxLootEnchantment = config.getOrDefault("MaxLootEnchantment", Common.MaxLootEnchantment);
+        Common.BaseDefenceRange = config.getOrDefault("BaseDefenceRange", Common.BaseDefenceRange);
+        Common.BaseDefenceWarpRange = config.getOrDefault("BaseDefenceWarpRange", Common.BaseDefenceWarpRange);
         
         // Protection settings
-        Common.ProtectionLimitFire = getIntProperty(properties, "ProtectionLimitFire", Common.ProtectionLimitFire);
-        Common.ProtectionLimitFall = getIntProperty(properties, "ProtectionLimitFall", Common.ProtectionLimitFall);
-        Common.ProtectionLimitBlast = getIntProperty(properties, "ProtectionLimitBlast", Common.ProtectionLimitBlast);
-        Common.ProtectionLimitProjectile = getIntProperty(properties, "ProtectionLimitProjectile", Common.ProtectionLimitProjectile);
+        Common.ProtectionLimitFire = config.getOrDefault("ProtectionLimitFire", Common.ProtectionLimitFire);
+        Common.ProtectionLimitFall = config.getOrDefault("ProtectionLimitFall", Common.ProtectionLimitFall);
+        Common.ProtectionLimitBlast = config.getOrDefault("ProtectionLimitBlast", Common.ProtectionLimitBlast);
+        Common.ProtectionLimitProjectile = config.getOrDefault("ProtectionLimitProjectile", Common.ProtectionLimitProjectile);
         
         // Smart Core Retrieval
-        Common.EnableSmartCoreRetrieval = getBooleanProperty(properties, "EnableSmartCoreRetrieval", Common.EnableSmartCoreRetrieval);
-        Common.SmartCoreRetrievalDistance = getDoubleProperty(properties, "SmartCoreRetrievalDistance", Common.SmartCoreRetrievalDistance);
+        Common.EnableSmartCoreRetrieval = config.getOrDefault("EnableSmartCoreRetrieval", Common.EnableSmartCoreRetrieval);
+        Common.SmartCoreRetrievalDistance = config.getOrDefault("SmartCoreRetrievalDistance", Common.SmartCoreRetrievalDistance);
         
         // AI Behavior settings
-        Common.OwnerStillThreshold = getIntProperty(properties, "OwnerStillThreshold", Common.OwnerStillThreshold);
-        Common.WanderCheckInterval = getIntProperty(properties, "WanderCheckInterval", Common.WanderCheckInterval);
-        Common.WanderChance = getDoubleProperty(properties, "WanderChance", Common.WanderChance);
-        Common.WanderRadiusMin = getDoubleProperty(properties, "WanderRadiusMin", Common.WanderRadiusMin);
-        Common.WanderRadiusMax = getDoubleProperty(properties, "WanderRadiusMax", Common.WanderRadiusMax);
-        Common.WanderDurationMin = getIntProperty(properties, "WanderDurationMin", Common.WanderDurationMin);
-        Common.WanderDurationMax = getIntProperty(properties, "WanderDurationMax", Common.WanderDurationMax);
-        Common.WanderCooldownMin = getIntProperty(properties, "WanderCooldownMin", Common.WanderCooldownMin);
-        Common.WanderCooldownMax = getIntProperty(properties, "WanderCooldownMax", Common.WanderCooldownMax);
-        Common.PatrolDurationMin = getIntProperty(properties, "PatrolDurationMin", Common.PatrolDurationMin);
-        Common.PatrolDurationMax = getIntProperty(properties, "PatrolDurationMax", Common.PatrolDurationMax);
-        Common.GuardDurationMin = getIntProperty(properties, "GuardDurationMin", Common.GuardDurationMin);
-        Common.GuardDurationMax = getIntProperty(properties, "GuardDurationMax", Common.GuardDurationMax);
-        Common.PatrolPauseDurationMin = getIntProperty(properties, "PatrolPauseDurationMin", Common.PatrolPauseDurationMin);
-        Common.PatrolPauseDurationMax = getIntProperty(properties, "PatrolPauseDurationMax", Common.PatrolPauseDurationMax);
-        Common.GuardRotationSpeed = getDoubleProperty(properties, "GuardRotationSpeed", Common.GuardRotationSpeed);
-        Common.EnableCombatRadiusParticles = getBooleanProperty(properties, "EnableCombatRadiusParticles", Common.EnableCombatRadiusParticles);
-        Common.CombatRadiusParticleCount = getIntProperty(properties, "CombatRadiusParticleCount", Common.CombatRadiusParticleCount);
-        Common.CombatRadiusParticleSpread = getDoubleProperty(properties, "CombatRadiusParticleSpread", Common.CombatRadiusParticleSpread);
+        Common.OwnerStillThreshold = config.getOrDefault("OwnerStillThreshold", Common.OwnerStillThreshold);
+        Common.WanderCheckInterval = config.getOrDefault("WanderCheckInterval", Common.WanderCheckInterval);
+        Common.WanderChance = config.getOrDefault("WanderChance", Common.WanderChance);
+        Common.WanderRadiusMin = config.getOrDefault("WanderRadiusMin", Common.WanderRadiusMin);
+        Common.WanderRadiusMax = config.getOrDefault("WanderRadiusMax", Common.WanderRadiusMax);
+        Common.WanderDurationMin = config.getOrDefault("WanderDurationMin", Common.WanderDurationMin);
+        Common.WanderDurationMax = config.getOrDefault("WanderDurationMax", Common.WanderDurationMax);
+        Common.WanderCooldownMin = config.getOrDefault("WanderCooldownMin", Common.WanderCooldownMin);
+        Common.WanderCooldownMax = config.getOrDefault("WanderCooldownMax", Common.WanderCooldownMax);
+        Common.PatrolDurationMin = config.getOrDefault("PatrolDurationMin", Common.PatrolDurationMin);
+        Common.PatrolDurationMax = config.getOrDefault("PatrolDurationMax", Common.PatrolDurationMax);
+        Common.GuardDurationMin = config.getOrDefault("GuardDurationMin", Common.GuardDurationMin);
+        Common.GuardDurationMax = config.getOrDefault("GuardDurationMax", Common.GuardDurationMax);
+        Common.PatrolPauseDurationMin = config.getOrDefault("PatrolPauseDurationMin", Common.PatrolPauseDurationMin);
+        Common.PatrolPauseDurationMax = config.getOrDefault("PatrolPauseDurationMax", Common.PatrolPauseDurationMax);
+        Common.GuardRotationSpeed = config.getOrDefault("GuardRotationSpeed", Common.GuardRotationSpeed);
+        Common.EnableCombatRadiusParticles = config.getOrDefault("EnableCombatRadiusParticles", Common.EnableCombatRadiusParticles);
+        Common.CombatRadiusParticleCount = config.getOrDefault("CombatRadiusParticleCount", Common.CombatRadiusParticleCount);
+        Common.CombatRadiusParticleSpread = config.getOrDefault("CombatRadiusParticleSpread", Common.CombatRadiusParticleSpread);
         
         // Animation settings
-        Common.StandbyToSitDelayMin = getIntProperty(properties, "StandbyToSitDelayMin", Common.StandbyToSitDelayMin);
-        Common.StandbyToSitDelayMax = getIntProperty(properties, "StandbyToSitDelayMax", Common.StandbyToSitDelayMax);
+        Common.StandbyToSitDelayMin = config.getOrDefault("StandbyToSitDelayMin", Common.StandbyToSitDelayMin);
+        Common.StandbyToSitDelayMax = config.getOrDefault("StandbyToSitDelayMax", Common.StandbyToSitDelayMax);
         
         // Entity-specific settings - BUNNY2
-        Common.Bunny2MaxLevel = getIntProperty(properties, "Bunny2MaxLevel", Common.Bunny2MaxLevel);
-        Common.Bunny2MaxHealth = getFloatProperty(properties, "Bunny2MaxHealth", Common.Bunny2MaxHealth);
-        Common.Bunny2AttackDamage = getFloatProperty(properties, "Bunny2AttackDamage", Common.Bunny2AttackDamage);
-        Common.Bunny2AttackSpeed = getFloatProperty(properties, "Bunny2AttackSpeed", Common.Bunny2AttackSpeed);
-        Common.Bunny2MovementSpeed = getFloatProperty(properties, "Bunny2MovementSpeed", Common.Bunny2MovementSpeed);
-        Common.Bunny2Armor = getFloatProperty(properties, "Bunny2Armor", Common.Bunny2Armor);
-        Common.Bunny2ArmorToughness = getFloatProperty(properties, "Bunny2ArmorToughness", Common.Bunny2ArmorToughness);
+        Common.Bunny2MaxLevel = config.getOrDefault("Bunny2MaxLevel", Common.Bunny2MaxLevel);
+        Common.Bunny2MaxHealth = config.getOrDefault("Bunny2MaxHealth", Common.Bunny2MaxHealth);
+        Common.Bunny2AttackDamage = config.getOrDefault("Bunny2AttackDamage", Common.Bunny2AttackDamage);
+        Common.Bunny2AttackSpeed = config.getOrDefault("Bunny2AttackSpeed", Common.Bunny2AttackSpeed);
+        Common.Bunny2MovementSpeed = config.getOrDefault("Bunny2MovementSpeed", Common.Bunny2MovementSpeed);
+        Common.Bunny2Armor = config.getOrDefault("Bunny2Armor", Common.Bunny2Armor);
+        Common.Bunny2ArmorToughness = config.getOrDefault("Bunny2ArmorToughness", Common.Bunny2ArmorToughness);
         
         // Entity-specific settings - VANILLA
-        Common.VanillaMaxLevel = getIntProperty(properties, "VanillaMaxLevel", Common.VanillaMaxLevel);
-        Common.VanillaMaxHealth = getFloatProperty(properties, "VanillaMaxHealth", Common.VanillaMaxHealth);
-        Common.VanillaAttackDamage = getFloatProperty(properties, "VanillaAttackDamage", Common.VanillaAttackDamage);
-        Common.VanillaAttackSpeed = getFloatProperty(properties, "VanillaAttackSpeed", Common.VanillaAttackSpeed);
-        Common.VanillaMovementSpeed = getFloatProperty(properties, "VanillaMovementSpeed", Common.VanillaMovementSpeed);
-        Common.VanillaArmor = getFloatProperty(properties, "VanillaArmor", Common.VanillaArmor);
-        Common.VanillaArmorToughness = getFloatProperty(properties, "VanillaArmorToughness", Common.VanillaArmorToughness);
+        Common.VanillaMaxLevel = config.getOrDefault("VanillaMaxLevel", Common.VanillaMaxLevel);
+        Common.VanillaMaxHealth = config.getOrDefault("VanillaMaxHealth", Common.VanillaMaxHealth);
+        Common.VanillaAttackDamage = config.getOrDefault("VanillaAttackDamage", Common.VanillaAttackDamage);
+        Common.VanillaAttackSpeed = config.getOrDefault("VanillaAttackSpeed", Common.VanillaAttackSpeed);
+        Common.VanillaMovementSpeed = config.getOrDefault("VanillaMovementSpeed", Common.VanillaMovementSpeed);
+        Common.VanillaArmor = config.getOrDefault("VanillaArmor", Common.VanillaArmor);
+        Common.VanillaArmorToughness = config.getOrDefault("VanillaArmorToughness", Common.VanillaArmorToughness);
         
         // Entity-specific settings - DRAGON
-        Common.DragonMaxLevel = getIntProperty(properties, "DragonMaxLevel", Common.DragonMaxLevel);
-        Common.DragonMaxHealth = getFloatProperty(properties, "DragonMaxHealth", Common.DragonMaxHealth);
-        Common.DragonAttackDamage = getFloatProperty(properties, "DragonAttackDamage", Common.DragonAttackDamage);
-        Common.DragonAttackSpeed = getFloatProperty(properties, "DragonAttackSpeed", Common.DragonAttackSpeed);
-        Common.DragonMovementSpeed = getFloatProperty(properties, "DragonMovementSpeed", Common.DragonMovementSpeed);
-        Common.DragonArmor = getFloatProperty(properties, "DragonArmor", Common.DragonArmor);
-        Common.DragonArmorToughness = getFloatProperty(properties, "DragonArmorToughness", Common.DragonArmorToughness);
+        Common.DragonMaxLevel = config.getOrDefault("DragonMaxLevel", Common.DragonMaxLevel);
+        Common.DragonMaxHealth = config.getOrDefault("DragonMaxHealth", Common.DragonMaxHealth);
+        Common.DragonAttackDamage = config.getOrDefault("DragonAttackDamage", Common.DragonAttackDamage);
+        Common.DragonAttackSpeed = config.getOrDefault("DragonAttackSpeed", Common.DragonAttackSpeed);
+        Common.DragonMovementSpeed = config.getOrDefault("DragonMovementSpeed", Common.DragonMovementSpeed);
+        Common.DragonArmor = config.getOrDefault("DragonArmor", Common.DragonArmor);
+        Common.DragonArmorToughness = config.getOrDefault("DragonArmorToughness", Common.DragonArmorToughness);
         
         // Entity-specific settings - KITSUNE
-        Common.KitsuneMaxLevel = getIntProperty(properties, "KitsuneMaxLevel", Common.KitsuneMaxLevel);
-        Common.KitsuneMaxHealth = getFloatProperty(properties, "KitsuneMaxHealth", Common.KitsuneMaxHealth);
-        Common.KitsuneAttackDamage = getFloatProperty(properties, "KitsuneAttackDamage", Common.KitsuneAttackDamage);
-        Common.KitsuneAttackSpeed = getFloatProperty(properties, "KitsuneAttackSpeed", Common.KitsuneAttackSpeed);
-        Common.KitsuneMovementSpeed = getFloatProperty(properties, "KitsuneMovementSpeed", Common.KitsuneMovementSpeed);
-        Common.KitsuneArmor = getFloatProperty(properties, "KitsuneArmor", Common.KitsuneArmor);
-        Common.KitsuneArmorToughness = getFloatProperty(properties, "KitsuneArmorToughness", Common.KitsuneArmorToughness);
-    } // loadCommonConfig()
+        Common.KitsuneMaxLevel = config.getOrDefault("KitsuneMaxLevel", Common.KitsuneMaxLevel);
+        Common.KitsuneMaxHealth = config.getOrDefault("KitsuneMaxHealth", Common.KitsuneMaxHealth);
+        Common.KitsuneAttackDamage = config.getOrDefault("KitsuneAttackDamage", Common.KitsuneAttackDamage);
+        Common.KitsuneAttackSpeed = config.getOrDefault("KitsuneAttackSpeed", Common.KitsuneAttackSpeed);
+        Common.KitsuneMovementSpeed = config.getOrDefault("KitsuneMovementSpeed", Common.KitsuneMovementSpeed);
+        Common.KitsuneArmor = config.getOrDefault("KitsuneArmor", Common.KitsuneArmor);
+        Common.KitsuneArmorToughness = config.getOrDefault("KitsuneArmorToughness", Common.KitsuneArmorToughness);
+    } // loadConfigValues()
 
-    /**
-     * Loads client-only config values with validation.
-     */
-    private static void loadClientConfig(Properties properties) {
-        Client.ShadowRadius = getFloatProperty(properties, "ShadowRadius", Client.ShadowRadius);
-    } // loadClientConfig()
 
-    /**
-     * Creates default config file with all current values.
-     * <p>
-     * <b>File Creation:</b> Writes properties file with comments explaining each
-     * section. Uses current static field values as defaults.
-     */
-    private static void saveDefaultConfig() {
-        Properties properties = new Properties();
-        
-        // General settings
-        properties.setProperty("OwnerMaxRobotNum", String.valueOf(Common.OwnerMaxRobotNum));
-        properties.setProperty("MovementMeleeAttack", String.valueOf(Common.MovementMeleeAttack));
-        properties.setProperty("MovementFollowOwner", String.valueOf(Common.MovementFollowOwner));
-        properties.setProperty("MovementWanderAround", String.valueOf(Common.MovementWanderAround));
-        properties.setProperty("FollowDistanceMax", String.valueOf(Common.FollowDistanceMax));
-        properties.setProperty("FollowDistanceMin", String.valueOf(Common.FollowDistanceMin));
-        properties.setProperty("LookRange", String.valueOf(Common.LookRange));
-        
-        // Renderer settings
-        properties.setProperty("Width", String.valueOf(Common.Width));
-        properties.setProperty("Height", String.valueOf(Common.Height));
-        properties.setProperty("ShadowRadius", String.valueOf(Client.ShadowRadius));
-        
-        // Level/Experience
-        properties.setProperty("ExperienceBase", String.valueOf(Common.ExperienceBase));
-        properties.setProperty("ExperienceMultiplier", String.valueOf(Common.ExperienceMultiplier));
-        
-        // Combat
-        properties.setProperty("FriendlyFire", String.valueOf(Common.FriendlyFire));
-        properties.setProperty("AttackChance", String.valueOf(Common.AttackChance));
-        properties.setProperty("HealInterval", String.valueOf(Common.HealInterval));
-        properties.setProperty("WaryTime", String.valueOf(Common.WaryTime));
-        properties.setProperty("GlobalAutoHeal", String.valueOf(Common.GlobalAutoHeal));
-        properties.setProperty("LootEnchantment", String.valueOf(Common.LootEnchantment));
-        properties.setProperty("LootEnchantmentLevel", String.valueOf(Common.LootEnchantmentLevel));
-        properties.setProperty("MaxLootEnchantment", String.valueOf(Common.MaxLootEnchantment));
-        properties.setProperty("BaseDefenceRange", String.valueOf(Common.BaseDefenceRange));
-        properties.setProperty("BaseDefenceWarpRange", String.valueOf(Common.BaseDefenceWarpRange));
-        
-        // Protection
-        properties.setProperty("ProtectionLimitFire", String.valueOf(Common.ProtectionLimitFire));
-        properties.setProperty("ProtectionLimitFall", String.valueOf(Common.ProtectionLimitFall));
-        properties.setProperty("ProtectionLimitBlast", String.valueOf(Common.ProtectionLimitBlast));
-        properties.setProperty("ProtectionLimitProjectile", String.valueOf(Common.ProtectionLimitProjectile));
-        
-        // Smart Core Retrieval
-        properties.setProperty("EnableSmartCoreRetrieval", String.valueOf(Common.EnableSmartCoreRetrieval));
-        properties.setProperty("SmartCoreRetrievalDistance", String.valueOf(Common.SmartCoreRetrievalDistance));
-        
-        // AI Behavior
-        properties.setProperty("OwnerStillThreshold", String.valueOf(Common.OwnerStillThreshold));
-        properties.setProperty("WanderCheckInterval", String.valueOf(Common.WanderCheckInterval));
-        properties.setProperty("WanderChance", String.valueOf(Common.WanderChance));
-        properties.setProperty("WanderRadiusMin", String.valueOf(Common.WanderRadiusMin));
-        properties.setProperty("WanderRadiusMax", String.valueOf(Common.WanderRadiusMax));
-        properties.setProperty("WanderDurationMin", String.valueOf(Common.WanderDurationMin));
-        properties.setProperty("WanderDurationMax", String.valueOf(Common.WanderDurationMax));
-        properties.setProperty("WanderCooldownMin", String.valueOf(Common.WanderCooldownMin));
-        properties.setProperty("WanderCooldownMax", String.valueOf(Common.WanderCooldownMax));
-        properties.setProperty("PatrolDurationMin", String.valueOf(Common.PatrolDurationMin));
-        properties.setProperty("PatrolDurationMax", String.valueOf(Common.PatrolDurationMax));
-        properties.setProperty("GuardDurationMin", String.valueOf(Common.GuardDurationMin));
-        properties.setProperty("GuardDurationMax", String.valueOf(Common.GuardDurationMax));
-        properties.setProperty("PatrolPauseDurationMin", String.valueOf(Common.PatrolPauseDurationMin));
-        properties.setProperty("PatrolPauseDurationMax", String.valueOf(Common.PatrolPauseDurationMax));
-        properties.setProperty("GuardRotationSpeed", String.valueOf(Common.GuardRotationSpeed));
-        properties.setProperty("EnableCombatRadiusParticles", String.valueOf(Common.EnableCombatRadiusParticles));
-        properties.setProperty("CombatRadiusParticleCount", String.valueOf(Common.CombatRadiusParticleCount));
-        properties.setProperty("CombatRadiusParticleSpread", String.valueOf(Common.CombatRadiusParticleSpread));
-        
-        // Animation
-        properties.setProperty("StandbyToSitDelayMin", String.valueOf(Common.StandbyToSitDelayMin));
-        properties.setProperty("StandbyToSitDelayMax", String.valueOf(Common.StandbyToSitDelayMax));
-        
-        // Entity-specific - BUNNY2
-        properties.setProperty("Bunny2MaxLevel", String.valueOf(Common.Bunny2MaxLevel));
-        properties.setProperty("Bunny2MaxHealth", String.valueOf(Common.Bunny2MaxHealth));
-        properties.setProperty("Bunny2AttackDamage", String.valueOf(Common.Bunny2AttackDamage));
-        properties.setProperty("Bunny2AttackSpeed", String.valueOf(Common.Bunny2AttackSpeed));
-        properties.setProperty("Bunny2MovementSpeed", String.valueOf(Common.Bunny2MovementSpeed));
-        properties.setProperty("Bunny2Armor", String.valueOf(Common.Bunny2Armor));
-        properties.setProperty("Bunny2ArmorToughness", String.valueOf(Common.Bunny2ArmorToughness));
-        
-        // Entity-specific - VANILLA
-        properties.setProperty("VanillaMaxLevel", String.valueOf(Common.VanillaMaxLevel));
-        properties.setProperty("VanillaMaxHealth", String.valueOf(Common.VanillaMaxHealth));
-        properties.setProperty("VanillaAttackDamage", String.valueOf(Common.VanillaAttackDamage));
-        properties.setProperty("VanillaAttackSpeed", String.valueOf(Common.VanillaAttackSpeed));
-        properties.setProperty("VanillaMovementSpeed", String.valueOf(Common.VanillaMovementSpeed));
-        properties.setProperty("VanillaArmor", String.valueOf(Common.VanillaArmor));
-        properties.setProperty("VanillaArmorToughness", String.valueOf(Common.VanillaArmorToughness));
-        
-        // Entity-specific - DRAGON
-        properties.setProperty("DragonMaxLevel", String.valueOf(Common.DragonMaxLevel));
-        properties.setProperty("DragonMaxHealth", String.valueOf(Common.DragonMaxHealth));
-        properties.setProperty("DragonAttackDamage", String.valueOf(Common.DragonAttackDamage));
-        properties.setProperty("DragonAttackSpeed", String.valueOf(Common.DragonAttackSpeed));
-        properties.setProperty("DragonMovementSpeed", String.valueOf(Common.DragonMovementSpeed));
-        properties.setProperty("DragonArmor", String.valueOf(Common.DragonArmor));
-        properties.setProperty("DragonArmorToughness", String.valueOf(Common.DragonArmorToughness));
-        
-        // Entity-specific - KITSUNE
-        properties.setProperty("KitsuneMaxLevel", String.valueOf(Common.KitsuneMaxLevel));
-        properties.setProperty("KitsuneMaxHealth", String.valueOf(Common.KitsuneMaxHealth));
-        properties.setProperty("KitsuneAttackDamage", String.valueOf(Common.KitsuneAttackDamage));
-        properties.setProperty("KitsuneAttackSpeed", String.valueOf(Common.KitsuneAttackSpeed));
-        properties.setProperty("KitsuneMovementSpeed", String.valueOf(Common.KitsuneMovementSpeed));
-        properties.setProperty("KitsuneArmor", String.valueOf(Common.KitsuneArmor));
-        properties.setProperty("KitsuneArmorToughness", String.valueOf(Common.KitsuneArmorToughness));
-        
-        try (OutputStream output = Files.newOutputStream(CONFIG_PATH)) {
-            properties.store(output, "Legacy LovelyRobot Configuration");
-            LovelyLegacy.LOGGER.info("Created default config file: {}", CONFIG_PATH);
-        } catch (IOException e) {
-            LovelyLegacy.LOGGER.error("Failed to create default config file", e);
-        }
-    } // saveDefaultConfig()
 
     /**
      * Reloads configuration from file, validating new values before applying.
      * <p>
      * <b>Runtime Reload:</b> Allows server admins to update config without restart.
-     * Validates all values before applying to prevent invalid state.
+     * Re-reads config file from disk and validates all values before applying.
      * <p>
-     * <b>Change Logging:</b> Logs config reload event for audit trail.
+     * <b>Error Recovery:</b> On reload failure, preserves existing config values
+     * and logs error details. Config remains in last known good state.
+     * <p>
+     * <b>Change Logging:</b> Logs reload start and completion for audit trail.
      */
     public static void reload() {
-        LovelyLegacy.LOGGER.info("Reloading configuration...");
-        loadConfig();
-        LovelyLegacy.LOGGER.info("Configuration reloaded successfully");
+        LovelyLegacy.LOGGER.info("Starting configuration reload from disk...");
+        
+        // Store reference to current config for rollback
+        SimpleConfig previousConfig = config;
+        
+        try {
+            // Re-read config file by creating new SimpleConfig instance
+            ConfigProvider provider = new ConfigProvider();
+            buildConfigProvider(provider);
+            
+            SimpleConfig newConfig = SimpleConfig.of(CONFIG_FILE_NAME).provider(provider).request();
+            
+            // Check if new config loaded successfully
+            if (newConfig.isBroken()) {
+                LovelyLegacy.LOGGER.error("Config file is broken or failed to parse, preserving existing configuration values");
+                return;
+            }
+            
+            // Update the config reference
+            config = newConfig;
+            
+            // Load all values from the new config
+            loadConfigValues();
+            
+            LovelyLegacy.LOGGER.info("Configuration reload completed successfully");
+        } catch (Exception e) {
+            // Restore previous config on any error
+            config = previousConfig;
+            LovelyLegacy.LOGGER.error("Failed to reload configuration due to unexpected error, preserving existing configuration values: " + e.getMessage(), e);
+        }
     } // reload()
-
-    // -- Helper Methods --
-
-    private static int getIntProperty(Properties properties, String key, int defaultValue) {
-        try {
-            String value = properties.getProperty(key);
-            if (value != null) {
-                return Integer.parseInt(value);
-            }
-        } catch (NumberFormatException e) {
-            LovelyLegacy.LOGGER.warn("Invalid integer value for {}, using default: {}", key, defaultValue);
-        }
-        return defaultValue;
-    } // getIntProperty()
-
-    private static float getFloatProperty(Properties properties, String key, float defaultValue) {
-        try {
-            String value = properties.getProperty(key);
-            if (value != null) {
-                return Float.parseFloat(value);
-            }
-        } catch (NumberFormatException e) {
-            LovelyLegacy.LOGGER.warn("Invalid float value for {}, using default: {}", key, defaultValue);
-        }
-        return defaultValue;
-    } // getFloatProperty()
-
-    private static double getDoubleProperty(Properties properties, String key, double defaultValue) {
-        try {
-            String value = properties.getProperty(key);
-            if (value != null) {
-                return Double.parseDouble(value);
-            }
-        } catch (NumberFormatException e) {
-            LovelyLegacy.LOGGER.warn("Invalid double value for {}, using default: {}", key, defaultValue);
-        }
-        return defaultValue;
-    } // getDoubleProperty()
-
-    private static boolean getBooleanProperty(Properties properties, String key, boolean defaultValue) {
-        String value = properties.getProperty(key);
-        if (value != null) {
-            return Boolean.parseBoolean(value);
-        }
-        return defaultValue;
-    } // getBooleanProperty()
 
     // -- Classes --
 
     /**
-     * Config options only available to each client.
+     * Client-side configuration options for rendering and visual effects.
+     * <p>
+     * <b>Scope:</b> Values in this class are only loaded and used on the client side.
+     * Server does not access or validate these settings.
+     * <p>
+     * <b>Usage:</b> Primarily controls visual rendering parameters that have no
+     * gameplay impact and should not be synchronized across client-server boundary.
      */
     public static class Client {
 
@@ -385,7 +455,16 @@ public class LovelyConfigs {
     } // Class Client
 
     /**
-     * Config options shared by both the client and server.
+     * Shared configuration options available to both client and server.
+     * <p>
+     * <b>Scope:</b> Values in this class affect gameplay mechanics and must be
+     * consistent across client-server boundary. Server is authoritative for these values.
+     * <p>
+     * <b>Organization:</b> Settings are grouped by functional area (general, combat,
+     * AI behavior, entity-specific) for maintainability and user comprehension.
+     * <p>
+     * <b>Synchronization:</b> These values are loaded from server config and should
+     * match on all connected clients to ensure consistent gameplay behavior.
      */
     public static class Common {
 
