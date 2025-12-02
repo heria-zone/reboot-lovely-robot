@@ -5,7 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import net.msymbios.llovelyr.framework.utils.*;
 import net.msymbios.llovelyr.common.commands.*;
 import net.msymbios.llovelyr.source.*;
-import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.GeckoLib;
@@ -84,7 +84,7 @@ public class LovelyLegacy implements ModInitializer {
 		GeckoLib.initialize();
 
 		LovelyConfigs.register();
-		NativeRobotType.reloadFromConfig();
+		LovelyRobotType.reloadFromConfig();
 		LovelyGroups.register();
 		LovelyItems.register();
 		LovelyEvents.register();

@@ -60,7 +60,8 @@ public class LovelyEvents {
         @SubscribeEvent
         public static void onRegisterCommands(RegisterCommandsEvent event) {
             LovelyCommands.register(event.getDispatcher());
-            LovelyLegacy.LOGGER.info("Registered LovelyRobot commands");
+            net.msymbios.llovelyr.common.commands.LovelyRobotCommands.register(event.getDispatcher());
+            LovelyLegacy.LOGGER.info("Registered LovelyRobotEntity commands");
         } // onRegisterCommands()
 
     } // Class: ForgeEvents

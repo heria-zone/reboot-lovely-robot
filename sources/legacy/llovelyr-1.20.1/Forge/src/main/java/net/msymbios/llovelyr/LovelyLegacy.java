@@ -1,6 +1,6 @@
 package net.msymbios.llovelyr;
 
-import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotType;
 import net.msymbios.llovelyr.framework.utils.*;
 import net.msymbios.llovelyr.common.commands.*;
 import net.msymbios.llovelyr.source.*;
@@ -8,8 +8,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.*;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import org.slf4j.Logger;
@@ -88,7 +87,7 @@ public class LovelyLegacy {
         GeckoLib.initialize();
 
         LovelyConfigs.register(context);
-        LovelyConfigs.onLoadCallback(NativeRobotType::reloadFromConfig);
+        LovelyConfigs.onLoadCallback(LovelyRobotType::reloadFromConfig);
 
         LovelyBlocks.register(events);
         LovelyItems.register(events);

@@ -3,21 +3,21 @@ package net.msymbios.llovelyr.source;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.world.World;
+import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
-import net.msymbios.llovelyr.source.entity.custom.bunny2.Bunny2Renderer;
-import net.msymbios.llovelyr.source.entity.custom.vanilla.VanillaRenderer;
-import net.msymbios.llovelyr.source.entity.custom.bunny2.Bunny2Entity;
-import net.msymbios.llovelyr.source.entity.custom.vanilla.VanillaEntity;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotType;
+import net.msymbios.llovelyr.source.entity.custom.RobotEntity;
+import net.msymbios.llovelyr.source.entity.custom.RobotRenderer;
 
 /**
- * Registry for LovelyRobot Legacy entity types (Fabric).
+ * Registry for LovelyRobotEntity Legacy entity types (Fabric).
  * <p>
  * <b>Architecture:</b> Manages entity type registration, attribute creation,
  * and renderer binding for all robot variants in the Legacy mod.
@@ -30,49 +30,48 @@ public class LovelyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final EntityType<VanillaEntity> VANILLA = 
-        register(LovelyIdentifier.VARIANT_VANILLA, (type, world) -> new VanillaEntity(type, world, NativeRobotType.VANILLA), SpawnGroup.CREATURE,
-            LovelyConfigs.Common.Width, LovelyConfigs.Common.Height);
-
-    public static final EntityType<Bunny2Entity> BUNNY2 = 
-        register(LovelyIdentifier.VARIANT_BUNNY2, (type, world) -> new Bunny2Entity(type, world, NativeRobotType.BUNNY2), SpawnGroup.CREATURE, 
-            LovelyConfigs.Common.Width, LovelyConfigs.Common.Height);
+    public static final EntityType<RobotEntity> BUNNY2 = registerRobot(LovelyIdentifier.VARIANT_BUNNY2, LovelyRobotType.BUNNY2);
+    public static final EntityType<RobotEntity> VANILLA = registerRobot(LovelyIdentifier.VARIANT_VANILLA, LovelyRobotType.VANILLA);
 
     // -- Registration Methods --
 
     /**
-     * Registers an entity type with specified parameters.
+     * Registers a robot entity type with RobotEntity implementation.
+     * <p>
+     * Type-safe registration that ensures RobotEntity is used consistently
+     * across all robot variants.
      *
      * @param name entity variant name
-     * @param factory entity factory
-     * @param spawnGroup spawn group
-     * @param width entity width
-     * @param height entity height
+     * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static <T extends Entity> EntityType<T> register(
-            String name, EntityType.EntityFactory<T> factory, SpawnGroup spawnGroup, 
-            float width, float height) {
-        return Registry.register(Registries.ENTITY_TYPE, LovelyIdentifier.getId(name),
-                FabricEntityTypeBuilder.create(spawnGroup, factory)
-                    .dimensions(EntityDimensions.fixed(width, height))
-                    .build());
-    } // register
+    private static EntityType<RobotEntity> registerRobot(String name, NativeEntityType robotType) {
+        return Registry.register(
+            Registries.ENTITY_TYPE, 
+            LovelyIdentifier.getId(name),
+            FabricEntityTypeBuilder.create(
+                SpawnGroup.CREATURE,
+                (EntityType<RobotEntity> type, World world) -> new RobotEntity(type, world, robotType)
+            )
+            .dimensions(EntityDimensions.fixed(LovelyConfigs.EntityDimensions.DEFAULT_WIDTH, LovelyConfigs.EntityDimensions.DEFAULT_HEIGHT))
+            .build()
+        );
+    } // registerRobot()
 
     /**
      * Registers entity attributes.
      */
     public static void register() {
-        FabricDefaultAttributeRegistry.register(VANILLA, VanillaEntity.createAttributes());
-        FabricDefaultAttributeRegistry.register(BUNNY2, Bunny2Entity.createAttributes());
-    } // register
+        FabricDefaultAttributeRegistry.register(BUNNY2, LovelyRobotEntity.createAttributes(LovelyRobotType.BUNNY2));
+        FabricDefaultAttributeRegistry.register(VANILLA, LovelyRobotEntity.createAttributes(LovelyRobotType.VANILLA));
+    } // register ()
 
     /**
      * Registers entity renderers on client side.
      */
     public static void registerRender() {
-        EntityRendererRegistry.register(VANILLA, VanillaRenderer::new);
-        EntityRendererRegistry.register(BUNNY2, Bunny2Renderer::new);
-    } // registerRender
+        EntityRendererRegistry.register(BUNNY2, RobotRenderer::new);
+        EntityRendererRegistry.register(VANILLA, RobotRenderer::new);
+    } // registerRender ()
 
 } // Class: LovelyEntities

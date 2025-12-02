@@ -1,6 +1,8 @@
 package net.msymbios.llovelyr.source;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.msymbios.llovelyr.common.commands.LovelyRobotCommands;
+import net.msymbios.llovelyr.common.commands.NativeCommands;
 
 /**
  * Centralizes Fabric event handler registration.
@@ -33,6 +35,8 @@ public class LovelyEvents {
         // Register robot management commands
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             LovelyCommands.register(dispatcher);
+            LovelyRobotCommands.register(dispatcher);
+            NativeCommands.register(dispatcher);
         });
     } // register()
 

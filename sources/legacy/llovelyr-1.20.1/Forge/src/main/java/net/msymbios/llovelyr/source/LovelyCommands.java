@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.msymbios.llovelyr.common.commands.ColorArgumentType;
-import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 
 import java.util.*;
@@ -82,7 +82,7 @@ public class LovelyCommands {
     /**
      * Executes level setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies level to all matching LovelyRobot entities,
+     * <b>Behavior:</b> Applies level to all matching LovelyRobotEntity entities,
      * triggering stat recalculation through setCurrentLevel(). Non-robot
      * entities in selection are silently skipped.
      * <p>
@@ -99,7 +99,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setCurrentLevel(level);
                 count++;
             }
@@ -117,7 +117,7 @@ public class LovelyCommands {
     /**
      * Executes XP setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies experience points to all matching LovelyRobot
+     * <b>Behavior:</b> Applies experience points to all matching LovelyRobotEntity
      * entities. XP affects level progression but does not automatically
      * trigger leveling (requires separate level calculation).
      * <p>
@@ -134,7 +134,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setExp(xp);
                 count++;
             }
@@ -153,7 +153,7 @@ public class LovelyCommands {
      * Executes all-stats setter command on targeted robots.
      * <p>
      * <b>Behavior:</b> Applies HP, attack, defense, and speed values to all
-     * matching LovelyRobot entities. This is a batch operation for efficient
+     * matching LovelyRobotEntity entities. This is a batch operation for efficient
      * stat configuration during testing or events.
      * <p>
      * <b>Implementation Note:</b> Currently sets level-based stats. Future
@@ -183,7 +183,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(hp);
                 robot.setHealth(hp);
                 count++;
@@ -212,7 +212,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).setBaseValue(attack);
                 count++;
             }
@@ -240,7 +240,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).setBaseValue(defense);
                 count++;
             }
@@ -268,7 +268,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 // Speed is typically a decimal value (0.3 = normal walking speed)
                 // Convert integer input to appropriate decimal (divide by 10)
                 robot.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(speed / 10.0);
@@ -289,7 +289,7 @@ public class LovelyCommands {
      * Executes all-attributes setter command on targeted robots.
      * <p>
      * <b>Behavior:</b> Applies HP, attack, defense, and speed values to all
-     * matching LovelyRobot entities. This is a batch operation for efficient
+     * matching LovelyRobotEntity entities. This is a batch operation for efficient
      * attribute configuration during testing or events.
      *
      * @param ctx command context with source and arguments
@@ -305,7 +305,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(hp);
                 robot.setHealth(hp);
                 robot.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).setBaseValue(attack);
@@ -411,7 +411,7 @@ public class LovelyCommands {
     /**
      * Executes looting enchantment setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies looting level to all matching LovelyRobot entities.
+     * <b>Behavior:</b> Applies looting level to all matching LovelyRobotEntity entities.
      * Looting affects drop rates from mobs killed by the robot.
      * <p>
      * <b>Implementation Note:</b> Current robot architecture calculates looting
@@ -430,7 +430,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 // Note: Current architecture calculates looting from level
                 // This is a placeholder for future direct looting setter
                 count++;
@@ -465,7 +465,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 // Apply all enchantments
                 count++;
             }
@@ -483,7 +483,7 @@ public class LovelyCommands {
     /**
      * Executes fire protection setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies fire protection level to all matching LovelyRobot
+     * <b>Behavior:</b> Applies fire protection level to all matching LovelyRobotEntity
      * entities. Fire protection reduces damage from fire, lava, and burning.
      * <p>
      * <b>Feedback:</b> Sends success message with count of affected robots,
@@ -499,7 +499,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setFireProtection(level);
                 count++;
             }
@@ -517,7 +517,7 @@ public class LovelyCommands {
     /**
      * Executes fall protection setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies fall protection level to all matching LovelyRobot
+     * <b>Behavior:</b> Applies fall protection level to all matching LovelyRobotEntity
      * entities. Fall protection reduces damage from falling.
      * <p>
      * <b>Feedback:</b> Sends success message with count of affected robots,
@@ -533,7 +533,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setFallProtection(level);
                 count++;
             }
@@ -551,7 +551,7 @@ public class LovelyCommands {
     /**
      * Executes blast protection setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies blast protection level to all matching LovelyRobot
+     * <b>Behavior:</b> Applies blast protection level to all matching LovelyRobotEntity
      * entities. Blast protection reduces damage from explosions.
      * <p>
      * <b>Feedback:</b> Sends success message with count of affected robots,
@@ -567,7 +567,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setBlastProtection(level);
                 count++;
             }
@@ -585,7 +585,7 @@ public class LovelyCommands {
     /**
      * Executes projectile protection setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies projectile protection level to all matching LovelyRobot
+     * <b>Behavior:</b> Applies projectile protection level to all matching LovelyRobotEntity
      * entities. Projectile protection reduces damage from arrows and other projectiles.
      * <p>
      * <b>Feedback:</b> Sends success message with count of affected robots,
@@ -601,7 +601,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setProjectileProtection(level);
                 count++;
             }
@@ -620,7 +620,7 @@ public class LovelyCommands {
      * Executes all-protections setter command on targeted robots.
      * <p>
      * <b>Behavior:</b> Applies fire, fall, blast, and projectile protection values
-     * to all matching LovelyRobot entities. This is a batch operation for efficient
+     * to all matching LovelyRobotEntity entities. This is a batch operation for efficient
      * protection configuration during testing or events.
      * <p>
      * <b>Feedback:</b> Sends success message with count of affected robots,
@@ -639,7 +639,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setFireProtection(fire);
                 robot.setFallProtection(fall);
                 robot.setBlastProtection(blast);
@@ -732,7 +732,7 @@ public class LovelyCommands {
     /**
      * Executes design setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies color/texture to all matching LovelyRobot entities.
+     * <b>Behavior:</b> Applies color/texture to all matching LovelyRobotEntity entities.
      * Color change is immediate and visible to all nearby players.
      * <p>
      * <b>Feedback:</b> Sends success message with count of affected robots,
@@ -748,7 +748,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setTexture(color);
                 count++;
             }
@@ -780,7 +780,7 @@ public class LovelyCommands {
     private static int executeGetOwner(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Entity entity = EntityArgument.getEntity(ctx, "target");
 
-        if (entity instanceof LovelyRobot robot) {
+        if (entity instanceof LovelyRobotEntity robot) {
             Player owner = (Player) robot.getOwner();
             String ownerName = owner != null ? owner.getName().getString() : "No owner";
             
@@ -798,7 +798,7 @@ public class LovelyCommands {
     /**
      * Executes owner setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Transfers ownership of all matching LovelyRobot entities
+     * <b>Behavior:</b> Transfers ownership of all matching LovelyRobotEntity entities
      * to specified player. Updates taming relationship and behavioral loyalty.
      * <p>
      * <b>Feedback:</b> Sends success message with count of affected robots,
@@ -814,7 +814,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.tame(newOwner);
                 count++;
             }
@@ -833,7 +833,7 @@ public class LovelyCommands {
     /**
      * Executes name setter command on targeted robots.
      * <p>
-     * <b>Behavior:</b> Applies custom name to all matching LovelyRobot entities.
+     * <b>Behavior:</b> Applies custom name to all matching LovelyRobotEntity entities.
      * Accepts simple text strings for user-friendly naming.
      * <p>
      * <b>Feedback:</b> Sends success message with count of affected robots,
@@ -850,7 +850,7 @@ public class LovelyCommands {
         int count = 0;
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 robot.setCustomName(name);
                 robot.setCustomNameVisible(true);
                 count++;
@@ -893,9 +893,9 @@ public class LovelyCommands {
                             return builder.buildFuture();
                         }
                         
-                        List<LovelyRobot> ownedRobots = findOwnedRobots(player);
+                        List<LovelyRobotEntity> ownedRobots = findOwnedRobots(player);
                         
-                        for (LovelyRobot robot : ownedRobots) {
+                        for (LovelyRobotEntity robot : ownedRobots) {
                             try {
                                 String displayName = getRobotDisplayName(robot);
                                 String uuidPrefix = robot.getUUID().toString().substring(0, 8);
@@ -930,10 +930,10 @@ public class LovelyCommands {
      * Cross-dimension robot discovery is not supported.
      *
      * @param player the player whose robots to find
-     * @return list of LovelyRobot instances owned by the player
+     * @return list of LovelyRobotEntity instances owned by the player
      */
-    private static List<LovelyRobot> findOwnedRobots(Player player) {
-        List<LovelyRobot> robots = new ArrayList<>();
+    private static List<LovelyRobotEntity> findOwnedRobots(Player player) {
+        List<LovelyRobotEntity> robots = new ArrayList<>();
         
         try {
             if (player == null || player.level() == null) {
@@ -944,7 +944,7 @@ public class LovelyCommands {
             
             // Use getEntities() with a predicate instead of getAllEntities()
             for (Entity entity : level.getEntities().getAll()) {
-                if (entity instanceof LovelyRobot robot && robot.isOwnedBy(player)) {
+                if (entity instanceof LovelyRobotEntity robot && robot.isOwnedBy(player)) {
                     robots.add(robot);
                 }
             }
@@ -966,10 +966,10 @@ public class LovelyCommands {
      *
      * @param player the player who owns the robot
      * @param identifier the robot identifier string (name_uuid format)
-     * @return matching LovelyRobot or null if not found
+     * @return matching LovelyRobotEntity or null if not found
      */
-    private static LovelyRobot findRobotByIdentifier(Player player, String identifier) {
-        List<LovelyRobot> ownedRobots = findOwnedRobots(player);
+    private static LovelyRobotEntity findRobotByIdentifier(Player player, String identifier) {
+        List<LovelyRobotEntity> ownedRobots = findOwnedRobots(player);
         
         // Extract UUID prefix from identifier (format: name_uuid)
         String[] parts = identifier.split("_");
@@ -980,7 +980,7 @@ public class LovelyCommands {
         String uuidPrefix = parts[parts.length - 1];
         
         // Find robot with matching UUID prefix
-        for (LovelyRobot robot : ownedRobots) {
+        for (LovelyRobotEntity robot : ownedRobots) {
             String robotUuidPrefix = robot.getUUID().toString().substring(0, 8);
             if (robotUuidPrefix.equals(uuidPrefix)) {
                 return robot;
@@ -1078,7 +1078,7 @@ public class LovelyCommands {
         String robotIdentifier = StringArgumentType.getString(ctx, "robot");
         
         // Find robot by identifier
-        LovelyRobot robot = findRobotByIdentifier(player, robotIdentifier);
+        LovelyRobotEntity robot = findRobotByIdentifier(player, robotIdentifier);
         
         if (robot == null) {
             throw new SimpleCommandExceptionType(
@@ -1178,7 +1178,7 @@ public class LovelyCommands {
      * @param robot the robot to get display name for
      * @return display name string
      */
-    private static String getRobotDisplayName(LovelyRobot robot) {
+    private static String getRobotDisplayName(LovelyRobotEntity robot) {
         if (robot.hasCustomName())
             return Objects.requireNonNull(robot.getCustomName()).getString();
         return robot.nativeEntity.getKey();
@@ -1515,9 +1515,9 @@ public class LovelyCommands {
                             return builder.buildFuture();
                         }
                         
-                        List<LovelyRobot> ownedRobots = findOwnedRobots(player);
+                        List<LovelyRobotEntity> ownedRobots = findOwnedRobots(player);
                         
-                        for (LovelyRobot robot : ownedRobots) {
+                        for (LovelyRobotEntity robot : ownedRobots) {
                             try {
                                 String displayName = getRobotDisplayName(robot);
                                 String uuidPrefix = robot.getUUID().toString().substring(0, 8);
@@ -1555,7 +1555,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int level = IntegerArgumentType.getInteger(ctx, "value");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
@@ -1580,7 +1580,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int xp = IntegerArgumentType.getInteger(ctx, "value");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1604,7 +1604,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int hp = IntegerArgumentType.getInteger(ctx, "value");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1630,7 +1630,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int attack = IntegerArgumentType.getInteger(ctx, "value");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1655,7 +1655,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int defense = IntegerArgumentType.getInteger(ctx, "value");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1680,7 +1680,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int speed = IntegerArgumentType.getInteger(ctx, "value");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1708,7 +1708,7 @@ public class LovelyCommands {
         int defense = IntegerArgumentType.getInteger(ctx, "defense");
         int speed = IntegerArgumentType.getInteger(ctx, "speed");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1737,7 +1737,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int level = IntegerArgumentType.getInteger(ctx, "level");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1760,7 +1760,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int looting = IntegerArgumentType.getInteger(ctx, "looting");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1783,7 +1783,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int level = IntegerArgumentType.getInteger(ctx, "level");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1807,7 +1807,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int level = IntegerArgumentType.getInteger(ctx, "level");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1831,7 +1831,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int level = IntegerArgumentType.getInteger(ctx, "level");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1855,7 +1855,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int level = IntegerArgumentType.getInteger(ctx, "level");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1882,7 +1882,7 @@ public class LovelyCommands {
         int blast = IntegerArgumentType.getInteger(ctx, "blast");
         int projectile = IntegerArgumentType.getInteger(ctx, "projectile");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1910,7 +1910,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         EntityTexture color = ctx.getArgument("color", EntityTexture.class);
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1935,7 +1935,7 @@ public class LovelyCommands {
     private static int executeCrosshairGetOwner(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Player player = ctx.getSource().getPlayerOrException();
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair"));
             return 0;
@@ -1956,7 +1956,7 @@ public class LovelyCommands {
         Player player = ctx.getSource().getPlayerOrException();
         Player newOwner = EntityArgument.getPlayer(ctx, "player");
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -1983,7 +1983,7 @@ public class LovelyCommands {
         String nameString = StringArgumentType.getString(ctx, "name");
         Component name = Component.literal(nameString);
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -2018,7 +2018,7 @@ public class LovelyCommands {
     private static int executeCrosshairTeleport(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Player player = ctx.getSource().getPlayerOrException();
         
-        LovelyRobot robot = findCrosshairRobot(player);
+        LovelyRobotEntity robot = findCrosshairRobot(player);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair or you don't own it"));
             return 0;
@@ -2089,12 +2089,12 @@ public class LovelyCommands {
      * <p>
      * <b>Range:</b> 5 block reach distance (standard interaction range)
      * <p>
-     * <b>Validation:</b> Only returns LovelyRobot entities (ownership checked by caller).
+     * <b>Validation:</b> Only returns LovelyRobotEntity entities (ownership checked by caller).
      *
      * @param player the player performing the lookup
      * @return the robot in crosshair, or null if none found
      */
-    private static LovelyRobot findCrosshairRobot(Player player) {
+    private static LovelyRobotEntity findCrosshairRobot(Player player) {
         // Get player's look vector
         Vec3 eyePos = player.getEyePosition();
         Vec3 lookVec = player.getViewVector(1.0F);
@@ -2104,11 +2104,11 @@ public class LovelyCommands {
         AABB searchBox = new AABB(eyePos, endPos).inflate(1.0);
         List<Entity> entities = player.level().getEntities(player, searchBox);
         
-        LovelyRobot closestRobot = null;
+        LovelyRobotEntity closestRobot = null;
         double closestDistance = Double.MAX_VALUE;
         
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobot robot) {
+            if (entity instanceof LovelyRobotEntity robot) {
                 // Check if ray intersects with entity bounding box
                 Optional<Vec3> hit = entity.getBoundingBox().clip(eyePos, endPos);
                 if (hit.isPresent()) {

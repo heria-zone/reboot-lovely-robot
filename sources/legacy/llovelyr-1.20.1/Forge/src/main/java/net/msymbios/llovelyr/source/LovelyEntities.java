@@ -8,16 +8,15 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.msymbios.llovelyr.LovelyLegacy;
-import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
+import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.type.NativeRobotType;
-import net.msymbios.llovelyr.source.entity.custom.bunny2.Bunny2Renderer;
-import net.msymbios.llovelyr.source.entity.custom.vanilla.VanillaRenderer;
-import net.msymbios.llovelyr.source.entity.custom.bunny2.Bunny2Entity;
-import net.msymbios.llovelyr.source.entity.custom.vanilla.VanillaEntity;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
+import net.msymbios.llovelyr.source.entity.custom.RobotEntity;
+import net.msymbios.llovelyr.source.entity.custom.RobotRenderer;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotType;
 
 /**
- * Registry for LovelyRobot Legacy entity types.
+ * Registry for LovelyRobotEntity Legacy entity types (Forge).
  * <p>
  * <b>Architecture:</b> Manages entity type registration, attribute creation,
  * and renderer binding for all robot variants in the Legacy mod.
@@ -34,28 +33,28 @@ public class LovelyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<VanillaEntity>> VANILLA = register(LovelyIdentifier.VARIANT_VANILLA, MobCategory.CREATURE, 0.4F, 1.9F/*LovelyConfigs.Width, LovelyConfigs.Height*/, (type, level) -> new VanillaEntity(type, level, NativeRobotType.VANILLA));
-    public static final RegistryObject<EntityType<Bunny2Entity>> BUNNY2 = register(LovelyIdentifier.VARIANT_BUNNY2, MobCategory.CREATURE, 0.4F, 1.9F/*LovelyConfigs.Width, LovelyConfigs.Height**/, (type, level) -> new Bunny2Entity(type, level, NativeRobotType.BUNNY2));
+    public static final RegistryObject<EntityType<RobotEntity>> BUNNY2 = registerRobot(LovelyIdentifier.VARIANT_BUNNY2, LovelyRobotType.BUNNY2);
+    public static final RegistryObject<EntityType<RobotEntity>> VANILLA = registerRobot(LovelyIdentifier.VARIANT_VANILLA, LovelyRobotType.VANILLA);
 
     // -- Registration Methods --
-    /**/
+
     /**
-     * Registers an entity type with specified parameters.
+     * Registers a robot entity type with RobotEntity implementation.
+     * <p>
+     * Type-safe registration that ensures RobotEntity is used consistently
+     * across all robot variants.
      *
      * @param name entity variant name
-     * @param category mob category
-     * @param width entity width
-     * @param height entity height
-     * @param factory entity factory
+     * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static <T extends InternalEntity> RegistryObject<EntityType<T>> register(
-            String name, MobCategory category, float width, float height, 
-            EntityType.EntityFactory<T> factory) {
-        return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(factory, category)
-            .sized(width, height)
-            .build(LovelyIdentifier.getId(name).toString()));
-    } // register
+    private static RegistryObject<EntityType<RobotEntity>> registerRobot(String name, NativeEntityType robotType) {
+        return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
+                (EntityType<RobotEntity> type, net.minecraft.world.level.Level level) ->
+                        new RobotEntity(type, level, robotType), MobCategory.CREATURE)
+                .sized(LovelyConfigs.EntityDimensions.DEFAULT_WIDTH, LovelyConfigs.EntityDimensions.DEFAULT_HEIGHT)
+                .build(LovelyIdentifier.getId(name).toString()));
+    } // registerRobot()
 
     /**
      * Registers entity types to the event bus.
@@ -64,34 +63,29 @@ public class LovelyEntities {
      */
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
-    } // register
+    } // register()
 
     /**
      * Registers entity attributes during entity attribute creation event.
      * <p>
-     * <b>Timing:</b> This event fires during mod construction. To ensure config
-     * values are loaded, we call NativeEntityType.register() first to populate
-     * combat stats from config before creating attribute suppliers.
+     * <b>Timing:</b> Fires during mod construction. Config values are loaded
+     * before this event to populate combat stats.
      *
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
-        event.put(VANILLA.get(), VanillaEntity.createAttributes());
-        event.put(BUNNY2.get(), Bunny2Entity.createAttributes());
-    } // registerAttribute ()
+        event.put(BUNNY2.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.BUNNY2));
+        event.put(VANILLA.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.VANILLA));
+    } // registerAttribute()
 
     /**
      * Registers entity renderers on client side.
-     * <p>
-     * <b>Architecture:</b> Uses EntityRenderersEvent.RegisterRenderers for proper
-     * renderer registration in Forge 1.20.1+. This ensures renderers are registered
-     * at the correct time and on the correct thread.
      *
-     * @param event the entity renderers registration event
-    */
+     * @param event entity renderers registration event
+     */
     public static void registerRender(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(VANILLA.get(), VanillaRenderer::new);
-        event.registerEntityRenderer(BUNNY2.get(), Bunny2Renderer::new);
-    } // registerRender ()
+        event.registerEntityRenderer(BUNNY2.get(), RobotRenderer::new);
+        event.registerEntityRenderer(VANILLA.get(), RobotRenderer::new);
+    } // registerRender()
 
 } // Class: LovelyEntities
