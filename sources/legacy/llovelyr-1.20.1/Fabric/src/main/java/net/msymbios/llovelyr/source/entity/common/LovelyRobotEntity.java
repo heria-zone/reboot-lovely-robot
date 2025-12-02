@@ -32,6 +32,7 @@ import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.framework.utils.Version;
 import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
+import net.msymbios.llovelyr.lib.entity.features.ProtectionFeature;
 import net.msymbios.llovelyr.source.LovelyConfigs;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.source.LovelyItems;
@@ -898,6 +899,33 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
         }
         return robotType.getFeature(LevelFeature.class);
     } // getLevelSystem ()
+
+    /**
+     * Retrieves protection feature for this robot type.
+     * <p>
+     * <b>Architecture:</b> Provides type-safe access to robot's protection configuration
+     * through Optional pattern. Returns empty if entity type doesn't support protection
+     * system functionality to prevent ClassCastException or NullPointerException.
+     * <p>
+     * <b>Use Case:</b> Call this before using getProtectionSystem() or any protection-related
+     * operations that depend on ProtectionFeature being present.
+     * <p>
+     * <b>Usage Pattern:</b>
+     * <pre>
+     * getProtectionSystem().ifPresent(protectionFeature -> {
+     *     int maxFire = protectionFeature.getMaxFireProtection();
+     *     // ... use protectionFeature
+     * });
+     * </pre>
+     *
+     * @return Optional containing ProtectionFeature if present, empty Optional otherwise
+     */
+    public java.util.Optional<ProtectionFeature> getProtectionSystem() {
+        if (!(nativeEntity instanceof NativeEntityType robotType)) {
+            return java.util.Optional.empty();
+        }
+        return robotType.getFeature(ProtectionFeature.class);
+    } // getProtectionSystem()
 
     /**
      * Adds experience points and handles level-up logic.
