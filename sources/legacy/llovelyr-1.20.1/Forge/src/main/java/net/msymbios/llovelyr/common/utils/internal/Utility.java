@@ -2,6 +2,7 @@ package net.msymbios.llovelyr.common.utils.internal;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
+import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
 
 import java.util.List;
 import java.util.Objects;

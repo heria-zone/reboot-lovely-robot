@@ -27,7 +27,10 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry;
+import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
+import net.msymbios.llovelyr.source.LovelyConfigs;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,6 +90,19 @@ public class LovelySpawnItem extends SpawnEggItem {
                 return TypedActionResult.pass(itemStack);
             } else if (world.canPlayerModifyAt(user, blockPos) && user.canPlaceOn(blockPos, blockHitResult.getSide(), itemStack)) {
                 EntityType<?> entityType = this.getEntityType(itemStack.getNbt());
+                // Check registry spawn limit before spawning
+                OwnerRobotRegistry registry = RobotRegistryManager.getRegistry((net.minecraft.server.world.ServerWorld) world);
+
+                if (!registry.canSpawnRobot(user.getUuid(), LovelyConfigs.Common.OwnerMaxRobotNum)) {
+                    // Display error message to player
+                    user.sendMessage(
+                        Text.literal("Cannot spawn robot: limit of " + LovelyConfigs.Common.OwnerMaxRobotNum + " reached (" +
+                            registry.getRobotsForOwner(user.getUuid()).size() + " active)"),
+                        true
+                    );
+                    return TypedActionResult.fail(itemStack);
+                }
+                
                 MobEntity entity = (MobEntity) entityType.spawnFromItemStack((ServerWorld) world, itemStack, user, blockPos, SpawnReason.SPAWN_EGG, false, false);
                 if (entity == null) {
                     return TypedActionResult.pass(itemStack);
@@ -98,25 +114,9 @@ public class LovelySpawnItem extends SpawnEggItem {
                     user.incrementStat(Stats.USED.getOrCreateStat(this));
                     world.emitGameEvent(user, GameEvent.ENTITY_PLACE, entity.getPos());
 
-                    if (entity instanceof LovelyRobot robotEntity) {
-                        // Set ownership without taming particles (spawning, not taming)
-                        robotEntity.setOwner(user);
-                        robotEntity.setSitting(false);
+                    if (entity instanceof LovelyRobotEntity robotEntity) {
+                        robotEntity.handleTame(user);
                         initialize(itemStack.getOrCreateNbt(), robotEntity);
-                        
-                        // Spawn POOF particles (spawn effect)
-                        net.msymbios.llovelyr.common.entity.internal.InternalParticle.Poof(robotEntity);
-                        
-                        // Play spawn sound effect (totem activation sound) - volume scales with entity size
-                        float volume = (float) Math.max(0.5F, Math.min(2.0F, entity.getWidth() * entity.getHeight()));
-                        world.playSound(
-                            null, 
-                            entity.getBlockPos(), 
-                            net.minecraft.sound.SoundEvents.ITEM_TOTEM_USE, 
-                            net.minecraft.sound.SoundCategory.NEUTRAL, 
-                            volume, 
-                            1.2F
-                        );
                     }
                     return TypedActionResult.consume(itemStack);
                 }
@@ -153,31 +153,30 @@ public class LovelySpawnItem extends SpawnEggItem {
                     blockPos2 = blockPos.offset(direction);
                 }
 
+                // Check registry spawn limit before spawning
+                PlayerEntity player = context.getPlayer();
+                if (player != null) {
+                    OwnerRobotRegistry registry = RobotRegistryManager.getRegistry((ServerWorld) world);
+                    if (!registry.canSpawnRobot(player.getUuid(), LovelyConfigs.Common.OwnerMaxRobotNum)) {
+                        // Display error message to player
+                        player.sendMessage(
+                            Text.literal("Cannot spawn robot: limit of " + LovelyConfigs.Common.OwnerMaxRobotNum + " reached (" +
+                                registry.getRobotsForOwner(player.getUuid()).size() + " active)"),
+                            true
+                        );
+                        return ActionResult.FAIL;
+                    }
+                }
+                
                 EntityType<?> entityType = this.getEntityType(itemStack.getNbt());
                 MobEntity entity = (MobEntity) entityType.spawnFromItemStack((ServerWorld) world, itemStack, context.getPlayer(), blockPos2, SpawnReason.SPAWN_EGG, true, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP);
                 if (entity != null) {
                     itemStack.decrement(1);
                     world.emitGameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
 
-                    if (entity instanceof LovelyRobot robotEntity) {
-                        // Set ownership without taming particles (spawning, not taming)
-                        robotEntity.setOwner(context.getPlayer());
-                        robotEntity.setSitting(false);
+                    if (entity instanceof LovelyRobotEntity robotEntity) {
+                        robotEntity.handleTame(context.getPlayer());
                         initialize(itemStack.getOrCreateNbt(), robotEntity);
-                        
-                        // Spawn POOF particles (spawn effect)
-                        net.msymbios.llovelyr.common.entity.internal.InternalParticle.Poof(robotEntity);
-                        
-                        // Play spawn sound effect (totem activation sound) - volume scales with entity size
-                        float volume = (float) Math.max(0.5F, Math.min(2.0F, entity.getWidth() * entity.getHeight()));
-                        world.playSound(
-                            null, 
-                            entity.getBlockPos(), 
-                            net.minecraft.sound.SoundEvents.ITEM_TOTEM_USE, 
-                            net.minecraft.sound.SoundCategory.NEUTRAL, 
-                            volume, 
-                            1.2F
-                        );
                     }
                 }
 
@@ -197,7 +196,7 @@ public class LovelySpawnItem extends SpawnEggItem {
      * @param dataNBT the NBT compound from spawn egg
      * @param entity the spawned robot entity to initialize
      */
-    private void initialize(NbtCompound dataNBT, LovelyRobot entity) {
+    private void initialize(NbtCompound dataNBT, LovelyRobotEntity entity) {
         if (!dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME).isEmpty()) entity.setCustomName(Text.literal(dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME)));
         if (dataNBT.getInt(LovelyIdentifier.STAT_COLOR) != EntityTexture.RANDOM.getId()) entity.setTexture(dataNBT.getInt(LovelyIdentifier.STAT_COLOR));
 

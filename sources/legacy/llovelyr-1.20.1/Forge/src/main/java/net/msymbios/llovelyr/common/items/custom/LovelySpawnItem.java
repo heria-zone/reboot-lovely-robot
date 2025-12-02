@@ -28,7 +28,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.msymbios.llovelyr.common.entity.internal.InternalParticle;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
-import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,6 +88,23 @@ public class LovelySpawnItem extends ForgeSpawnEggItem {
             if (!(level.getBlockState(blockPos).getBlock() instanceof LiquidBlock)) {
                 return InteractionResultHolder.pass(itemStack);
             } else if (level.mayInteract(player, blockPos) && player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
+                // Check registry spawn limit before spawning
+                net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry registry = 
+                    net.msymbios.llovelyr.lib.registry.RobotRegistryManager.getRegistry((ServerLevel) level);
+                
+                // TODO: Get max robots from config (default 10 for now)
+                int maxRobots = 10;
+                
+                if (!registry.canSpawnRobot(player.getUUID(), maxRobots)) {
+                    // Display error message to player
+                    player.displayClientMessage(
+                        Component.literal("Cannot spawn robot: limit of " + maxRobots + " reached (" + 
+                            registry.getRobotsForOwner(player.getUUID()).size() + " active)"),
+                        true
+                    );
+                    return InteractionResultHolder.fail(itemStack);
+                }
+                
                 EntityType<?> entityType = this.getType(itemStack.getTag());
                 Mob entity = (Mob) entityType.spawn((ServerLevel) level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false);
                 if (entity == null) {
@@ -100,7 +117,7 @@ public class LovelySpawnItem extends ForgeSpawnEggItem {
                     player.awardStat(Stats.ITEM_USED.get(this));
                     level.gameEvent(player, GameEvent.ENTITY_PLACE, entity.position());
 
-                    if (entity instanceof LovelyRobot robotEntity) {
+                    if (entity instanceof LovelyRobotEntity robotEntity) {
                         // Set ownership without taming particles (spawning, not taming)
                         robotEntity.tame(player);
                         robotEntity.setTame(true);
@@ -156,13 +173,33 @@ public class LovelySpawnItem extends ForgeSpawnEggItem {
                     blockPos2 = blockPos.relative(direction);
                 }
 
+                // Check registry spawn limit before spawning
+                Player player = context.getPlayer();
+                if (player != null) {
+                    net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry registry = 
+                        net.msymbios.llovelyr.lib.registry.RobotRegistryManager.getRegistry((ServerLevel) level);
+                    
+                    // TODO: Get max robots from config (default 10 for now)
+                    int maxRobots = 10;
+                    
+                    if (!registry.canSpawnRobot(player.getUUID(), maxRobots)) {
+                        // Display error message to player
+                        player.displayClientMessage(
+                            Component.literal("Cannot spawn robot: limit of " + maxRobots + " reached (" + 
+                                registry.getRobotsForOwner(player.getUUID()).size() + " active)"),
+                            true
+                        );
+                        return InteractionResult.FAIL;
+                    }
+                }
+                
                 EntityType<?> entityType = this.getType(itemStack.getTag());
                 Mob entity = (Mob) entityType.spawn((ServerLevel) level, itemStack, context.getPlayer(), blockPos2, MobSpawnType.SPAWN_EGG, true, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP);
                 if (entity != null) {
                     itemStack.shrink(1);
                     level.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
 
-                    if (entity instanceof LovelyRobot robotEntity) {
+                    if (entity instanceof LovelyRobotEntity robotEntity) {
                         // Set ownership without taming particles (spawning, not taming)
                         robotEntity.tame(context.getPlayer());
                         robotEntity.setTame(true);
@@ -200,7 +237,7 @@ public class LovelySpawnItem extends ForgeSpawnEggItem {
      * @param dataNBT the NBT compound from spawn egg
      * @param entity the spawned robot entity to initialize
      */
-    private void initialize(CompoundTag dataNBT, LovelyRobot entity) {
+    private void initialize(CompoundTag dataNBT, LovelyRobotEntity entity) {
         if (!dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME).isEmpty()) entity.setCustomName(Component.literal(dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME)));
         if (dataNBT.getInt(LovelyIdentifier.STAT_COLOR) != EntityTexture.RANDOM.getId()) entity.setTexture(dataNBT.getInt(LovelyIdentifier.STAT_COLOR));
 

@@ -2,6 +2,7 @@ package net.msymbios.llovelyr.common.utils.internal;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.TameableEntity;
+import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
 
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +42,7 @@ public class Utility {
     public static String getEntityCustomName(LivingEntity entity) {
         String customName = "";
         try {
-            customName = entity.getCustomName().getString();
+            customName = Objects.requireNonNull(entity.getCustomName()).getString();
         } catch (Exception ignored) {
             // Custom name not found, return empty string
         }
