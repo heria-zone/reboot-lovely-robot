@@ -40,97 +40,70 @@ public class NativeCommands {
         dispatcher.register(
                 CommandManager.literal("llovely")
                         .requires(source -> source.hasPermissionLevel(2))
-                        .then(buildRobotCombatCommands())
-                        .then(buildTargetCombatCommands())
-                        .then(buildListCommands())
+                        .then(buildCrossCommands())
+                        .then(buildTargetCommands())
+                        .then(buildOwnerCommands())
         );
     } // register ()
 
     // -- Internal Methods --
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildRobotCombatCommands() {
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossCommands() {
         return CommandManager.literal("robot")
-                .then(CommandManager.literal("add")
-                        .then(CommandManager.literal("combat")
-                                .then(CommandManager.literal("exp")
-                                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                                .suggests(NativeCommands::suggestMaxExp)
-                                                .executes(NativeCommands::executeCrosshairAddXP)
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("set")
-                        .then(CommandManager.literal("combat")
-                                .then(CommandManager.literal("all")
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
-                                                .suggests(NativeCommands::suggestMaxLevel)
-                                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
-                                                        .suggests(NativeCommands::suggestMaxExpForLevel)
-                                                        .executes(NativeCommands::executeSetAllCombat)
-                                                )
-                                        )
-                                )
-                                .then(CommandManager.literal("exp")
-                                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                                .suggests(NativeCommands::suggestMaxExp)
-                                                .executes(NativeCommands::executeCrosshairSetXP)
-                                        )
-                                )
-                                .then(CommandManager.literal("level")
-                                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
-                                                .suggests(NativeCommands::suggestMaxLevel)
-                                                .executes(NativeCommands::executeCrosshairSetLevel)
-                                        )
-                                )
-                        )
-                );
-    } // buildRobotCombatCommands()
+                .then(buildCrossAddCommands())
+                .then(buildCrossSetCommands());
+    } // buildCrossCommands()
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetCombatCommands() {
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossAddCommands() {
+        return CommandManager.literal("add")
+                .then(buildCrossAddCombatCommands());
+    } // buildCrossAddCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetCommands() {
+        return CommandManager.literal("set")
+                .then(buildCrossSetCombatCommands())
+                .then(buildCrossSetAttributeCommands())
+                .then(buildCrossSetEnchantmentCommands())
+                .then(buildCrossSetProtectionCommands())
+                .then(buildCrossSetAppearanceCommands())
+                .then(buildCrossSetIdentifierCommands());
+    } // buildCrossSetCommands ()
+
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetCommands() {
         return CommandManager.literal("target")
                 .then(CommandManager.argument("targets", EntityArgumentType.entities())
-                        .then(CommandManager.literal("add")
-                                .then(CommandManager.literal("combat")
-                                        .then(CommandManager.literal("exp")
-                                                .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                                        .suggests(NativeCommands::suggestMinMaxExp)
-                                                        .executes(NativeCommands::executeTargetAddXP)
-                                                )
-                                        )
-                                )
-                        )
-                        .then(CommandManager.literal("set")
-                                .then(CommandManager.literal("combat")
-                                        .then(CommandManager.literal("all")
-                                                .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
-                                                        .suggests(NativeCommands::suggestMinMaxLevel)
-                                                        .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
-                                                                .suggests(NativeCommands::suggestMinMaxExpForLevel)
-                                                                .executes(NativeCommands::executeTargetSetAllCombat)
-                                                        )
-                                                )
-                                        )
-                                        .then(CommandManager.literal("exp")
-                                                .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                                        .suggests(NativeCommands::suggestMinMaxExp)
-                                                        .executes(NativeCommands::executeTargetSetXP)
-                                                )
-                                        )
-                                        .then(CommandManager.literal("level")
-                                                .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
-                                                        .suggests(NativeCommands::suggestMinMaxLevel)
-                                                        .executes(NativeCommands::executeTargetSetLevel)
-                                                )
-                                        )
-                                )
-                        )
+                        .then(buildTargetAddCommands())
+                        .then(buildTargetSetCommands())
                 );
-    } // buildTargetCombatCommands()
+    } // buildTargetCommands()
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildListCommands() {
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetAddCommands() {
+        return CommandManager.literal("add")
+                .then(buildTargetAddCombatCommands());
+    } // buildTargetAddCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetCommands() {
+        return CommandManager.literal("set")
+                .then(buildTargetSetCombatCommands())
+                .then(buildTargetSetAttributeCommands())
+                .then(buildTargetSetEnchantmentCommands())
+                .then(buildTargetSetProtectionCommands())
+                .then(buildTargetSetAppearanceCommands())
+                .then(buildTargetSetIdentifierCommands());
+    } // buildTargetSetCommands ()
+
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerCommands() {
+        return CommandManager.literal("owner")
+                .then(buildOwnerListCommands())
+                .then(buildOwnerAddCommands())
+                .then(buildOwnerSetCommands());
+    } // buildListOwnerCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerListCommands() {
         return CommandManager.literal("list")
-                .then(CommandManager.literal("owner")
+                .then(CommandManager.literal("player")
                         .executes(NativeCommands::executeListOwners)
                 )
                 .then(CommandManager.literal("robot")
@@ -138,9 +111,219 @@ public class NativeCommands {
                                 .executes(NativeCommands::executeListPlayerRobots)
                         )
                 );
-    } // buildListCommands()
+    } // buildOwnerListCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerAddCommands() {
+        return CommandManager.literal("add")
+                .then(buildOwnerAddCombatCommands());
+    } // buildOwnerAddCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetCommands() {
+        return CommandManager.literal("set")
+                .then(buildOwnerSetCombatCommands())
+                .then(buildOwnerSetAttributeCommands())
+                .then(buildOwnerSetEnchantmentCommands())
+                .then(buildOwnerSetProtectionCommands())
+                .then(buildOwnerSetAppearanceCommands())
+                .then(buildOwnerSetIdentifierCommands());
+    } // buildOwnerSetCommands ()
 
 
+    // TARGET COMMANDS
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetAddCombatCommands () {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(NativeCommands::suggestMinMaxExp)
+                                .executes(NativeCommands::executeTargetAddXP)
+                        )
+                );
+    } // buildTargetAddCombatCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetCombatCommands () {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
+                                .suggests(NativeCommands::suggestMinMaxLevel)
+                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestMinMaxExpForLevel)
+                                        .executes(NativeCommands::executeTargetSetAllCombat)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(NativeCommands::suggestMinMaxExp)
+                                .executes(NativeCommands::executeTargetSetXP)
+                        )
+                )
+                .then(CommandManager.literal("level")
+                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
+                                .suggests(NativeCommands::suggestMinMaxLevel)
+                                .executes(NativeCommands::executeTargetSetLevel)
+                        )
+                );
+    } // buildTargetSetCombatCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetAttributeCommands () {
+        return CommandManager.literal("attribute");
+    } // buildTargetSetAttributeCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetEnchantmentCommands () {
+        return CommandManager.literal("enchantment");
+    } // buildTargetSetEnchantmentCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetProtectionCommands () {
+        return CommandManager.literal("protection");
+    } // buildTargetSetProtectionCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetAppearanceCommands () {
+        return CommandManager.literal("appearance");
+    } // buildTargetSetAppearanceCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetIdentifierCommands () {
+        return CommandManager.literal("identifier");
+    } // buildTargetSetIdentifierCommands ()
+
+
+    // CROSS-AIR COMMANDS
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossAddCombatCommands() {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(NativeCommands::suggestMaxExp)
+                                .executes(NativeCommands::executeCrosshairAddXP)
+                        )
+                );
+    } // buildRobotCombatCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetCombatCommands () {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
+                                .suggests(NativeCommands::suggestMaxLevel)
+                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestMaxExpForLevel)
+                                        .executes(NativeCommands::executeSetAllCombat)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(NativeCommands::suggestMaxExp)
+                                .executes(NativeCommands::executeCrosshairSetXP)
+                        )
+                )
+                .then(CommandManager.literal("level")
+                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
+                                .suggests(NativeCommands::suggestMaxLevel)
+                                .executes(NativeCommands::executeCrosshairSetLevel)
+                        )
+                );
+    } // buildCrossSetCombatCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetAttributeCommands () {
+        return CommandManager.literal("attribute");
+    } // buildCrossSetAttributeCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetEnchantmentCommands () {
+        return CommandManager.literal("enchantment");
+    } // buildCrossSetEnchantmentCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetProtectionCommands () {
+        return CommandManager.literal("protection");
+    } // buildCrossSetProtectionCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetAppearanceCommands () {
+        return CommandManager.literal("appearance");
+    } // buildCrossSetAppearanceCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetIdentifierCommands () {
+        return CommandManager.literal("identifier");
+    } // buildCrossSetIdentifierCommands ()
+
+
+    // OWNER COMMANDS
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerAddCombatCommands() {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                                .suggests(NativeCommands::suggestOwnerMaxExp)
+                                                .executes(NativeCommands::executeOwnerAddExp)
+                                        )
+                                )
+                        )
+                );
+    } // buildOwnerAddCombatCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetCombatCommands () {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
+                                                .suggests(NativeCommands::suggestOwnerMaxLevel)
+                                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
+                                                        .suggests(NativeCommands::suggestOwnerMaxExpForLevel)
+                                                        .executes(NativeCommands::executeOwnerSetAllCombat)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                                .suggests(NativeCommands::suggestOwnerMaxExp)
+                                                .executes(NativeCommands::executeOwnerSetExp)
+                                        )
+                                )
+                        )
+                )
+                .then(CommandManager.literal("level")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
+                                                .suggests(NativeCommands::suggestOwnerMaxLevel)
+                                                .executes(NativeCommands::executeOwnerSetLevel)
+                                        )
+                                )
+                        )
+                );
+    } // buildOwnerSetCombatCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetAttributeCommands () {
+        return CommandManager.literal("attribute");
+    } // buildOwnerSetAttributeCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetEnchantmentCommands () {
+        return CommandManager.literal("enchantment");
+    } // buildOwnerSetEnchantmentCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetProtectionCommands () {
+        return CommandManager.literal("protection");
+    } // buildOwnerSetProtectionCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetAppearanceCommands () {
+        return CommandManager.literal("appearance");
+    } // buildOwnerSetAppearanceCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetIdentifierCommands () {
+        return CommandManager.literal("identifier");
+    } // buildOwnerSetIdentifierCommands ()
+
+    // -- Commands Suggestions --
 
     /**
      * Suggests max level for targeted robot.
@@ -310,6 +493,136 @@ public class NativeCommands {
         } catch (Exception ignored) {}
         return builder.buildFuture();
     } // suggestMinMaxExpForLevel()
+
+    /**
+     * Suggests player names who own robots.
+     * <p>
+     * Queries registry for all owners and suggests their names.
+     */
+    private static CompletableFuture<Suggestions> suggestPlayerNames(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+        try {
+            ServerWorld world = ctx.getSource().getWorld();
+            OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+            var ownerMap = registry.getAllOwners();
+
+            for (var ownerUuid : ownerMap.keySet()) {
+                PlayerEntity player = world.getPlayerByUuid(ownerUuid);
+                if (player != null) {
+                    builder.suggest(player.getName().getString());
+                }
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestPlayerNames()
+
+    /**
+     * Suggests robot indices for selected player.
+     * <p>
+     * Displays robot count and suggests valid indices based on player's robots.
+     */
+    private static CompletableFuture<Suggestions> suggestRobotIndices(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+        try {
+            PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+            ServerWorld world = (ServerWorld) player.getWorld();
+            OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+            
+            List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUuid());
+            
+            if (!robots.isEmpty()) {
+                // Suggest first few indices with robot names
+                for (int i = 0; i < Math.min(robots.size(), 5); i++) {
+                    RobotRegistryEntry entry = robots.get(i);
+                    Object entityObj = entry.getEntity();
+                    
+                    String robotInfo;
+                    if (entityObj instanceof InternalEntity robot && robot.hasCustomName()) {
+                        robotInfo = robot.getCustomName().getString();
+                    } else {
+                        robotInfo = entry.getRobotType().replace("entity.llovelyr.", "");
+                    }
+                    
+                    builder.suggest(i, Text.literal(robotInfo));
+                }
+                
+                // If more robots exist, suggest the count
+                if (robots.size() > 5) {
+                    builder.suggest(robots.size() - 1, Text.literal("Last robot (total: " + robots.size() + ")"));
+                }
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestRobotIndices()
+
+    /**
+     * Suggests max level for owner's robot at specified index.
+     * <p>
+     * Retrieves robot from registry and displays its max level.
+     */
+    private static CompletableFuture<Suggestions> suggestOwnerMaxLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+        try {
+            PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+            
+            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            if (robot != null) {
+                int maxLevel = robot.getLevelSystem()
+                        .map(LevelFeature::getMaxLevel)
+                        .orElse(200);
+                builder.suggest(maxLevel, Text.literal("Maximum level for this robot"));
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestOwnerMaxLevel()
+
+    /**
+     * Suggests max XP for owner's robot at specified index.
+     * <p>
+     * Retrieves robot from registry and displays max XP for current level.
+     */
+    private static CompletableFuture<Suggestions> suggestOwnerMaxExp(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+        try {
+            PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+            
+            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            if (robot != null) {
+                int maxExp = robot.getLevelSystem()
+                        .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
+                        .orElse(Integer.MAX_VALUE);
+                builder.suggest(maxExp, Text.literal("Maximum XP for current level (surplus will level up)"));
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestOwnerMaxExp()
+
+    /**
+     * Suggests max XP for the level being typed in owner "all" command.
+     * <p>
+     * Dynamically calculates max XP based on level argument and robot type.
+     */
+    private static CompletableFuture<Suggestions> suggestOwnerMaxExpForLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+        try {
+            PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+            
+            int targetLevel;
+            try {
+                targetLevel = IntegerArgumentType.getInteger(ctx, "level");
+            } catch (IllegalArgumentException e) {
+                targetLevel = 1;
+            }
+            
+            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            if (robot != null) {
+                int finalTargetLevel = targetLevel;
+                int maxExp = robot.getLevelSystem()
+                        .map(feature -> feature.getExpForLevel(finalTargetLevel))
+                        .orElse(Integer.MAX_VALUE);
+                builder.suggest(maxExp, Text.literal("Maximum XP for level " + targetLevel));
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestOwnerMaxExpForLevel()
 
     // -- Command Executors --
 
@@ -560,6 +873,111 @@ public class NativeCommands {
         return count;
     } // executeTargetSetAllCombat()
 
+    // -- Owner Command Executors --
+
+    /**
+     * Adds experience to robot selected by owner and index.
+     * <p>
+     * No validation - surplus XP triggers level ups automatically.
+     */
+    private static int executeOwnerAddExp(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+        int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
+
+        return executeOnOwnerRobot(ctx, player, index, robot -> {
+            robot.addExp(xp);
+            return new CommandResult(true, "Added " + xp + "xp to " + Utility.getEntityCustomName(robot));
+        });
+    } // executeOwnerAddExp()
+
+    /**
+     * Sets exact XP for robot selected by owner and index.
+     * <p>
+     * Validates against robot's current level max XP.
+     */
+    private static int executeOwnerSetExp(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+        int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
+
+        return executeOnOwnerRobot(ctx, player, index, robot -> {
+            int maxExp = robot.getLevelSystem()
+                    .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
+                    .orElse(Integer.MAX_VALUE);
+
+            if (xp > maxExp) {
+                return new CommandResult(false, "Exp " + xp + " exceeds maximum requirement of " + maxExp + "xp for current level!");
+            }
+
+            robot.setExp(xp);
+            return new CommandResult(true, "Set " + xp + "xp to " + Utility.getEntityCustomName(robot));
+        });
+    } // executeOwnerSetExp()
+
+    /**
+     * Sets level for robot selected by owner and index.
+     * <p>
+     * Validates against robot's max level.
+     */
+    private static int executeOwnerSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+        int level = IntegerArgumentType.getInteger(ctx, "level_value");
+
+        return executeOnOwnerRobot(ctx, player, index, robot -> {
+            int maxLevel = robot.getLevelSystem()
+                    .map(LevelFeature::getMaxLevel)
+                    .orElse(200);
+
+            if (level > maxLevel) {
+                return new CommandResult(false, "Level " + level + " exceeds maximum requirement of " + maxLevel + " for this robot!");
+            }
+
+            robot.setCurrentLevel(level);
+            return new CommandResult(true, "Set level " + level + " to " + Utility.getEntityCustomName(robot));
+        });
+    } // executeOwnerSetLevel()
+
+    /**
+     * Sets both level and XP for robot selected by owner and index.
+     * <p>
+     * Validates both values against robot's limits.
+     */
+    private static int executeOwnerSetAllCombat(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+        int level = IntegerArgumentType.getInteger(ctx, "level");
+        int exp = IntegerArgumentType.getInteger(ctx, "exp");
+
+        return executeOnOwnerRobot(ctx, player, index, robot -> {
+            // Validate level
+            int maxLevel = robot.getLevelSystem()
+                    .map(LevelFeature::getMaxLevel)
+                    .orElse(200);
+
+            if (level > maxLevel) {
+                return new CommandResult(false, "Level " + level + " exceeds maximum requirement of " + maxLevel + " for this robot!");
+            }
+
+            // Validate exp for target level
+            int maxExp = robot.getLevelSystem()
+                    .map(feature -> feature.getExpForLevel(level))
+                    .orElse(Integer.MAX_VALUE);
+
+            if (exp > maxExp) {
+                return new CommandResult(false, "Exp " + exp + " exceeds maximum requirement of " + maxExp + "xp for level " + level + "!");
+            }
+
+            // Set both values
+            robot.setCurrentLevel(level);
+            robot.setExp(exp);
+
+            String name = Utility.getEntityCustomName(robot);
+            return new CommandResult(true, "Set " + name + " to level " + level + " with " + exp + "xp");
+        });
+    } // executeOwnerSetAllCombat()
+
     // -- List Command Executors --
 
     /**
@@ -668,6 +1086,83 @@ public class NativeCommands {
     } // executeListPlayerRobots()
 
     // -- Helper Methods --
+
+    /**
+     * Retrieves robot by owner and index from registry.
+     * <p>
+     * <b>Validation:</b> Checks index bounds and entity validity.
+     *
+     * @param player owner player
+     * @param index robot index
+     * @return robot entity or null if not found/invalid
+     */
+    private static LovelyRobotEntity getOwnerRobotByIndex(PlayerEntity player, int index) {
+        try {
+            ServerWorld world = (ServerWorld) player.getWorld();
+            OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+            
+            List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUuid());
+            
+            if (index < 0 || index >= robots.size()) {
+                return null;
+            }
+            
+            RobotRegistryEntry entry = robots.get(index);
+            Object entityObj = entry.getEntity();
+            
+            if (entityObj instanceof LovelyRobotEntity robot && entry.isEntityValid()) {
+                return robot;
+            }
+        } catch (Exception ignored) {}
+        return null;
+    } // getOwnerRobotByIndex()
+
+    /**
+     * Executes command action on robot selected by owner and index.
+     * <p>
+     * <b>Design Pattern:</b> Template method - handles registry lookup and validation
+     * while delegating specific action to provided function.
+     *
+     * @param context command context
+     * @param player owner player
+     * @param index robot index
+     * @param action function to execute on validated robot
+     * @return 1 if successful, 0 if failed
+     */
+    private static int executeOnOwnerRobot(CommandContext<ServerCommandSource> context, PlayerEntity player, int index, IRobotCommandAction action) throws CommandSyntaxException {
+        ServerWorld world = (ServerWorld) player.getWorld();
+        OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+        
+        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUuid());
+        
+        if (robots.isEmpty()) {
+            context.getSource().sendError(Text.literal("Player " + player.getName().getString() + " has no registered robots"));
+            return 0;
+        }
+        
+        if (index < 0 || index >= robots.size()) {
+            context.getSource().sendError(Text.literal("Invalid robot index " + index + " (player has " + robots.size() + " robot(s))"));
+            return 0;
+        }
+        
+        RobotRegistryEntry entry = robots.get(index);
+        Object entityObj = entry.getEntity();
+        
+        if (!(entityObj instanceof LovelyRobotEntity robot) || !entry.isEntityValid()) {
+            context.getSource().sendError(Text.literal("Robot is offline or unloaded"));
+            return 0;
+        }
+
+        CommandResult result = action.execute(robot);
+        
+        if (result.success) {
+            context.getSource().sendFeedback(() -> Text.literal(result.message), true);
+            return 1;
+        } else {
+            context.getSource().sendError(Text.literal(result.message));
+            return 0;
+        }
+    } // executeOnOwnerRobot()
 
     /**
      * Executes command action on robot in crosshair with common validation.
