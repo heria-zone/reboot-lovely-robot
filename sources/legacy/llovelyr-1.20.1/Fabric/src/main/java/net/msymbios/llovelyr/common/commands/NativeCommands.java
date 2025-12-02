@@ -21,8 +21,7 @@ import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
 import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.common.utils.internal.Utility;
-import net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry;
-import net.msymbios.llovelyr.framework.registry.RobotRegistryEntry;
+import net.msymbios.llovelyr.framework.registry.*;
 import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
 import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
 import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
@@ -43,6 +42,7 @@ public class NativeCommands {
                         .then(buildCrossCommands())
                         .then(buildTargetCommands())
                         .then(buildOwnerCommands())
+                        .then(buildReloadCommand())
         );
     } // register ()
 
@@ -51,7 +51,17 @@ public class NativeCommands {
     private static ArgumentBuilder<ServerCommandSource, ?> buildCrossCommands() {
         return CommandManager.literal("robot")
                 .then(buildCrossAddCommands())
-                .then(buildCrossSetCommands());
+                .then(buildCrossGetCommands())
+                .then(buildCrossSetCommands())
+                .then(CommandManager.literal("recall")
+                        .executes(NativeCommands::executeCrosshairRecall)
+                )
+                .then(CommandManager.literal("heal")
+                        .executes(NativeCommands::executeCrosshairHeal)
+                )
+                .then(CommandManager.literal("stats")
+                        .executes(NativeCommands::executeCrosshairStats)
+                );
     } // buildCrossCommands()
 
     private static ArgumentBuilder<ServerCommandSource, ?> buildCrossAddCommands() {
@@ -74,6 +84,22 @@ public class NativeCommands {
                 .then(CommandManager.argument("targets", EntityArgumentType.entities())
                         .then(buildTargetAddCommands())
                         .then(buildTargetSetCommands())
+                        .then(CommandManager.literal("heal").executes(NativeCommands::executeTargetHeal))
+                        .then(CommandManager.literal("teleport")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                        .executes(NativeCommands::executeTargetTeleport)
+                                )
+                        )
+                        .then(CommandManager.literal("recall")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                        .executes(NativeCommands::executeTargetRecall)
+                                )
+                        )
+                        .then(CommandManager.literal("ownership")
+                                .then(CommandManager.argument("to_player", EntityArgumentType.player())
+                                        .executes(NativeCommands::executeTargetTransfer)
+                                )
+                        )
                 );
     } // buildTargetCommands()
 
@@ -96,8 +122,61 @@ public class NativeCommands {
         return CommandManager.literal("owner")
                 .then(buildOwnerListCommands())
                 .then(buildOwnerAddCommands())
-                .then(buildOwnerSetCommands());
-    } // buildListOwnerCommands()
+                .then(buildOwnerSetCommands())
+                .then(CommandManager.literal("teleport")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .executes(NativeCommands::executeOwnerTeleport)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("recall")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .executes(NativeCommands::executeOwnerRecall)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("heal")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .executes(NativeCommands::executeOwnerHeal)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("healall")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .executes(NativeCommands::executeOwnerHealAll)
+                        )
+                )
+                .then(CommandManager.literal("stats")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .executes(NativeCommands::executeOwnerStats)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("transfer")
+                        .then(CommandManager.argument("from_player", EntityArgumentType.player())
+                                .suggests(NativeCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(NativeCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("to_player", EntityArgumentType.player())
+                                                .executes(NativeCommands::executeOwnerTransfer)
+                                        )
+                                )
+                        )
+                );
+    } // buildOwnerCommands()
 
     private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerListCommands() {
         return CommandManager.literal("list")
@@ -124,7 +203,6 @@ public class NativeCommands {
                 .then(buildOwnerSetAppearanceCommands())
                 .then(buildOwnerSetIdentifierCommands());
     } // buildOwnerSetCommands ()
-
 
     // TARGET COMMANDS
     private static ArgumentBuilder<ServerCommandSource, ?> buildTargetAddCombatCommands () {
@@ -254,7 +332,6 @@ public class NativeCommands {
                 );
     } // buildTargetSetIdentifierCommands()
 
-
     // CROSS-AIR COMMANDS
     private static ArgumentBuilder<ServerCommandSource, ?> buildCrossAddCombatCommands() {
         return CommandManager.literal("combat")
@@ -383,6 +460,12 @@ public class NativeCommands {
                 );
     } // buildCrossSetIdentifierCommands()
 
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossGetCommands() {
+        return CommandManager.literal("get")
+                .then(CommandManager.literal("owner")
+                        .executes(NativeCommands::executeCrosshairGetOwner)
+                );
+    } // buildCrossGetCommands()
 
     // OWNER COMMANDS
     private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerAddCombatCommands() {
@@ -607,6 +690,11 @@ public class NativeCommands {
                         )
                 );
     } // buildOwnerSetIdentifierCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildReloadCommand() {
+        return CommandManager.literal("reload")
+                .executes(NativeCommands::executeReload);
+    } // buildReloadCommand()
 
     // -- Commands Suggestions --
 
@@ -1493,6 +1581,60 @@ public class NativeCommands {
     } // executeCrosshairSetIdentifier()
 
     /**
+     * Gets owner of robot in crosshair.
+     * <p>
+     * Displays current owner name or "No owner" if untamed.
+     */
+    private static int executeCrosshairGetOwner(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeOnRobot(ctx, robot -> {
+            PlayerEntity owner = (PlayerEntity) robot.getOwner();
+            String ownerName = owner != null ? owner.getName().getString() : "No owner";
+            String robotName = Utility.getEntityCustomName(robot);
+            return new CommandResult(true, robotName + " owner: " + ownerName);
+        });
+    } // executeCrosshairGetOwner()
+
+    /**
+     * Displays comprehensive stats for robot in crosshair.
+     */
+    private static int executeCrosshairStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
+        LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+
+        if (robot == null) {
+            ctx.getSource().sendError(Text.literal("No robot found in crosshair"));
+            return 0;
+        }
+
+        robot.displayGeneralMessage(true, false);
+        return 1;
+    } // executeCrosshairStats()
+
+    /**
+     * Heals robot in crosshair to full health.
+     */
+    private static int executeCrosshairHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeOnRobot(ctx, robot -> {
+            robot.setHealth(robot.getMaxHealth());
+            String robotName = Utility.getEntityCustomName(robot);
+            return new CommandResult(true, "Healed " + robotName);
+        });
+    } // executeCrosshairHeal()
+
+    /**
+     * Recalls robot in crosshair to command source location.
+     */
+    private static int executeCrosshairRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        net.minecraft.server.network.ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+        
+        return executeOnRobot(ctx, robot -> {
+            robot.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
+            String robotName = Utility.getEntityCustomName(robot);
+            return new CommandResult(true, "Recalled " + robotName);
+        });
+    } // executeCrosshairRecall()
+
+    /**
      * Sets both level and experience in one command.
      * <p>
      * Validates both values against robot's limits. Convenient for quickly
@@ -1989,6 +2131,116 @@ public class NativeCommands {
         return count;
     } // executeTargetSetIdentifier()
 
+    /**
+     * Heals all targeted robots to full health.
+     * <p>
+     * Batch operation for efficient healing of multiple robots.
+     */
+    private static int executeTargetHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
+        int count = 0;
+
+        for (Entity entity : entities) {
+            if (entity instanceof LovelyRobotEntity robot) {
+                robot.setHealth(robot.getMaxHealth());
+                count++;
+            }
+        }
+
+        int finalCount = count;
+        ctx.getSource().sendFeedback(
+                () -> Text.literal("Healed " + finalCount + " robot(s)"),
+                true
+        );
+        return count;
+    } // executeTargetHeal()
+
+    /**
+     * Teleports command source to first targeted robot.
+     * <p>
+     * If multiple robots targeted, teleports to the first one.
+     */
+    private static int executeTargetTeleport(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
+        
+        for (Entity entity : entities) {
+            if (entity instanceof LovelyRobotEntity robot) {
+                net.minecraft.server.network.ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+                player.teleport(
+                        (ServerWorld) robot.getWorld(),
+                        robot.getX(),
+                        robot.getY(),
+                        robot.getZ(),
+                        robot.getYaw(),
+                        robot.getPitch()
+                );
+
+                String robotName = Utility.getEntityCustomName(robot);
+                ctx.getSource().sendFeedback(() -> Text.literal("Teleported to " + robotName), false);
+                return 1;
+            }
+        }
+
+        ctx.getSource().sendError(Text.literal("No valid robot found in targets"));
+        return 0;
+    } // executeTargetTeleport()
+
+    /**
+     * Recalls all targeted robots to command source location.
+     * <p>
+     * Batch operation for efficient robot repositioning.
+     */
+    private static int executeTargetRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
+        net.minecraft.server.network.ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+        int count = 0;
+
+        for (Entity entity : entities) {
+            if (entity instanceof LovelyRobotEntity robot) {
+                robot.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
+                count++;
+            }
+        }
+
+        int finalCount = count;
+        ctx.getSource().sendFeedback(
+                () -> Text.literal("Recalled " + finalCount + " robot(s)"),
+                true
+        );
+        return count;
+    } // executeTargetRecall()
+
+    /**
+     * Transfers ownership of all targeted robots to specified player.
+     * <p>
+     * Batch operation for efficient ownership transfer.
+     */
+    private static int executeTargetTransfer(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
+        PlayerEntity toPlayer = EntityArgumentType.getPlayer(ctx, "to_player");
+        int count = 0;
+
+        for (Entity entity : entities) {
+            if (entity instanceof LovelyRobotEntity robot) {
+                // Unregister from old owner
+                ServerWorld world = (ServerWorld) robot.getWorld();
+                OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+                registry.unregisterRobot(robot.getUuid());
+
+                // Set new owner (registration happens automatically)
+                robot.setOwner(toPlayer);
+                count++;
+            }
+        }
+
+        int finalCount = count;
+        ctx.getSource().sendFeedback(
+                () -> Text.literal("Transferred " + finalCount + " robot(s) to " + toPlayer.getName().getString()),
+                true
+        );
+        return count;
+    } // executeTargetTransfer()
+
     // -- Owner Command Executors --
 
     /**
@@ -2300,6 +2552,159 @@ public class NativeCommands {
             return new CommandResult(true, "Set name to '" + nameString + "' for " + Utility.getEntityCustomName(robot));
         });
     } // executeOwnerSetIdentifier()
+
+    // -- Owner Utility Command Executors --
+
+    /**
+     * Teleports player to robot selected by owner and index.
+     */
+    private static int executeOwnerTeleport(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        if (robot == null) {
+            ctx.getSource().sendError(Text.literal("Robot not found or offline"));
+            return 0;
+        }
+
+        net.minecraft.server.network.ServerPlayerEntity serverPlayer = (net.minecraft.server.network.ServerPlayerEntity) player;
+        serverPlayer.teleport(
+                (ServerWorld) robot.getWorld(),
+                robot.getX(),
+                robot.getY(),
+                robot.getZ(),
+                robot.getYaw(),
+                robot.getPitch()
+        );
+
+        String robotName = Utility.getEntityCustomName(robot);
+        ctx.getSource().sendFeedback(() -> Text.literal("Teleported to " + robotName), false);
+        return 1;
+    } // executeOwnerTeleport()
+
+    /**
+     * Recalls robot to player location by owner and index.
+     */
+    private static int executeOwnerRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+        return executeOnOwnerRobot(ctx, player, index, robot -> {
+            robot.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
+            String robotName = Utility.getEntityCustomName(robot);
+            return new CommandResult(true, "Recalled " + robotName + " to " + player.getName().getString());
+        });
+    } // executeOwnerRecall()
+
+    /**
+     * Heals robot selected by owner and index to full health.
+     */
+    private static int executeOwnerHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+        return executeOnOwnerRobot(ctx, player, index, robot -> {
+            robot.setHealth(robot.getMaxHealth());
+            String robotName = Utility.getEntityCustomName(robot);
+            return new CommandResult(true, "Healed " + robotName);
+        });
+    } // executeOwnerHeal()
+
+    /**
+     * Heals all robots owned by specified player.
+     */
+    private static int executeOwnerHealAll(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        ServerWorld world = (ServerWorld) player.getWorld();
+        OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+
+        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUuid());
+        int healedCount = 0;
+
+        for (RobotRegistryEntry entry : robots) {
+            Object entityObj = entry.getEntity();
+            if (entityObj instanceof LovelyRobotEntity robot && entry.isEntityValid()) {
+                robot.setHealth(robot.getMaxHealth());
+                healedCount++;
+            }
+        }
+
+        int finalCount = healedCount;
+        ctx.getSource().sendFeedback(
+                () -> Text.literal("Healed " + finalCount + " robot(s) for " + player.getName().getString()),
+                true
+        );
+        return healedCount;
+    } // executeOwnerHealAll()
+
+    /**
+     * Displays comprehensive stats for robot selected by owner and index.
+     */
+    private static int executeOwnerStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        if (robot == null) {
+            ctx.getSource().sendError(Text.literal("Robot not found or offline"));
+            return 0;
+        }
+
+        robot.displayGeneralMessage(true, false);
+        return 1;
+    } // executeOwnerStats()
+
+    /**
+     * Transfers robot ownership from one player to another.
+     */
+    private static int executeOwnerTransfer(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        PlayerEntity fromPlayer = EntityArgumentType.getPlayer(ctx, "from_player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+        PlayerEntity toPlayer = EntityArgumentType.getPlayer(ctx, "to_player");
+
+        LovelyRobotEntity robot = getOwnerRobotByIndex(fromPlayer, index);
+        if (robot == null) {
+            ctx.getSource().sendError(Text.literal("Robot not found or offline"));
+            return 0;
+        }
+
+        // Unregister from old owner
+        ServerWorld world = (ServerWorld) fromPlayer.getWorld();
+        OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+        registry.unregisterRobot(robot.getUuid());
+
+        // Set new owner (registration happens automatically)
+        robot.setOwner(toPlayer);
+
+        String robotName = Utility.getEntityCustomName(robot);
+        ctx.getSource().sendFeedback(
+                () -> Text.literal("Transferred " + robotName + " from " + fromPlayer.getName().getString() + " to " + toPlayer.getName().getString()),
+                true
+        );
+        return 1;
+    } // executeOwnerTransfer()
+
+    // -- Reload Command Executor --
+
+    /**
+     * Reloads configuration from disk.
+     * <p>
+     * Triggers config reload without server restart.
+     */
+    private static int executeReload(CommandContext<ServerCommandSource> ctx) {
+        try {
+            net.msymbios.llovelyr.source.LovelyConfigs.reload();
+            ctx.getSource().sendFeedback(
+                    () -> Text.literal("Configuration reloaded successfully").formatted(Formatting.GREEN),
+                    true
+            );
+            return 1;
+        } catch (Exception e) {
+            ctx.getSource().sendError(Text.literal("Failed to reload configuration: " + e.getMessage()));
+            return 0;
+        }
+    } // executeReload()
 
     // -- List Command Executors --
 
