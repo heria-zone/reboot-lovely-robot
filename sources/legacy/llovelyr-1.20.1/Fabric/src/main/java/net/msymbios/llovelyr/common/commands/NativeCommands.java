@@ -1,8 +1,6 @@
 package net.msymbios.llovelyr.common.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -10,8 +8,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -31,670 +29,389 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class NativeCommands {
+public abstract class NativeCommands {
 
-    // -- API Methods --
+    // -- Core Abstraction Layer --
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(
-                CommandManager.literal("llovely")
-                        .requires(source -> source.hasPermissionLevel(2))
-                        .then(buildCrossCommands())
-                        .then(buildTargetCommands())
-                        .then(buildOwnerCommands())
-                        .then(buildReloadCommand())
-        );
-    } // register ()
+    /**
+     * Defines robot selection strategy for command execution.
+     * <p>
+     * <b>Design Pattern:</b> Strategy - encapsulates different robot selection
+     * methods (crosshair, target list, owner registry) behind unified interface.
+     */
+    @FunctionalInterface
+    private interface RobotSelector {
+        /**
+         * Selects robots for command execution.
+         * 
+         * @param ctx command context
+         * @return list of robots to operate on
+         * @throws CommandSyntaxException if selection fails
+         */
+        List<LovelyRobotEntity> selectRobots(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException;
+    } // Interface: RobotSelector
 
-    // -- Internal Methods --
+    /**
+     * Encapsulates robot operation with validation and result handling.
+     * <p>
+     * <b>Design Pattern:</b> Command - encapsulates operation as object,
+     * enabling parameterization and validation.
+     */
+    @FunctionalInterface
+    private interface RobotOperation {
+        /**
+         * Executes operation on robot with validation.
+         * 
+         * @param robot target robot
+         * @param ctx command context for parameter extraction
+         * @return operation result
+         * @throws CommandSyntaxException if command execution fails
+         */
+        CommandResult execute(LovelyRobotEntity robot, CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException;
+    } // Interface: RobotOperation
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossCommands() {
-        return CommandManager.literal("robot")
-                .then(buildCrossAddCommands())
-                .then(buildCrossGetCommands())
-                .then(buildCrossSetCommands())
-                .then(CommandManager.literal("recall")
-                        .executes(NativeCommands::executeCrosshairRecall)
-                )
-                .then(CommandManager.literal("heal")
-                        .executes(NativeCommands::executeCrosshairHeal)
-                )
-                .then(CommandManager.literal("stats")
-                        .executes(NativeCommands::executeCrosshairStats)
-                );
-    } // buildCrossCommands()
+    // -- Robot Selectors --
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossAddCommands() {
-        return CommandManager.literal("add")
-                .then(buildCrossAddCombatCommands());
-    } // buildCrossAddCommands()
+    /**
+     * Selects robot in player's crosshair.
+     */
+    private static final RobotSelector CROSSHAIR_SELECTOR = ctx -> {
+        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
+        LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+        return robot != null ? List.of(robot) : List.of();
+    }; // CROSSHAIR_SELECTOR
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetCommands() {
-        return CommandManager.literal("set")
-                .then(buildCrossSetCombatCommands())
-                .then(buildCrossSetAttributeCommands())
-                .then(buildCrossSetProtectionCommands())
-                .then(buildCrossSetAppearanceCommands())
-                .then(buildCrossSetIdentifierCommands());
-    } // buildCrossSetCommands ()
+    /**
+     * Selects robots from target argument.
+     */
+    private static final RobotSelector TARGET_SELECTOR = ctx -> {
+        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
+        return entities.stream()
+                .filter(e -> e instanceof LovelyRobotEntity)
+                .map(e -> (LovelyRobotEntity) e)
+                .toList();
+    }; // TARGET_SELECTOR
 
+    /**
+     * Selects robot by owner and index from registry.
+     */
+    private static final RobotSelector OWNER_SELECTOR = ctx -> {
+        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        return robot != null ? List.of(robot) : List.of();
+    }; // OWNER_SELECTOR
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetCommands() {
-        return CommandManager.literal("target")
-                .then(CommandManager.argument("targets", EntityArgumentType.entities())
-                        .then(buildTargetAddCommands())
-                        .then(buildTargetSetCommands())
-                        .then(CommandManager.literal("heal").executes(NativeCommands::executeTargetHeal))
-                        .then(CommandManager.literal("teleport")
-                                .then(CommandManager.argument("player", EntityArgumentType.player())
-                                        .executes(NativeCommands::executeTargetTeleport)
-                                )
-                        )
-                        .then(CommandManager.literal("recall")
-                                .then(CommandManager.argument("player", EntityArgumentType.player())
-                                        .executes(NativeCommands::executeTargetRecall)
-                                )
-                        )
-                        .then(CommandManager.literal("ownership")
-                                .then(CommandManager.argument("to_player", EntityArgumentType.player())
-                                        .executes(NativeCommands::executeTargetTransfer)
-                                )
-                        )
-                );
-    } // buildTargetCommands()
+    // -- Unified Command Executor --
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetAddCommands() {
-        return CommandManager.literal("add")
-                .then(buildTargetAddCombatCommands());
-    } // buildTargetAddCommands()
+    /**
+     * Unified command executor handling robot selection, validation, and feedback.
+     * <p>
+     * <b>Architecture:</b> Eliminates duplication by centralizing execution flow
+     * across crosshair, target, and owner command variants.
+     */
+    protected static int executeRobotCommand(
+            CommandContext<ServerCommandSource> ctx,
+            RobotSelector selector,
+            RobotOperation operation,
+            boolean requireOwnership
+    ) throws CommandSyntaxException {
+        List<LovelyRobotEntity> robots = selector.selectRobots(ctx);
+        
+        if (robots.isEmpty()) {
+            ctx.getSource().sendError(Text.literal("No robots found"));
+            return 0;
+        }
+        
+        int successCount = 0;
+        int failureCount = 0;
+        List<String> errorMessages = new java.util.ArrayList<>();
+        
+        for (LovelyRobotEntity robot : robots) {
+            // Ownership validation
+            if (requireOwnership) {
+                PlayerEntity player = ctx.getSource().getPlayerOrThrow();
+                if (!robot.isOwner(player)) {
+                    failureCount++;
+                    errorMessages.add("Not owner of " + Utility.getEntityCustomName(robot));
+                    continue;
+                }
+            }
+            
+            // Execute operation
+            CommandResult result = operation.execute(robot, ctx);
+            
+            if (result.success) {
+                successCount++;
+                // For single robot operations, send individual feedback
+                if (robots.size() == 1) {
+                    ctx.getSource().sendFeedback(() -> Text.literal(result.message), true);
+                }
+            } else {
+                failureCount++;
+                errorMessages.add(result.message);
+            }
+        }
+        
+        // Send batch feedback for multiple robots
+        if (robots.size() > 1) {
+            int finalSuccess = successCount;
+            int finalFailure = failureCount;
+            ctx.getSource().sendFeedback(() -> 
+                Text.literal("Operation completed: " + finalSuccess + " succeeded" + 
+                    (finalFailure > 0 ? ", " + finalFailure + " failed" : "")), 
+                true
+            );
+        }
+        
+        // Send error details if any
+        if (!errorMessages.isEmpty() && errorMessages.size() <= 3) {
+            for (String error : errorMessages) {
+                ctx.getSource().sendError(Text.literal(error));
+            }
+        }
+        
+        return successCount;
+    } // executeRobotCommand()
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetCommands() {
-        return CommandManager.literal("set")
-                .then(buildTargetSetCombatCommands())
-                .then(buildTargetSetAttributeCommands())
-                .then(buildTargetSetProtectionCommands())
-                .then(buildTargetSetAppearanceCommands())
-                .then(buildTargetSetIdentifierCommands());
-    } // buildTargetSetCommands ()
+    // -- Operation Factories --
 
+    /**
+     * Combat operations factory.
+     * <p>
+     * Provides reusable operations for XP, level, and combined combat management.
+     */
+    private static class CombatOperations {
+        
+        static RobotOperation addXP() {
+            return (robot, ctx) -> {
+                int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
+                robot.addExp(xp);
+                return new CommandResult(true, "Added " + xp + "xp to " + Utility.getEntityCustomName(robot));
+            };
+        } // addXP()
+        
+        static RobotOperation setXP() {
+            return (robot, ctx) -> {
+                int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
+                int maxXp = robot.getLevelSystem()
+                        .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
+                        .orElse(Integer.MAX_VALUE);
+                
+                if (xp > maxXp) {
+                    return new CommandResult(false, "XP " + xp + " exceeds max " + maxXp + " for " + Utility.getEntityCustomName(robot));
+                }
+                
+                robot.setExp(xp);
+                return new CommandResult(true, "Set " + xp + "xp to " + Utility.getEntityCustomName(robot));
+            };
+        } // setXP()
+        
+        static RobotOperation setLevel() {
+            return (robot, ctx) -> {
+                int level = IntegerArgumentType.getInteger(ctx, "level_value");
+                int maxLevel = robot.getLevelSystem()
+                        .map(LevelFeature::getMaxLevel)
+                        .orElse(200);
+                
+                if (level > maxLevel) {
+                    return new CommandResult(false, "Level " + level + " exceeds max " + maxLevel + " for " + Utility.getEntityCustomName(robot));
+                }
+                
+                robot.setCurrentLevel(level);
+                return new CommandResult(true, "Set level " + level + " to " + Utility.getEntityCustomName(robot));
+            };
+        } // setLevel()
+        
+        static RobotOperation setAllCombat() {
+            return (robot, ctx) -> {
+                int level = IntegerArgumentType.getInteger(ctx, "level");
+                int exp = IntegerArgumentType.getInteger(ctx, "exp");
+                
+                // Validate level
+                int maxLevel = robot.getLevelSystem()
+                        .map(LevelFeature::getMaxLevel)
+                        .orElse(200);
+                if (level > maxLevel) {
+                    return new CommandResult(false, "Level " + level + " exceeds max " + maxLevel + " for " + Utility.getEntityCustomName(robot));
+                }
+                
+                // Validate exp
+                int maxExp = robot.getLevelSystem()
+                        .map(feature -> feature.getExpForLevel(level))
+                        .orElse(Integer.MAX_VALUE);
+                if (exp > maxExp) {
+                    return new CommandResult(false, "XP " + exp + " exceeds max " + maxExp + " for level " + level + " on " + Utility.getEntityCustomName(robot));
+                }
+                
+                robot.setCurrentLevel(level);
+                robot.setExp(exp);
+                return new CommandResult(true, "Set " + Utility.getEntityCustomName(robot) + " to level " + level + " with " + exp + "xp");
+            };
+        } // setAllCombat()
+        
+    } // Class: CombatOperations
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerCommands() {
-        return CommandManager.literal("owner")
-                .then(buildOwnerListCommands())
-                .then(buildOwnerAddCommands())
-                .then(buildOwnerSetCommands())
-                .then(CommandManager.literal("teleport")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .executes(NativeCommands::executeOwnerTeleport)
-                                )
-                        )
-                )
-                .then(CommandManager.literal("recall")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .executes(NativeCommands::executeOwnerRecall)
-                                )
-                        )
-                )
-                .then(CommandManager.literal("heal")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .executes(NativeCommands::executeOwnerHeal)
-                                )
-                        )
-                )
-                .then(CommandManager.literal("healall")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .executes(NativeCommands::executeOwnerHealAll)
-                        )
-                )
-                .then(CommandManager.literal("stats")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .executes(NativeCommands::executeOwnerStats)
-                                )
-                        )
-                )
-                .then(CommandManager.literal("transfer")
-                        .then(CommandManager.argument("from_player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("to_player", EntityArgumentType.player())
-                                                .executes(NativeCommands::executeOwnerTransfer)
-                                        )
-                                )
-                        )
-                );
-    } // buildOwnerCommands()
+    /**
+     * Attribute operations factory.
+     * <p>
+     * Provides reusable operations for HP, attack, defense, speed, and combined attributes.
+     */
+    private static class AttributeOperations {
+        
+        static RobotOperation setHP() {
+            return (robot, ctx) -> {
+                int hp = IntegerArgumentType.getInteger(ctx, "value");
+                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
+                robot.setHealth(hp);
+                return new CommandResult(true, "Set HP to " + hp + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setHP()
+        
+        static RobotOperation setAttack() {
+            return (robot, ctx) -> {
+                int attack = IntegerArgumentType.getInteger(ctx, "value");
+                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
+                return new CommandResult(true, "Set attack to " + attack + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setAttack()
+        
+        static RobotOperation setDefense() {
+            return (robot, ctx) -> {
+                int defense = IntegerArgumentType.getInteger(ctx, "value");
+                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
+                return new CommandResult(true, "Set defense to " + defense + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setDefense()
+        
+        static RobotOperation setSpeed() {
+            return (robot, ctx) -> {
+                int speed = IntegerArgumentType.getInteger(ctx, "value");
+                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
+                return new CommandResult(true, "Set speed to " + speed + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setSpeed()
+        
+        static RobotOperation setAllAttributes() {
+            return (robot, ctx) -> {
+                int hp = IntegerArgumentType.getInteger(ctx, "hp");
+                int attack = IntegerArgumentType.getInteger(ctx, "attack");
+                int defense = IntegerArgumentType.getInteger(ctx, "defense");
+                int speed = IntegerArgumentType.getInteger(ctx, "speed");
+                
+                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
+                robot.setHealth(hp);
+                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
+                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
+                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
+                
+                String name = Utility.getEntityCustomName(robot);
+                return new CommandResult(true, "Set attributes (HP:" + hp + " ATK:" + attack + " DEF:" + defense + " SPD:" + speed + ") for " + name);
+            };
+        } // setAllAttributes()
+        
+    } // Class: AttributeOperations
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerListCommands() {
-        return CommandManager.literal("list")
-                .then(CommandManager.literal("player")
-                        .executes(NativeCommands::executeListOwners)
-                )
-                .then(CommandManager.literal("robot")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .executes(NativeCommands::executeListPlayerRobots)
-                        )
-                );
-    } // buildOwnerListCommands ()
+    /**
+     * Protection operations factory.
+     * <p>
+     * Provides reusable operations for fire, fall, blast, projectile, and combined protections.
+     */
+    private static class ProtectionOperations {
+        
+        static RobotOperation setFireProtection() {
+            return (robot, ctx) -> {
+                int level = IntegerArgumentType.getInteger(ctx, "level");
+                robot.setFireProtection(level);
+                return new CommandResult(true, "Set fire protection to " + level + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setFireProtection()
+        
+        static RobotOperation setFallProtection() {
+            return (robot, ctx) -> {
+                int level = IntegerArgumentType.getInteger(ctx, "level");
+                robot.setFallProtection(level);
+                return new CommandResult(true, "Set fall protection to " + level + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setFallProtection()
+        
+        static RobotOperation setBlastProtection() {
+            return (robot, ctx) -> {
+                int level = IntegerArgumentType.getInteger(ctx, "level");
+                robot.setBlastProtection(level);
+                return new CommandResult(true, "Set blast protection to " + level + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setBlastProtection()
+        
+        static RobotOperation setProjectileProtection() {
+            return (robot, ctx) -> {
+                int level = IntegerArgumentType.getInteger(ctx, "level");
+                robot.setProjectileProtection(level);
+                return new CommandResult(true, "Set projectile protection to " + level + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setProjectileProtection()
+        
+        static RobotOperation setAllProtections() {
+            return (robot, ctx) -> {
+                int fire = IntegerArgumentType.getInteger(ctx, "fire");
+                int fall = IntegerArgumentType.getInteger(ctx, "fall");
+                int blast = IntegerArgumentType.getInteger(ctx, "blast");
+                int projectile = IntegerArgumentType.getInteger(ctx, "projectile");
+                
+                robot.setFireProtection(fire);
+                robot.setFallProtection(fall);
+                robot.setBlastProtection(blast);
+                robot.setProjectileProtection(projectile);
+                
+                String name = Utility.getEntityCustomName(robot);
+                return new CommandResult(true, "Set protections (Fire:" + fire + " Fall:" + fall + " Blast:" + blast + " Projectile:" + projectile + ") for " + name);
+            };
+        } // setAllProtections()
+        
+    } // Class: ProtectionOperations
 
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerAddCommands() {
-        return CommandManager.literal("add")
-                .then(buildOwnerAddCombatCommands());
-    } // buildOwnerAddCommands ()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetCommands() {
-        return CommandManager.literal("set")
-                .then(buildOwnerSetCombatCommands())
-                .then(buildOwnerSetAttributeCommands())
-                .then(buildOwnerSetProtectionCommands())
-                .then(buildOwnerSetAppearanceCommands())
-                .then(buildOwnerSetIdentifierCommands());
-    } // buildOwnerSetCommands ()
-
-    // TARGET COMMANDS
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetAddCombatCommands () {
-        return CommandManager.literal("combat")
-                .then(CommandManager.literal("exp")
-                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMinMaxExp)
-                                .executes(NativeCommands::executeTargetAddXP)
-                        )
-                );
-    } // buildTargetAddCombatCommands ()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetCombatCommands () {
-        return CommandManager.literal("combat")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
-                                .suggests(NativeCommands::suggestMinMaxLevel)
-                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestMinMaxExpForLevel)
-                                        .executes(NativeCommands::executeTargetSetAllCombat)
-                                )
-                        )
-                )
-                .then(CommandManager.literal("exp")
-                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMinMaxExp)
-                                .executes(NativeCommands::executeTargetSetXP)
-                        )
-                )
-                .then(CommandManager.literal("level")
-                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
-                                .suggests(NativeCommands::suggestMinMaxLevel)
-                                .executes(NativeCommands::executeTargetSetLevel)
-                        )
-                );
-    } // buildTargetSetCombatCommands ()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetAttributeCommands() {
-        return CommandManager.literal("attribute")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("hp", IntegerArgumentType.integer(1))
-                                .then(CommandManager.argument("attack", IntegerArgumentType.integer(1))
-                                        .then(CommandManager.argument("defense", IntegerArgumentType.integer(0))
-                                                .then(CommandManager.argument("speed", IntegerArgumentType.integer(1))
-                                                        .executes(NativeCommands::executeTargetSetAllAttributes)
-                                                )
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("hp")
-                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                .executes(NativeCommands::executeTargetSetHP)
-                        )
-                )
-                .then(CommandManager.literal("attack")
-                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                .executes(NativeCommands::executeTargetSetAttack)
-                        )
-                )
-                .then(CommandManager.literal("defense")
-                        .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
-                                .executes(NativeCommands::executeTargetSetDefense)
-                        )
-                )
-                .then(CommandManager.literal("speed")
-                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                .executes(NativeCommands::executeTargetSetSpeed)
-                        )
-                );
-    } // buildTargetSetAttributeCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetProtectionCommands() {
-        return CommandManager.literal("protection")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("fire", IntegerArgumentType.integer(0))
-                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fire"))
-                                .then(CommandManager.argument("fall", IntegerArgumentType.integer(0))
-                                        .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fall"))
-                                        .then(CommandManager.argument("blast", IntegerArgumentType.integer(0))
-                                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "blast"))
-                                                .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0))
-                                                        .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "projectile"))
-                                                        .executes(NativeCommands::executeTargetSetAllProtections)
-                                                )
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("fire")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fire"))
-                                .executes(NativeCommands::executeTargetSetFireProtection)
-                        )
-                )
-                .then(CommandManager.literal("fall")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fall"))
-                                .executes(NativeCommands::executeTargetSetFallProtection)
-                        )
-                )
-                .then(CommandManager.literal("blast")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "blast"))
-                                .executes(NativeCommands::executeTargetSetBlastProtection)
-                        )
-                )
-                .then(CommandManager.literal("projectile")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "projectile"))
-                                .executes(NativeCommands::executeTargetSetProjectileProtection)
-                        )
-                );
-    } // buildTargetSetProtectionCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetAppearanceCommands() {
-        return CommandManager.literal("appearance")
-                .then(CommandManager.argument("color", ColorArgumentType.color())
-                        .executes(NativeCommands::executeTargetSetAppearance)
-                );
-    } // buildTargetSetAppearanceCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetIdentifierCommands() {
-        return CommandManager.literal("identifier")
-                .then(CommandManager.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
-                        .executes(NativeCommands::executeTargetSetIdentifier)
-                );
-    } // buildTargetSetIdentifierCommands()
-
-    // CROSS-AIR COMMANDS
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossAddCombatCommands() {
-        return CommandManager.literal("combat")
-                .then(CommandManager.literal("exp")
-                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMaxExp)
-                                .executes(NativeCommands::executeCrosshairAddXP)
-                        )
-                );
-    } // buildRobotCombatCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetCombatCommands () {
-        return CommandManager.literal("combat")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
-                                .suggests(NativeCommands::suggestMaxLevel)
-                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestMaxExpForLevel)
-                                        .executes(NativeCommands::executeSetAllCombat)
-                                )
-                        )
-                )
-                .then(CommandManager.literal("exp")
-                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMaxExp)
-                                .executes(NativeCommands::executeCrosshairSetXP)
-                        )
-                )
-                .then(CommandManager.literal("level")
-                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
-                                .suggests(NativeCommands::suggestMaxLevel)
-                                .executes(NativeCommands::executeCrosshairSetLevel)
-                        )
-                );
-    } // buildCrossSetCombatCommands ()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetAttributeCommands() {
-        return CommandManager.literal("attribute")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("hp", IntegerArgumentType.integer(1))
-                                .then(CommandManager.argument("attack", IntegerArgumentType.integer(1))
-                                        .then(CommandManager.argument("defense", IntegerArgumentType.integer(0))
-                                                .then(CommandManager.argument("speed", IntegerArgumentType.integer(1))
-                                                        .executes(NativeCommands::executeCrosshairSetAllAttributes)
-                                                )
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("hp")
-                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                .executes(NativeCommands::executeCrosshairSetHP)
-                        )
-                )
-                .then(CommandManager.literal("attack")
-                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                .executes(NativeCommands::executeCrosshairSetAttack)
-                        )
-                )
-                .then(CommandManager.literal("defense")
-                        .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
-                                .executes(NativeCommands::executeCrosshairSetDefense)
-                        )
-                )
-                .then(CommandManager.literal("speed")
-                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                .executes(NativeCommands::executeCrosshairSetSpeed)
-                        )
-                );
-    } // buildCrossSetAttributeCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetProtectionCommands() {
-        return CommandManager.literal("protection")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("fire", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMaxFireProtection)
-                                .then(CommandManager.argument("fall", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestMaxFallProtection)
-                                        .then(CommandManager.argument("blast", IntegerArgumentType.integer(0))
-                                                .suggests(NativeCommands::suggestMaxBlastProtection)
-                                                .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0))
-                                                        .suggests(NativeCommands::suggestMaxProjectileProtection)
-                                                        .executes(NativeCommands::executeCrosshairSetAllProtections)
-                                                )
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("fire")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMaxFireProtection)
-                                .executes(NativeCommands::executeCrosshairSetFireProtection)
-                        )
-                )
-                .then(CommandManager.literal("fall")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMaxFallProtection)
-                                .executes(NativeCommands::executeCrosshairSetFallProtection)
-                        )
-                )
-                .then(CommandManager.literal("blast")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMaxBlastProtection)
-                                .executes(NativeCommands::executeCrosshairSetBlastProtection)
-                        )
-                )
-                .then(CommandManager.literal("projectile")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestMaxProjectileProtection)
-                                .executes(NativeCommands::executeCrosshairSetProjectileProtection)
-                        )
-                );
-    } // buildCrossSetProtectionCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetAppearanceCommands() {
-        return CommandManager.literal("appearance")
-                .then(CommandManager.argument("color", ColorArgumentType.color())
-                        .executes(NativeCommands::executeCrosshairSetAppearance)
-                );
-    } // buildCrossSetAppearanceCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetIdentifierCommands() {
-        return CommandManager.literal("identifier")
-                .then(CommandManager.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
-                        .executes(NativeCommands::executeCrosshairSetIdentifier)
-                );
-    } // buildCrossSetIdentifierCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossGetCommands() {
-        return CommandManager.literal("get")
-                .then(CommandManager.literal("owner")
-                        .executes(NativeCommands::executeCrosshairGetOwner)
-                );
-    } // buildCrossGetCommands()
-
-    // OWNER COMMANDS
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerAddCombatCommands() {
-        return CommandManager.literal("combat")
-                .then(CommandManager.literal("exp")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                                .suggests(NativeCommands::suggestOwnerMaxExp)
-                                                .executes(NativeCommands::executeOwnerAddExp)
-                                        )
-                                )
-                        )
-                );
-    } // buildOwnerAddCombatCommands ()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetCombatCommands () {
-        return CommandManager.literal("combat")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
-                                                .suggests(NativeCommands::suggestOwnerMaxLevel)
-                                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
-                                                        .suggests(NativeCommands::suggestOwnerMaxExpForLevel)
-                                                        .executes(NativeCommands::executeOwnerSetAllCombat)
-                                                )
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("exp")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
-                                                .suggests(NativeCommands::suggestOwnerMaxExp)
-                                                .executes(NativeCommands::executeOwnerSetExp)
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("level")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
-                                                .suggests(NativeCommands::suggestOwnerMaxLevel)
-                                                .executes(NativeCommands::executeOwnerSetLevel)
-                                        )
-                                )
-                        )
-                );
-    } // buildOwnerSetCombatCommands ()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetAttributeCommands() {
-        return CommandManager.literal("attribute")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("hp", IntegerArgumentType.integer(1))
-                                                .then(CommandManager.argument("attack", IntegerArgumentType.integer(1))
-                                                        .then(CommandManager.argument("defense", IntegerArgumentType.integer(0))
-                                                                .then(CommandManager.argument("speed", IntegerArgumentType.integer(1))
-                                                                        .executes(NativeCommands::executeOwnerSetAllAttributes)
-                                                                )
-                                                        )
-                                                )
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("hp")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                                .executes(NativeCommands::executeOwnerSetHP)
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("attack")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                                .executes(NativeCommands::executeOwnerSetAttack)
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("defense")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
-                                                .executes(NativeCommands::executeOwnerSetDefense)
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("speed")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                                .executes(NativeCommands::executeOwnerSetSpeed)
-                                        )
-                                )
-                        )
-                );
-    } // buildOwnerSetAttributeCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetProtectionCommands() {
-        return CommandManager.literal("protection")
-                .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("fire", IntegerArgumentType.integer(0))
-                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fire"))
-                                                .then(CommandManager.argument("fall", IntegerArgumentType.integer(0))
-                                                        .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fall"))
-                                                        .then(CommandManager.argument("blast", IntegerArgumentType.integer(0))
-                                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "blast"))
-                                                                .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0))
-                                                                        .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "projectile"))
-                                                                        .executes(NativeCommands::executeOwnerSetAllProtections)
-                                                                )
-                                                        )
-                                                )
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("fire")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fire"))
-                                                .executes(NativeCommands::executeOwnerSetFireProtection)
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("fall")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fall"))
-                                                .executes(NativeCommands::executeOwnerSetFallProtection)
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("blast")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "blast"))
-                                                .executes(NativeCommands::executeOwnerSetBlastProtection)
-                                        )
-                                )
-                        )
-                )
-                .then(CommandManager.literal("projectile")
-                        .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .suggests(NativeCommands::suggestPlayerNames)
-                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                        .suggests(NativeCommands::suggestRobotIndices)
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
-                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "projectile"))
-                                                .executes(NativeCommands::executeOwnerSetProjectileProtection)
-                                        )
-                                )
-                        )
-                );
-    } // buildOwnerSetProtectionCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetAppearanceCommands() {
-        return CommandManager.literal("appearance")
-                .then(CommandManager.argument("player", EntityArgumentType.player())
-                        .suggests(NativeCommands::suggestPlayerNames)
-                        .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestRobotIndices)
-                                .then(CommandManager.argument("color", ColorArgumentType.color())
-                                        .executes(NativeCommands::executeOwnerSetAppearance)
-                                )
-                        )
-                );
-    } // buildOwnerSetAppearanceCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetIdentifierCommands() {
-        return CommandManager.literal("identifier")
-                .then(CommandManager.argument("player", EntityArgumentType.player())
-                        .suggests(NativeCommands::suggestPlayerNames)
-                        .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
-                                .suggests(NativeCommands::suggestRobotIndices)
-                                .then(CommandManager.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
-                                        .executes(NativeCommands::executeOwnerSetIdentifier)
-                                )
-                        )
-                );
-    } // buildOwnerSetIdentifierCommands()
-
-    private static ArgumentBuilder<ServerCommandSource, ?> buildReloadCommand() {
-        return CommandManager.literal("reload")
-                .executes(NativeCommands::executeReload);
-    } // buildReloadCommand()
+    /**
+     * Utility operations factory.
+     * <p>
+     * Provides reusable operations for heal, recall, appearance, and identifier.
+     */
+    private static class UtilityOperations {
+        
+        static RobotOperation heal() {
+            return (robot, ctx) -> {
+                robot.setHealth(robot.getMaxHealth());
+                return new CommandResult(true, "Healed " + Utility.getEntityCustomName(robot));
+            };
+        } // heal()
+        
+        static RobotOperation recall() {
+            return (robot, ctx) -> {
+                PlayerEntity player = ctx.getSource().getPlayerOrThrow();
+                robot.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
+                return new CommandResult(true, "Recalled " + Utility.getEntityCustomName(robot));
+            };
+        } // recall()
+        
+        static RobotOperation setAppearance() {
+            return (robot, ctx) -> {
+                net.msymbios.llovelyr.framework.entity.enums.EntityTexture color = ctx.getArgument("color", net.msymbios.llovelyr.framework.entity.enums.EntityTexture.class);
+                robot.setTexture(color);
+                String colorName = color.Name().toLowerCase();
+                return new CommandResult(true, "Set color to " + colorName + " for " + Utility.getEntityCustomName(robot));
+            };
+        } // setAppearance()
+        
+        static RobotOperation setIdentifier() {
+            return (robot, ctx) -> {
+                String nameString = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name");
+                Text name = Text.literal(nameString);
+                robot.setCustomName(name);
+                robot.setCustomNameVisible(true);
+                return new CommandResult(true, "Set name to '" + nameString + "' for " + Utility.getEntityCustomName(robot));
+            };
+        } // setIdentifier()
+        
+    } // Class: UtilityOperations
 
     // -- Commands Suggestions --
 
@@ -704,7 +421,7 @@ public class NativeCommands {
      * Displays robot's max level as suggestion, providing context-aware
      * command completion.
      */
-    private static CompletableFuture<Suggestions> suggestMaxLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMaxLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = ctx.getSource().getPlayerOrThrow();
             LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
@@ -726,7 +443,7 @@ public class NativeCommands {
      * Displays XP required for next level, providing context-aware
      * command completion.
      */
-    private static CompletableFuture<Suggestions> suggestMaxExp(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMaxExp(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = ctx.getSource().getPlayerOrThrow();
             LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
@@ -747,7 +464,7 @@ public class NativeCommands {
      * Dynamically calculates max XP based on the level argument value,
      * providing accurate suggestions for the target level.
      */
-    private static CompletableFuture<Suggestions> suggestMaxExpForLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMaxExpForLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = ctx.getSource().getPlayerOrThrow();
             LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
@@ -778,7 +495,7 @@ public class NativeCommands {
      * Finds the lowest max level across selected entities - ensures suggested
      * value works for all robots.
      */
-    private static CompletableFuture<Suggestions> suggestMinMaxLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMinMaxLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
             int minMaxLevel = Integer.MAX_VALUE;
@@ -807,7 +524,7 @@ public class NativeCommands {
      * Finds the lowest max XP across selected entities - ensures suggested
      * value works for all robots at their current levels.
      */
-    private static CompletableFuture<Suggestions> suggestMinMaxExp(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMinMaxExp(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
             int minMaxExp = Integer.MAX_VALUE;
@@ -836,7 +553,7 @@ public class NativeCommands {
      * Finds the lowest max XP across selected entities for the specified level -
      * ensures suggested value works for all robots at that level.
      */
-    private static CompletableFuture<Suggestions> suggestMinMaxExpForLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMinMaxExpForLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
             int targetLevel;
@@ -872,7 +589,7 @@ public class NativeCommands {
      * <p>
      * Queries registry for all owners and suggests their names.
      */
-    private static CompletableFuture<Suggestions> suggestPlayerNames(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestPlayerNames(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             ServerWorld world = ctx.getSource().getWorld();
             OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
@@ -893,7 +610,7 @@ public class NativeCommands {
      * <p>
      * Displays robot count and suggests valid indices based on player's robots.
      */
-    private static CompletableFuture<Suggestions> suggestRobotIndices(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestRobotIndices(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
             ServerWorld world = (ServerWorld) player.getWorld();
@@ -931,7 +648,7 @@ public class NativeCommands {
      * <p>
      * Retrieves robot from registry and displays its max level.
      */
-    private static CompletableFuture<Suggestions> suggestOwnerMaxLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestOwnerMaxLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
@@ -952,7 +669,7 @@ public class NativeCommands {
      * <p>
      * Retrieves robot from registry and displays max XP for current level.
      */
-    private static CompletableFuture<Suggestions> suggestOwnerMaxExp(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestOwnerMaxExp(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
@@ -973,7 +690,7 @@ public class NativeCommands {
      * <p>
      * Dynamically calculates max XP based on level argument and robot type.
      */
-    private static CompletableFuture<Suggestions> suggestOwnerMaxExpForLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestOwnerMaxExpForLevel(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
@@ -1000,7 +717,7 @@ public class NativeCommands {
     /**
      * Suggests max fire protection for crosshair robot.
      */
-    private static CompletableFuture<Suggestions> suggestMaxFireProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMaxFireProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = ctx.getSource().getPlayerOrThrow();
             LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
@@ -1018,7 +735,7 @@ public class NativeCommands {
     /**
      * Suggests max fall protection for crosshair robot.
      */
-    private static CompletableFuture<Suggestions> suggestMaxFallProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMaxFallProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = ctx.getSource().getPlayerOrThrow();
             LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
@@ -1036,7 +753,7 @@ public class NativeCommands {
     /**
      * Suggests max blast protection for crosshair robot.
      */
-    private static CompletableFuture<Suggestions> suggestMaxBlastProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMaxBlastProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = ctx.getSource().getPlayerOrThrow();
             LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
@@ -1054,7 +771,7 @@ public class NativeCommands {
     /**
      * Suggests max projectile protection for crosshair robot.
      */
-    private static CompletableFuture<Suggestions> suggestMaxProjectileProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    protected static CompletableFuture<Suggestions> suggestMaxProjectileProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
         try {
             PlayerEntity player = ctx.getSource().getPlayerOrThrow();
             LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
@@ -1070,215 +787,9 @@ public class NativeCommands {
     } // suggestMaxProjectileProtection()
 
     /**
-     * Suggests minimum max protection among all targeted robots.
-     */
-    private static CompletableFuture<Suggestions> suggestMinMaxFireProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        try {
-            Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-            int minMaxLevel = Integer.MAX_VALUE;
-            int robotCount = 0;
-
-            for (Entity entity : entities) {
-                if (entity instanceof LovelyRobotEntity robot) {
-                    int maxLevel = robot.getProtectionSystem()
-                            .map(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature::getMaxFireProtection)
-                            .orElse(80);
-                    minMaxLevel = Math.min(minMaxLevel, maxLevel);
-                    robotCount++;
-                }
-            }
-
-            if (robotCount > 0 && minMaxLevel != Integer.MAX_VALUE) {
-                builder.suggest(minMaxLevel, Text.literal("Safe max fire protection for all " + robotCount + " robot(s)"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestMinMaxFireProtection()
-
-    /**
-     * Suggests minimum max fall protection among all targeted robots.
-     */
-    private static CompletableFuture<Suggestions> suggestMinMaxFallProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        try {
-            Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-            int minMaxLevel = Integer.MAX_VALUE;
-            int robotCount = 0;
-
-            for (Entity entity : entities) {
-                if (entity instanceof LovelyRobotEntity robot) {
-                    int maxLevel = robot.getProtectionSystem()
-                            .map(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature::getMaxFallProtection)
-                            .orElse(80);
-                    minMaxLevel = Math.min(minMaxLevel, maxLevel);
-                    robotCount++;
-                }
-            }
-
-            if (robotCount > 0 && minMaxLevel != Integer.MAX_VALUE) {
-                builder.suggest(minMaxLevel, Text.literal("Safe max fall protection for all " + robotCount + " robot(s)"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestMinMaxFallProtection()
-
-    /**
-     * Suggests minimum max blast protection among all targeted robots.
-     */
-    private static CompletableFuture<Suggestions> suggestMinMaxBlastProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        try {
-            Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-            int minMaxLevel = Integer.MAX_VALUE;
-            int robotCount = 0;
-
-            for (Entity entity : entities) {
-                if (entity instanceof LovelyRobotEntity robot) {
-                    int maxLevel = robot.getProtectionSystem()
-                            .map(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature::getMaxBlastProtection)
-                            .orElse(80);
-                    minMaxLevel = Math.min(minMaxLevel, maxLevel);
-                    robotCount++;
-                }
-            }
-
-            if (robotCount > 0 && minMaxLevel != Integer.MAX_VALUE) {
-                builder.suggest(minMaxLevel, Text.literal("Safe max blast protection for all " + robotCount + " robot(s)"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestMinMaxBlastProtection()
-
-    /**
-     * Suggests minimum max projectile protection among all targeted robots.
-     */
-    private static CompletableFuture<Suggestions> suggestMinMaxProjectileProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        try {
-            Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-            int minMaxLevel = Integer.MAX_VALUE;
-            int robotCount = 0;
-
-            for (Entity entity : entities) {
-                if (entity instanceof LovelyRobotEntity robot) {
-                    int maxLevel = robot.getProtectionSystem()
-                            .map(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature::getMaxProjectileProtection)
-                            .orElse(80);
-                    minMaxLevel = Math.min(minMaxLevel, maxLevel);
-                    robotCount++;
-                }
-            }
-
-            if (robotCount > 0 && minMaxLevel != Integer.MAX_VALUE) {
-                builder.suggest(minMaxLevel, Text.literal("Safe max projectile protection for all " + robotCount + " robot(s)"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestMinMaxProjectileProtection()
-
-    /**
-     * Suggests max fire protection for owner's robot.
-     */
-    private static CompletableFuture<Suggestions> suggestOwnerMaxFireProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        try {
-            PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-            
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
-            if (robot != null) {
-                int maxLevel = robot.getProtectionSystem()
-                        .map(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature::getMaxFireProtection)
-                        .orElse(80);
-                builder.suggest(maxLevel, Text.literal("Maximum fire protection for this robot"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestOwnerMaxFireProtection()
-
-    /**
-     * Suggests max fall protection for owner's robot.
-     */
-    private static CompletableFuture<Suggestions> suggestOwnerMaxFallProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        try {
-            PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-            
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
-            if (robot != null) {
-                int maxLevel = robot.getProtectionSystem()
-                        .map(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature::getMaxFallProtection)
-                        .orElse(80);
-                builder.suggest(maxLevel, Text.literal("Maximum fall protection for this robot"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestOwnerMaxFallProtection()
-
-    /**
-     * Suggests max blast protection for owner's robot.
-     */
-    private static CompletableFuture<Suggestions> suggestOwnerMaxBlastProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        try {
-            PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-            
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
-            if (robot != null) {
-                int maxLevel = robot.getProtectionSystem()
-                        .map(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature::getMaxBlastProtection)
-                        .orElse(80);
-                builder.suggest(maxLevel, Text.literal("Maximum blast protection for this robot"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestOwnerMaxBlastProtection()
-
-    /**
-     * Suggests max projectile protection for owner's robot.
-     */
-    private static CompletableFuture<Suggestions> suggestOwnerMaxProjectileProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
-        try {
-            PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-            
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
-            if (robot != null) {
-                int maxLevel = robot.getProtectionSystem()
-                        .map(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature::getMaxProjectileProtection)
-                        .orElse(80);
-                builder.suggest(maxLevel, Text.literal("Maximum projectile protection for this robot"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestOwnerMaxProjectileProtection()
-
-    /**
-     * Suggests max protection level for targeted robot.
-     * <p>
-     * Displays robot's max protection level based on protection type.
-     */
-    private static CompletableFuture<Suggestions> suggestMaxProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder, String protectionType) {
-        try {
-            PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-            LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
-            
-            if (robot != null) {
-                int maxLevel = robot.nativeEntity.getFeature(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature.class)
-                        .map(feature -> switch (protectionType) {
-                            case "fire" -> feature.getMaxFireProtection();
-                            case "fall" -> feature.getMaxFallProtection();
-                            case "blast" -> feature.getMaxBlastProtection();
-                            case "projectile" -> feature.getMaxProjectileProtection();
-                            default -> 80;
-                        })
-                        .orElse(80);
-                builder.suggest(maxLevel, Text.literal("Maximum " + protectionType + " protection for this robot"));
-            }
-        } catch (Exception ignored) {}
-        return builder.buildFuture();
-    } // suggestMaxProtection()
-
-    /**
      * Suggests minimum max protection level among all targeted robots.
      */
-    private static CompletableFuture<Suggestions> suggestMinMaxProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder, String protectionType) {
+    protected static CompletableFuture<Suggestions> suggestMinMaxProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder, String protectionType) {
         try {
             Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
             int minMaxLevel = Integer.MAX_VALUE;
@@ -1310,7 +821,7 @@ public class NativeCommands {
     /**
      * Suggests max protection level for owner's robot at specified index.
      */
-    private static CompletableFuture<Suggestions> suggestOwnerMaxProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder, String protectionType) {
+    protected static CompletableFuture<Suggestions> suggestOwnerMaxProtection(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder, String protectionType) {
         try {
             PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
@@ -1334,270 +845,173 @@ public class NativeCommands {
 
     // -- Command Executors --
 
-    /**
-     * Adds experience points to robot in crosshair.
-     * <p>
-     * No validation - allows adding any amount. Useful for rewarding robots
-     * without level restrictions.
-     */
-    private static int executeCrosshairAddXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
+    // -- Crosshair Commands --
 
-        return executeOnRobot(ctx, robot -> {
-            robot.addExp(xp);
-            return new CommandResult(true, "Add " + xp + "xp to " + Utility.getEntityCustomName(robot));
-        });
+    /**
+     * Adds XP to crosshair robot with ownership validation.
+     * <p>
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
+     */
+    protected static int executeCrosshairAddXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, CombatOperations.addXP(), true);
     } // executeCrosshairAddXP()
 
     /**
-     * Sets exact experience value for robot in crosshair.
+     * Sets exact XP for crosshair robot with validation against level cap.
      * <p>
-     * Validates against max XP for current level to prevent overflow.
-     * Use for precise XP control during testing or balancing.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
-        
-        return executeOnRobot(ctx, robot -> {
-            int maxXp = robot.getLevelSystem()
-                    .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
-                    .orElse(Integer.MAX_VALUE);
-
-            if (xp > maxXp) {
-                return new CommandResult(false, "Exp " + xp + " exceeds maximum requirement of " + maxXp + "xp for current level!");
-            }
-
-            robot.setExp(xp);
-            return new CommandResult(true, "Set " + xp + "xp to " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, CombatOperations.setXP(), true);
     } // executeCrosshairSetXP()
 
     /**
-     * Sets robot level directly, bypassing XP progression.
+     * Sets level for crosshair robot with validation against max level.
      * <p>
-     * Validates against robot type's max level from LevelFeature.
-     * Useful for testing high-level robot behavior or quick progression.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int level = IntegerArgumentType.getInteger(ctx, "level_value");
-        
-        return executeOnRobot(ctx, robot -> {
-            int maxLevel = robot.getLevelSystem()
-                    .map(LevelFeature::getMaxLevel)
-                    .orElse(200);
-
-            if (level > maxLevel) {
-                return new CommandResult(false, "Level " + level + " exceeds maximum requirement of " + maxLevel + " for this robot!");
-            }
-
-            robot.setCurrentLevel(level);
-            return new CommandResult(true, "Set level " + level + " to " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, CombatOperations.setLevel(), true);
     } // executeCrosshairSetLevel()
 
     /**
-     * Sets HP attribute for robot in crosshair.
+     * Sets both level and XP for crosshair robot atomically.
      * <p>
-     * Sets max health and heals robot to full HP.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetHP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int hp = IntegerArgumentType.getInteger(ctx, "value");
+    protected static int executeSetAllCombat(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, CombatOperations.setAllCombat(), true);
+    } // executeSetAllCombat()
 
-        return executeOnRobot(ctx, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-            robot.setHealth(hp);
-            return new CommandResult(true, "Set HP to " + hp + " for " + Utility.getEntityCustomName(robot));
-        });
+    /**
+     * Sets HP attribute for crosshair robot, healing to full.
+     * <p>
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
+     */
+    protected static int executeCrosshairSetHP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, AttributeOperations.setHP(), true);
     } // executeCrosshairSetHP()
 
     /**
-     * Sets attack attribute for robot in crosshair.
+     * Sets attack damage attribute for crosshair robot.
+     * <p>
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetAttack(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int attack = IntegerArgumentType.getInteger(ctx, "value");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
-            return new CommandResult(true, "Set attack to " + attack + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetAttack(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, AttributeOperations.setAttack(), true);
     } // executeCrosshairSetAttack()
 
     /**
-     * Sets defense attribute for robot in crosshair.
+     * Sets armor defense attribute for crosshair robot.
+     * <p>
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetDefense(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int defense = IntegerArgumentType.getInteger(ctx, "value");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
-            return new CommandResult(true, "Set defense to " + defense + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetDefense(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, AttributeOperations.setDefense(), true);
     } // executeCrosshairSetDefense()
 
     /**
-     * Sets speed attribute for robot in crosshair.
+     * Sets movement speed attribute for crosshair robot.
      * <p>
-     * Speed value is divided by 10 for Minecraft's movement speed scale.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
+     * <i>Note:</i> Value divided by 10 for Minecraft's speed scale.
      */
-    private static int executeCrosshairSetSpeed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int speed = IntegerArgumentType.getInteger(ctx, "value");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
-            return new CommandResult(true, "Set speed to " + speed + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetSpeed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, AttributeOperations.setSpeed(), true);
     } // executeCrosshairSetSpeed()
 
     /**
-     * Sets all attributes in one command for robot in crosshair.
+     * Sets all attributes atomically for crosshair robot.
      * <p>
-     * Batch operation for efficient attribute configuration.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetAllAttributes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int hp = IntegerArgumentType.getInteger(ctx, "hp");
-        int attack = IntegerArgumentType.getInteger(ctx, "attack");
-        int defense = IntegerArgumentType.getInteger(ctx, "defense");
-        int speed = IntegerArgumentType.getInteger(ctx, "speed");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-            robot.setHealth(hp);
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
-
-            String name = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Set attributes (HP:" + hp + " ATK:" + attack + " DEF:" + defense + " SPD:" + speed + ") for " + name);
-        });
+    protected static int executeCrosshairSetAllAttributes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, AttributeOperations.setAllAttributes(), true);
     } // executeCrosshairSetAllAttributes()
 
     /**
-     * Sets fire protection for robot in crosshair.
+     * Sets fire protection level for crosshair robot.
      * <p>
-     * Fire protection reduces damage from fire, lava, and burning.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetFireProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.setFireProtection(level);
-            return new CommandResult(true, "Set fire protection to " + level + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetFireProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, ProtectionOperations.setFireProtection(), true);
     } // executeCrosshairSetFireProtection()
 
     /**
-     * Sets fall protection for robot in crosshair.
+     * Sets fall protection level for crosshair robot.
      * <p>
-     * Fall protection reduces damage from falling.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetFallProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.setFallProtection(level);
-            return new CommandResult(true, "Set fall protection to " + level + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetFallProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, ProtectionOperations.setFallProtection(), true);
     } // executeCrosshairSetFallProtection()
 
     /**
-     * Sets blast protection for robot in crosshair.
+     * Sets blast protection level for crosshair robot.
      * <p>
-     * Blast protection reduces damage from explosions.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetBlastProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.setBlastProtection(level);
-            return new CommandResult(true, "Set blast protection to " + level + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetBlastProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, ProtectionOperations.setBlastProtection(), true);
     } // executeCrosshairSetBlastProtection()
 
     /**
-     * Sets projectile protection for robot in crosshair.
+     * Sets projectile protection level for crosshair robot.
      * <p>
-     * Projectile protection reduces damage from arrows and other projectiles.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetProjectileProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.setProjectileProtection(level);
-            return new CommandResult(true, "Set projectile protection to " + level + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetProjectileProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, ProtectionOperations.setProjectileProtection(), true);
     } // executeCrosshairSetProjectileProtection()
 
     /**
-     * Sets all protections in one command for robot in crosshair.
+     * Sets all protection levels atomically for crosshair robot.
      * <p>
-     * Batch operation for efficient protection configuration.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetAllProtections(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int fire = IntegerArgumentType.getInteger(ctx, "fire");
-        int fall = IntegerArgumentType.getInteger(ctx, "fall");
-        int blast = IntegerArgumentType.getInteger(ctx, "blast");
-        int projectile = IntegerArgumentType.getInteger(ctx, "projectile");
-
-        return executeOnRobot(ctx, robot -> {
-            robot.setFireProtection(fire);
-            robot.setFallProtection(fall);
-            robot.setBlastProtection(blast);
-            robot.setProjectileProtection(projectile);
-
-            String name = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Set protections (Fire:" + fire + " Fall:" + fall + " Blast:" + blast + " Projectile:" + projectile + ") for " + name);
-        });
+    protected static int executeCrosshairSetAllProtections(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, ProtectionOperations.setAllProtections(), true);
     } // executeCrosshairSetAllProtections()
 
     /**
-     * Sets appearance (color/texture) for robot in crosshair.
+     * Sets texture/color appearance for crosshair robot.
      * <p>
-     * Changes robot's visual appearance immediately.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetAppearance(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        net.msymbios.llovelyr.framework.entity.enums.EntityTexture color = ctx.getArgument("color", net.msymbios.llovelyr.framework.entity.enums.EntityTexture.class);
-
-        return executeOnRobot(ctx, robot -> {
-            robot.setTexture(color);
-            String colorName = color.Name().toLowerCase();
-            return new CommandResult(true, "Set color to " + colorName + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetAppearance(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, UtilityOperations.setAppearance(), true);
     } // executeCrosshairSetAppearance()
 
     /**
-     * Sets identifier (custom name) for robot in crosshair.
+     * Sets custom name for crosshair robot with visibility enabled.
      * <p>
-     * Sets custom name and makes it visible above the robot.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairSetIdentifier(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        String nameString = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name");
-
-        return executeOnRobot(ctx, robot -> {
-            Text name = Text.literal(nameString);
-            robot.setCustomName(name);
-            robot.setCustomNameVisible(true);
-            return new CommandResult(true, "Set name to '" + nameString + "' for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeCrosshairSetIdentifier(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, UtilityOperations.setIdentifier(), true);
     } // executeCrosshairSetIdentifier()
 
     /**
-     * Gets owner of robot in crosshair.
+     * Retrieves owner information for crosshair robot.
      * <p>
-     * Displays current owner name or "No owner" if untamed.
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairGetOwner(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        return executeOnRobot(ctx, robot -> {
+    protected static int executeCrosshairGetOwner(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, (robot, c) -> {
             PlayerEntity owner = (PlayerEntity) robot.getOwner();
             String ownerName = owner != null ? owner.getName().getString() : "No owner";
             String robotName = Utility.getEntityCustomName(robot);
             return new CommandResult(true, robotName + " owner: " + ownerName);
-        });
+        }, true);
     } // executeCrosshairGetOwner()
 
     /**
-     * Displays comprehensive stats for robot in crosshair.
+     * Displays comprehensive stats for crosshair robot.
+     * <p>
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    protected static int executeCrosshairStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         PlayerEntity player = ctx.getSource().getPlayerOrThrow();
         LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
 
@@ -1611,561 +1025,189 @@ public class NativeCommands {
     } // executeCrosshairStats()
 
     /**
-     * Heals robot in crosshair to full health.
+     * Heals crosshair robot to full health.
+     * <p>
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        return executeOnRobot(ctx, robot -> {
-            robot.setHealth(robot.getMaxHealth());
-            String robotName = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Healed " + robotName);
-        });
+    protected static int executeCrosshairHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, UtilityOperations.heal(), true);
     } // executeCrosshairHeal()
 
     /**
-     * Recalls robot in crosshair to command source location.
+     * Teleports crosshair robot to command source location.
+     * <p>
+     * <b>Selection:</b> Raycast-based targeting within 5 blocks.
      */
-    private static int executeCrosshairRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        net.minecraft.server.network.ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        
-        return executeOnRobot(ctx, robot -> {
-            robot.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
-            String robotName = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Recalled " + robotName);
-        });
+    protected static int executeCrosshairRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, CROSSHAIR_SELECTOR, UtilityOperations.recall(), true);
     } // executeCrosshairRecall()
 
-    /**
-     * Sets both level and experience in one command.
-     * <p>
-     * Validates both values against robot's limits. Convenient for quickly
-     * configuring robot combat stats during testing or setup.
-     */
-    private static int executeSetAllCombat(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int exp = IntegerArgumentType.getInteger(ctx, "exp");
-        
-        return executeOnRobot(ctx, robot -> {
-            // Validate level
-            int maxLevel = robot.getLevelSystem()
-                    .map(LevelFeature::getMaxLevel)
-                    .orElse(200);
-
-            if (level > maxLevel) {
-                return new CommandResult(false, "Level " + level + " exceeds maximum requirement of " + maxLevel + " for this robot!");
-            }
-
-            // Validate exp (after setting level, check against new level's max)
-            int maxExp = robot.getLevelSystem()
-                    .map(feature -> feature.getExpForLevel(level))
-                    .orElse(Integer.MAX_VALUE);
-
-            if (exp > maxExp) {
-                return new CommandResult(false, "Exp " + exp + " exceeds maximum requirement of " + maxExp + "xp for level " + level + "!");
-            }
-
-            // Set both values
-            robot.setCurrentLevel(level);
-            robot.setExp(exp);
-            
-            String name = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Set " + name + " to level " + level + " with " + exp + "xp");
-        });
-    } // executeSetAllCombat()
-
-    // -- Target Command Executors --
+    // -- Target Commands --
 
     /**
-     * Adds experience to multiple targeted robots.
+     * Adds XP to multiple targeted robots without ownership validation.
      * <p>
-     * No validation - surplus XP triggers level ups automatically.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetAddXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.addExp(xp);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Added " + xp + "xp to " + finalCount + " robot(s)"), true
-        );
-        return count;
+    protected static int executeTargetAddXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, CombatOperations.addXP(), false);
     } // executeTargetAddXP()
 
     /**
-     * Sets exact XP for multiple targeted robots.
+     * Sets exact XP for multiple targeted robots with per-robot validation.
      * <p>
-     * Validates against each robot's current level max XP.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
-        int count = 0;
-        int skipped = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                int maxExp = robot.getLevelSystem()
-                        .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
-                        .orElse(Integer.MAX_VALUE);
-
-                if (xp > maxExp) {
-                    skipped++;
-                    continue;
-                }
-
-                robot.setExp(xp);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        int finalSkipped = skipped;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set " + xp + "xp for " + finalCount + " robot(s)" + 
-                        (finalSkipped > 0 ? " (" + finalSkipped + " skipped - XP too high)" : "")), 
-                true
-        );
-        return count;
+    protected static int executeTargetSetXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, CombatOperations.setXP(), false);
     } // executeTargetSetXP()
 
     /**
-     * Sets level for multiple targeted robots.
+     * Sets level for multiple targeted robots with per-robot validation.
      * <p>
-     * Validates against each robot's max level.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int level = IntegerArgumentType.getInteger(ctx, "level_value");
-        int count = 0;
-        int skipped = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                int maxLevel = robot.getLevelSystem()
-                        .map(LevelFeature::getMaxLevel)
-                        .orElse(200);
-
-                if (level > maxLevel) {
-                    skipped++;
-                    continue;
-                }
-
-                robot.setCurrentLevel(level);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        int finalSkipped = skipped;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set level " + level + " for " + finalCount + " robot(s)" + 
-                        (finalSkipped > 0 ? " (" + finalSkipped + " skipped - level too high)" : "")), 
-                true
-        );
-        return count;
+    protected static int executeTargetSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, CombatOperations.setLevel(), false);
     } // executeTargetSetLevel()
 
     /**
-     * Sets both level and XP for multiple targeted robots.
+     * Sets both level and XP atomically for multiple targeted robots.
      * <p>
-     * Validates both values against each robot's limits.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetAllCombat(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int exp = IntegerArgumentType.getInteger(ctx, "exp");
-        int count = 0;
-        int skipped = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                int maxLevel = robot.getLevelSystem()
-                        .map(LevelFeature::getMaxLevel)
-                        .orElse(200);
-
-                if (level > maxLevel) {
-                    skipped++;
-                    continue;
-                }
-
-                int maxExp = robot.getLevelSystem()
-                        .map(feature -> feature.getExpForLevel(level))
-                        .orElse(Integer.MAX_VALUE);
-
-                if (exp > maxExp) {
-                    skipped++;
-                    continue;
-                }
-
-                robot.setCurrentLevel(level);
-                robot.setExp(exp);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        int finalSkipped = skipped;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set level " + level + " with " + exp + "xp for " + finalCount + " robot(s)" + 
-                        (finalSkipped > 0 ? " (" + finalSkipped + " skipped - values too high)" : "")), 
-                true
-        );
-        return count;
+    protected static int executeTargetSetAllCombat(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, CombatOperations.setAllCombat(), false);
     } // executeTargetSetAllCombat()
 
     /**
-     * Sets HP for multiple targeted robots.
+     * Sets HP attribute for multiple targeted robots.
+     * <p>
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetHP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int hp = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-                robot.setHealth(hp);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set HP to " + hp + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetHP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, AttributeOperations.setHP(), false);
     } // executeTargetSetHP()
 
     /**
-     * Sets attack for multiple targeted robots.
+     * Sets attack damage attribute for multiple targeted robots.
+     * <p>
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetAttack(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int attack = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set attack to " + attack + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetAttack(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, AttributeOperations.setAttack(), false);
     } // executeTargetSetAttack()
 
     /**
-     * Sets defense for multiple targeted robots.
+     * Sets armor defense attribute for multiple targeted robots.
+     * <p>
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetDefense(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int defense = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set defense to " + defense + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetDefense(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, AttributeOperations.setDefense(), false);
     } // executeTargetSetDefense()
 
     /**
-     * Sets speed for multiple targeted robots.
+     * Sets movement speed attribute for multiple targeted robots.
      * <p>
-     * Speed value is divided by 10 for Minecraft's movement speed scale.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetSpeed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int speed = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set speed to " + speed + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetSpeed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, AttributeOperations.setSpeed(), false);
     } // executeTargetSetSpeed()
 
     /**
-     * Sets all attributes for multiple targeted robots.
+     * Sets all attributes atomically for multiple targeted robots.
      * <p>
-     * Batch operation for efficient attribute configuration.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetAllAttributes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int hp = IntegerArgumentType.getInteger(ctx, "hp");
-        int attack = IntegerArgumentType.getInteger(ctx, "attack");
-        int defense = IntegerArgumentType.getInteger(ctx, "defense");
-        int speed = IntegerArgumentType.getInteger(ctx, "speed");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-                robot.setHealth(hp);
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set attributes (HP:" + hp + " ATK:" + attack + " DEF:" + defense + " SPD:" + speed + ") for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetAllAttributes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, AttributeOperations.setAllAttributes(), false);
     } // executeTargetSetAllAttributes()
 
     /**
-     * Sets fire protection for multiple targeted robots.
+     * Sets fire protection level for multiple targeted robots.
      * <p>
-     * Fire protection reduces damage from fire, lava, and burning.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetFireProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setFireProtection(level);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set fire protection to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetFireProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, ProtectionOperations.setFireProtection(), false);
     } // executeTargetSetFireProtection()
 
     /**
-     * Sets fall protection for multiple targeted robots.
+     * Sets fall protection level for multiple targeted robots.
      * <p>
-     * Fall protection reduces damage from falling.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetFallProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setFallProtection(level);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set fall protection to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetFallProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, ProtectionOperations.setFallProtection(), false);
     } // executeTargetSetFallProtection()
 
     /**
-     * Sets blast protection for multiple targeted robots.
+     * Sets blast protection level for multiple targeted robots.
      * <p>
-     * Blast protection reduces damage from explosions.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetBlastProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setBlastProtection(level);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set blast protection to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetBlastProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, ProtectionOperations.setBlastProtection(), false);
     } // executeTargetSetBlastProtection()
 
     /**
-     * Sets projectile protection for multiple targeted robots.
+     * Sets projectile protection level for multiple targeted robots.
      * <p>
-     * Projectile protection reduces damage from arrows and other projectiles.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetProjectileProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setProjectileProtection(level);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set projectile protection to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetProjectileProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, ProtectionOperations.setProjectileProtection(), false);
     } // executeTargetSetProjectileProtection()
 
     /**
-     * Sets all protections for multiple targeted robots.
+     * Sets all protection levels atomically for multiple targeted robots.
      * <p>
-     * Batch operation for efficient protection configuration.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetAllProtections(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int fire = IntegerArgumentType.getInteger(ctx, "fire");
-        int fall = IntegerArgumentType.getInteger(ctx, "fall");
-        int blast = IntegerArgumentType.getInteger(ctx, "blast");
-        int projectile = IntegerArgumentType.getInteger(ctx, "projectile");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setFireProtection(fire);
-                robot.setFallProtection(fall);
-                robot.setBlastProtection(blast);
-                robot.setProjectileProtection(projectile);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set protections (Fire:" + fire + " Fall:" + fall + " Blast:" + blast + " Projectile:" + projectile + ") for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetAllProtections(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, ProtectionOperations.setAllProtections(), false);
     } // executeTargetSetAllProtections()
 
     /**
-     * Sets appearance for multiple targeted robots.
+     * Sets texture/color appearance for multiple targeted robots.
      * <p>
-     * Changes visual appearance for all selected robots.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetAppearance(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        net.msymbios.llovelyr.framework.entity.enums.EntityTexture color = ctx.getArgument("color", net.msymbios.llovelyr.framework.entity.enums.EntityTexture.class);
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setTexture(color);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        String colorName = color.Name().toLowerCase();
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set color to " + colorName + " for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetAppearance(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, UtilityOperations.setAppearance(), false);
     } // executeTargetSetAppearance()
 
     /**
-     * Sets identifier (custom name) for multiple targeted robots.
+     * Sets custom name for multiple targeted robots with visibility enabled.
      * <p>
-     * Sets custom name and makes it visible for all selected robots.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetSetIdentifier(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        String nameString = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name");
-        Text name = Text.literal(nameString);
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setCustomName(name);
-                robot.setCustomNameVisible(true);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set name to '" + nameString + "' for " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetSetIdentifier(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, UtilityOperations.setIdentifier(), false);
     } // executeTargetSetIdentifier()
 
     /**
      * Heals all targeted robots to full health.
      * <p>
-     * Batch operation for efficient healing of multiple robots.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setHealth(robot.getMaxHealth());
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Healed " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, UtilityOperations.heal(), false);
     } // executeTargetHeal()
 
     /**
      * Teleports command source to first targeted robot.
      * <p>
-     * If multiple robots targeted, teleports to the first one.
+     * <b>Selection:</b> Only first robot in selector is used.
      */
-    private static int executeTargetTeleport(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    protected static int executeTargetTeleport(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
         
         for (Entity entity : entities) {
             if (entity instanceof LovelyRobotEntity robot) {
-                net.minecraft.server.network.ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+                ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
                 player.teleport(
                         (ServerWorld) robot.getWorld(),
                         robot.getX(),
@@ -2186,379 +1228,189 @@ public class NativeCommands {
     } // executeTargetTeleport()
 
     /**
-     * Recalls all targeted robots to command source location.
+     * Teleports all targeted robots to command source location.
      * <p>
-     * Batch operation for efficient robot repositioning.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
      */
-    private static int executeTargetRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        net.minecraft.server.network.ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Recalled " + finalCount + " robot(s)"),
-                true
-        );
-        return count;
+    protected static int executeTargetRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, UtilityOperations.recall(), false);
     } // executeTargetRecall()
 
     /**
      * Transfers ownership of all targeted robots to specified player.
      * <p>
-     * Batch operation for efficient ownership transfer.
+     * <b>Selection:</b> Entity selector argument supports multiple robots.
+     * <i>Note:</i> Unregisters from old owner and re-registers automatically.
      */
-    private static int executeTargetTransfer(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "targets");
-        PlayerEntity toPlayer = EntityArgumentType.getPlayer(ctx, "to_player");
-        int count = 0;
+    protected static int executeTargetTransfer(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, TARGET_SELECTOR, (robot, c) -> {
+            PlayerEntity toPlayer = EntityArgumentType.getPlayer(c, "to_player");
+            
+            // Unregister from old owner
+            ServerWorld world = (ServerWorld) robot.getWorld();
+            OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+            registry.unregisterRobot(robot.getUuid());
 
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                // Unregister from old owner
-                ServerWorld world = (ServerWorld) robot.getWorld();
-                OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
-                registry.unregisterRobot(robot.getUuid());
-
-                // Set new owner (registration happens automatically)
-                robot.setOwner(toPlayer);
-                count++;
-            }
-        }
-
-        int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Transferred " + finalCount + " robot(s) to " + toPlayer.getName().getString()),
-                true
-        );
-        return count;
+            // Set new owner (registration happens automatically)
+            robot.setOwner(toPlayer);
+            
+            return new CommandResult(true, "Transferred " + Utility.getEntityCustomName(robot) + " to " + toPlayer.getName().getString());
+        }, false);
     } // executeTargetTransfer()
 
-    // -- Owner Command Executors --
+    // -- Owner Commands --
 
     /**
-     * Adds experience to robot selected by owner and index.
+     * Adds XP to robot selected by owner and index from registry.
      * <p>
-     * No validation - surplus XP triggers level ups automatically.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerAddExp(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.addExp(xp);
-            return new CommandResult(true, "Added " + xp + "xp to " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerAddExp(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, CombatOperations.addXP(), false);
     } // executeOwnerAddExp()
 
     /**
-     * Sets exact XP for robot selected by owner and index.
+     * Sets exact XP for robot selected by owner and index with validation.
      * <p>
-     * Validates against robot's current level max XP.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetExp(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int xp = IntegerArgumentType.getInteger(ctx, "exp_value");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            int maxExp = robot.getLevelSystem()
-                    .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
-                    .orElse(Integer.MAX_VALUE);
-
-            if (xp > maxExp) {
-                return new CommandResult(false, "Exp " + xp + " exceeds maximum requirement of " + maxExp + "xp for current level!");
-            }
-
-            robot.setExp(xp);
-            return new CommandResult(true, "Set " + xp + "xp to " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetExp(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, CombatOperations.setXP(), false);
     } // executeOwnerSetExp()
 
     /**
-     * Sets level for robot selected by owner and index.
+     * Sets level for robot selected by owner and index with validation.
      * <p>
-     * Validates against robot's max level.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int level = IntegerArgumentType.getInteger(ctx, "level_value");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            int maxLevel = robot.getLevelSystem()
-                    .map(LevelFeature::getMaxLevel)
-                    .orElse(200);
-
-            if (level > maxLevel) {
-                return new CommandResult(false, "Level " + level + " exceeds maximum requirement of " + maxLevel + " for this robot!");
-            }
-
-            robot.setCurrentLevel(level);
-            return new CommandResult(true, "Set level " + level + " to " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, CombatOperations.setLevel(), false);
     } // executeOwnerSetLevel()
 
     /**
-     * Sets both level and XP for robot selected by owner and index.
+     * Sets both level and XP atomically for robot selected by owner and index.
      * <p>
-     * Validates both values against robot's limits.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetAllCombat(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int exp = IntegerArgumentType.getInteger(ctx, "exp");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            // Validate level
-            int maxLevel = robot.getLevelSystem()
-                    .map(LevelFeature::getMaxLevel)
-                    .orElse(200);
-
-            if (level > maxLevel) {
-                return new CommandResult(false, "Level " + level + " exceeds maximum requirement of " + maxLevel + " for this robot!");
-            }
-
-            // Validate exp for target level
-            int maxExp = robot.getLevelSystem()
-                    .map(feature -> feature.getExpForLevel(level))
-                    .orElse(Integer.MAX_VALUE);
-
-            if (exp > maxExp) {
-                return new CommandResult(false, "Exp " + exp + " exceeds maximum requirement of " + maxExp + "xp for level " + level + "!");
-            }
-
-            // Set both values
-            robot.setCurrentLevel(level);
-            robot.setExp(exp);
-
-            String name = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Set " + name + " to level " + level + " with " + exp + "xp");
-        });
+    protected static int executeOwnerSetAllCombat(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, CombatOperations.setAllCombat(), false);
     } // executeOwnerSetAllCombat()
 
     /**
-     * Sets HP for robot selected by owner and index.
+     * Sets HP attribute for robot selected by owner and index.
+     * <p>
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetHP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int hp = IntegerArgumentType.getInteger(ctx, "value");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-            robot.setHealth(hp);
-            return new CommandResult(true, "Set HP to " + hp + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetHP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, AttributeOperations.setHP(), false);
     } // executeOwnerSetHP()
 
     /**
-     * Sets attack for robot selected by owner and index.
+     * Sets attack damage attribute for robot selected by owner and index.
+     * <p>
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetAttack(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int attack = IntegerArgumentType.getInteger(ctx, "value");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
-            return new CommandResult(true, "Set attack to " + attack + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetAttack(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, AttributeOperations.setAttack(), false);
     } // executeOwnerSetAttack()
 
     /**
-     * Sets defense for robot selected by owner and index.
+     * Sets armor defense attribute for robot selected by owner and index.
+     * <p>
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetDefense(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int defense = IntegerArgumentType.getInteger(ctx, "value");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
-            return new CommandResult(true, "Set defense to " + defense + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetDefense(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, AttributeOperations.setDefense(), false);
     } // executeOwnerSetDefense()
 
     /**
-     * Sets speed for robot selected by owner and index.
+     * Sets movement speed attribute for robot selected by owner and index.
      * <p>
-     * Speed value is divided by 10 for Minecraft's movement speed scale.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetSpeed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int speed = IntegerArgumentType.getInteger(ctx, "value");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
-            return new CommandResult(true, "Set speed to " + speed + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetSpeed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, AttributeOperations.setSpeed(), false);
     } // executeOwnerSetSpeed()
 
     /**
-     * Sets all attributes for robot selected by owner and index.
+     * Sets all attributes atomically for robot selected by owner and index.
      * <p>
-     * Batch operation for efficient attribute configuration.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetAllAttributes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int hp = IntegerArgumentType.getInteger(ctx, "hp");
-        int attack = IntegerArgumentType.getInteger(ctx, "attack");
-        int defense = IntegerArgumentType.getInteger(ctx, "defense");
-        int speed = IntegerArgumentType.getInteger(ctx, "speed");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-            robot.setHealth(hp);
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
-            robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
-
-            String name = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Set attributes (HP:" + hp + " ATK:" + attack + " DEF:" + defense + " SPD:" + speed + ") for " + name);
-        });
+    protected static int executeOwnerSetAllAttributes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, AttributeOperations.setAllAttributes(), false);
     } // executeOwnerSetAllAttributes()
 
     /**
-     * Sets fire protection for robot selected by owner and index.
+     * Sets fire protection level for robot selected by owner and index.
      * <p>
-     * Fire protection reduces damage from fire, lava, and burning.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetFireProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.setFireProtection(level);
-            return new CommandResult(true, "Set fire protection to " + level + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetFireProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, ProtectionOperations.setFireProtection(), false);
     } // executeOwnerSetFireProtection()
 
     /**
-     * Sets fall protection for robot selected by owner and index.
+     * Sets fall protection level for robot selected by owner and index.
      * <p>
-     * Fall protection reduces damage from falling.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetFallProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.setFallProtection(level);
-            return new CommandResult(true, "Set fall protection to " + level + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetFallProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, ProtectionOperations.setFallProtection(), false);
     } // executeOwnerSetFallProtection()
 
     /**
-     * Sets blast protection for robot selected by owner and index.
+     * Sets blast protection level for robot selected by owner and index.
      * <p>
-     * Blast protection reduces damage from explosions.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetBlastProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.setBlastProtection(level);
-            return new CommandResult(true, "Set blast protection to " + level + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetBlastProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, ProtectionOperations.setBlastProtection(), false);
     } // executeOwnerSetBlastProtection()
 
     /**
-     * Sets projectile protection for robot selected by owner and index.
+     * Sets projectile protection level for robot selected by owner and index.
      * <p>
-     * Projectile protection reduces damage from arrows and other projectiles.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetProjectileProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.setProjectileProtection(level);
-            return new CommandResult(true, "Set projectile protection to " + level + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetProjectileProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, ProtectionOperations.setProjectileProtection(), false);
     } // executeOwnerSetProjectileProtection()
 
     /**
-     * Sets all protections for robot selected by owner and index.
+     * Sets all protection levels atomically for robot selected by owner and index.
      * <p>
-     * Batch operation for efficient protection configuration.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetAllProtections(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        int fire = IntegerArgumentType.getInteger(ctx, "fire");
-        int fall = IntegerArgumentType.getInteger(ctx, "fall");
-        int blast = IntegerArgumentType.getInteger(ctx, "blast");
-        int projectile = IntegerArgumentType.getInteger(ctx, "projectile");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.setFireProtection(fire);
-            robot.setFallProtection(fall);
-            robot.setBlastProtection(blast);
-            robot.setProjectileProtection(projectile);
-
-            String name = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Set protections (Fire:" + fire + " Fall:" + fall + " Blast:" + blast + " Projectile:" + projectile + ") for " + name);
-        });
+    protected static int executeOwnerSetAllProtections(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, ProtectionOperations.setAllProtections(), false);
     } // executeOwnerSetAllProtections()
 
     /**
-     * Sets appearance for robot selected by owner and index.
+     * Sets texture/color appearance for robot selected by owner and index.
      * <p>
-     * Changes robot's visual appearance.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetAppearance(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        net.msymbios.llovelyr.framework.entity.enums.EntityTexture color = ctx.getArgument("color", net.msymbios.llovelyr.framework.entity.enums.EntityTexture.class);
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.setTexture(color);
-            String colorName = color.Name().toLowerCase();
-            return new CommandResult(true, "Set color to " + colorName + " for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetAppearance(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, UtilityOperations.setAppearance(), false);
     } // executeOwnerSetAppearance()
 
     /**
-     * Sets identifier (custom name) for robot selected by owner and index.
+     * Sets custom name for robot selected by owner and index with visibility enabled.
      * <p>
-     * Sets custom name and makes it visible.
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerSetIdentifier(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        String nameString = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            Text name = Text.literal(nameString);
-            robot.setCustomName(name);
-            robot.setCustomNameVisible(true);
-            return new CommandResult(true, "Set name to '" + nameString + "' for " + Utility.getEntityCustomName(robot));
-        });
+    protected static int executeOwnerSetIdentifier(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, UtilityOperations.setIdentifier(), false);
     } // executeOwnerSetIdentifier()
 
-    // -- Owner Utility Command Executors --
-
     /**
-     * Teleports player to robot selected by owner and index.
+     * Teleports command source to robot selected by owner and index.
+     * <p>
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
+     * <i>Note:</i> Fails gracefully if robot is offline or unloaded.
      */
-    private static int executeOwnerTeleport(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    protected static int executeOwnerTeleport(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
@@ -2568,7 +1420,7 @@ public class NativeCommands {
             return 0;
         }
 
-        net.minecraft.server.network.ServerPlayerEntity serverPlayer = (net.minecraft.server.network.ServerPlayerEntity) player;
+        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
         serverPlayer.teleport(
                 (ServerWorld) robot.getWorld(),
                 robot.getX(),
@@ -2584,37 +1436,34 @@ public class NativeCommands {
     } // executeOwnerTeleport()
 
     /**
-     * Recalls robot to player location by owner and index.
+     * Teleports robot to owner's location by registry lookup.
+     * <p>
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
+    protected static int executeOwnerRecall(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, (robot, c) -> {
+            PlayerEntity player = EntityArgumentType.getPlayer(c, "player");
             robot.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
-            String robotName = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Recalled " + robotName + " to " + player.getName().getString());
-        });
+            return new CommandResult(true, "Recalled " + Utility.getEntityCustomName(robot) + " to " + player.getName().getString());
+        }, false);
     } // executeOwnerRecall()
 
     /**
      * Heals robot selected by owner and index to full health.
+     * <p>
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
      */
-    private static int executeOwnerHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
-        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-
-        return executeOnOwnerRobot(ctx, player, index, robot -> {
-            robot.setHealth(robot.getMaxHealth());
-            String robotName = Utility.getEntityCustomName(robot);
-            return new CommandResult(true, "Healed " + robotName);
-        });
+    protected static int executeOwnerHeal(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, OWNER_SELECTOR, UtilityOperations.heal(), false);
     } // executeOwnerHeal()
 
     /**
-     * Heals all robots owned by specified player.
+     * Heals all robots owned by specified player to full health.
+     * <p>
+     * <b>Selection:</b> All robots in registry for player UUID.
+     * <i>Note:</i> Skips offline or unloaded robots automatically.
      */
-    private static int executeOwnerHealAll(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    protected static int executeOwnerHealAll(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         ServerWorld world = (ServerWorld) player.getWorld();
         OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
@@ -2640,8 +1489,11 @@ public class NativeCommands {
 
     /**
      * Displays comprehensive stats for robot selected by owner and index.
+     * <p>
+     * <b>Selection:</b> Registry lookup by player UUID and robot index.
+     * <i>Note:</i> Fails gracefully if robot is offline or unloaded.
      */
-    private static int executeOwnerStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    protected static int executeOwnerStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
@@ -2656,9 +1508,12 @@ public class NativeCommands {
     } // executeOwnerStats()
 
     /**
-     * Transfers robot ownership from one player to another.
+     * Transfers robot ownership from one player to another by registry manipulation.
+     * <p>
+     * <b>Selection:</b> Registry lookup by source player UUID and robot index.
+     * <i>Note:</i> Unregisters from old owner and re-registers automatically.
      */
-    private static int executeOwnerTransfer(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    protected static int executeOwnerTransfer(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         PlayerEntity fromPlayer = EntityArgumentType.getPlayer(ctx, "from_player");
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
         PlayerEntity toPlayer = EntityArgumentType.getPlayer(ctx, "to_player");
@@ -2692,7 +1547,7 @@ public class NativeCommands {
      * <p>
      * Triggers config reload without server restart.
      */
-    private static int executeReload(CommandContext<ServerCommandSource> ctx) {
+    protected static int executeReload(CommandContext<ServerCommandSource> ctx) {
         try {
             net.msymbios.llovelyr.source.LovelyConfigs.reload();
             ctx.getSource().sendFeedback(
@@ -2714,7 +1569,7 @@ public class NativeCommands {
      * Displays player names with robot counts in format "player_name (count)".
      * Useful for server administration and ownership overview.
      */
-    private static int executeListOwners(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    protected static int executeListOwners(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         ServerWorld world = ctx.getSource().getWorld();
         OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
         
@@ -2751,7 +1606,7 @@ public class NativeCommands {
      * Displays index, type, name, and dimension for each robot.
      * Index values can be used with owner-based commands for robot management.
      */
-    private static int executeListPlayerRobots(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    protected static int executeListPlayerRobots(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         ServerWorld world = (ServerWorld) player.getWorld();
         OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
@@ -2846,88 +1701,6 @@ public class NativeCommands {
     } // getOwnerRobotByIndex()
 
     /**
-     * Executes command action on robot selected by owner and index.
-     * <p>
-     * <b>Design Pattern:</b> Template method - handles registry lookup and validation
-     * while delegating specific action to provided function.
-     *
-     * @param context command context
-     * @param player owner player
-     * @param index robot index
-     * @param action function to execute on validated robot
-     * @return 1 if successful, 0 if failed
-     */
-    private static int executeOnOwnerRobot(CommandContext<ServerCommandSource> context, PlayerEntity player, int index, IRobotCommandAction action) throws CommandSyntaxException {
-        ServerWorld world = (ServerWorld) player.getWorld();
-        OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
-        
-        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUuid());
-        
-        if (robots.isEmpty()) {
-            context.getSource().sendError(Text.literal("Player " + player.getName().getString() + " has no registered robots"));
-            return 0;
-        }
-        
-        if (index < 0 || index >= robots.size()) {
-            context.getSource().sendError(Text.literal("Invalid robot index " + index + " (player has " + robots.size() + " robot(s))"));
-            return 0;
-        }
-        
-        RobotRegistryEntry entry = robots.get(index);
-        Object entityObj = entry.getEntity();
-        
-        if (!(entityObj instanceof LovelyRobotEntity robot) || !entry.isEntityValid()) {
-            context.getSource().sendError(Text.literal("Robot is offline or unloaded"));
-            return 0;
-        }
-
-        CommandResult result = action.execute(robot);
-        
-        if (result.success) {
-            context.getSource().sendFeedback(() -> Text.literal(result.message), true);
-            return 1;
-        } else {
-            context.getSource().sendError(Text.literal(result.message));
-            return 0;
-        }
-    } // executeOnOwnerRobot()
-
-    /**
-     * Executes command action on robot in crosshair with common validation.
-     * <p>
-     * <b>Design Pattern:</b> Template method - handles common validation (robot presence,
-     * ownership) while delegating specific action to provided function.
-     *
-     * @param context command context
-     * @param action function to execute on validated robot
-     * @return 1 if successful, 0 if failed
-     */
-    private static int executeOnRobot(CommandContext<ServerCommandSource> context, IRobotCommandAction action) throws CommandSyntaxException {
-        PlayerEntity player = context.getSource().getPlayerOrThrow();
-        LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
-
-        if (robot == null) {
-            context.getSource().sendError(Text.literal("No robot found in crosshair"));
-            return 0;
-        }
-
-        if (!robot.isOwner(player)) {
-            context.getSource().sendError(Text.literal("You don't own " + Utility.getEntityCustomName(robot)));
-            return 0;
-        }
-
-        CommandResult result = action.execute(robot);
-        
-        if (result.success) {
-            context.getSource().sendFeedback(() -> Text.literal(result.message), true);
-            return 1;
-        } else {
-            context.getSource().sendError(Text.literal(result.message));
-            return 0;
-        }
-    } // executeOnRobot()
-
-    /**
      * Finds robot in front of PlayerEntity using raycast.
      * <p>
      * <b>Range:</b> 5 block reach distance
@@ -2974,14 +1747,5 @@ public class NativeCommands {
      * Command execution result with success status and message.
      */
     private record CommandResult(boolean success, String message) {} // Record: CommandResult
-
-    /**
-     * Functional interface for robot command actions.
-     */
-    @FunctionalInterface
-    private interface IRobotCommandAction {
-        // -- Methods --
-        CommandResult execute(LovelyRobotEntity robot);
-    } // Interfaces: IRobotCommandAction
 
 } // Class: NativeCommands
