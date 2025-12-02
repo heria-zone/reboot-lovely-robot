@@ -6,7 +6,7 @@ import net.msymbios.llovelyr.common.entity.internal.InternalModel;
  * GeckoLib model provider for robot entities.
  * <p>
  * Delegates model/animation resolution to InternalModel, which queries entity's
- * RobotEntityType for variant-specific resources.
+ * NativeEntityType for variant-specific resources.
  */
 public class RobotModel extends InternalModel<RobotEntity> {
 

@@ -18,7 +18,7 @@ public class RobotRenderer extends GeoEntityRenderer<RobotEntity> {
 
     public RobotRenderer(EntityRendererProvider.Context context) {
         super(context, new RobotModel());
-        this.shadowRadius = LovelyConfigs.Client.ShadowRadius;
+        this.shadowRadius = LovelyConfigs.ShadowRadius;
         addRenderLayer(new RobotLayer(this));
     } // Constructor: RobotRenderer()
 
