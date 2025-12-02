@@ -9,7 +9,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -21,16 +20,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
+import net.msymbios.llovelyr.common.entity.internal.InternalParticle;
 import net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry;
 import net.msymbios.llovelyr.framework.registry.RobotRegistryEntry;
-import net.msymbios.llovelyr.lib.entity.type.features.CombatLevelFeature;
-import net.msymbios.llovelyr.lib.entity.type.features.ProtectionFeature;
+import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
+import net.msymbios.llovelyr.lib.entity.features.ProtectionFeature;
 import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * <p>Registry-based robot management commands with owner + index targeting.<p>
@@ -83,7 +83,7 @@ public class LovelyRobotCommands {
         return CommandManager.literal("owner")
             .then(CommandManager.literal("list")
                 .executes(ctx -> executeOwnerList(ctx, null))
-                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                     .executes(ctx -> executeOwnerList(ctx, EntityArgumentType.getPlayer(ctx, "player")))
                 )
             );
@@ -98,7 +98,7 @@ public class LovelyRobotCommands {
         return CommandManager.literal("owner")
             .then(CommandManager.literal("set")
                 .then(CommandManager.literal("level")
-                    .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                    .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                         .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                             .then(CommandManager.argument("value", IntegerArgumentType.integer(1, 200))
                                 .executes(LovelyRobotCommands::executeOwnerSetLevel)
@@ -118,7 +118,7 @@ public class LovelyRobotCommands {
         return CommandManager.literal("owner")
             .then(CommandManager.literal("set")
                 .then(CommandManager.literal("exp")
-                    .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                    .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                         .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                             .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
                                 .executes(LovelyRobotCommands::executeOwnerSetExp)
@@ -139,7 +139,7 @@ public class LovelyRobotCommands {
             .then(CommandManager.literal("set")
                 .then(CommandManager.literal("protection")
                     .then(CommandManager.literal("fire")
-                        .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                        .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                             .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                                 .then(CommandManager.argument("value", IntegerArgumentType.integer(0, 80))
                                     .executes(ctx -> executeOwnerSetProtection(ctx, "fire"))
@@ -148,7 +148,7 @@ public class LovelyRobotCommands {
                         )
                     )
                     .then(CommandManager.literal("fall")
-                        .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                        .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                             .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                                 .then(CommandManager.argument("value", IntegerArgumentType.integer(0, 80))
                                     .executes(ctx -> executeOwnerSetProtection(ctx, "fall"))
@@ -157,7 +157,7 @@ public class LovelyRobotCommands {
                         )
                     )
                     .then(CommandManager.literal("blast")
-                        .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                        .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                             .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                                 .then(CommandManager.argument("value", IntegerArgumentType.integer(0, 80))
                                     .executes(ctx -> executeOwnerSetProtection(ctx, "blast"))
@@ -166,7 +166,7 @@ public class LovelyRobotCommands {
                         )
                     )
                     .then(CommandManager.literal("projectile")
-                        .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                        .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                             .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                                 .then(CommandManager.argument("value", IntegerArgumentType.integer(0, 80))
                                     .executes(ctx -> executeOwnerSetProtection(ctx, "projectile"))
@@ -186,7 +186,7 @@ public class LovelyRobotCommands {
     private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerTeleportCommand() {
         return CommandManager.literal("owner")
             .then(CommandManager.literal("teleport")
-                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                     .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                         .executes(LovelyRobotCommands::executeOwnerTeleport)
                     )
@@ -202,7 +202,7 @@ public class LovelyRobotCommands {
     private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerRecallCommand() {
         return CommandManager.literal("owner")
             .then(CommandManager.literal("recall")
-                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                     .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                         .executes(LovelyRobotCommands::executeOwnerRecall)
                     )
@@ -218,7 +218,7 @@ public class LovelyRobotCommands {
     private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerHealAllCommand() {
         return CommandManager.literal("owner")
             .then(CommandManager.literal("healall")
-                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                     .executes(LovelyRobotCommands::executeOwnerHealAll)
                 )
             );
@@ -232,7 +232,7 @@ public class LovelyRobotCommands {
     private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerStatsCommand() {
         return CommandManager.literal("owner")
             .then(CommandManager.literal("stats")
-                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.PlayerEntity())
+                .then(CommandManager.argument("PlayerEntity", EntityArgumentType.player())
                     .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
                         .executes(LovelyRobotCommands::executeOwnerStats)
                     )
@@ -248,9 +248,9 @@ public class LovelyRobotCommands {
     private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerTransferCommand() {
         return CommandManager.literal("owner")
             .then(CommandManager.literal("transfer")
-                .then(CommandManager.argument("from_player", EntityArgumentType.PlayerEntity())
+                .then(CommandManager.argument("from_player", EntityArgumentType.player())
                     .then(CommandManager.argument("index", IntegerArgumentType.integer(0))
-                        .then(CommandManager.argument("to_player", EntityArgumentType.PlayerEntity())
+                        .then(CommandManager.argument("to_player", EntityArgumentType.player())
                             .executes(LovelyRobotCommands::executeOwnerTransfer)
                         )
                     )
@@ -271,7 +271,7 @@ public class LovelyRobotCommands {
         ServerWorld level = (ServerWorld) player.getWorld();
         OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(level);
         
-        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUUID());
+        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUuid());
         
         if (robots.isEmpty()) {
             ctx.getSource().sendFeedback(
@@ -294,7 +294,7 @@ public class LovelyRobotCommands {
             if (entityObj instanceof InternalEntity robot) {
                 String name = robot.hasCustomName() ? robot.getCustomName().getString() : "Unnamed";
                 String type = entry.getRobotType();
-                String dimension = robot.getWorld().dimension().getValue().toString();
+                String dimension = robot.getWorld().getDimensionKey().getValue().toString();
                 BlockPos pos = robot.getBlockPos();
                 float health = robot.getHealth();
                 float maxHealth = robot.getMaxHealth();
@@ -328,7 +328,7 @@ public class LovelyRobotCommands {
         InternalEntity robot = getRobotByIndex(ctx, player, index);
         
         // Get max level from robot's entity type
-        Optional<CombatLevelFeature> featureOpt = robot.nativeEntity.getFeature(CombatLevelFeature.class);
+        Optional<LevelFeature> featureOpt = robot.nativeEntity.getFeature(LevelFeature.class);
         if (featureOpt.isPresent()) {
             int maxLevel = featureOpt.get().getMaxLevel();
             if (newLevel > maxLevel) {
@@ -357,10 +357,10 @@ public class LovelyRobotCommands {
         int index = IntegerArgumentType.getInteger(ctx, "index");
         int newExp = IntegerArgumentType.getInteger(ctx, "value");
         
-        InternalEntity robot = getRobotByIndex(ctx, player, index);
+        LovelyRobotEntity robot = (LovelyRobotEntity)getRobotByIndex(ctx, player, index);
         
         int oldLevel = robot.getLevel();
-        robot.setExp(newExp);
+        robot.addExp(newExp);
         
         // Auto-level-up logic would be in setExp or we trigger it here
         // For now, just set the exp
@@ -438,14 +438,14 @@ public class LovelyRobotCommands {
         InternalEntity robot = getRobotByIndex(ctx, player, index);
         
         // Teleport PlayerEntity to robot's position
-        ServerPlayerEntity ServerPlayerEntity = (ServerPlayerEntity) PlayerEntity;
-        Serverplayer.teleportTo(
+        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+        serverPlayer.teleport(
             (ServerWorld) robot.getWorld(),
             robot.getX(),
             robot.getY(),
             robot.getZ(),
-            robot.getYRot(),
-            robot.getXRot()
+            robot.getYaw(),
+            robot.getPitch()
         );
         
         String robotName = robot.hasCustomName() ? robot.getCustomName().getString() : "Robot";
@@ -467,7 +467,7 @@ public class LovelyRobotCommands {
         InternalEntity robot = getRobotByIndex(ctx, player, index);
         
         // Teleport robot to PlayerEntity's position
-        robot.moveTo(player.getX(), player.getY(), player.getZ(), PlayerEntity.getYRot(), PlayerEntity.getXRot());
+        robot.refreshPositionAndAngles(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
         
         String robotName = robot.hasCustomName() ? robot.getCustomName().getString() : "Robot";
         ctx.getSource().sendFeedback(
@@ -486,7 +486,7 @@ public class LovelyRobotCommands {
         ServerWorld level = (ServerWorld) player.getWorld();
         OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(level);
         
-        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUUID());
+        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUuid());
         int healedCount = 0;
         
         for (RobotRegistryEntry entry : robots) {
@@ -512,12 +512,12 @@ public class LovelyRobotCommands {
     private static int executeOwnerStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         PlayerEntity player = EntityArgumentType.getPlayer(ctx, "player");
         int index = IntegerArgumentType.getInteger(ctx, "index");
-        
-        InternalEntity robot = getRobotByIndex(ctx, player, index);
+
+        LovelyRobotEntity robot = (LovelyRobotEntity)getRobotByIndex(ctx, player, index);
         
         String name = robot.hasCustomName() ? robot.getCustomName().getString() : "Unnamed";
         BlockPos pos = robot.getBlockPos();
-        String dimension = robot.getWorld().dimension().getValue().toString();
+        String dimension = robot.getWorld().getDimensionKey().getValue().toString();
         
         ctx.getSource().sendFeedback(
             () -> Text.literal("=== Stats for " + name + " ===").formatted(Formatting.GOLD),
@@ -562,10 +562,11 @@ public class LovelyRobotCommands {
         // Unregister from old owner
         ServerWorld level = (ServerWorld) fromPlayer.getWorld();
         OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(level);
-        registry.unregisterRobot(robot.getUUID());
+        registry.unregisterRobot(robot.getUuid());
         
         // Set new owner (registration happens automatically in setTame)
-        robot.tame(toPlayer);
+        robot.setOwner(toPlayer);
+        InternalParticle.HappyVillager(robot);
         
         String robotName = robot.hasCustomName() ? robot.getCustomName().getString() : "Robot";
         ctx.getSource().sendFeedback(
@@ -585,16 +586,16 @@ public class LovelyRobotCommands {
      * appropriate exceptions with descriptive messages.
      * 
      * @param ctx command context
-     * @param PlayerEntity owner PlayerEntity
+     * @param player owner player
      * @param index robot index
      * @return robot entity
      * @throws CommandSyntaxException if robot not found or invalid
      */
-    private static InternalEntity getRobotByIndex(CommandContext<ServerCommandSource> ctx, PlayerEntity PlayerEntity, int index) throws CommandSyntaxException {
+    private static InternalEntity getRobotByIndex(CommandContext<ServerCommandSource> ctx, PlayerEntity player, int index) throws CommandSyntaxException {
         ServerWorld level = (ServerWorld) player.getWorld();
         OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(level);
         
-        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUUID());
+        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUuid());
         
         if (robots.isEmpty()) {
             throw new SimpleCommandExceptionType(
@@ -651,8 +652,8 @@ public class LovelyRobotCommands {
         }
         
         // Try raycast
-        PlayerEntity PlayerEntity = ctx.getSource().getPlayerOrThrow();
-        InternalEntity robot = findRobotInFront(PlayerEntity);
+        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
+        InternalEntity robot = findRobotInFront(player);
         
         if (robot == null) {
             throw new SimpleCommandExceptionType(
@@ -671,23 +672,26 @@ public class LovelyRobotCommands {
      * <b>Implementation:</b> Creates search box along look vector and finds
      * closest InternalEntity.
      * 
-     * @param PlayerEntity PlayerEntity performing raycast
+     * @param player player performing raycast
      * @return robot entity or null if none found
      */
-    private static InternalEntity findRobotInFront(PlayerEntity PlayerEntity) {
-        Vec3d eyePos = PlayerEntity.getEyePosition();
-        Vec3d lookVec = PlayerEntity.getViewVector(1.0F);
-        Vec3d endPos = eyePos.add(lookVec.scale(5.0));
-        
-        Box searchBox = new Box(eyePos, endPos).inflate(1.0);
-        List<Entity> entities = player.getWorld().getEntities(PlayerEntity, searchBox);
-        
-        InternalEntity closestRobot = null;
+    private static InternalEntity findRobotInFront(PlayerEntity player) {
+        // Get player's look vector
+        Vec3d eyePos = player.getEyePos();
+        Vec3d lookVec = player.getRotationVec(1.0F);
+        Vec3d endPos = eyePos.add(lookVec.multiply(5.0)); // 5 block reach
+
+        // Perform entity raycast
+        Box searchBox = new Box(eyePos, endPos).expand(1.0);
+        List<Entity> entities = player.getWorld().getOtherEntities(player, searchBox);
+
+        LovelyRobotEntity closestRobot = null;
         double closestDistance = Double.MAX_VALUE;
-        
+
         for (Entity entity : entities) {
-            if (entity instanceof InternalEntity robot) {
-                Optional<Vec3d> hit = entity.getBoundingBox().clip(eyePos, endPos);
+            if (entity instanceof LovelyRobotEntity robot) {
+                // Check if ray intersects with entity bounding box
+                Optional<Vec3d> hit = entity.getBoundingBox().raycast(eyePos, endPos);
                 if (hit.isPresent()) {
                     double distance = eyePos.distanceTo(hit.get());
                     if (distance < closestDistance) {
@@ -697,7 +701,7 @@ public class LovelyRobotCommands {
                 }
             }
         }
-        
+
         return closestRobot;
     } // findRobotInFront()
 
