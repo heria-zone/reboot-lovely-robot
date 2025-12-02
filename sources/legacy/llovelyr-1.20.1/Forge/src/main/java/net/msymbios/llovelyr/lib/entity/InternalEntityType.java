@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.lib.entity.type;
+package net.msymbios.llovelyr.lib.entity;
 
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;

@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.entity.type;
+package net.msymbios.llovelyr.common.entity;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -11,8 +11,8 @@ import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.framework.entity.enums.EntityVariantModel;
 import net.msymbios.llovelyr.framework.entity.enums.EntityVariantTexture;
 import net.msymbios.llovelyr.framework.entity.type.*;
-import net.msymbios.llovelyr.lib.entity.type.InternalEntityType;
-import net.msymbios.llovelyr.lib.entity.type.features.LevelFeature;
+import net.msymbios.llovelyr.lib.entity.InternalEntityType;
+import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ import java.util.Random;
  * <b>Resource Management:</b> Populates textures, models, and animators based on EntityVariant.
  * Color textures are populated separately via withColorPalette() for 16-color customization.
  */
-public class RobotEntityType extends InternalEntityType<RobotEntityType> {
+public class NativeEntityType extends InternalEntityType<NativeEntityType> {
 
     // -- Color Palette --
     
@@ -53,7 +53,7 @@ public class RobotEntityType extends InternalEntityType<RobotEntityType> {
      * @param key unique identifier for this robot type
      * @param variant entity variant determining resource paths
      */
-    public RobotEntityType(String key, EntityVariant variant) {
+    public NativeEntityType(String key, EntityVariant variant) {
         super(key);
         this.variant = variant;
         this.colorTextures = new HashMap<>();
@@ -135,7 +135,7 @@ public class RobotEntityType extends InternalEntityType<RobotEntityType> {
      * @param variant entity variant determining color texture paths
      * @return this instance for method chaining
      */
-    public RobotEntityType withColorPalette(EntityVariant variant) {
+    public NativeEntityType withColorPalette(EntityVariant variant) {
         String basePath = LovelyIdentifier.TEXTURE_ENTITY_PATH + variant.getName() + "/";
         
         // Populate all 16 colors using variant_ID naming pattern
@@ -212,4 +212,4 @@ public class RobotEntityType extends InternalEntityType<RobotEntityType> {
                 .orElse(0);
     }
 
-} // Class: RobotEntityType
+} // Class: NativeEntityType
