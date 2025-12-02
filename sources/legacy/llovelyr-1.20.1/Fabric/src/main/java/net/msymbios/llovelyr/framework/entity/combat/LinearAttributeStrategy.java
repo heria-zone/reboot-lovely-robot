@@ -8,7 +8,7 @@ package net.msymbios.llovelyr.framework.entity.combat;
  * <b>Design Decision:</b> Maintains compatibility with existing InternalLogic
  * calculations while providing a pluggable implementation.
  */
-public class LinearAttributeStrategy implements AttributeCalculationStrategy {
+public class LinearAttributeStrategy implements IAttributeCalculationStrategy {
     
     // -- Constants --
     

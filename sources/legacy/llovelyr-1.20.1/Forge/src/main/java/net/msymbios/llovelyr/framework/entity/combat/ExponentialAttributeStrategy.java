@@ -11,7 +11,7 @@ package net.msymbios.llovelyr.framework.entity.combat;
  * <b>Performance:</b> Uses Math.pow for exponential calculation. For very high
  * levels, consider caching or alternative approaches.
  */
-public class ExponentialAttributeStrategy implements AttributeCalculationStrategy {
+public class ExponentialAttributeStrategy implements IAttributeCalculationStrategy {
     
     // -- Constants --
     

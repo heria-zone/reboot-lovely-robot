@@ -9,7 +9,7 @@ package net.msymbios.llovelyr.framework.entity.combat;
  * <b>Implementation Requirements:</b> All calculations must be deterministic
  * and produce consistent results for the same inputs.
  */
-public interface AttributeCalculationStrategy {
+public interface IAttributeCalculationStrategy {
     
     /**
      * Calculates HP based on level and base value.
@@ -54,4 +54,4 @@ public interface AttributeCalculationStrategy {
      */
     double calculateArmorToughness(double armorLevel);
     
-} // Interface: AttributeCalculationStrategy
+} // Interface: IAttributeCalculationStrategy
