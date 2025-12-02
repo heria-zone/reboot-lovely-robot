@@ -4,7 +4,7 @@
     "layer0": "llovelyr:item/vanilla_spawn"
   },
   "overrides": [
-    { "predicate": {"llovelyr:variant": 0.0}, "model": "llovelyr:item/vanilla/vanilla00" },
+    { "predicate": {"llovelyr:variant": 0.00}, "model": "llovelyr:item/vanilla/vanilla00" },
     { "predicate": {"llovelyr:variant": 0.03}, "model": "llovelyr:item/vanilla/vanilla01" },
     { "predicate": {"llovelyr:variant": 0.09}, "model": "llovelyr:item/vanilla/vanilla02" },
     { "predicate": {"llovelyr:variant": 0.15}, "model": "llovelyr:item/vanilla/vanilla03" },

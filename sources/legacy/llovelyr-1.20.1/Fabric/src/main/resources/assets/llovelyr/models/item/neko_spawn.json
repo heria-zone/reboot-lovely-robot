@@ -1,25 +1,25 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rlovelyr:item/neko_spawn"
+    "layer0": "llovelyr:item/neko_spawn"
   },
   "overrides": [
-    { "predicate": {"rlovelyr:variant": 0}, "model": "rlovelyr:item/neko/neko00" },
-    { "predicate": {"rlovelyr:variant": 1}, "model": "rlovelyr:item/neko/neko01" },
-    { "predicate": {"rlovelyr:variant": 2}, "model": "rlovelyr:item/neko/neko02" },
-    { "predicate": {"rlovelyr:variant": 3}, "model": "rlovelyr:item/neko/neko03" },
-    { "predicate": {"rlovelyr:variant": 4}, "model": "rlovelyr:item/neko/neko04" },
-    { "predicate": {"rlovelyr:variant": 5}, "model": "rlovelyr:item/neko/neko05" },
-    { "predicate": {"rlovelyr:variant": 6}, "model": "rlovelyr:item/neko/neko06" },
-    { "predicate": {"rlovelyr:variant": 7}, "model": "rlovelyr:item/neko/neko07" },
-    { "predicate": {"rlovelyr:variant": 8}, "model": "rlovelyr:item/neko/neko08" },
-    { "predicate": {"rlovelyr:variant": 9}, "model": "rlovelyr:item/neko/neko09" },
-    { "predicate": {"rlovelyr:variant": 10}, "model": "rlovelyr:item/neko/neko10" },
-    { "predicate": {"rlovelyr:variant": 11}, "model": "rlovelyr:item/neko/neko11" },
-    { "predicate": {"rlovelyr:variant": 12}, "model": "rlovelyr:item/neko/neko12" },
-    { "predicate": {"rlovelyr:variant": 13}, "model": "rlovelyr:item/neko/neko13" },
-    { "predicate": {"rlovelyr:variant": 14}, "model": "rlovelyr:item/neko/neko14" },
-    { "predicate": {"rlovelyr:variant": 15}, "model": "rlovelyr:item/neko/neko15" },
-    { "predicate": {"rlovelyr:variant": 16}, "model": "rlovelyr:item/neko/neko16" }
+    { "predicate": {"llovelyr:variant": 0.00}, "model": "llovelyr:item/neko/neko00" },
+    { "predicate": {"llovelyr:variant": 0.03}, "model": "llovelyr:item/neko/neko01" },
+    { "predicate": {"llovelyr:variant": 0.09}, "model": "llovelyr:item/neko/neko02" },
+    { "predicate": {"llovelyr:variant": 0.15}, "model": "llovelyr:item/neko/neko03" },
+    { "predicate": {"llovelyr:variant": 0.21}, "model": "llovelyr:item/neko/neko04" },
+    { "predicate": {"llovelyr:variant": 0.27}, "model": "llovelyr:item/neko/neko05" },
+    { "predicate": {"llovelyr:variant": 0.33}, "model": "llovelyr:item/neko/neko06" },
+    { "predicate": {"llovelyr:variant": 0.39}, "model": "llovelyr:item/neko/neko07" },
+    { "predicate": {"llovelyr:variant": 0.45}, "model": "llovelyr:item/neko/neko08" },
+    { "predicate": {"llovelyr:variant": 0.51}, "model": "llovelyr:item/neko/neko09" },
+    { "predicate": {"llovelyr:variant": 0.57}, "model": "llovelyr:item/neko/neko10" },
+    { "predicate": {"llovelyr:variant": 0.63}, "model": "llovelyr:item/neko/neko11" },
+    { "predicate": {"llovelyr:variant": 0.69}, "model": "llovelyr:item/neko/neko12" },
+    { "predicate": {"llovelyr:variant": 0.75}, "model": "llovelyr:item/neko/neko13" },
+    { "predicate": {"llovelyr:variant": 0.81}, "model": "llovelyr:item/neko/neko14" },
+    { "predicate": {"llovelyr:variant": 0.87}, "model": "llovelyr:item/neko/neko15" },
+    { "predicate": {"llovelyr:variant": 0.93}, "model": "llovelyr:item/neko/neko16" }
   ]
 }

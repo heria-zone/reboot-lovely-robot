@@ -4,7 +4,7 @@
     "layer0": "llovelyr:item/bunny2_spawn"
   },
   "overrides": [
-    { "predicate": {"llovelyr:variant": 0.0}, "model": "llovelyr:item/bunny2/bunny2_00" },
+    { "predicate": {"llovelyr:variant": 0.00}, "model": "llovelyr:item/bunny2/bunny2_00" },
     { "predicate": {"llovelyr:variant": 0.03}, "model": "llovelyr:item/bunny2/bunny2_01" },
     { "predicate": {"llovelyr:variant": 0.09}, "model": "llovelyr:item/bunny2/bunny2_02" },
     { "predicate": {"llovelyr:variant": 0.15}, "model": "llovelyr:item/bunny2/bunny2_03" },

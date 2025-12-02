@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "rlovelyr:item/bunny/bunny04"
+    "layer0": "llovelyr:item/bunny/bunny04"
   }
 }
