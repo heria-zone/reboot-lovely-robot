@@ -25,6 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.common.entity.goal.*;
@@ -257,6 +258,12 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
     @Override
     public void tick() {
         super.tick();
+        
+        // Register robot on first tick if not already registered (handles world load/chunk load)
+        if (!this.level().isClientSide && this.tickCount == 1 && this.isTame() && this.getOwnerUUID() != null) {
+            ensureRegistered();
+        }
+        
         handleStandbyAnimation();
         handleCombatMode();
         handleAutoHeal();
@@ -882,7 +889,7 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
      * 
      * @return Optional containing LevelFeature if present, empty Optional otherwise
      */
-    private java.util.Optional<LevelFeature> getLevelSystem() {
+    public java.util.Optional<LevelFeature> getLevelSystem() {
         if (!(nativeEntity instanceof NativeEntityType)) {
             return java.util.Optional.empty();
         }
@@ -1144,6 +1151,8 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
             1.0F
         );
 
+        unregisterRobot();
+
         // Remove robot entity
         this.discard();
 
@@ -1353,6 +1362,36 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
             1.0F
         );
     } // playRetrievalSound ()
+
+    /**
+     * Ensures robot is registered in owner registry.
+     * <p>
+     * <b>Use Case:</b> Called on first tick after entity loads from NBT (world reload,
+     * chunk load). Prevents duplicate registration by checking if robot already exists
+     * in registry.
+     * <p>
+     * <b>Thread Safety:</b> Only runs on server side to avoid client-side issues.
+     */
+    private void ensureRegistered() {
+        if (this.level() instanceof ServerLevel serverLevel) {
+            net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry registry = 
+                net.msymbios.llovelyr.lib.registry.RobotRegistryManager.getRegistry(serverLevel);
+            
+            // Check if already registered
+            if (registry.getRobotById(this.getUUID()) == null) {
+                // Not registered - register now
+                String robotType = this.getType().getDescriptionId();
+                net.msymbios.llovelyr.framework.registry.RobotRegistryEntry registryEntry = 
+                    new net.msymbios.llovelyr.framework.registry.RobotRegistryEntry(
+                        this.getUUID(),
+                        this.getOwnerUUID(),
+                        this,
+                        robotType
+                    );
+                registry.registerRobot(registryEntry);
+            }
+        }
+    } // ensureRegistered()
 
     // -- Attribute Creation --
 
