@@ -16,21 +16,21 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
+import net.msymbios.llovelyr.common.entity.internal.InternalParticle;
 import net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry;
 import net.msymbios.llovelyr.framework.registry.RobotRegistryEntry;
-import net.msymbios.llovelyr.lib.entity.type.features.CombatLevelFeature;
-import net.msymbios.llovelyr.lib.entity.type.features.ProtectionFeature;
+import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
+import net.msymbios.llovelyr.lib.entity.features.ProtectionFeature;
 import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * <p>Registry-based robot management commands with owner + index targeting.<p>
@@ -328,7 +328,7 @@ public class LovelyRobotCommands {
         InternalEntity robot = getRobotByIndex(ctx, player, index);
         
         // Get max level from robot's entity type
-        Optional<CombatLevelFeature> featureOpt = robot.nativeEntity.getFeature(CombatLevelFeature.class);
+        Optional<LevelFeature> featureOpt = robot.nativeEntity.getFeature(LevelFeature.class);
         if (featureOpt.isPresent()) {
             int maxLevel = featureOpt.get().getMaxLevel();
             if (newLevel > maxLevel) {
@@ -356,11 +356,11 @@ public class LovelyRobotCommands {
         Player player = EntityArgument.getPlayer(ctx, "player");
         int index = IntegerArgumentType.getInteger(ctx, "index");
         int newExp = IntegerArgumentType.getInteger(ctx, "value");
-        
-        InternalEntity robot = getRobotByIndex(ctx, player, index);
+
+        LovelyRobotEntity robot = (LovelyRobotEntity)getRobotByIndex(ctx, player, index);
         
         int oldLevel = robot.getLevel();
-        robot.setExp(newExp);
+        robot.addExp(newExp);
         
         // Auto-level-up logic would be in setExp or we trigger it here
         // For now, just set the exp
@@ -512,8 +512,8 @@ public class LovelyRobotCommands {
     private static int executeOwnerStats(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Player player = EntityArgument.getPlayer(ctx, "player");
         int index = IntegerArgumentType.getInteger(ctx, "index");
-        
-        InternalEntity robot = getRobotByIndex(ctx, player, index);
+
+        LovelyRobotEntity robot = (LovelyRobotEntity)getRobotByIndex(ctx, player, index);
         
         String name = robot.hasCustomName() ? robot.getCustomName().getString() : "Unnamed";
         BlockPos pos = robot.blockPosition();
@@ -565,7 +565,8 @@ public class LovelyRobotCommands {
         registry.unregisterRobot(robot.getUUID());
         
         // Set new owner (registration happens automatically in setTame)
-        robot.tame(toPlayer);
+        robot.setOwnerUUID(toPlayer.getUUID());
+        InternalParticle.HappyVillager(robot);
         
         String robotName = robot.hasCustomName() ? robot.getCustomName().getString() : "Robot";
         ctx.getSource().sendSuccess(
