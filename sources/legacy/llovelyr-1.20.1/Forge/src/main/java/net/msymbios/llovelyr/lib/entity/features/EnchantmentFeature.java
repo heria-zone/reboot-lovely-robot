@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.lib.entity.type.features;
+package net.msymbios.llovelyr.lib.entity.features;
 
 import net.msymbios.llovelyr.framework.entity.enchantment.DefaultEnchantmentStrategy;
 import net.msymbios.llovelyr.framework.entity.enchantment.EnchantmentCalculationStrategy;

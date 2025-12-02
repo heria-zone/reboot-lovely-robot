@@ -1,6 +1,6 @@
-package net.msymbios.llovelyr.lib.entity.type.features;
+package net.msymbios.llovelyr.lib.entity.features;
 
-import net.msymbios.llovelyr.framework.entity.combat.AttributeCalculationStrategy;
+import net.msymbios.llovelyr.framework.entity.combat.IAttributeCalculationStrategy;
 import net.msymbios.llovelyr.framework.entity.combat.LinearAttributeStrategy;
 
 import java.util.Objects;
@@ -24,7 +24,7 @@ public class CombatLevelFeature {
 
     // -- Fields --
     
-    private AttributeCalculationStrategy strategy;
+    private IAttributeCalculationStrategy strategy;
     private int baseHp;
     private int baseAttack;
     private int baseDefense;
@@ -55,11 +55,11 @@ public class CombatLevelFeature {
      * @param strategy attribute calculation strategy (must not be null)
      * @throws NullPointerException if strategy is null
      */
-    public CombatLevelFeature(int baseHp, int baseAttack, int baseDefense, AttributeCalculationStrategy strategy) {
+    public CombatLevelFeature(int baseHp, int baseAttack, int baseDefense, IAttributeCalculationStrategy strategy) {
         this.baseHp = Math.max(1, baseHp);
         this.baseAttack = Math.max(0, baseAttack);
         this.baseDefense = Math.max(0, baseDefense);
-        this.strategy = Objects.requireNonNull(strategy, "AttributeCalculationStrategy cannot be null");
+        this.strategy = Objects.requireNonNull(strategy, "IAttributeCalculationStrategy cannot be null");
     }
 
     // -- Calculation Methods --
@@ -181,8 +181,8 @@ public class CombatLevelFeature {
      * @param strategy new calculation strategy (must not be null)
      * @throws NullPointerException if strategy is null
      */
-    public void setStrategy(AttributeCalculationStrategy strategy) {
-        this.strategy = Objects.requireNonNull(strategy, "AttributeCalculationStrategy cannot be null");
+    public void setStrategy(IAttributeCalculationStrategy strategy) {
+        this.strategy = Objects.requireNonNull(strategy, "IAttributeCalculationStrategy cannot be null");
     }
 
     // -- Getters --
@@ -211,7 +211,7 @@ public class CombatLevelFeature {
     /**
      * @return current calculation strategy
      */
-    public AttributeCalculationStrategy getStrategy() {
+    public IAttributeCalculationStrategy getStrategy() {
         return strategy;
     }
 
