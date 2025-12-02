@@ -4,7 +4,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.msymbios.llovelyr.source.LovelyConfigs;
-import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 
 /**
@@ -28,7 +28,7 @@ public class AiFollowOwnerGoal extends FollowOwnerGoal {
 
     // -- Fields --
 
-    private final LovelyRobot entity;
+    private final LovelyRobotEntity entity;
     private int ownerStillTicks = 0;
 
     // -- Constructor --
@@ -42,7 +42,7 @@ public class AiFollowOwnerGoal extends FollowOwnerGoal {
      * @param maxDistance maximum distance before teleporting (blocks)
      * @param leavesAllowed whether pathfinding can traverse leaves
      */
-    public AiFollowOwnerGoal(LovelyRobot tameable, double speed, float minDistance, float maxDistance, boolean leavesAllowed) {
+    public AiFollowOwnerGoal(LovelyRobotEntity tameable, double speed, float minDistance, float maxDistance, boolean leavesAllowed) {
         super((TamableAnimal) tameable, speed, minDistance, maxDistance, leavesAllowed);
         entity = tameable;
     } // Constructor: AiFollowOwnerGoal ()

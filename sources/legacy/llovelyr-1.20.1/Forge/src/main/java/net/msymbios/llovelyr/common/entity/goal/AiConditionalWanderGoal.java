@@ -2,7 +2,7 @@ package net.msymbios.llovelyr.common.entity.goal;
 
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.LivingEntity;
-import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.source.LovelyConfigs;
 
@@ -27,7 +27,7 @@ public class AiConditionalWanderGoal extends WaterAvoidingRandomStrollGoal {
 
     // -- Fields --
 
-    private final LovelyRobot robot;
+    private final LovelyRobotEntity robot;
     
     private int ownerStillTicks = 0;
     private int wanderCooldown = 0;
@@ -52,7 +52,7 @@ public class AiConditionalWanderGoal extends WaterAvoidingRandomStrollGoal {
      * @param robot robot entity to control
      * @param speed movement speed multiplier when wandering
      */
-    public AiConditionalWanderGoal(LovelyRobot robot, double speed) {
+    public AiConditionalWanderGoal(LovelyRobotEntity robot, double speed) {
         super(robot, speed);
         this.robot = robot;
     } // Constructor: AiConditionalWanderGoal

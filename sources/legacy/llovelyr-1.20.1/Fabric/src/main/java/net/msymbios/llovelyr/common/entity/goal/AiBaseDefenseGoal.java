@@ -6,7 +6,7 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.pathing.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldView;
-import net.msymbios.llovelyr.source.entity.common.LovelyRobot;
+import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.source.LovelyConfigs;
 
@@ -62,7 +62,7 @@ public class AiBaseDefenseGoal extends Goal {
     // -- Fields --
 
     private final WorldView world;
-    private final LovelyRobot entity;
+    private final LovelyRobotEntity entity;
     private final EntityNavigation navigation;
     private final float speed;
     private final float maxDistance;
@@ -101,7 +101,7 @@ public class AiBaseDefenseGoal extends Goal {
      * @param maxDistance maximum distance before teleportation triggers (blocks)
      * @throws IllegalArgumentException if navigation type unsupported
      */
-    public AiBaseDefenseGoal(LovelyRobot mob, float speed, float minDistance, float maxDistance) {
+    public AiBaseDefenseGoal(LovelyRobotEntity mob, float speed, float minDistance, float maxDistance) {
         this.entity = mob;
         this.world = mob.getWorld();
         this.speed = speed;
