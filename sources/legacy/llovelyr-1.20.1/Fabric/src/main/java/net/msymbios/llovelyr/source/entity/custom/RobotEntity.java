@@ -1,6 +1,7 @@
 package net.msymbios.llovelyr.source.entity.custom;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
@@ -16,8 +17,8 @@ public class RobotEntity extends LovelyRobotEntity {
 
     // -- Constructor --
 
-    public RobotEntity(EntityType<? extends LovelyRobotEntity> entityType, World world, NativeEntityType nativeEntity) {
-        super(entityType, world, nativeEntity);
+    public RobotEntity(EntityType<? extends LovelyRobotEntity> entityType, World world, NativeEntityType nativeEntity, Item spawnItem) {
+        super(entityType, world, nativeEntity, spawnItem);
     } // Constructor: RobotEntity()
 
 } // Class: RobotEntity

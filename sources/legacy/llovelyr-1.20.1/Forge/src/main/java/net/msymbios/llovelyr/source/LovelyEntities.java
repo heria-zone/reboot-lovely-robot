@@ -13,6 +13,8 @@ import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.source.entity.custom.RobotEntity;
 import net.msymbios.llovelyr.source.entity.custom.RobotRenderer;
+import net.msymbios.llovelyr.source.entity.custom.bunny.BunnyRenderer;
+import net.msymbios.llovelyr.source.entity.custom.kitsune.KitsuneRenderer;
 import net.msymbios.llovelyr.source.entity.common.LovelyRobotType;
 
 /**
@@ -33,8 +35,13 @@ public class LovelyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<RobotEntity>> BUNNY2 = registerRobot(LovelyIdentifier.VARIANT_BUNNY2, LovelyRobotType.BUNNY2);
-    public static final RegistryObject<EntityType<RobotEntity>> VANILLA = registerRobot(LovelyIdentifier.VARIANT_VANILLA, LovelyRobotType.VANILLA);
+    public static final RegistryObject<EntityType<RobotEntity>> BUNNY = registerRobot(LovelyIdentifier.VARIANT_BUNNY, LovelyRobotType.BUNNY, LovelyItems.BUNNY_SPAWN);
+    public static final RegistryObject<EntityType<RobotEntity>> BUNNY2 = registerRobot(LovelyIdentifier.VARIANT_BUNNY2, LovelyRobotType.BUNNY2, LovelyItems.BUNNY2_SPAWN);
+    public static final RegistryObject<EntityType<RobotEntity>> DRAGON = registerRobot(LovelyIdentifier.VARIANT_DRAGON, LovelyRobotType.DRAGON, LovelyItems.DRAGON_SPAWN);
+    public static final RegistryObject<EntityType<RobotEntity>> HONEY = registerRobot(LovelyIdentifier.VARIANT_HONEY, LovelyRobotType.HONEY, LovelyItems.HONEY_SPAWN);
+    public static final RegistryObject<EntityType<RobotEntity>> KITSUNE = registerRobot(LovelyIdentifier.VARIANT_KITSUNE, LovelyRobotType.KITSUNE, LovelyItems.KITSUNE_SPAWN);
+    public static final RegistryObject<EntityType<RobotEntity>> NEKO = registerRobot(LovelyIdentifier.VARIANT_NEKO, LovelyRobotType.NEKO, LovelyItems.NEKO_SPAWN);
+    public static final RegistryObject<EntityType<RobotEntity>> VANILLA = registerRobot(LovelyIdentifier.VARIANT_VANILLA, LovelyRobotType.VANILLA, LovelyItems.VANILLA_SPAWN);
 
     // -- Registration Methods --
 
@@ -46,12 +53,13 @@ public class LovelyEntities {
      *
      * @param name entity variant name
      * @param robotType robot configuration data
+     * @param spawnItem registry object for the spawn item
      * @return registered entity type
      */
-    private static RegistryObject<EntityType<RobotEntity>> registerRobot(String name, NativeEntityType robotType) {
+    private static RegistryObject<EntityType<RobotEntity>> registerRobot(String name, NativeEntityType robotType, RegistryObject<net.minecraft.world.item.Item> spawnItem) {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
                 (EntityType<RobotEntity> type, net.minecraft.world.level.Level level) ->
-                        new RobotEntity(type, level, robotType), MobCategory.CREATURE)
+                        new RobotEntity(type, level, robotType, spawnItem.get()), MobCategory.CREATURE)
                 .sized(LovelyConfigs.EntityDimensions.DEFAULT_WIDTH, LovelyConfigs.EntityDimensions.DEFAULT_HEIGHT)
                 .build(LovelyIdentifier.getId(name).toString()));
     } // registerRobot()
@@ -74,7 +82,12 @@ public class LovelyEntities {
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
+        event.put(BUNNY.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.BUNNY));
         event.put(BUNNY2.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.BUNNY2));
+        event.put(DRAGON.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.DRAGON));
+        event.put(HONEY.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.HONEY));
+        event.put(KITSUNE.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.KITSUNE));
+        event.put(NEKO.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.NEKO));
         event.put(VANILLA.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.VANILLA));
     } // registerAttribute()
 
@@ -84,7 +97,12 @@ public class LovelyEntities {
      * @param event entity renderers registration event
      */
     public static void registerRender(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(BUNNY.get(), BunnyRenderer::new);
         event.registerEntityRenderer(BUNNY2.get(), RobotRenderer::new);
+        event.registerEntityRenderer(DRAGON.get(), RobotRenderer::new);
+        event.registerEntityRenderer(HONEY.get(), RobotRenderer::new);
+        event.registerEntityRenderer(KITSUNE.get(), KitsuneRenderer::new);
+        event.registerEntityRenderer(NEKO.get(), RobotRenderer::new);
         event.registerEntityRenderer(VANILLA.get(), RobotRenderer::new);
     } // registerRender()
 

@@ -72,6 +72,9 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
 
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
     
+    // -- Spawn Item Reference --
+    private final Item spawnItem;
+    
     // -- Standby Animation State (not persisted) --
     private int standbyTicks = 0;
     private int standbyTargetTicks = 0;
@@ -220,8 +223,9 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
 
     // -- Constructor --
 
-    public LovelyRobotEntity(EntityType<? extends InternalEntity> entityType, Level level, NativeEntityType nativeEntity) {
+    public LovelyRobotEntity(EntityType<? extends InternalEntity> entityType, Level level, NativeEntityType nativeEntity, Item spawnItem) {
         super(entityType, level, nativeEntity);
+        this.spawnItem = spawnItem;
     } // Constructor LovelyRobotEntity ()
 
     // -- Inherited Methods --
@@ -1172,16 +1176,11 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
      * @return ItemStack containing spawn item with complete robot data
      */
     private ItemStack createSpawnItemFromEntity() {
-        // Determine correct spawn item based on robot variant
-        final ItemStack spawnItem;
-        if (this.nativeEntity.getKey().equals("bunny2")) {
-            spawnItem = new ItemStack(LovelyItems.BUNNY2_SPAWN.get(), 1);
-        } else {
-            spawnItem = new ItemStack(LovelyItems.VANILLA_SPAWN.get(), 1);
-        }
+        // Use the spawn item provided during entity construction
+        final ItemStack spawnItemStack = new ItemStack(this.spawnItem, 1);
         
         // Use same NBT structure as handleItemDrop()
-        CompoundTag nbt = spawnItem.getTag();
+        CompoundTag nbt = spawnItemStack.getTag();
         if(nbt == null) nbt = new CompoundTag();
 
         String customName = Utility.getEntityCustomName(this);
@@ -1203,11 +1202,11 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
         nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
         nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
 
-        spawnItem.setTag(nbt);
+        spawnItemStack.setTag(nbt);
 
         // Apply custom name with title (commented for future use)
         // if (!customName.isEmpty()) {
-        //     spawnItem.setHoverName(
+        //     spawnItemStack.setHoverName(
         //         Component.nullToEmpty(customName)
         //             .copy()
         //             .append(Utility.getRandomTitle())
@@ -1215,7 +1214,7 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
         //     );
         // }
         
-        return spawnItem;
+        return spawnItemStack;
     } // createSpawnItemFromEntity ()
 
     /**

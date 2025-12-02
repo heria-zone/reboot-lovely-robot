@@ -74,6 +74,9 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
 
     protected boolean changeWeapon = false;
     
+    // -- Spawn Item Reference --
+    private final Item spawnItem;
+    
     // -- Standby Animation State (not persisted) --
     private int standbyTicks = 0;
     private int standbyTargetTicks = 0;
@@ -222,8 +225,9 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
 
     // -- Constructor --
 
-    public LovelyRobotEntity(EntityType<? extends InternalEntity> entityType, World world, NativeEntityType robotEntityType) {
+    public LovelyRobotEntity(EntityType<? extends InternalEntity> entityType, World world, NativeEntityType robotEntityType, Item spawnItem) {
         super(entityType, world, robotEntityType);
+        this.spawnItem = spawnItem;
     } // Constructor LovelyRobotEntity ()
 
     // -- Inherited Methods --
@@ -1198,16 +1202,11 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
      * @return ItemStack containing spawn item with complete robot data
      */
     private ItemStack createSpawnItemFromEntity() {
-        // Determine correct spawn item based on robot variant
-        final ItemStack spawnItem;
-        if (this.nativeEntity.getKey().equals("bunny2")) {
-            spawnItem = new ItemStack(LovelyItems.BUNNY2_SPAWN, 1);
-        } else {
-            spawnItem = new ItemStack(LovelyItems.VANILLA_SPAWN, 1);
-        }
+        // Use the spawn item provided during entity construction
+        final ItemStack spawnItemStack = new ItemStack(this.spawnItem, 1);
         
         // Use same NBT structure as handleItemDrop()
-        NbtCompound nbt = spawnItem.getNbt();
+        NbtCompound nbt = spawnItemStack.getNbt();
         if(nbt == null) nbt = new NbtCompound();
 
         String customName = Utility.getEntityCustomName(this);
@@ -1229,18 +1228,18 @@ public abstract class LovelyRobotEntity extends InternalEntity implements GeoEnt
         nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
         nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
 
-        spawnItem.setNbt(nbt);
+        spawnItemStack.setNbt(nbt);
 
         // Apply custom name with title (commented for future use)
         // if (!customName.isEmpty()) {
-        //     spawnItem.setCustomName(
+        //     spawnItemStack.setCustomName(
         //         Text.literal(customName)
         //             .append(Utility.getRandomTitle())
         //             .formatted(Formatting.DARK_PURPLE)
         //     );
         // }
         
-        return spawnItem;
+        return spawnItemStack;
     } // createSpawnItemFromEntity ()
 
     /**
