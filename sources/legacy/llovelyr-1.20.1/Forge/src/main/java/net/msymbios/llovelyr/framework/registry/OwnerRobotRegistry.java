@@ -235,4 +235,25 @@ public class OwnerRobotRegistry {
         return ownerToRobots.size();
     }
     
+    /**
+     * Gets all owners with their registered robots.
+     * <p>
+     * <b>Use Case:</b> Administrative commands that need to list all robot owners
+     * and their robot counts.
+     * <p>
+     * <b>Performance:</b> O(n) where n is number of owners. Returns immutable
+     * view to prevent external modification.
+     * 
+     * @return map of owner UUIDs to their robot entry lists
+     */
+    public Map<UUID, List<RobotRegistryEntry>> getAllOwners() {
+        Map<UUID, List<RobotRegistryEntry>> result = new HashMap<>();
+        
+        ownerToRobots.forEach((ownerId, robotSet) -> {
+            result.put(ownerId, new ArrayList<>(robotSet));
+        });
+        
+        return Collections.unmodifiableMap(result);
+    }
+    
 } // Class: OwnerRobotRegistry
