@@ -1,35 +1,13 @@
 package net.msymbios.llovelyr.source;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.TextArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
 import net.msymbios.llovelyr.common.commands.ColorArgumentType;
-import net.msymbios.llovelyr.source.entity.common.LovelyRobotEntity;
-import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
-
-import java.util.*;
+import net.msymbios.llovelyr.common.commands.NativeCommands;
 
 /**
  * Centralizes command registration and execution for robot management.
@@ -46,2090 +24,670 @@ import java.util.*;
  * flexible entity selection (@e, @p, @a, @r with type filters), enabling
  * batch operations on multiple robots simultaneously.
  */
-public class LovelyCommands {
+public class LovelyCommands extends NativeCommands {
 
-    // -- Public Methods --
+    // -- API Methods --
 
-    /**
-     * Registers all robot management commands with the command dispatcher.
-     * <p>
-     * <b>Command Structure:</b> Root literal "llovely" with permission
-     * requirement branches into functional categories (stats, enchant,
-     * protection, design, owner, name, teleport).
-     * <p>
-     * <b>Registration Timing:</b> Called during RegisterCommandsEvent,
-     * ensuring commands are available before server accepts connections.
-     *
-     * @param dispatcher the command dispatcher for registration
-     */
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(
-                CommandManager.literal("llovely2")
+                CommandManager.literal("llovely")
                         .requires(source -> source.hasPermissionLevel(2))
-                        .then(buildHybridStatsCommands())
-                        .then(buildHybridAttributesCommands())
-                        .then(buildHybridEnchantCommands())
-                        .then(buildHybridProtectionCommands())
-                        .then(buildHybridDesignCommands())
-                        .then(buildHybridOwnerCommands())
-                        .then(buildHybridNameCommands())
-                        .then(buildHybridTeleportCommand())
+                        .then(buildCrossCommands())
+                        .then(buildTargetCommands())
+                        .then(buildOwnerCommands())
                         .then(buildReloadCommand())
         );
-    } // register()
-
-    // -- Private Methods --
-
-    /**
-     * Executes level setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies level to all matching LovelyRobotEntity entities,
-     * triggering stat recalculation through setCurrentLevel(). Non-robot
-     * entities in selection are silently skipped.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int level = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setCurrentLevel(level);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set level to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetLevel()
-
-    /**
-     * Executes XP setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies experience points to all matching LovelyRobotEntity
-     * entities. XP affects level progression but does not automatically
-     * trigger leveling (requires separate level calculation).
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int xp = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setExp(xp);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set XP to " + xp + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetXP()
-
-    /**
-     * Executes HP setter command on targeted robots.
-     * <p>
-     * <b>Implementation Note:</b> Currently uses Minecraft's attribute system.
-     * Sets max health and heals robot to full HP.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetHP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int hp = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-                robot.setHealth(hp);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set HP to " + hp + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetHP()
-
-    /**
-     * Executes attack setter command on targeted robots.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetAttack(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int attack = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set attack to " + attack + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetAttack()
-
-    /**
-     * Executes defense setter command on targeted robots.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetDefense(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int defense = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set defense to " + defense + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetDefense()
-
-    /**
-     * Executes speed setter command on targeted robots.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetSpeed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int speed = IntegerArgumentType.getInteger(ctx, "value");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set speed to " + speed + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetSpeed()
-
-    /**
-     * Executes all-attributes setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies HP, attack, defense, and speed values to all
-     * matching LovelyRobotEntity entities. This is a batch operation for efficient
-     * attribute configuration during testing or events.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetAllAttributes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int hp = IntegerArgumentType.getInteger(ctx, "hp");
-        int attack = IntegerArgumentType.getInteger(ctx, "attack");
-        int defense = IntegerArgumentType.getInteger(ctx, "defense");
-        int speed = IntegerArgumentType.getInteger(ctx, "speed");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-                robot.setHealth(hp);
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(defense);
-                robot.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MOVEMENT_SPEED).setBaseValue(speed / 10.0);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set attributes (HP:" + hp + " ATK:" + attack + " DEF:" + defense + " SPD:" + speed + ") for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetAllAttributes()
-
-    /**
-     * Executes looting enchantment setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies looting level to all matching LovelyRobotEntity entities.
-     * Looting affects drop rates from mobs killed by the robot.
-     * <p>
-     * <b>Implementation Note:</b> Current robot architecture calculates looting
-     * from level. This command provides direct override for testing/events.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetLooting(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set looting to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetLooting()
-
-    /**
-     * Executes all-enchantments setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Batch operation for setting all enchantment levels.
-     * Currently only looting is supported, but structure allows future expansion.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetAllEnchants(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int looting = IntegerArgumentType.getInteger(ctx, "looting");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set all enchantments (Looting:" + looting + ") for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetAllEnchants()
-
-    /**
-     * Executes fire protection setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies fire protection level to all matching LovelyRobotEntity
-     * entities. Fire protection reduces damage from fire, lava, and burning.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetFireProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setFireProtection(level);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set fire protection to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetFireProtection()
-
-    /**
-     * Executes fall protection setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies fall protection level to all matching LovelyRobotEntity
-     * entities. Fall protection reduces damage from falling.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetFallProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setFallProtection(level);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set fall protection to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetFallProtection()
-
-    /**
-     * Executes blast protection setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies blast protection level to all matching LovelyRobotEntity
-     * entities. Blast protection reduces damage from explosions.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetBlastProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setBlastProtection(level);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set blast protection to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetBlastProtection()
-
-    /**
-     * Executes projectile protection setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies projectile protection level to all matching LovelyRobotEntity
-     * entities. Projectile protection reduces damage from arrows and other projectiles.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetProjectileProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setProjectileProtection(level);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set projectile protection to " + level + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetProjectileProtection()
-
-    /**
-     * Executes all-protections setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies fire, fall, blast, and projectile protection values
-     * to all matching LovelyRobotEntity entities. This is a batch operation for efficient
-     * protection configuration during testing or events.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetAllProtections(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        int fire = IntegerArgumentType.getInteger(ctx, "fire");
-        int fall = IntegerArgumentType.getInteger(ctx, "fall");
-        int blast = IntegerArgumentType.getInteger(ctx, "blast");
-        int projectile = IntegerArgumentType.getInteger(ctx, "projectile");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setFireProtection(fire);
-                robot.setFallProtection(fall);
-                robot.setBlastProtection(blast);
-                robot.setProjectileProtection(projectile);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set all protections (Fire:" + fire + " Fall:" + fall + " Blast:" + blast + " Projectile:" + projectile + ") for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetAllProtections()
-
-    /**
-     * Executes design setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies color/texture to all matching LovelyRobotEntity entities.
-     * Color change is immediate and visible to all nearby players.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetDesign(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        EntityTexture color = ctx.getArgument("color", EntityTexture.class);
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setTexture(color);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        final String colorName = color.Name().toLowerCase();
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set color to " + colorName + " for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetDesign()
-
-    /**
-     * Executes owner getter command on targeted robot.
-     * <p>
-     * <b>Behavior:</b> Displays current owner of the robot. Shows "No owner"
-     * if robot is untamed or owner is unknown.
-     * <p>
-     * <b>Feedback:</b> Sends owner information to command source only
-     * (not broadcast to all operators).
-     *
-     * @param ctx command context with source and arguments
-     * @return 1 if successful, 0 if not a robot
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeGetOwner(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Entity entity = EntityArgumentType.getEntity(ctx, "target");
-
-        if (entity instanceof LovelyRobotEntity robot) {
-            ServerPlayerEntity owner = (ServerPlayerEntity) robot.getOwner();
-            String ownerName = owner != null ? owner.getName().getString() : "No owner";
-
-            ctx.getSource().sendFeedback(
-                    () -> Text.literal("Robot owner: " + ownerName),
-                    false
-            );
-            return 1;
-        }
-
-        ctx.getSource().sendError(Text.literal("Target is not a robot"));
-        return 0;
-    } // executeGetOwner()
-
-    /**
-     * Executes owner setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Transfers ownership of all matching LovelyRobotEntity entities
-     * to specified player. Updates taming relationship and behavioral loyalty.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetOwner(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        ServerPlayerEntity newOwner = EntityArgumentType.getPlayer(ctx, "player");
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.handleTame(newOwner);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        final String ownerName = newOwner.getName().getString();
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Transferred ownership of " + finalCount + " robot(s) to " + ownerName),
-                true
-        );
-
-        return count;
-    } // executeSetOwner()
-
-    /**
-     * Executes name setter command on targeted robots.
-     * <p>
-     * <b>Behavior:</b> Applies custom name to all matching LovelyRobotEntity entities.
-     * Accepts simple text strings for user-friendly naming.
-     * <p>
-     * <b>Feedback:</b> Sends success message with count of affected robots,
-     * broadcast to all operators for audit trail.
-     *
-     * @param ctx command context with source and arguments
-     * @return count of robots modified
-     * @throws CommandSyntaxException if entity selector fails
-     */
-    private static int executeSetName(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Collection<? extends Entity> entities = EntityArgumentType.getEntities(ctx, "target");
-        String nameString = StringArgumentType.getString(ctx, "name");
-        Text name = Text.literal(nameString);
-        int count = 0;
-
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                robot.setCustomName(name);
-                robot.setCustomNameVisible(true);
-                count++;
-            }
-        }
-
-        final int finalCount = count;
-        final String finalName = nameString;
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Set name to '" + finalName + "' for " + finalCount + " robot(s)"),
-                true
-        );
-
-        return count;
-    } // executeSetName()
-
-    /**
-     * Discovers all robots owned by the specified player.
-     * <p>
-     * <b>Performance:</b> Searches all loaded entities in the player's level.
-     * Optimized for typical server entity counts (O(n) where n = loaded entities).
-     * <p>
-     * <b>Scope:</b> Only searches entities in the same dimension as the player.
-     * Cross-dimension robot discovery is not supported.
-     *
-     * @param player the player whose robots to find
-     * @return list of LovelyRobotEntity instances owned by the player
-     */
-    private static List<LovelyRobotEntity> findOwnedRobots(ServerPlayerEntity player) {
-        List<LovelyRobotEntity> robots = new ArrayList<>();
-
-        try {
-            if (player == null || player.getWorld() == null) {
-                return robots;
-            }
-
-            ServerWorld world = (ServerWorld) player.getWorld();
-
-            for (Entity entity : world.iterateEntities()) {
-                if (entity instanceof LovelyRobotEntity robot && robot.isOwner(player)) {
-                    robots.add(robot);
-                }
-            }
-        } catch (Exception e) {
-            // Return empty list if there's any error
-        }
-
-        return robots;
-    } // findOwnedRobots()
-
-    /**
-     * Parses robot identifier and finds matching robot owned by player.
-     * <p>
-     * <b>Format:</b> Expects "name_uuid" format where uuid is the first 8
-     * characters of the robot's UUID. This format matches autocomplete suggestions.
-     * <p>
-     * <b>Matching:</b> Searches owned robots for UUID prefix match. Returns
-     * first match found (UUID prefix should be unique enough for disambiguation).
-     *
-     * @param player the player who owns the robot
-     * @param identifier the robot identifier string (name_uuid format)
-     * @return matching LovelyRobotEntity or null if not found
-     */
-    private static LovelyRobotEntity findRobotByIdentifier(ServerPlayerEntity player, String identifier) {
-        List<LovelyRobotEntity> ownedRobots = findOwnedRobots(player);
-
-        String[] parts = identifier.split("_");
-        if (parts.length < 2) {
-            return null;
-        }
-
-        String uuidPrefix = parts[parts.length - 1];
-
-        for (LovelyRobotEntity robot : ownedRobots) {
-            String robotUuidPrefix = robot.getUuid().toString().substring(0, 8);
-            if (robotUuidPrefix.equals(uuidPrefix)) {
-                return robot;
-            }
-        }
-
-        return null;
-    } // findRobotByIdentifier()
-
-    /**
-     * Finds safe teleport location near target position.
-     * <p>
-     * <b>Safety Criteria:</b> Location must have non-suffocating blocks and
-     * solid ground beneath. Checks 5x5 area around target position.
-     * <p>
-     * <b>Search Pattern:</b> Starts at target position and spirals outward,
-     * returning first safe location found within 5 block radius.
-     * <p>
-     * <b>Performance:</b> Early exit on first safe location. Worst case checks
-     * 25 positions (~1ms execution time).
-     *
-     * @param world the level to search in
-     * @param targetPos the desired teleport position
-     * @return safe BlockPos or null if no safe location found
-     */
-    private static BlockPos findSafeTeleportLocation(ServerWorld world, BlockPos targetPos) {
-        if (isSafeTeleportLocation(world, targetPos)) {
-            return targetPos;
-        }
-
-        for (int dx = -2; dx <= 2; dx++) {
-            for (int dz = -2; dz <= 2; dz++) {
-                BlockPos checkPos = targetPos.add(dx, 0, dz);
-                if (isSafeTeleportLocation(world, checkPos)) {
-                    return checkPos;
-                }
-            }
-        }
-
-        return null;
-    } // findSafeTeleportLocation()
-
-    /**
-     * Validates if position is safe for robot teleportation.
-     * <p>
-     * <b>Safety Checks:</b>
-     * - Block at position is non-suffocating (air or passable)
-     * - Block above is non-suffocating (room for robot)
-     * - Block below is solid (ground support)
-     * <p>
-     * <b>Prevents:</b> Suffocation damage, falling damage, invalid positions.
-     *
-     * @param world the level containing the position
-     * @param pos the position to validate
-     * @return true if position is safe for teleportation
-     */
-    private static boolean isSafeTeleportLocation(ServerWorld world, BlockPos pos) {
-        var blockAtPos = world.getBlockState(pos);
-        var blockAbove = world.getBlockState(pos.up());
-        var blockBelow = world.getBlockState(pos.down());
-
-        boolean positionClear = !blockAtPos.isSolidBlock(world, pos);
-        boolean aboveClear = !blockAbove.isSolidBlock(world, pos.up());
-        boolean hasGround = blockBelow.isSolidBlock(world, pos.down());
-
-        return positionClear && aboveClear && hasGround;
-    } // isSafeTeleportLocation()
-
-    /**
-     * Executes robot teleportation to player location.
-     * <p>
-     * <b>Ownership Validation:</b> Verifies player owns the robot or has admin
-     * permissions before allowing teleportation.
-     * <p>
-     * <b>Safe Teleportation:</b> Finds safe location near player to prevent
-     * suffocation or fall damage. Cancels if no safe location found.
-     * <p>
-     * <b>Feedback:</b> Spawns particles at origin and destination, plays sound,
-     * sends confirmation message to player.
-     * <p>
-     * <b>Dimension Handling:</b> Safely handles cross-dimension teleportation
-     * by changing robot's level before position update.
-     *
-     * @param ctx command context with source and arguments
-     * @return 1 if successful, 0 if failed
-     * @throws CommandSyntaxException if player not found or robot not found
-     */
-    private static int executeTeleport(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        String robotIdentifier = StringArgumentType.getString(ctx, "robot");
-
-        LovelyRobotEntity robot = findRobotByIdentifier(player, robotIdentifier);
-
-        if (robot == null) {
-            throw new SimpleCommandExceptionType(
-                    Text.literal("Robot not found or you don't own it")
-            ).create();
-        }
-
-        boolean isAdmin = ctx.getSource().hasPermissionLevel(2);
-        if (!robot.isOwner(player) && !isAdmin) {
-            throw new SimpleCommandExceptionType(
-                    Text.literal("You don't own this robot")
-            ).create();
-        }
-
-        ServerWorld playerWorld = (ServerWorld) player.getWorld();
-        BlockPos playerPos = player.getBlockPos();
-
-        BlockPos safePos = findSafeTeleportLocation(playerWorld, playerPos);
-
-        if (safePos == null) {
-            throw new SimpleCommandExceptionType(
-                    Text.literal("No safe location found for teleportation")
-            ).create();
-        }
-
-        ServerWorld robotWorld = (ServerWorld) robot.getWorld();
-        spawnTeleportParticles(robotWorld, robot.getPos());
-
-        if (robot.getWorld() != player.getWorld()) {
-            throw new SimpleCommandExceptionType(
-                    Text.literal("Cannot teleport robot across dimensions")
-            ).create();
-        }
-
-        robot.refreshPositionAndAngles(safePos.getX() + 0.5, safePos.getY(), safePos.getZ() + 0.5, robot.getYaw(), robot.getPitch());
-
-        spawnTeleportParticles(playerWorld, robot.getPos());
-
-        playerWorld.playSound(
-                null,
-                safePos,
-                SoundEvents.ENTITY_ENDERMAN_TELEPORT,
-                SoundCategory.PLAYERS,
-                1.0F,
-                1.0F
-        );
-
-        String displayName = getRobotDisplayName(robot);
-        ctx.getSource().sendFeedback(
-                () -> Text.literal("Teleported " + displayName + " to your location"),
-                false
-        );
-
-        return 1;
-    } // executeTeleport()
-
-    /**
-     * Spawns portal particles at specified position.
-     * <p>
-     * <b>Visual Effect:</b> Creates purple portal particles in a small area
-     * to indicate teleportation event. Visible to all nearby players.
-     * <p>
-     * <b>Performance:</b> Spawns 20 particles with minimal spread, negligible
-     * performance impact.
-     *
-     * @param world the level to spawn particles in
-     * @param pos the position to spawn particles at
-     */
-    private static void spawnTeleportParticles(ServerWorld world, Vec3d pos) {
-        world.spawnParticles(
-                ParticleTypes.PORTAL,
-                pos.x, pos.y + 0.5, pos.z,
-                20,
-                0.5, 0.5, 0.5,
-                0.1
-        );
-    } // spawnTeleportParticles()
-
-    /**
-     * Gets display name for robot.
-     * <p>
-     * <b>Priority:</b> Returns custom name if set, otherwise returns robot
-     * variant type (e.g., "Vanilla Robot", "Bunny2 Robot").
-     * <p>
-     * <b>Formatting:</b> Strips formatting codes from custom names for use
-     * in command feedback messages.
-     *
-     * @param robot the robot to get display name for
-     * @return display name string
-     */
-    private static String getRobotDisplayName(LovelyRobotEntity robot) {
-        if (robot.hasCustomName()) {
-            return robot.getCustomName().getString();
-        }
-        return robot.nativeEntity.getKey() + " Robot";
-    } // getRobotDisplayName()
-
-    // ========================================
-
-    /**
-     * Builds enchantment command tree for looting level management.
-     * <p>
-     * <b>Command Structure:</b>
-     * - /llovely enchant set {@literal <target>} looting {@literal <level>}
-     * - /llovely enchant set {@literal <target>} all {@literal <looting>}
-     * <p>
-     * <b>Validation:</b> Looting range 0-3 enforced by argument type,
-     * matching Minecraft's enchantment level limits.
-     *
-     * @return argument builder for enchant command branch
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildEnchantCommands() {
-        return CommandManager.literal("enchant")
-                .then(CommandManager.literal("set")
-                        .then(CommandManager.argument("target", EntityArgumentType.entities())
-                                .then(CommandManager.literal("looting")
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 3))
-                                                .executes(LovelyCommands::executeSetLooting)
-                                        )
+    } // register ()
+
+    // -- Internal Methods --
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossCommands() {
+        return CommandManager.literal("robot")
+                .then(buildCrossAddCommands())
+                .then(buildCrossGetCommands())
+                .then(buildCrossSetCommands())
+                .then(CommandManager.literal("recall")
+                        .executes(LovelyCommands::executeCrosshairRecall)
+                )
+                .then(CommandManager.literal("heal")
+                        .executes(LovelyCommands::executeCrosshairHeal)
+                )
+                .then(CommandManager.literal("stats")
+                        .executes(LovelyCommands::executeCrosshairStats)
+                );
+    } // buildCrossCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossAddCommands() {
+        return CommandManager.literal("add")
+                .then(buildCrossAddCombatCommands());
+    } // buildCrossAddCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetCommands() {
+        return CommandManager.literal("set")
+                .then(buildCrossSetCombatCommands())
+                .then(buildCrossSetAttributeCommands())
+                .then(buildCrossSetProtectionCommands())
+                .then(buildCrossSetAppearanceCommands())
+                .then(buildCrossSetIdentifierCommands());
+    } // buildCrossSetCommands ()
+
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetCommands() {
+        return CommandManager.literal("target")
+                .then(CommandManager.argument("targets", EntityArgumentType.entities())
+                        .then(buildTargetAddCommands())
+                        .then(buildTargetSetCommands())
+                        .then(CommandManager.literal("heal").executes(LovelyCommands::executeTargetHeal))
+                        .then(CommandManager.literal("teleport")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                        .executes(LovelyCommands::executeTargetTeleport)
                                 )
-                                .then(CommandManager.literal("all")
-                                        .then(CommandManager.argument("looting", IntegerArgumentType.integer(0, 3))
-                                                .executes(LovelyCommands::executeSetAllEnchants)
-                                        )
+                        )
+                        .then(CommandManager.literal("recall")
+                                .then(CommandManager.argument("player", EntityArgumentType.player())
+                                        .executes(LovelyCommands::executeTargetRecall)
+                                )
+                        )
+                        .then(CommandManager.literal("ownership")
+                                .then(CommandManager.argument("to_player", EntityArgumentType.player())
+                                        .executes(LovelyCommands::executeTargetTransfer)
                                 )
                         )
                 );
-    } // buildEnchantCommands()
+    } // buildTargetCommands()
 
-    /**
-     * Builds protection command tree for damage reduction management.
-     * <p>
-     * <b>Command Structure:</b>
-     * - /llovely protection set {@literal <target>} fire {@literal <level>}
-     * - /llovely protection set {@literal <target>} fall {@literal <level>}
-     * - /llovely protection set {@literal <target>} blast {@literal <level>}
-     * - /llovely protection set {@literal <target>} projectile {@literal <level>}
-     * - /llovely protection set {@literal <target>} all {@literal <fire> <fall> <blast> <projectile>}
-     * <p>
-     * <b>Validation:</b> Protection range 0-80 matches robot stat system,
-     * providing granular damage reduction control.
-     *
-     * @return argument builder for protection command branch
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildProtectionCommands() {
-        return CommandManager.literal("protection")
-                .then(CommandManager.literal("set")
-                        .then(CommandManager.argument("target", EntityArgumentType.entities())
-                                .then(CommandManager.literal("fire")
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                                                .executes(LovelyCommands::executeSetFireProtection)
-                                        )
-                                )
-                                .then(CommandManager.literal("fall")
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                                                .executes(LovelyCommands::executeSetFallProtection)
-                                        )
-                                )
-                                .then(CommandManager.literal("blast")
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                                                .executes(LovelyCommands::executeSetBlastProtection)
-                                        )
-                                )
-                                .then(CommandManager.literal("projectile")
-                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                                                .executes(LovelyCommands::executeSetProjectileProtection)
-                                        )
-                                )
-                                .then(CommandManager.literal("all")
-                                        .then(CommandManager.argument("fire", IntegerArgumentType.integer(0, 80))
-                                                .then(CommandManager.argument("fall", IntegerArgumentType.integer(0, 80))
-                                                        .then(CommandManager.argument("blast", IntegerArgumentType.integer(0, 80))
-                                                                .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0, 80))
-                                                                        .executes(LovelyCommands::executeSetAllProtections)
-                                                                )
-                                                        )
-                                                )
-                                        )
-                                )
-                        )
-                );
-    } // buildProtectionCommands()
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetAddCommands() {
+        return CommandManager.literal("add")
+                .then(buildTargetAddCombatCommands());
+    } // buildTargetAddCommands()
 
-    /**
-     * Builds design command tree for robot color/texture management.
-     * <p>
-     * <b>Command Structure:</b>
-     * - /llovely design set {@literal <target>} {@literal <color>}
-     * <p>
-     * <b>Color Selection:</b> Uses ColorArgumentType for type-safe color parsing
-     * with autocomplete support. Accepts all 16 standard Minecraft dye colors.
-     *
-     * @return argument builder for design command branch
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildDesignCommands() {
-        return CommandManager.literal("design")
-                .then(CommandManager.literal("set")
-                        .then(CommandManager.argument("target", EntityArgumentType.entities())
-                                .then(CommandManager.argument("color", ColorArgumentType.color())
-                                        .executes(LovelyCommands::executeSetDesign)
-                                )
-                        )
-                );
-    } // buildDesignCommands()
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetCommands() {
+        return CommandManager.literal("set")
+                .then(buildTargetSetCombatCommands())
+                .then(buildTargetSetAttributeCommands())
+                .then(buildTargetSetProtectionCommands())
+                .then(buildTargetSetAppearanceCommands())
+                .then(buildTargetSetIdentifierCommands());
+    } // buildTargetSetCommands ()
 
-    /**
-     * Builds owner command tree for ownership management.
-     * <p>
-     * <b>Command Structure:</b>
-     * - /llovely owner get {@literal <target>}
-     * - /llovely owner set {@literal <target>} {@literal <player>}
-     * <p>
-     * <b>Ownership Transfer:</b> Set command transfers robot ownership to specified
-     * player, updating taming relationship and behavioral loyalty.
-     *
-     * @return argument builder for owner command branch
-     */
+
     private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerCommands() {
         return CommandManager.literal("owner")
-                .then(CommandManager.literal("get")
-                        .then(CommandManager.argument("target", EntityArgumentType.entity())
-                                .executes(LovelyCommands::executeGetOwner)
+                .then(buildOwnerListCommands())
+                .then(buildOwnerAddCommands())
+                .then(buildOwnerSetCommands())
+                .then(CommandManager.literal("teleport")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .executes(LovelyCommands::executeOwnerTeleport)
+                                )
                         )
                 )
-                .then(CommandManager.literal("set")
-                        .then(CommandManager.argument("target", EntityArgumentType.entities())
-                                .then(CommandManager.argument("player", EntityArgumentType.player())
-                                        .executes(LovelyCommands::executeSetOwner)
+                .then(CommandManager.literal("recall")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .executes(LovelyCommands::executeOwnerRecall)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("heal")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .executes(LovelyCommands::executeOwnerHeal)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("healall")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .executes(LovelyCommands::executeOwnerHealAll)
+                        )
+                )
+                .then(CommandManager.literal("stats")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .executes(LovelyCommands::executeOwnerStats)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("transfer")
+                        .then(CommandManager.argument("from_player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("to_player", EntityArgumentType.player())
+                                                .executes(LovelyCommands::executeOwnerTransfer)
+                                        )
                                 )
                         )
                 );
     } // buildOwnerCommands()
 
-    /**
-     * Builds name command tree for custom name management.
-     * <p>
-     * <b>Command Structure:</b>
-     * - /llovely name set {@literal <target>} {@literal <name>}
-     * <p>
-     * <b>Name Formatting:</b> Uses ComponentArgument for rich text support,
-     * allowing colors, formatting codes, and special characters in robot names.
-     *
-     * @return argument builder for name command branch
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildNameCommands() {
-        return CommandManager.literal("name")
-                .then(CommandManager.literal("set")
-                        .then(CommandManager.argument("target", EntityArgumentType.entities())
-                                .then(CommandManager.argument("name", TextArgumentType.text())
-                                        .executes(LovelyCommands::executeSetName)
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerListCommands() {
+        return CommandManager.literal("list")
+                .then(CommandManager.literal("player")
+                        .executes(LovelyCommands::executeListOwners)
+                )
+                .then(CommandManager.literal("robot")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .executes(LovelyCommands::executeListPlayerRobots)
+                        )
+                );
+    } // buildOwnerListCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerAddCommands() {
+        return CommandManager.literal("add")
+                .then(buildOwnerAddCombatCommands());
+    } // buildOwnerAddCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetCommands() {
+        return CommandManager.literal("set")
+                .then(buildOwnerSetCombatCommands())
+                .then(buildOwnerSetAttributeCommands())
+                .then(buildOwnerSetProtectionCommands())
+                .then(buildOwnerSetAppearanceCommands())
+                .then(buildOwnerSetIdentifierCommands());
+    } // buildOwnerSetCommands ()
+
+    // TARGET COMMANDS
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetAddCombatCommands () {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMinMaxExp)
+                                .executes(LovelyCommands::executeTargetAddXP)
+                        )
+                );
+    } // buildTargetAddCombatCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetCombatCommands () {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
+                                .suggests(LovelyCommands::suggestMinMaxLevel)
+                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestMinMaxExpForLevel)
+                                        .executes(LovelyCommands::executeTargetSetAllCombat)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMinMaxExp)
+                                .executes(LovelyCommands::executeTargetSetXP)
+                        )
+                )
+                .then(CommandManager.literal("level")
+                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
+                                .suggests(LovelyCommands::suggestMinMaxLevel)
+                                .executes(LovelyCommands::executeTargetSetLevel)
+                        )
+                );
+    } // buildTargetSetCombatCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetAttributeCommands() {
+        return CommandManager.literal("attribute")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("hp", IntegerArgumentType.integer(1))
+                                .then(CommandManager.argument("attack", IntegerArgumentType.integer(1))
+                                        .then(CommandManager.argument("defense", IntegerArgumentType.integer(0))
+                                                .then(CommandManager.argument("speed", IntegerArgumentType.integer(1))
+                                                        .executes(LovelyCommands::executeTargetSetAllAttributes)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(CommandManager.literal("hp")
+                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeTargetSetHP)
+                        )
+                )
+                .then(CommandManager.literal("attack")
+                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeTargetSetAttack)
+                        )
+                )
+                .then(CommandManager.literal("defense")
+                        .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
+                                .executes(LovelyCommands::executeTargetSetDefense)
+                        )
+                )
+                .then(CommandManager.literal("speed")
+                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeTargetSetSpeed)
+                        )
+                );
+    } // buildTargetSetAttributeCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetProtectionCommands() {
+        return CommandManager.literal("protection")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("fire", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fire"))
+                                .then(CommandManager.argument("fall", IntegerArgumentType.integer(0))
+                                        .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fall"))
+                                        .then(CommandManager.argument("blast", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "blast"))
+                                                .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0))
+                                                        .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "projectile"))
+                                                        .executes(LovelyCommands::executeTargetSetAllProtections)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(CommandManager.literal("fire")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fire"))
+                                .executes(LovelyCommands::executeTargetSetFireProtection)
+                        )
+                )
+                .then(CommandManager.literal("fall")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fall"))
+                                .executes(LovelyCommands::executeTargetSetFallProtection)
+                        )
+                )
+                .then(CommandManager.literal("blast")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "blast"))
+                                .executes(LovelyCommands::executeTargetSetBlastProtection)
+                        )
+                )
+                .then(CommandManager.literal("projectile")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "projectile"))
+                                .executes(LovelyCommands::executeTargetSetProjectileProtection)
+                        )
+                );
+    } // buildTargetSetProtectionCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetAppearanceCommands() {
+        return CommandManager.literal("appearance")
+                .then(CommandManager.argument("color", ColorArgumentType.color())
+                        .executes(LovelyCommands::executeTargetSetAppearance)
+                );
+    } // buildTargetSetAppearanceCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildTargetSetIdentifierCommands() {
+        return CommandManager.literal("identifier")
+                .then(CommandManager.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                        .executes(LovelyCommands::executeTargetSetIdentifier)
+                );
+    } // buildTargetSetIdentifierCommands()
+
+    // CROSS-AIR COMMANDS
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossAddCombatCommands() {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxExp)
+                                .executes(LovelyCommands::executeCrosshairAddXP)
+                        )
+                );
+    } // buildRobotCombatCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetCombatCommands () {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
+                                .suggests(LovelyCommands::suggestMaxLevel)
+                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestMaxExpForLevel)
+                                        .executes(LovelyCommands::executeSetAllCombat)
+                                )
+                        )
+                )
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxExp)
+                                .executes(LovelyCommands::executeCrosshairSetXP)
+                        )
+                )
+                .then(CommandManager.literal("level")
+                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
+                                .suggests(LovelyCommands::suggestMaxLevel)
+                                .executes(LovelyCommands::executeCrosshairSetLevel)
+                        )
+                );
+    } // buildCrossSetCombatCommands ()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetAttributeCommands() {
+        return CommandManager.literal("attribute")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("hp", IntegerArgumentType.integer(1))
+                                .then(CommandManager.argument("attack", IntegerArgumentType.integer(1))
+                                        .then(CommandManager.argument("defense", IntegerArgumentType.integer(0))
+                                                .then(CommandManager.argument("speed", IntegerArgumentType.integer(1))
+                                                        .executes(LovelyCommands::executeCrosshairSetAllAttributes)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(CommandManager.literal("hp")
+                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeCrosshairSetHP)
+                        )
+                )
+                .then(CommandManager.literal("attack")
+                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeCrosshairSetAttack)
+                        )
+                )
+                .then(CommandManager.literal("defense")
+                        .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
+                                .executes(LovelyCommands::executeCrosshairSetDefense)
+                        )
+                )
+                .then(CommandManager.literal("speed")
+                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeCrosshairSetSpeed)
+                        )
+                );
+    } // buildCrossSetAttributeCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetProtectionCommands() {
+        return CommandManager.literal("protection")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("fire", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxFireProtection)
+                                .then(CommandManager.argument("fall", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestMaxFallProtection)
+                                        .then(CommandManager.argument("blast", IntegerArgumentType.integer(0))
+                                                .suggests(LovelyCommands::suggestMaxBlastProtection)
+                                                .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0))
+                                                        .suggests(LovelyCommands::suggestMaxProjectileProtection)
+                                                        .executes(LovelyCommands::executeCrosshairSetAllProtections)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(CommandManager.literal("fire")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxFireProtection)
+                                .executes(LovelyCommands::executeCrosshairSetFireProtection)
+                        )
+                )
+                .then(CommandManager.literal("fall")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxFallProtection)
+                                .executes(LovelyCommands::executeCrosshairSetFallProtection)
+                        )
+                )
+                .then(CommandManager.literal("blast")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxBlastProtection)
+                                .executes(LovelyCommands::executeCrosshairSetBlastProtection)
+                        )
+                )
+                .then(CommandManager.literal("projectile")
+                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxProjectileProtection)
+                                .executes(LovelyCommands::executeCrosshairSetProjectileProtection)
+                        )
+                );
+    } // buildCrossSetProtectionCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetAppearanceCommands() {
+        return CommandManager.literal("appearance")
+                .then(CommandManager.argument("color", ColorArgumentType.color())
+                        .executes(LovelyCommands::executeCrosshairSetAppearance)
+                );
+    } // buildCrossSetAppearanceCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossSetIdentifierCommands() {
+        return CommandManager.literal("identifier")
+                .then(CommandManager.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                        .executes(LovelyCommands::executeCrosshairSetIdentifier)
+                );
+    } // buildCrossSetIdentifierCommands()
+
+    private static ArgumentBuilder<ServerCommandSource, ?> buildCrossGetCommands() {
+        return CommandManager.literal("get")
+                .then(CommandManager.literal("owner")
+                        .executes(LovelyCommands::executeCrosshairGetOwner)
+                );
+    } // buildCrossGetCommands()
+
+    // OWNER COMMANDS
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerAddCombatCommands() {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                                .suggests(LovelyCommands::suggestOwnerMaxExp)
+                                                .executes(LovelyCommands::executeOwnerAddExp)
+                                        )
                                 )
                         )
                 );
-    } // buildNameCommands()
+    } // buildOwnerAddCombatCommands ()
 
-    /**
-     * Builds teleport command tree for robot召唤 system.
-     * <p>
-     * <b>Command Structure:</b>
-     * - /llovely teleport {@literal <robot>}
-     * <p>
-     * <b>Autocomplete:</b> Provides smart suggestions listing all robots owned
-     * by the command executor, formatted with names and levels for easy identification.
-     * <p>
-     * <b>Ownership:</b> Players can only teleport their own robots unless they
-     * have admin permissions (OP level 2+).
-     *
-     * @return argument builder for teleport command branch
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildTeleportCommand() {
-        return CommandManager.literal("teleport")
-                .then(CommandManager.argument("robot", StringArgumentType.word())
-                        .suggests((ctx, builder) -> {
-                            try {
-                                PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-
-                                // Safety check: ensure player and level are valid
-                                if (player == null || player.getWorld() == null) {
-                                    return builder.buildFuture();
-                                }
-
-                                List<LovelyRobotEntity> ownedRobots = findOwnedRobots((ServerPlayerEntity) player);
-
-                                for (LovelyRobotEntity robot : ownedRobots) {
-                                    try {
-                                        String displayName = getRobotDisplayName(robot);
-                                        String uuidPrefix = robot.getUuid().toString().substring(0, 8);
-                                        String suggestion = displayName + "_" + uuidPrefix;
-
-                                        builder.suggest(
-                                                suggestion,
-                                                Text.literal(displayName + " (Level " + robot.getCurrentLevel() + ")")
-                                        );
-                                    } catch (Exception e) {
-                                        // Skip this robot if there's any error
-                                        continue;
-                                    }
-                                }
-                            } catch (Exception e) {
-                                // Command source is not a player or other error, no suggestions
-                            }
-
-                            return builder.buildFuture();
-                        })
-                        .executes(LovelyCommands::executeTeleport)
-                );
-    } // buildTeleportCommand()
-
-
-    // ========================================
-    // HYBRID COMMAND BUILDERS (Crosshair + Selector)
-    // ========================================
-
-    /**
-     * Builds hybrid stats commands supporting both crosshair targeting and entity selectors.
-     * <p>
-     * <b>Usage Examples:</b>
-     * - `/llovely stats set level 50` - Sets level of robot player is looking at
-     * - `/llovely stats set @e[type=llovelyr:vanilla] level 50` - Sets level of all vanilla robots
-     * <p>
-     * <b>Architecture:</b> Commands branch based on whether first argument is an entity selector.
-     * If not a selector, assumes crosshair targeting for intuitive single-robot operations.
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildHybridStatsCommands() {
-        return CommandManager.literal("stats")
-                .then(CommandManager.literal("set")
-                        .then(CommandManager.argument("target", EntityArgumentType.entities())
-                                .then(CommandManager.literal("level")
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1, 200))
-                                                .executes(LovelyCommands::executeSetLevel)
-                                        )
-                                )
-                                .then(CommandManager.literal("exp")
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
-                                                .executes(LovelyCommands::executeSetXP)
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetCombatCommands () {
+        return CommandManager.literal("combat")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(1))
+                                                .suggests(LovelyCommands::suggestOwnerMaxLevel)
+                                                .then(CommandManager.argument("exp", IntegerArgumentType.integer(0))
+                                                        .suggests(LovelyCommands::suggestOwnerMaxExpForLevel)
+                                                        .executes(LovelyCommands::executeOwnerSetAllCombat)
+                                                )
                                         )
                                 )
                         )
-                        .then(CommandManager.literal("level")
-                                .then(CommandManager.argument("value", IntegerArgumentType.integer(1, 200))
-                                        .executes(LovelyCommands::executeCrosshairSetLevel)
+                )
+                .then(CommandManager.literal("exp")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("exp_value", IntegerArgumentType.integer(0))
+                                                .suggests(LovelyCommands::suggestOwnerMaxExp)
+                                                .executes(LovelyCommands::executeOwnerSetExp)
+                                        )
                                 )
                         )
-                        .then(CommandManager.literal("exp")
-                                .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
-                                        .executes(LovelyCommands::executeCrosshairSetXP)
+                )
+                .then(CommandManager.literal("level")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("level_value", IntegerArgumentType.integer(1))
+                                                .suggests(LovelyCommands::suggestOwnerMaxLevel)
+                                                .executes(LovelyCommands::executeOwnerSetLevel)
+                                        )
                                 )
                         )
                 );
-    } // buildHybridStatsCommands()
+    } // buildOwnerSetCombatCommands ()
 
-    /**
-     * Builds hybrid attributes commands supporting both crosshair targeting and entity selectors.
-     * <p>
-     * <b>Usage Examples:</b>
-     * - `/llovely attributes set hp 100` - Sets HP of robot player is looking at
-     * - `/llovely attributes set @e[type=llovelyr:vanilla] hp 100` - Sets HP of all vanilla robots
-     * <p>
-     * <b>Architecture:</b> Separate from stats to distinguish between progression (level/exp)
-     * and combat attributes (hp/attack/defense/speed).
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildHybridAttributesCommands() {
-        return CommandManager.literal("attributes")
-                .then(CommandManager.literal("set")
-                        .then(CommandManager.argument("target", EntityArgumentType.entities())
-                                .then(CommandManager.literal("hp")
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                                .executes(LovelyCommands::executeSetHP)
-                                        )
-                                )
-                                .then(CommandManager.literal("attack")
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                                .executes(LovelyCommands::executeSetAttack)
-                                        )
-                                )
-                                .then(CommandManager.literal("defense")
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
-                                                .executes(LovelyCommands::executeSetDefense)
-                                        )
-                                )
-                                .then(CommandManager.literal("speed")
-                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                                                .executes(LovelyCommands::executeSetSpeed)
-                                        )
-                                )
-                                .then(CommandManager.literal("all")
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetAttributeCommands() {
+        return CommandManager.literal("attribute")
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
                                         .then(CommandManager.argument("hp", IntegerArgumentType.integer(1))
                                                 .then(CommandManager.argument("attack", IntegerArgumentType.integer(1))
                                                         .then(CommandManager.argument("defense", IntegerArgumentType.integer(0))
                                                                 .then(CommandManager.argument("speed", IntegerArgumentType.integer(1))
-                                                                        .executes(LovelyCommands::executeSetAllAttributes)
+                                                                        .executes(LovelyCommands::executeOwnerSetAllAttributes)
                                                                 )
                                                         )
                                                 )
                                         )
                                 )
                         )
-                // Branch 2: Crosshair targeting path
+                )
                 .then(CommandManager.literal("hp")
-                    .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                        .executes(LovelyCommands::executeCrosshairSetHP)
-                    )
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                                .executes(LovelyCommands::executeOwnerSetHP)
+                                        )
+                                )
+                        )
                 )
                 .then(CommandManager.literal("attack")
-                    .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                        .executes(LovelyCommands::executeCrosshairSetAttack)
-                    )
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                                .executes(LovelyCommands::executeOwnerSetAttack)
+                                        )
+                                )
+                        )
                 )
                 .then(CommandManager.literal("defense")
-                    .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
-                        .executes(LovelyCommands::executeCrosshairSetDefense)
-                    )
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(0))
+                                                .executes(LovelyCommands::executeOwnerSetDefense)
+                                        )
+                                )
+                        )
                 )
                 .then(CommandManager.literal("speed")
-                    .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
-                        .executes(LovelyCommands::executeCrosshairSetSpeed)
-                    )
-                )
-                .then(CommandManager.literal("all")
-                    .then(CommandManager.argument("hp", IntegerArgumentType.integer(1))
-                        .then(CommandManager.argument("attack", IntegerArgumentType.integer(1))
-                            .then(CommandManager.argument("defense", IntegerArgumentType.integer(0))
-                                .then(CommandManager.argument("speed", IntegerArgumentType.integer(1))
-                                    .executes(LovelyCommands::executeCrosshairSetAllAttributes)
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("value", IntegerArgumentType.integer(1))
+                                                .executes(LovelyCommands::executeOwnerSetSpeed)
+                                        )
                                 )
-                            )
                         )
-                    )
-                )
-            );
-    } // buildHybridAttributesCommands()
+                );
+    } // buildOwnerSetAttributeCommands()
 
-    /**
-     * Builds hybrid enchantment commands supporting both targeting methods.
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildHybridEnchantCommands() {
-        return CommandManager.literal("enchant")
-            .then(CommandManager.literal("set")
-                // Entity selector path
-                .then(CommandManager.argument("target", EntityArgumentType.entities())
-                    .then(CommandManager.literal("looting")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 3))
-                            .executes(LovelyCommands::executeSetLooting)
-                        )
-                    )
-                    .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("looting", IntegerArgumentType.integer(0, 3))
-                            .executes(LovelyCommands::executeSetAllEnchants)
-                        )
-                    )
-                )
-                // Crosshair targeting path
-                .then(CommandManager.literal("looting")
-                    .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 3))
-                        .executes(LovelyCommands::executeCrosshairSetLooting)
-                    )
-                )
-                .then(CommandManager.literal("all")
-                    .then(CommandManager.argument("looting", IntegerArgumentType.integer(0, 3))
-                        .executes(LovelyCommands::executeCrosshairSetAllEnchants)
-                    )
-                )
-            );
-    } // buildHybridEnchantCommands()
-
-    /**
-     * Builds hybrid protection commands supporting both targeting methods.
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildHybridProtectionCommands() {
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetProtectionCommands() {
         return CommandManager.literal("protection")
-            .then(CommandManager.literal("set")
-                // Entity selector path
-                .then(CommandManager.argument("target", EntityArgumentType.entities())
-                    .then(CommandManager.literal("fire")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyCommands::executeSetFireProtection)
-                        )
-                    )
-                    .then(CommandManager.literal("fall")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyCommands::executeSetFallProtection)
-                        )
-                    )
-                    .then(CommandManager.literal("blast")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyCommands::executeSetBlastProtection)
-                        )
-                    )
-                    .then(CommandManager.literal("projectile")
-                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                            .executes(LovelyCommands::executeSetProjectileProtection)
-                        )
-                    )
-                    .then(CommandManager.literal("all")
-                        .then(CommandManager.argument("fire", IntegerArgumentType.integer(0, 80))
-                            .then(CommandManager.argument("fall", IntegerArgumentType.integer(0, 80))
-                                .then(CommandManager.argument("blast", IntegerArgumentType.integer(0, 80))
-                                    .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0, 80))
-                                        .executes(LovelyCommands::executeSetAllProtections)
-                                    )
+                .then(CommandManager.literal("all")
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("fire", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fire"))
+                                                .then(CommandManager.argument("fall", IntegerArgumentType.integer(0))
+                                                        .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fall"))
+                                                        .then(CommandManager.argument("blast", IntegerArgumentType.integer(0))
+                                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "blast"))
+                                                                .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0))
+                                                                        .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "projectile"))
+                                                                        .executes(LovelyCommands::executeOwnerSetAllProtections)
+                                                                )
+                                                        )
+                                                )
+                                        )
                                 )
-                            )
                         )
-                    )
                 )
-                // Crosshair targeting path
                 .then(CommandManager.literal("fire")
-                    .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                        .executes(LovelyCommands::executeCrosshairSetFireProtection)
-                    )
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fire"))
+                                                .executes(LovelyCommands::executeOwnerSetFireProtection)
+                                        )
+                                )
+                        )
                 )
                 .then(CommandManager.literal("fall")
-                    .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                        .executes(LovelyCommands::executeCrosshairSetFallProtection)
-                    )
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fall"))
+                                                .executes(LovelyCommands::executeOwnerSetFallProtection)
+                                        )
+                                )
+                        )
                 )
                 .then(CommandManager.literal("blast")
-                    .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                        .executes(LovelyCommands::executeCrosshairSetBlastProtection)
-                    )
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "blast"))
+                                                .executes(LovelyCommands::executeOwnerSetBlastProtection)
+                                        )
+                                )
+                        )
                 )
                 .then(CommandManager.literal("projectile")
-                    .then(CommandManager.argument("level", IntegerArgumentType.integer(0, 80))
-                        .executes(LovelyCommands::executeCrosshairSetProjectileProtection)
-                    )
-                )
-                .then(CommandManager.literal("all")
-                    .then(CommandManager.argument("fire", IntegerArgumentType.integer(0, 80))
-                        .then(CommandManager.argument("fall", IntegerArgumentType.integer(0, 80))
-                            .then(CommandManager.argument("blast", IntegerArgumentType.integer(0, 80))
-                                .then(CommandManager.argument("projectile", IntegerArgumentType.integer(0, 80))
-                                    .executes(LovelyCommands::executeCrosshairSetAllProtections)
+                        .then(CommandManager.argument("player", EntityArgumentType.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(CommandManager.argument("level", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "projectile"))
+                                                .executes(LovelyCommands::executeOwnerSetProjectileProtection)
+                                        )
                                 )
-                            )
                         )
-                    )
-                )
-            );
-    } // buildHybridProtectionCommands()
+                );
+    } // buildOwnerSetProtectionCommands()
 
-    /**
-     * Builds hybrid design commands supporting both targeting methods.
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildHybridDesignCommands() {
-        return CommandManager.literal("design")
-            .then(CommandManager.literal("set")
-                // Entity selector path
-                .then(CommandManager.argument("target", EntityArgumentType.entities())
-                    .then(CommandManager.argument("color", ColorArgumentType.color())
-                        .executes(LovelyCommands::executeSetDesign)
-                    )
-                )
-                // Crosshair targeting path (using "here" literal to avoid ambiguity)
-                .then(CommandManager.literal("here")
-                    .then(CommandManager.argument("color", ColorArgumentType.color())
-                        .executes(LovelyCommands::executeCrosshairSetDesign)
-                    )
-                )
-            );
-    } // buildHybridDesignCommands()
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetAppearanceCommands() {
+        return CommandManager.literal("appearance")
+                .then(CommandManager.argument("player", EntityArgumentType.player())
+                        .suggests(LovelyCommands::suggestPlayerNames)
+                        .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestRobotIndices)
+                                .then(CommandManager.argument("color", ColorArgumentType.color())
+                                        .executes(LovelyCommands::executeOwnerSetAppearance)
+                                )
+                        )
+                );
+    } // buildOwnerSetAppearanceCommands()
 
-    /**
-     * Builds hybrid owner commands supporting both targeting methods.
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildHybridOwnerCommands() {
-        return CommandManager.literal("owner")
-            .then(CommandManager.literal("get")
-                // Entity selector path
-                .then(CommandManager.argument("target", EntityArgumentType.entity())
-                    .executes(LovelyCommands::executeGetOwner)
-                )
-                // Crosshair targeting path (no arguments)
-                .then(CommandManager.literal("here")
-                    .executes(LovelyCommands::executeCrosshairGetOwner)
-                )
-            )
-            .then(CommandManager.literal("set")
-                // Entity selector path
-                .then(CommandManager.argument("target", EntityArgumentType.entities())
-                    .then(CommandManager.argument("player", EntityArgumentType.player())
-                        .executes(LovelyCommands::executeSetOwner)
-                    )
-                )
-                // Crosshair targeting path (using "here" literal to avoid ambiguity)
-                .then(CommandManager.literal("here")
-                    .then(CommandManager.argument("player", EntityArgumentType.player())
-                        .executes(LovelyCommands::executeCrosshairSetOwner)
-                    )
-                )
-            );
-    } // buildHybridOwnerCommands()
+    private static ArgumentBuilder<ServerCommandSource, ?> buildOwnerSetIdentifierCommands() {
+        return CommandManager.literal("identifier")
+                .then(CommandManager.argument("player", EntityArgumentType.player())
+                        .suggests(LovelyCommands::suggestPlayerNames)
+                        .then(CommandManager.argument("robot_index", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestRobotIndices)
+                                .then(CommandManager.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                                        .executes(LovelyCommands::executeOwnerSetIdentifier)
+                                )
+                        )
+                );
+    } // buildOwnerSetIdentifierCommands()
 
-    /**
-     * Builds hybrid name commands supporting both targeting methods.
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildHybridNameCommands() {
-        return CommandManager.literal("name")
-            .then(CommandManager.literal("set")
-                // Entity selector path
-                .then(CommandManager.argument("target", EntityArgumentType.entities())
-                    .then(CommandManager.argument("name", StringArgumentType.greedyString())
-                        .executes(LovelyCommands::executeSetName)
-                    )
-                )
-                // Crosshair targeting path (using "here" literal to avoid ambiguity)
-                .then(CommandManager.literal("here")
-                    .then(CommandManager.argument("name", StringArgumentType.greedyString())
-                        .executes(LovelyCommands::executeCrosshairSetName)
-                    )
-                )
-            );
-    } // buildHybridNameCommands()
-
-    /**
-     * Builds hybrid teleport command supporting both targeting methods.
-     * <p>
-     * <b>Usage Examples:</b>
-     * - `/llovely teleport` - Teleports robot player is looking at
-     * - `/llovely teleport <robot_name_uuid>` - Teleports specific robot by identifier
-     * <p>
-     * <b>Architecture:</b> Crosshair mode (no arguments) uses raycasting,
-     * identifier mode uses autocomplete with robot names and UUIDs.
-     */
-    private static ArgumentBuilder<ServerCommandSource, ?> buildHybridTeleportCommand() {
-        return CommandManager.literal("teleport")
-            // Crosshair targeting path (no arguments)
-            .executes(LovelyCommands::executeCrosshairTeleport)
-            // Robot identifier path (with autocomplete)
-            .then(CommandManager.argument("robot", StringArgumentType.word())
-                .suggests((ctx, builder) -> {
-                    try {
-                        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-                        
-                        if (player == null || player.getWorld() == null) {
-                            return builder.buildFuture();
-                        }
-                        
-                        List<LovelyRobotEntity> ownedRobots = findOwnedRobots((ServerPlayerEntity) player);
-                        
-                        for (LovelyRobotEntity robot : ownedRobots) {
-                            try {
-                                String displayName = getRobotDisplayName(robot);
-                                String uuidPrefix = robot.getUuid().toString().substring(0, 8);
-                                String suggestion = displayName + "_" + uuidPrefix;
-                                
-                                builder.suggest(
-                                    suggestion,
-                                    Text.literal(displayName + " (Level " + robot.getCurrentLevel() + ")")
-                                );
-                            } catch (Exception e) {
-                                continue;
-                            }
-                        }
-                    } catch (Exception e) {
-                        // Command source is not a player
-                    }
-                    
-                    return builder.buildFuture();
-                })
-                .executes(LovelyCommands::executeTeleport)
-            );
-    } // buildHybridTeleportCommand()
-
-    // ========================================
-    // CROSSHAIR TARGETING EXECUTORS
-    // ========================================
-
-    /**
-     * Executes level setting on the robot the player is looking at.
-     * <p>
-     * <b>Architecture:</b> Uses server-side raycasting to find crosshair target.
-     * This follows the Blocklings pattern for intuitive entity targeting.
-     */
-    private static int executeCrosshairSetLevel(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int level = IntegerArgumentType.getInteger(ctx, "value");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setCurrentLevel(level);
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set level to " + level + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetLevel()
-
-    private static int executeCrosshairSetXP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int xp = IntegerArgumentType.getInteger(ctx, "value");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setExp(xp);
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set XP to " + xp + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetXP()
-
-    private static int executeCrosshairSetHP(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int hp = IntegerArgumentType.getInteger(ctx, "value");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(hp);
-        robot.setHealth(hp);
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set HP to " + hp + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetHP()
-
-    private static int executeCrosshairSetAttack(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int attack = IntegerArgumentType.getInteger(ctx, "value");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        Objects.requireNonNull(robot.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).setBaseValue(attack);
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set attack to " + attack + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetAttack()
-
-    private static int executeCrosshairSetDefense(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int defense = IntegerArgumentType.getInteger(ctx, "value");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        Objects.requireNonNull(robot.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).setBaseValue(defense);
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set defense to " + defense + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetDefense()
-
-    private static int executeCrosshairSetSpeed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int speed = IntegerArgumentType.getInteger(ctx, "value");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        Objects.requireNonNull(robot.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(speed / 10.0);
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set speed to " + speed + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetSpeed()
-
-    private static int executeCrosshairSetAllAttributes(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int hp = IntegerArgumentType.getInteger(ctx, "hp");
-        int attack = IntegerArgumentType.getInteger(ctx, "attack");
-        int defense = IntegerArgumentType.getInteger(ctx, "defense");
-        int speed = IntegerArgumentType.getInteger(ctx, "speed");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        Objects.requireNonNull(robot.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)).setBaseValue(hp);
-        robot.setHealth(hp);
-        Objects.requireNonNull(robot.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)).setBaseValue(attack);
-        Objects.requireNonNull(robot.getAttributeInstance(EntityAttributes.GENERIC_ARMOR)).setBaseValue(defense);
-        Objects.requireNonNull(robot.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(speed / 10.0);
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set attributes (HP:" + hp + " ATK:" + attack + " DEF:" + defense + " SPD:" + speed + ") for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetAllAttributes()
-
-    private static int executeCrosshairSetLooting(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set looting to " + level + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetLooting()
-
-    private static int executeCrosshairSetAllEnchants(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int looting = IntegerArgumentType.getInteger(ctx, "looting");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set all enchantments (Looting:" + looting + ") for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetAllEnchants()
-
-    private static int executeCrosshairSetFireProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setFireProtection(level);
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set fire protection to " + level + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetFireProtection()
-
-    private static int executeCrosshairSetFallProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setFallProtection(level);
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set fall protection to " + level + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetFallProtection()
-
-    private static int executeCrosshairSetBlastProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setBlastProtection(level);
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set blast protection to " + level + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetBlastProtection()
-
-    private static int executeCrosshairSetProjectileProtection(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int level = IntegerArgumentType.getInteger(ctx, "level");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setProjectileProtection(level);
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set projectile protection to " + level + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetProjectileProtection()
-
-    private static int executeCrosshairSetAllProtections(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        int fire = IntegerArgumentType.getInteger(ctx, "fire");
-        int fall = IntegerArgumentType.getInteger(ctx, "fall");
-        int blast = IntegerArgumentType.getInteger(ctx, "blast");
-        int projectile = IntegerArgumentType.getInteger(ctx, "projectile");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setFireProtection(fire);
-        robot.setFallProtection(fall);
-        robot.setBlastProtection(blast);
-        robot.setProjectileProtection(projectile);
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set all protections (Fire:" + fire + " Fall:" + fall + " Blast:" + blast + " Projectile:" + projectile + ") for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetAllProtections()
-
-    private static int executeCrosshairSetDesign(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        EntityTexture color = ctx.getArgument("color", EntityTexture.class);
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setTexture(color);
-        
-        final String colorName = color.Name().toLowerCase();
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set color to " + colorName + " for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetDesign()
-
-    private static int executeCrosshairGetOwner(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair"));
-            return 0;
-        }
-        
-        PlayerEntity owner = (PlayerEntity) robot.getOwner();
-        String ownerName = owner != null ? owner.getName().getString() : "No owner";
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal(getRobotDisplayName(robot) + " owner: " + ownerName),
-            false
-        );
-        
-        return 1;
-    } // executeCrosshairGetOwner()
-
-    private static int executeCrosshairSetOwner(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        PlayerEntity newOwner = EntityArgumentType.getPlayer(ctx, "player");
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.handleTame(newOwner);
-        
-        final String ownerName = newOwner.getName().getString();
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Transferred ownership of " + getRobotDisplayName(robot) + " to " + ownerName),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetOwner()
-
-    private static int executeCrosshairSetName(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        String nameString = StringArgumentType.getString(ctx, "name");
-        Text name = Text.literal(nameString);
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        robot.setCustomName(name);
-        robot.setCustomNameVisible(true);
-        
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Set name to '" + nameString + "' for " + getRobotDisplayName(robot)),
-            true
-        );
-        
-        return 1;
-    } // executeCrosshairSetName()
-
-    /**
-     * Executes teleportation of the robot the player is looking at.
-     * <p>
-     * <b>Architecture:</b> Uses crosshair targeting to find robot, then teleports
-     * it to player's location with safety checks. Follows Blocklings pattern for
-     * intuitive teleportation without needing to specify robot identifier.
-     * <p>
-     * <b>Safety:</b> Finds safe landing spot near player to prevent suffocation
-     * or fall damage. Spawns particles and plays sound for visual/audio feedback.
-     */
-    private static int executeCrosshairTeleport(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        PlayerEntity player = ctx.getSource().getPlayerOrThrow();
-        
-        LovelyRobotEntity robot = findCrosshairRobot(player);
-        if (robot == null) {
-            ctx.getSource().sendError(Text.literal("No robot found in crosshair or you don't own it"));
-            return 0;
-        }
-        
-        if (!robot.isOwner(player)) {
-            ctx.getSource().sendError(Text.literal("You don't own this robot"));
-            return 0;
-        }
-        
-        ServerWorld playerLevel = (ServerWorld) player.getWorld();
-        BlockPos playerPos = player.getBlockPos();
-        
-        // Find safe teleport location
-        BlockPos safePos = findSafeTeleportLocation(playerLevel, playerPos);
-        
-        if (safePos == null) {
-            ctx.getSource().sendError(Text.literal("No safe location found for teleportation"));
-            return 0;
-        }
-        
-        // Spawn particles at origin
-        ServerWorld robotLevel = (ServerWorld) robot.getWorld();
-        spawnTeleportParticles(robotLevel, robot.getPos());
-        
-        // Handle dimension change if needed
-        if (robot.getWorld() != player.getWorld()) {
-            ctx.getSource().sendError(Text.literal("Cannot teleport robot across dimensions"));
-            return 0;
-        }
-        
-        // Teleport robot to safe location
-        robot.teleport(safePos.getX() + 0.5, safePos.getY(), safePos.getZ() + 0.5);
-        
-        // Spawn particles at destination
-        spawnTeleportParticles(playerLevel, robot.getPos());
-        
-        // Play sound at destination
-        playerLevel.playSound(
-            null,
-            safePos,
-            SoundEvents.ENTITY_ENDERMAN_TELEPORT,
-            SoundCategory.PLAYERS,
-            1.0F,
-            1.0F
-        );
-        
-        // Send confirmation message
-        String displayName = getRobotDisplayName(robot);
-        ctx.getSource().sendFeedback(
-            () -> Text.literal("Teleported " + displayName + " to your location"),
-            false
-        );
-        
-        return 1;
-    } // executeCrosshairTeleport()
-
-    // ========================================
-    // CROSSHAIR TARGETING UTILITY
-    // ========================================
-
-    /**
-     * Finds the robot the PlayerEntity is looking at using server-side raycasting.
-     * <p>
-     * <b>Architecture:</b> Uses player's look vector to perform entity raycast.
-     * This is a server-side implementation of the client-side crosshair targeting
-     * used in the Blocklings mod.
-     * <p>
-     * <b>Range:</b> 5 block reach distance (standard interaction range)
-     * <p>
-     * <b>Validation:</b> Only returns LovelyRobotEntity entities (ownership checked by caller).
-     *
-     * @param player the player performing the lookup
-     * @return the robot in crosshair, or null if none found
-     */
-    private static LovelyRobotEntity findCrosshairRobot(PlayerEntity player) {
-        // Get player's look vector
-        Vec3d eyePos = player.getEyePos();
-        Vec3d lookVec = player.getRotationVec(1.0F);
-        Vec3d endPos = eyePos.add(lookVec.multiply(5.0)); // 5 block reach
-        
-        // Perform entity raycast
-        Box searchBox = new Box(eyePos, endPos).expand(1.0);
-        List<Entity> entities = player.getWorld().getOtherEntities(player, searchBox);
-        
-        LovelyRobotEntity closestRobot = null;
-        double closestDistance = Double.MAX_VALUE;
-        
-        for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
-                // Check if ray intersects with entity bounding box
-                Optional<Vec3d> hit = entity.getBoundingBox().raycast(eyePos, endPos);
-                if (hit.isPresent()) {
-                    double distance = eyePos.distanceTo(hit.get());
-                    if (distance < closestDistance) {
-                        closestDistance = distance;
-                        closestRobot = robot;
-                    }
-                }
-            }
-        }
-        
-        return closestRobot;
-    } // findCrosshairRobot()
-
-    // ========================================
-    // CONFIG RELOAD COMMAND
-    // ========================================
-
-    /**
-     * Builds config reload command for runtime configuration updates.
-     * <p>
-     * <b>Usage:</b> `/llovely reload` - Reloads configuration from disk
-     * <p>
-     * <b>Permissions:</b> Requires operator level 2 (same as other llovely commands)
-     * <p>
-     * <b>Behavior:</b> Reloads configuration from disk and applies all values
-     * immediately without server restart.
-     */
     private static ArgumentBuilder<ServerCommandSource, ?> buildReloadCommand() {
         return CommandManager.literal("reload")
-            .executes(LovelyCommands::executeReload);
+                .executes(LovelyCommands::executeReload);
     } // buildReloadCommand()
-
-    /**
-     * Executes config reload command.
-     * <p>
-     * <b>Behavior:</b> Triggers configuration reload from disk.
-     * All config values are re-read and applied immediately.
-     * <p>
-     * <b>Feedback:</b> Sends success message to command source confirming reload.
-     *
-     * @param ctx command context with source
-     * @return command success code (1)
-     */
-    private static int executeReload(CommandContext<ServerCommandSource> ctx) {
-        try {
-            LovelyConfigs.reload();
-            ctx.getSource().sendFeedback(
-                () -> Text.literal("Configuration reloaded successfully!").formatted(Formatting.GREEN),
-                true
-            );
-            return Command.SINGLE_SUCCESS;
-        } catch (Exception e) {
-            ctx.getSource().sendError(
-                Text.literal("Failed to reload configuration: " + e.getMessage()).formatted(Formatting.RED)
-            );
-            return 0;
-        }
-    } // executeReload()
 
 } // Class: LovelyCommands
 
