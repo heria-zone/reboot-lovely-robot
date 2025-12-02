@@ -27,13 +27,26 @@ import net.minecraft.world.World;
 import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.common.entity.enums.EntityModel;
 import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
+import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.common.utils.internal.*;
+import net.msymbios.llovelyr.framework.entity.data.CombatStats;
+import net.msymbios.llovelyr.framework.entity.data.ProtectionStats;
+import net.msymbios.llovelyr.framework.entity.data.EnchantmentStats;
+import net.msymbios.llovelyr.framework.registry.RobotRegistryEntry;
+import net.msymbios.llovelyr.lib.entity.InternalEntityType;
+import net.msymbios.llovelyr.lib.entity.data.CombatStatsNBT;
+import net.msymbios.llovelyr.lib.entity.data.ProtectionStatsNBT;
+import net.msymbios.llovelyr.lib.entity.data.EnchantmentStatsNBT;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.framework.entity.enums.EntityVariantModel;
 import net.msymbios.llovelyr.framework.entity.enums.EntityVariantTexture;
 import net.msymbios.llovelyr.framework.entity.enums.EntityVariantAnimator;
 import net.msymbios.llovelyr.framework.utils.Version;
+import net.msymbios.llovelyr.lib.entity.features.CombatLevelFeature;
+import net.msymbios.llovelyr.lib.entity.features.EnchantmentFeature;
+import net.msymbios.llovelyr.lib.entity.features.ProtectionFeature;
+import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
 import net.msymbios.llovelyr.lib.utils.interfaces.IReadWriteNBT;
 import net.msymbios.llovelyr.source.LovelyConfigs;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
@@ -54,17 +67,63 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
 
     protected int waryTimer = 0, autoHealTimer = 0;
     protected boolean combatMode = false, autoHeal = false, canWander = false;
-    public net.msymbios.llovelyr.lib.entity.type.InternalEntityType<?> nativeEntity;
+    public InternalEntityType<?> nativeEntity;
     protected EntityModel model = EntityModel.Default;
+
+    // -- Stat Objects --
+    
+    /**
+     * <p>Encapsulates combat-related statistics.<p>
+     * <p>
+     * <b>Architecture:</b> Replaces scattered level/exp/hp fields with cohesive
+     * data object, enabling feature-based attribute calculations.
+     */
+    protected CombatStats combatStats;
+    
+    /**
+     * <p>Encapsulates protection statistics.<p>
+     * <p>
+     * <b>Architecture:</b> Centralizes fire/fall/blast/projectile protection
+     * levels with validation support.
+     */
+    protected ProtectionStats protectionStats;
+    
+    /**
+     * <p>Encapsulates enchantment statistics.<p>
+     * <p>
+     * <b>Architecture:</b> Manages looting/sharpness/knockback enchantment
+     * levels calculated from robot level.
+     */
+    protected EnchantmentStats enchantmentStats;
+
+    // -- NBT Handlers --
+    
+    /**
+     * <p>Handles NBT serialization for combat stats.<p>
+     * <p>
+     * <b>Design Decision:</b> Separates serialization logic from data model,
+     * enabling format changes without modifying stat classes.
+     */
+    protected CombatStatsNBT combatStatsNBT;
+    
+    /**
+     * <p>Handles NBT serialization for protection stats.<p>
+     */
+    protected ProtectionStatsNBT protectionStatsNBT;
+    
+    /**
+     * <p>Handles NBT serialization for enchantment stats.<p>
+     */
+    protected EnchantmentStatsNBT enchantmentStatsNBT;
 
     // -- Properties --
 
     // TEXTURE
 
     public Identifier getTexture() { 
-        // Use RobotEntityType's color texture system
-        if (nativeEntity instanceof net.msymbios.llovelyr.common.entity.type.RobotEntityType) {
-            return ((net.msymbios.llovelyr.common.entity.type.RobotEntityType) nativeEntity).getColorTexture(EntityTexture.byId(getTextureID()));
+        // Use NativeEntityType's color texture system
+        if (nativeEntity instanceof NativeEntityType) {
+            return ((NativeEntityType) nativeEntity).getColorTexture(EntityTexture.byId(getTextureID()));
         }
         // Fallback for non-robot entities
         return nativeEntity.getTextures().get(EntityVariantTexture.DEFAULT);
@@ -72,9 +131,9 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
 
     public int getTextureID() {
         int value = 0;  // Default to WHITE
-        // Use RobotEntityType's random color system
-        if (nativeEntity instanceof net.msymbios.llovelyr.common.entity.type.RobotEntityType) {
-            value = ((net.msymbios.llovelyr.common.entity.type.RobotEntityType) nativeEntity).getRandomColorId();
+        // Use NativeEntityType's random color system
+        if (nativeEntity instanceof NativeEntityType) {
+            value = ((NativeEntityType) nativeEntity).getRandomColorId();
         }
         try {value = this.dataTracker.get(TEXTURE_ID);}
         catch (Exception ignored) {}
@@ -82,9 +141,9 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
     } // getTextureID ()
 
     public void setTexture(int value) { 
-        // Use RobotEntityType's color checking system
-        if (nativeEntity instanceof net.msymbios.llovelyr.common.entity.type.RobotEntityType) {
-            if (((net.msymbios.llovelyr.common.entity.type.RobotEntityType) nativeEntity).hasColor(EntityTexture.byId(value))) {
+        // Use NativeEntityType's color checking system
+        if (nativeEntity instanceof NativeEntityType) {
+            if (((NativeEntityType) nativeEntity).hasColor(EntityTexture.byId(value))) {
                 this.dataTracker.set(TEXTURE_ID, value);
             }
         } else {
@@ -192,11 +251,390 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
         canWander = value;
     } // setCanWander ()
 
+    // -- Simplified Stat Accessors --
+
+    /**
+     * <p>Gets robot's current level.<p>
+     * <p>
+     * <b>Architecture:</b> Delegates to combatStats, providing clean interface
+     * without exposing internal stat object structure.
+     *
+     * @return current robot level
+     */
+    public int getLevel() {
+        return combatStats.getLevel();
+    } // getLevel ()
+
+    /**
+     * <p>Sets robot's level and recalculates attributes.<p>
+     * <p>
+     * <b>State Impact:</b> Triggers full attribute recalculation including HP,
+     * attack, defense, armor, enchantments, and optional protection upgrades.
+     *
+     * @param level new robot level
+     */
+    public void setLevel(int level) {
+        combatStats.setLevel(level);
+        recalculateAttributes();
+    } // setLevel ()
+
+    /**
+     * <p>Gets robot's current experience points.<p>
+     *
+     * @return current experience
+     */
+    public int getExperience() {
+        return combatStats.getExperience();
+    } // getExperience ()
+
+    /**
+     * <p>Sets robot's experience and triggers auto-level-up if sufficient.<p>
+     * <p>
+     * <b>Behavior:</b> Automatically consumes experience and increments level
+     * when sufficient exp is available, repeating until insufficient exp remains.
+     *
+     * @param experience new experience value
+     */
+    public void setExperience(int experience) {
+        combatStats.setExperience(experience);
+        // Auto-level-up logic will be handled by command system
+    } // setExperience ()
+
+    // Protection accessors
+
+    /**
+     * <p>Gets fire protection level.<p>
+     *
+     * @return fire protection level
+     */
+    public int getFireProtection() {
+        return protectionStats.getFireProtection();
+    } // getFireProtection ()
+
+    /**
+     * <p>Sets fire protection level.<p>
+     *
+     * @param level new fire protection level
+     */
+    public void setFireProtection(int level) {
+        protectionStats.setFireProtection(level);
+    } // setFireProtection ()
+
+    /**
+     * <p>Gets fall protection level.<p>
+     *
+     * @return fall protection level
+     */
+    public int getFallProtection() {
+        return protectionStats.getFallProtection();
+    } // getFallProtection ()
+
+    /**
+     * <p>Sets fall protection level.<p>
+     *
+     * @param level new fall protection level
+     */
+    public void setFallProtection(int level) {
+        protectionStats.setFallProtection(level);
+    } // setFallProtection ()
+
+    /**
+     * <p>Gets blast protection level.<p>
+     *
+     * @return blast protection level
+     */
+    public int getBlastProtection() {
+        return protectionStats.getBlastProtection();
+    } // getBlastProtection ()
+
+    /**
+     * <p>Sets blast protection level.<p>
+     *
+     * @param level new blast protection level
+     */
+    public void setBlastProtection(int level) {
+        protectionStats.setBlastProtection(level);
+    } // setBlastProtection ()
+
+    /**
+     * <p>Gets projectile protection level.<p>
+     *
+     * @return projectile protection level
+     */
+    public int getProjectileProtection() {
+        return protectionStats.getProjectileProtection();
+    } // getProjectileProtection ()
+
+    /**
+     * <p>Sets projectile protection level.<p>
+     *
+     * @param level new projectile protection level
+     */
+    public void setProjectileProtection(int level) {
+        protectionStats.setProjectileProtection(level);
+    } // setProjectileProtection ()
+
+    // Enchantment accessors
+
+    /**
+     * <p>Gets looting enchantment level.<p>
+     *
+     * @return looting level
+     */
+    public int getLootingLevel() {
+        return enchantmentStats.getLootingLevel();
+    } // getLootingLevel ()
+
+    /**
+     * <p>Sets looting enchantment level.<p>
+     *
+     * @param level new looting level
+     */
+    public void setLootingLevel(int level) {
+        enchantmentStats.setLootingLevel(level);
+    } // setLootingLevel ()
+
+    /**
+     * <p>Gets sharpness enchantment level.<p>
+     *
+     * @return sharpness level
+     */
+    public int getSharpnessLevel() {
+        return enchantmentStats.getSharpnessLevel();
+    } // getSharpnessLevel ()
+
+    /**
+     * <p>Sets sharpness enchantment level.<p>
+     *
+     * @param level new sharpness level
+     */
+    public void setSharpnessLevel(int level) {
+        enchantmentStats.setSharpnessLevel(level);
+    } // setSharpnessLevel ()
+
+    /**
+     * <p>Gets knockback enchantment level.<p>
+     *
+     * @return knockback level
+     */
+    public int getKnockbackLevel() {
+        return enchantmentStats.getKnockbackLevel();
+    } // getKnockbackLevel ()
+
+    /**
+     * <p>Sets knockback enchantment level.<p>
+     *
+     * @param level new knockback level
+     */
+    public void setKnockbackLevel(int level) {
+        enchantmentStats.setKnockbackLevel(level);
+    } // setKnockbackLevel ()
+
+    // -- Attribute Recalculation --
+
+    /**
+     * <p>Recalculates all entity attributes based on current level and features.<p>
+     * <p>
+     * <b>Architecture:</b> Coordinates feature-based calculations for combat stats,
+     * enchantments, and protections. Delegates to attached features on entity type.
+     * <p>
+     * <b>State Impact:</b> Updates HP, attack, defense, armor, armor toughness,
+     * enchantment levels, and optionally auto-upgrades protections based on level.
+     * <p>
+     * <b>Design Decision:</b> Centralized recalculation ensures consistency across
+     * level-ups, NBT loading, and command-based stat changes.
+     */
+    protected void recalculateAttributes() {
+        // Get CombatLevelFeature from entity type
+        if (nativeEntity instanceof NativeEntityType entityType) {
+
+            // Calculate combat attributes if feature exists
+
+            if (entityType.getFeature(CombatLevelFeature.class).isPresent()) {
+                CombatLevelFeature combatFeature =
+                    entityType.getFeature(CombatLevelFeature.class).get();
+                
+                int level = combatStats.getLevel();
+                
+                // Calculate HP, attack, defense
+                int maxHp = combatFeature.calculateHp(level);
+                int attack = combatFeature.calculateAttack(level);
+                int defense = combatFeature.calculateDefense(level);
+                
+                // Calculate armor and armor toughness
+                double armor = combatFeature.calculateArmor(level);
+                double armorToughness = combatFeature.calculateArmorToughness(level);
+                
+                // Update combat stats
+                combatStats.setMaxHp(maxHp);
+                combatStats.setAttack(attack);
+                combatStats.setDefense(defense);
+                
+                // Update entity attributes (Fabric uses different attribute system)
+                this.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(maxHp);
+                this.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(attack);
+                this.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(armor);
+                this.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR_TOUGHNESS).setBaseValue(armorToughness);
+                
+                // Ensure current HP doesn't exceed new max HP
+                if (this.getHealth() > maxHp) {
+                    this.setHealth(maxHp);
+                }
+                combatStats.setCurrentHp((int) this.getHealth());
+            }
+            
+            // Calculate enchantment levels if feature exists
+            if (entityType.getFeature(EnchantmentFeature.class).isPresent()) {
+                EnchantmentFeature enchantFeature =
+                    entityType.getFeature(EnchantmentFeature.class).get();
+                
+                int level = combatStats.getLevel();
+                
+                // Calculate enchantment levels
+                int looting = enchantFeature.calculateLooting(level);
+                int sharpness = enchantFeature.calculateSharpness(level);
+                int knockback = enchantFeature.calculateKnockback(level);
+                
+                // Update enchantment stats
+                enchantmentStats.setLootingLevel(looting);
+                enchantmentStats.setSharpnessLevel(sharpness);
+                enchantmentStats.setKnockbackLevel(knockback);
+            }
+            
+            // Auto-upgrade protections if feature exists and enabled
+            if (entityType.getFeature(ProtectionFeature.class).isPresent()) {
+                ProtectionFeature protectionFeature =
+                    entityType.getFeature(ProtectionFeature.class).get();
+                
+                int level = combatStats.getLevel();
+                
+                // Calculate auto-protection levels (only if auto-upgrade enabled)
+                int fireProtection = protectionFeature.calculateAutoFireProtection(level, protectionStats.getFireProtection());
+                int fallProtection = protectionFeature.calculateAutoFallProtection(level, protectionStats.getFallProtection());
+                int blastProtection = protectionFeature.calculateAutoBlastProtection(level, protectionStats.getBlastProtection());
+                int projectileProtection = protectionFeature.calculateAutoProjectileProtection(level, protectionStats.getProjectileProtection());
+                
+                // Update protection stats (only if auto-upgrade increased them)
+                if (fireProtection > protectionStats.getFireProtection()) {
+                    protectionStats.setFireProtection(fireProtection);
+                }
+                if (fallProtection > protectionStats.getFallProtection()) {
+                    protectionStats.setFallProtection(fallProtection);
+                }
+                if (blastProtection > protectionStats.getBlastProtection()) {
+                    protectionStats.setBlastProtection(blastProtection);
+                }
+                if (projectileProtection > protectionStats.getProjectileProtection()) {
+                    protectionStats.setProjectileProtection(projectileProtection);
+                }
+            }
+        }
+    } // recalculateAttributes ()
+
+    // -- Registry Lifecycle --
+
+    /**
+     * <p>Registers robot in owner's registry.<p>
+     * <p>
+     * <b>Architecture:</b> Called when robot is tamed, establishing tracking
+     * relationship between owner and robot for spawn limits and management commands.
+     * <p>
+     * <b>State Impact:</b> Creates registry entry with WeakReference to this entity,
+     * enabling live position/health/stats access without cached data synchronization.
+     * <p>
+     * <b>Design Decision:</b> Only registers on server side to prevent client-side
+     * registry pollution and ensure single source of truth.
+     */
+    protected void registerRobot() {
+        // Only register on server side
+        if (this.getWorld().isClient || !this.isTamed() || this.getOwnerUuid() == null) {
+            return;
+        }
+        
+        try {
+            ServerWorld serverLevel = (ServerWorld) this.getWorld();
+            RobotRegistryManager.getRegistry(serverLevel)
+                .registerRobot(new RobotRegistryEntry(
+                    this.getUuid(),
+                    this.getOwnerUuid(),
+                    this,
+                    nativeEntity.getKey()
+                ));
+        } catch (Exception e) {
+            // Log error but don't fail taming
+            LovelyLegacy.LOGGER.error("Failed to register robot {} for owner {}", 
+                this.getUuid(), this.getOwnerUuid(), e);
+        }
+    } // registerRobot ()
+
+    /**
+     * <p>Unregisters robot from owner's registry.<p>
+     * <p>
+     * <b>Architecture:</b> Called when robot is removed or dies, cleaning up
+     * tracking relationship and freeing registry slot for new robots.
+     * <p>
+     * <b>State Impact:</b> Removes registry entry. Robot will no longer appear
+     * in owner list commands or count toward spawn limits.
+     */
+    protected void unregisterRobot() {
+        // Only unregister on server side
+        if (this.getWorld().isClient) {
+            return;
+        }
+        
+        try {
+            ServerWorld serverLevel = (ServerWorld) this.getWorld();
+            RobotRegistryManager.getRegistry(serverLevel).unregisterRobot(this.getUuid());
+        } catch (Exception e) {
+            // Log error but don't fail removal
+            LovelyLegacy.LOGGER.error("Failed to unregister robot {}", this.getUuid(), e);
+        }
+    } // unregisterRobot ()
+
+    /**
+     * <p>Updates registry timestamp for this robot.<p>
+     * <p>
+     * <b>Architecture:</b> Called periodically (every 20 ticks) to maintain
+     * "last seen" timestamp for offline detection and cleanup.
+     * <p>
+     * <b>Performance:</b> Lightweight operation (O(1) lookup + timestamp update).
+     * Batched to once per second to minimize overhead.
+     */
+    protected void updateRegistryTimestamp() {
+        // Only update on server side
+        if (this.getWorld().isClient || !this.isTamed() || this.getOwnerUuid() == null) {
+            return;
+        }
+        
+        try {
+            net.minecraft.server.world.ServerWorld serverLevel = (net.minecraft.server.world.ServerWorld) this.getWorld();
+            net.msymbios.llovelyr.framework.registry.RobotRegistryEntry entry = 
+                net.msymbios.llovelyr.lib.registry.RobotRegistryManager.getRegistry(serverLevel)
+                    .getRobotById(this.getUuid());
+            
+            if (entry != null) {
+                entry.updateTimestamp();
+            }
+        } catch (Exception e) {
+            // Silently fail - timestamp update is not critical
+        }
+    } // updateRegistryTimestamp ()
+
     // -- Constructor --
 
-    protected InternalEntity(EntityType<? extends TameableEntity> entityType, World world, net.msymbios.llovelyr.lib.entity.type.InternalEntityType<?> nativeEntityType) {
+    protected InternalEntity(EntityType<? extends TameableEntity> entityType, World world, InternalEntityType<?> nativeEntityType) {
         super(entityType, world);
-        this.nativeEntity = nativeEntityType;
+        this.nativeEntity = (InternalEntityType<?>) nativeEntityType;
+        
+        // Initialize stat objects
+        this.combatStats = new CombatStats();
+        this.protectionStats = new ProtectionStats();
+        this.enchantmentStats = new EnchantmentStats();
+        
+        // Initialize NBT handlers
+        this.combatStatsNBT = new CombatStatsNBT(combatStats);
+        this.protectionStatsNBT = new ProtectionStatsNBT(protectionStats);
+        this.enchantmentStatsNBT = new EnchantmentStatsNBT(enchantmentStats);
     } // Constructor InternalEntity ()
 
     // -- Inherited Methods --
@@ -217,8 +655,8 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
 
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
-        if (nativeEntity instanceof net.msymbios.llovelyr.common.entity.type.RobotEntityType) {
-            this.setTexture(((net.msymbios.llovelyr.common.entity.type.RobotEntityType) nativeEntity).getRandomColorId());
+        if (nativeEntity instanceof NativeEntityType robotType) {
+            this.setTexture(robotType.getRandomColorId());
         }
         return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
     } // initialize ()
@@ -296,6 +734,19 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
         dataNBT.putInt("State", this.getCurrentStateID());
         dataNBT.putBoolean("Notification", this.getNotification());
 
+        // Save stat objects using NBT handlers
+        NbtCompound statsData = new NbtCompound();
+        combatStatsNBT.writeToNBT(statsData);
+        dataNBT.put("CombatStats", statsData);
+        
+        NbtCompound protectionData = new NbtCompound();
+        protectionStatsNBT.writeToNBT(protectionData);
+        dataNBT.put("ProtectionStats", protectionData);
+        
+        NbtCompound enchantmentData = new NbtCompound();
+        enchantmentStatsNBT.writeToNBT(enchantmentData);
+        dataNBT.put("EnchantmentStats", enchantmentData);
+
         NbtCompound entityData = new NbtCompound();
         entityData.putString("VersionNBT", LovelyLegacy.VERSION.toString());
         writeToNBT(entityData);
@@ -311,8 +762,72 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
         this.setCurrentState(dataNBT.getInt("State"));
         this.setNotification(dataNBT.getBoolean("Notification"));
 
+        // Check if new format exists
+        boolean hasNewFormat = dataNBT.contains("CombatStats") || 
+                              dataNBT.contains("ProtectionStats") || 
+                              dataNBT.contains("EnchantmentStats");
+        
+        if (hasNewFormat) {
+            // Load stat objects using NBT handlers (new format)
+            net.msymbios.llovelyr.framework.utils.Version version = new net.msymbios.llovelyr.framework.utils.Version("1.0.0");
+            
+            if (dataNBT.contains("CombatStats")) {
+                NbtCompound statsData = dataNBT.getCompound("CombatStats");
+                combatStatsNBT.readFromNBT(statsData, version);
+            }
+            
+            if (dataNBT.contains("ProtectionStats")) {
+                NbtCompound protectionData = dataNBT.getCompound("ProtectionStats");
+                protectionStatsNBT.readFromNBT(protectionData, version);
+            }
+            
+            if (dataNBT.contains("EnchantmentStats")) {
+                NbtCompound enchantmentData = dataNBT.getCompound("EnchantmentStats");
+                enchantmentStatsNBT.readFromNBT(enchantmentData, version);
+            }
+        } else {
+            // Migrate from legacy format
+            LovelyLegacy.LOGGER.warn("Migrating robot {} from legacy NBT format to new format", this.getUuid());
+            
+            // Migrate combat stats (if they exist in legacy format)
+            // Note: Legacy format may have stored these differently or not at all
+            // Use default values for missing fields
+            if (dataNBT.contains("Level")) {
+                combatStats.setLevel(dataNBT.getInt("Level"));
+            }
+            if (dataNBT.contains("Experience")) {
+                combatStats.setExperience(dataNBT.getInt("Experience"));
+            }
+            
+            // Current HP will be set from entity health
+            combatStats.setCurrentHp((int) this.getHealth());
+            combatStats.setMaxHp((int) this.getMaxHealth());
+            
+            // Migrate protection stats (if they exist in legacy format)
+            if (dataNBT.contains("FireProtection")) {
+                protectionStats.setFireProtection(dataNBT.getInt("FireProtection"));
+            }
+            if (dataNBT.contains("FallProtection")) {
+                protectionStats.setFallProtection(dataNBT.getInt("FallProtection"));
+            }
+            if (dataNBT.contains("BlastProtection")) {
+                protectionStats.setBlastProtection(dataNBT.getInt("BlastProtection"));
+            }
+            if (dataNBT.contains("ProjectileProtection")) {
+                protectionStats.setProjectileProtection(dataNBT.getInt("ProjectileProtection"));
+            }
+            
+            // Enchantment stats will be calculated from level during recalculation
+            // No need to migrate as they're derived values
+            
+            LovelyLegacy.LOGGER.info("Successfully migrated robot {} to new format", this.getUuid());
+        }
+
+        // Recalculate attributes after loading to ensure consistency
+        recalculateAttributes();
+
         //NbtCompound entityData = dataNBT.getCompound("EntityData");
-        //readFromNBT(entityData, ObjectUtil.coalesce(new Version(entityData.getString("VersionNBT")), LovelyRobot.VERSION));
+        //readFromNBT(entityData, ObjectUtil.coalesce(new Version(entityData.getString("VersionNBT")), LovelyRobotEntity.VERSION));
     } // readCustomDataFromNbt ()
 
     @Override
@@ -390,10 +905,29 @@ public abstract class InternalEntity extends TameableEntity implements IReadWrit
     } // handleCombatMode ()
 
     public void handleTame(PlayerEntity player) {
+        // Set ownership without taming particles (spawning, not taming)
         this.setOwner(player);
         this.setTamed(true);
-        InternalParticle.Heart(this);
+        this.setSitting(false);
+
+        // Spawn POOF particles (spawn effect)
+        InternalParticle.Poof(this);
+
+        // Play spawn sound effect (totem activation sound) - volume scales with entity size
+        float volume = (float) Math.max(0.5F, Math.min(2.0F, this.getWidth() * this.getHeight()));
+        this.getWorld().playSound(
+                null,
+                this.getBlockPos(),
+                net.minecraft.sound.SoundEvents.ITEM_TOTEM_USE,
+                net.minecraft.sound.SoundCategory.NEUTRAL,
+                volume,
+                1.2F
+        );
+
         InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_OWNER).append(Text.literal(": " + player.getName().getString())), true);
+        
+        // Register robot in owner's registry
+        registerRobot();
     } // handleTame ()
 
     protected boolean handleTexture(ItemStack stack, PlayerEntity player) {
