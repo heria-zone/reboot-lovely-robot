@@ -32,15 +32,13 @@ import net.msymbios.llovelyr.framework.entity.data.CombatStats;
 import net.msymbios.llovelyr.framework.entity.data.ProtectionStats;
 import net.msymbios.llovelyr.framework.entity.data.EnchantmentStats;
 import net.msymbios.llovelyr.framework.registry.RobotRegistryEntry;
+import net.msymbios.llovelyr.LovelyLegacy;
 import net.msymbios.llovelyr.lib.entity.InternalEntityType;
 import net.msymbios.llovelyr.lib.entity.data.CombatStatsNBT;
 import net.msymbios.llovelyr.lib.entity.data.ProtectionStatsNBT;
 import net.msymbios.llovelyr.lib.entity.data.EnchantmentStatsNBT;
 import net.msymbios.llovelyr.framework.utils.Version;
-import net.msymbios.llovelyr.lib.entity.features.CombatLevelFeature;
-import net.msymbios.llovelyr.lib.entity.features.EnchantmentFeature;
-import net.msymbios.llovelyr.lib.entity.features.ProtectionFeature;
-import net.msymbios.llovelyr.lib.entity.type.features.*;
+import net.msymbios.llovelyr.lib.entity.features.*;
 import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
 import net.msymbios.llovelyr.lib.utils.interfaces.IReadWriteNBT;
 import net.msymbios.llovelyr.source.LovelyConfigs;
@@ -921,10 +919,26 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     } // handleCombatMode ()
 
     public void handleTame(Player player) {
+        // Set ownership without taming particles (spawning, not taming)
         this.tame(player);
         this.setTame(true);
-        InternalParticle.Heart(this);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_OWNER).append(Component.nullToEmpty(": " + player.getName().getString())), true);
+        this.setOrderedToSit(false);
+
+        // Spawn POOF particles (spawn effect)
+        InternalParticle.Poof(this);
+
+        // Play spawn sound effect (totem activation sound) - volume scales with entity size
+        float volume = (float) Math.max(0.5F, Math.min(2.0F, this.getBbWidth() * this.getBbHeight()));
+        this.level().playSound(
+                null,
+                this.blockPosition(),
+                net.minecraft.sounds.SoundEvents.TOTEM_USE,
+                net.minecraft.sounds.SoundSource.NEUTRAL,
+                volume,
+                1.2F
+        );
+
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_OWNER).append(Component.literal(": " + player.getName().getString())), true);
         
         // Register robot in owner's registry
         registerRobot();
