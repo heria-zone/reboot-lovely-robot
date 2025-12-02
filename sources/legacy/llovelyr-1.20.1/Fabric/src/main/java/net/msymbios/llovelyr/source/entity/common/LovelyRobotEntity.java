@@ -31,7 +31,7 @@ import net.msymbios.llovelyr.common.utils.internal.Utility;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.framework.utils.Version;
-import net.msymbios.llovelyr.lib.entity.type.features.LevelFeature;
+import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
 import net.msymbios.llovelyr.source.LovelyConfigs;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.source.LovelyItems;
@@ -47,7 +47,7 @@ import java.util.Objects;
 import static net.msymbios.llovelyr.common.utils.internal.Utility.invertBoolean;
 import static net.msymbios.llovelyr.source.LovelyItems.ROBOT_CORE;
 
-public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
+public abstract class LovelyRobotEntity extends InternalEntity implements GeoEntity {
 
     // -- Variables --
 
@@ -221,9 +221,9 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
 
     // -- Constructor --
 
-    public LovelyRobot(EntityType<? extends InternalEntity> entityType, World world, NativeEntityType robotEntityType) {
+    public LovelyRobotEntity(EntityType<? extends InternalEntity> entityType, World world, NativeEntityType robotEntityType) {
         super(entityType, world, robotEntityType);
-    } // Constructor LovelyRobot ()
+    } // Constructor LovelyRobotEntity ()
 
     // -- Inherited Methods --
 
@@ -290,6 +290,12 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
+        
+        // Register robot on first tick if not already registered (handles world load/chunk load)
+        if (!this.getWorld().isClient && this.age == 1 && this.isTamed() && this.getOwnerUuid() != null) {
+            ensureRegistered();
+        }
+        
         handleStandbyAnimation();
         handleCombatMode();
         handleAutoHeal();
@@ -886,7 +892,7 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
      * 
      * @return Optional containing LevelFeature if present, empty Optional otherwise
      */
-    private java.util.Optional<LevelFeature> getLevelSystem() {
+    public java.util.Optional<LevelFeature> getLevelSystem() {
         if (!(nativeEntity instanceof NativeEntityType robotType)) {
             return java.util.Optional.empty();
         }
@@ -1142,10 +1148,12 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
             1.0F, 
             1.0F
         );
-        
+
+        unregisterRobot();
+
         // Remove robot entity
         this.discard();
-        
+
         return true;
     } // handlePickupRetrieval ()
 
@@ -1352,6 +1360,40 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
         );
     } // playRetrievalSound ()
 
+    // -- Lifecycle Management --
+
+    // -- Lifecycle Management --
+
+    /**
+     * Ensures robot is registered in owner registry.
+     * <p>
+     * <b>Use Case:</b> Called on first tick after entity loads from NBT (world reload,
+     * chunk load). Prevents duplicate registration by checking if robot already exists
+     * in registry.
+     * <p>
+     * <b>Thread Safety:</b> Only runs on server side to avoid client-side issues.
+     */
+    private void ensureRegistered() {
+        if (this.getWorld() instanceof net.minecraft.server.world.ServerWorld serverWorld) {
+            net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry registry = 
+                net.msymbios.llovelyr.lib.registry.RobotRegistryManager.getRegistry(serverWorld);
+            
+            // Check if already registered
+            if (registry.getRobotById(this.getUuid()) == null) {
+                // Not registered - register now
+                String robotType = this.getType().getTranslationKey();
+                net.msymbios.llovelyr.framework.registry.RobotRegistryEntry registryEntry = 
+                    new net.msymbios.llovelyr.framework.registry.RobotRegistryEntry(
+                        this.getUuid(),
+                        this.getOwnerUuid(),
+                        this,
+                        robotType
+                    );
+                registry.registerRobot(registryEntry);
+            }
+        }
+    } // ensureRegistered()
+
     // -- Attribute Creation --
 
     /**
@@ -1374,4 +1416,4 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
                 .build();
     } // createAttributes ()
 
-} // Class LovelyRobot
+} // Class LovelyRobotEntity

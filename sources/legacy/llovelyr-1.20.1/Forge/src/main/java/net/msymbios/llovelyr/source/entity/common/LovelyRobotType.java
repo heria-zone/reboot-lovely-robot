@@ -1,14 +1,14 @@
-package net.msymbios.llovelyr.source.entity.type;
+package net.msymbios.llovelyr.source.entity.common;
 
 import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
-import net.msymbios.llovelyr.common.entity.type.RobotEntityType;
+import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.framework.entity.combat.LinearAttributeStrategy;
 import net.msymbios.llovelyr.framework.entity.enchantment.DefaultEnchantmentStrategy;
 import net.msymbios.llovelyr.framework.entity.protection.LevelBasedProtectionStrategy;
-import net.msymbios.llovelyr.lib.entity.type.features.CombatLevelFeature;
-import net.msymbios.llovelyr.lib.entity.type.features.EnchantmentFeature;
-import net.msymbios.llovelyr.lib.entity.type.features.LevelFeature;
-import net.msymbios.llovelyr.lib.entity.type.features.ProtectionFeature;
+import net.msymbios.llovelyr.lib.entity.features.CombatLevelFeature;
+import net.msymbios.llovelyr.lib.entity.features.EnchantmentFeature;
+import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
+import net.msymbios.llovelyr.lib.entity.features.ProtectionFeature;
 import net.msymbios.llovelyr.source.LovelyConfigs;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.List;
  * exponential progression for harder leveling. KITSUNE uses custom formula with tail-unlock
  * progression (harder every 30 levels).
  */
-public class NativeRobotType {
+public class LovelyRobotType {
 
     // -- Registry --
     
@@ -39,7 +39,7 @@ public class NativeRobotType {
      * <b>Usage:</b> Enables iteration over all robot types for registration,
      * rendering setup, or bulk operations.
      */
-    public static final List<RobotEntityType> TYPES = new ArrayList<>();
+    public static final List<NativeEntityType> TYPES = new ArrayList<>();
     
     // -- Robot Types --
 
@@ -49,7 +49,7 @@ public class NativeRobotType {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via Bunny2MaxLevel, Bunny2BaseHp, etc.
      */
-    public static final RobotEntityType BUNNY2 = create(EntityVariant.Bunny2);
+    public static final NativeEntityType BUNNY2 = create(EntityVariant.Bunny2);
 
     /**
      * DRAGON robot type - enhanced combat capabilities.
@@ -58,7 +58,7 @@ public class NativeRobotType {
      * exponential XP progression (base 1.1). Configured via DragonMaxLevel,
      * DragonBaseHp, etc.
      */
-    public static final RobotEntityType DRAGON = create(EntityVariant.Dragon);
+    public static final NativeEntityType DRAGON = create(EntityVariant.Dragon);
 
     /**
      * KITSUNE robot type - tail-unlock progression.
@@ -67,7 +67,7 @@ public class NativeRobotType {
      * progression (harder every 30 levels). Configured via KitsuneMaxLevel,
      * KitsuneBaseHp, etc.
      */
-    public static final RobotEntityType KITSUNE = create(EntityVariant.Kitsune);
+    public static final NativeEntityType KITSUNE = create(EntityVariant.Kitsune);
 
     /**
      * VANILLA robot type - general-purpose companion.
@@ -75,14 +75,14 @@ public class NativeRobotType {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via VanillaMaxLevel, VanillaBaseHp, etc.
      */
-    public static final RobotEntityType VANILLA = create(EntityVariant.Vanilla);
+    public static final NativeEntityType VANILLA = create(EntityVariant.Vanilla);
 
     // -- Helper Methods --
     
     /**
      * Creates robot type with specified variant and combat stats.
      * <p>
-     * <b>Implementation:</b> Creates RobotEntityType, configures combat stats,
+     * <b>Implementation:</b> Creates NativeEntityType, configures combat stats,
      * applies color palette, and adds to registry.
      * <p>
      * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
@@ -96,19 +96,19 @@ public class NativeRobotType {
      * @param baseToughness amour toughness value
      * @param knockbackResistance knockback resistance (0.0 to 1.0)
      * @param moveSpeed movement speed multiplier
-     * @return configured RobotEntityType instance
+     * @return configured NativeEntityType instance
      */
-    private static RobotEntityType create(EntityVariant variant,
-                                         int maxLevel,
-                                         float maxHealth,
-                                         float baseAttack,
-                                         float attackSpeed,
-                                         float baseDefense,
-                                         float baseToughness,
-                                         float knockbackResistance,
-                                         float moveSpeed) {
+    private static NativeEntityType create(EntityVariant variant,
+                                           int maxLevel,
+                                           float maxHealth,
+                                           float baseAttack,
+                                           float attackSpeed,
+                                           float baseDefense,
+                                           float baseToughness,
+                                           float knockbackResistance,
+                                           float moveSpeed) {
         // Create robot type
-        RobotEntityType robotType = new RobotEntityType(variant.getName(), variant);
+        NativeEntityType robotType = new NativeEntityType(variant.getName(), variant);
         
         // Configure combat stats
         robotType.withCombatStats(maxHealth, baseAttack, attackSpeed,
@@ -131,17 +131,17 @@ public class NativeRobotType {
     /**
      * Creates robot type with specified variant and combat stats.
      * <p>
-     * <b>Implementation:</b> Creates RobotEntityType, configures combat stats,
+     * <b>Implementation:</b> Creates NativeEntityType, configures combat stats,
      * applies color palette, and adds to registry.
      * <p>
      * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
      *
      * @param variant entity variant determining resource paths
-     * @return configured RobotEntityType instance
+     * @return configured NativeEntityType instance
      */
-    private static RobotEntityType create(EntityVariant variant) {
+    private static NativeEntityType create(EntityVariant variant) {
         // Create robot type
-        RobotEntityType robotType = new RobotEntityType(variant.getName(), variant);
+        NativeEntityType robotType = new NativeEntityType(variant.getName(), variant);
 
         // Apply color palette
         robotType.withColorPalette(variant);
@@ -287,4 +287,4 @@ public class NativeRobotType {
         */
     } // reloadFromConfig ()
 
-} // Class: NativeRobotType
+} // Class: LovelyRobotType

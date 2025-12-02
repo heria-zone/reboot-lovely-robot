@@ -32,7 +32,7 @@ import net.msymbios.llovelyr.common.entity.internal.*;
 import net.msymbios.llovelyr.common.utils.internal.Utility;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.framework.utils.Version;
-import net.msymbios.llovelyr.lib.entity.type.features.LevelFeature;
+import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
 import net.msymbios.llovelyr.source.LovelyConfigs;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.source.LovelyItems;
@@ -47,7 +47,7 @@ import javax.annotation.Nonnull;
 
 import static net.msymbios.llovelyr.common.utils.internal.Utility.invertBoolean;
 
-public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
+public abstract class LovelyRobotEntity extends InternalEntity implements GeoEntity {
 
     // -- Variables --
 
@@ -219,9 +219,9 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
 
     // -- Constructor --
 
-    public LovelyRobot(EntityType<? extends InternalEntity> entityType, Level level, NativeEntityType nativeEntity) {
+    public LovelyRobotEntity(EntityType<? extends InternalEntity> entityType, Level level, NativeEntityType nativeEntity) {
         super(entityType, level, nativeEntity);
-    } // Constructor LovelyRobot ()
+    } // Constructor LovelyRobotEntity ()
 
     // -- Inherited Methods --
 
@@ -1376,4 +1376,4 @@ public abstract class LovelyRobot extends InternalEntity implements GeoEntity {
                 .build();
     } // createAttributes ()
 
-} // Class LovelyRobot
+} // Class LovelyRobotEntity
