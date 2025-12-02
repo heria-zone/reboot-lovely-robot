@@ -1,13 +1,8 @@
-package net.msymbios.llovelyr.source.entity.custom;
+package net.msymbios.llovelyr.source.entity.custom.kitsune;
 
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.msymbios.llovelyr.common.shared.LovelyResource;
-import net.msymbios.llovelyr.framework.entity.enums.EntityState;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
+import net.msymbios.llovelyr.source.entity.custom.RobotEntity;
+import net.msymbios.llovelyr.source.entity.custom.RobotLayer;
 import software.bernie.geckolib.renderer.GeoRenderer;
 
 /**
@@ -22,18 +17,9 @@ public class KitsuneLayer extends RobotLayer {
 
     public KitsuneLayer(GeoRenderer<RobotEntity> renderer) {
         super(renderer);
-    } // Constructor: BunnyLayer ()
+        layerIdle = LovelyResource.GENERAL_LAYER_EMPTY;
+        layerBaseDefence = LovelyResource.KITSUNE_LAYER_BASE_DEFENSE;
+        layerAutoAttack = LovelyResource.KITSUNE_LAYER_AUTO_ATTACK;
+    } // Constructor: KitsuneLayer ()
 
-    // -- Methods --
-
-    @Override
-    public void render(MatrixStack poseStack, RobotEntity animatable, BakedGeoModel bakedModel, RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-        RenderLayer armorRenderType = RenderLayer.getArmorCutoutNoCull(layerIdle);
-        if(animatable.getAutoAttack()) {
-            if(animatable.getCurrentState() == EntityState.Defense) armorRenderType = RenderLayer.getArmorCutoutNoCull(LovelyResource.KITSUNE_LAYER_BASE_DEFENSE);
-            else armorRenderType = RenderLayer.getArmorCutoutNoCull(LovelyResource.KITSUNE_LAYER_AUTO_ATTACK);
-        }
-        getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, armorRenderType, bufferSource.getBuffer(armorRenderType), partialTick, packedLight, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
-    } // render ()
-
-} // Class: RobotLayer
+} // Class: KitsuneLayer

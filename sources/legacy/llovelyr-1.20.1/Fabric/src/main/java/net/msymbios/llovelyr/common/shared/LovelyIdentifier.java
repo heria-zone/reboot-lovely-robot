@@ -20,15 +20,23 @@ public class LovelyIdentifier {
     public static final String ROBOT_CORE = "robot_core";
 
     // SPAWN
+    public static final String BUNNY_SPAWN = "bunny_spawn";
     public static final String BUNNY2_SPAWN = "bunny2_spawn";
+    public static final String DRAGON_SPAWN = "dragon_spawn";
+    public static final String HONEY_SPAWN = "honey_spawn";
+    public static final String KITSUNE_SPAWN = "kitsune_spawn";
+    public static final String NEKO_SPAWN = "neko_spawn";
     public static final String VANILLA_SPAWN = "vanilla_spawn";
     public static final String ITEM_TAG_VARIANT = "variant";
 
     // -- Entities --
 
+    public static final String VARIANT_BUNNY = "bunny";
     public static final String VARIANT_BUNNY2 = "bunny2";
     public static final String VARIANT_DRAGON = "dragon";
+    public static final String VARIANT_HONEY = "honey";
     public static final String VARIANT_KITSUNE = "kitsune";
+    public static final String VARIANT_NEKO = "neko";
     public static final String VARIANT_VANILLA = "vanilla";
 
     // -- Stats --
@@ -129,9 +137,12 @@ public class LovelyIdentifier {
     public static MutableText getTranslation(EntityVariant variant) {
         var value = getVariantTranslation(LovelyIdentifier.VARIANT_VANILLA);
         switch (variant) {
+            case Bunny -> value = getVariantTranslation(LovelyIdentifier.VARIANT_BUNNY);
             case Bunny2 -> value = getVariantTranslation(LovelyIdentifier.VARIANT_BUNNY2);
             case Dragon -> value = getVariantTranslation(LovelyIdentifier.VARIANT_DRAGON);
+            case Honey -> value = getVariantTranslation(LovelyIdentifier.VARIANT_HONEY);
             case Kitsune -> value = getVariantTranslation(LovelyIdentifier.VARIANT_KITSUNE);
+            case Neko -> value = getVariantTranslation(LovelyIdentifier.VARIANT_NEKO);
             case Vanilla -> value = getVariantTranslation(LovelyIdentifier.VARIANT_VANILLA);
         }
         return value;

@@ -55,8 +55,13 @@ public class LovelyGroups extends InternalItemsGroup {
      * Adds spawn eggs to vanilla spawn eggs creative tab.
      */
     private static void addSpawnEggs(FabricItemGroupEntries entries) {
-        entries.add(LovelyItems.VANILLA_SPAWN);
+        entries.add(LovelyItems.BUNNY_SPAWN);
         entries.add(LovelyItems.BUNNY2_SPAWN);
+        entries.add(LovelyItems.DRAGON_SPAWN);
+        entries.add(LovelyItems.HONEY_SPAWN);
+        entries.add(LovelyItems.KITSUNE_SPAWN);
+        entries.add(LovelyItems.NEKO_SPAWN);
+        entries.add(LovelyItems.VANILLA_SPAWN);
     } // spawnEggItemsEntry()
 
     /**
@@ -64,8 +69,13 @@ public class LovelyGroups extends InternalItemsGroup {
      */
     private static void allItemsEntry(FabricItemGroupEntries entries) {
         entries.add(LovelyItems.ROBOT_CORE);
-        entries.add(LovelyItems.VANILLA_SPAWN);
+        entries.add(LovelyItems.BUNNY_SPAWN);
         entries.add(LovelyItems.BUNNY2_SPAWN);
+        entries.add(LovelyItems.DRAGON_SPAWN);
+        entries.add(LovelyItems.HONEY_SPAWN);
+        entries.add(LovelyItems.KITSUNE_SPAWN);
+        entries.add(LovelyItems.NEKO_SPAWN);
+        entries.add(LovelyItems.VANILLA_SPAWN);
     } // allItemsEntry()
 
 } // Class: LovelyGroups

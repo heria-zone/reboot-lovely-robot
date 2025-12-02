@@ -44,6 +44,14 @@ public class LovelyRobotType {
     // -- Robot Types --
 
     /**
+     * BUNNY robot type - original bunny design.
+     * <p>
+     * <b>Characteristics:</b> Balanced stats, default XP progression.
+     * Configured via BunnyMaxLevel, BunnyBaseHp, etc.
+     */
+    public static final NativeEntityType BUNNY = create(EntityVariant.Bunny);
+
+    /**
      * BUNNY2 robot type - alternative bunny design.
      * <p>
      * <b>Characteristics:</b> Balanced stats, default XP progression.
@@ -61,6 +69,14 @@ public class LovelyRobotType {
     public static final NativeEntityType DRAGON = create(EntityVariant.Dragon);
 
     /**
+     * HONEY robot type - support-oriented companion.
+     * <p>
+     * <b>Characteristics:</b> Lower combat stats, default XP progression.
+     * Configured via HoneyMaxLevel, HoneyBaseHp, etc.
+     */
+    public static final NativeEntityType HONEY = create(EntityVariant.Honey);
+
+    /**
      * KITSUNE robot type - tail-unlock progression.
      * <p>
      * <b>Characteristics:</b> Moderate stats, custom XP formula with tail-unlock
@@ -68,6 +84,14 @@ public class LovelyRobotType {
      * KitsuneBaseHp, etc.
      */
     public static final NativeEntityType KITSUNE = create(EntityVariant.Kitsune);
+
+    /**
+     * NEKO robot type - agile combat specialist.
+     * <p>
+     * <b>Characteristics:</b> High attack and speed, default XP progression.
+     * Configured via NekoMaxLevel, NekoBaseHp, etc.
+     */
+    public static final NativeEntityType NEKO = create(EntityVariant.Neko);
 
     /**
      * VANILLA robot type - general-purpose companion.
@@ -177,6 +201,25 @@ public class LovelyRobotType {
                         LovelyConfigs.MaxLootEnchantment,
                         LovelyConfigs.LootEnchantmentLevel);
 
+        // Configure BUNNY
+        BUNNY.withCombatStats(LovelyConfigs.BunnyBaseHp,
+                        LovelyConfigs.BunnyBaseAttack,
+                        LovelyConfigs.BunnyAttackSpeed,
+                        LovelyConfigs.BunnyBaseDefense,
+                        LovelyConfigs.BunnyBaseToughness,
+                        0F,
+                        LovelyConfigs.BunnyMovementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(LovelyConfigs.BunnyMaxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                LovelyConfigs.BunnyBaseHp,
+                                LovelyConfigs.BunnyBaseAttack,
+                                LovelyConfigs.BunnyBaseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
         // Configure BUNNY2
         BUNNY2.withCombatStats(LovelyConfigs.Bunny2BaseHp,
                         LovelyConfigs.Bunny2BaseAttack,
@@ -215,6 +258,25 @@ public class LovelyRobotType {
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
+        // Configure HONEY
+        HONEY.withCombatStats(LovelyConfigs.HoneyBaseHp,
+                        LovelyConfigs.HoneyBaseAttack,
+                        LovelyConfigs.HoneyAttackSpeed,
+                        LovelyConfigs.HoneyBaseDefense,
+                        LovelyConfigs.HoneyBaseToughness,
+                        0F,
+                        LovelyConfigs.HoneyMovementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(LovelyConfigs.HoneyMaxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                LovelyConfigs.HoneyBaseHp,
+                                LovelyConfigs.HoneyBaseAttack,
+                                LovelyConfigs.HoneyBaseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
         // Configure KITSUNE
         KITSUNE.withCombatStats(LovelyConfigs.KitsuneBaseHp,
                         LovelyConfigs.KitsuneBaseAttack,
@@ -229,6 +291,25 @@ public class LovelyRobotType {
                                 LovelyConfigs.KitsuneBaseHp,
                                 LovelyConfigs.KitsuneBaseAttack,
                                 LovelyConfigs.KitsuneBaseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
+        // Configure NEKO
+        NEKO.withCombatStats(LovelyConfigs.NekoBaseHp,
+                        LovelyConfigs.NekoBaseAttack,
+                        LovelyConfigs.NekoAttackSpeed,
+                        LovelyConfigs.NekoBaseDefense,
+                        LovelyConfigs.NekoBaseToughness,
+                        0F,
+                        LovelyConfigs.NekoMovementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(LovelyConfigs.NekoMaxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                LovelyConfigs.NekoBaseHp,
+                                LovelyConfigs.NekoBaseAttack,
+                                LovelyConfigs.NekoBaseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
@@ -254,37 +335,6 @@ public class LovelyRobotType {
                 .withFeature(ProtectionFeature.class, defaultProtection);
         
         net.msymbios.llovelyr.LovelyLegacy.LOGGER.info("Robot type configurations reloaded from config");
-
-        /*
-        // Initialize DRAGON with exponential XP strategy
-        DRAGON.withCombatStats(LovelyConfigs.DragonBaseHp,
-                    LovelyConfigs.DragonBaseAttack,
-                    LovelyConfigs.DragonAttackSpeed,
-                    LovelyConfigs.DragonBaseDefense,
-                    LovelyConfigs.DragonBaseToughness,
-                    0.5F, // Knockback resistance
-                    LovelyConfigs.DragonMovementSpeed) // Set exponential XP strategy for DRAGON
-                .withFeature(LevelFeature.class, new LevelFeature(LovelyConfigs.DragonMaxLevel, new LevelFeature.ExponentialExpStrategy(1.1)));
-
-        // Initialize KITSUNE with custom formula
-        KITSUNE.withCombatStats(LovelyConfigs.KitsuneBaseHp,
-                    LovelyConfigs.KitsuneBaseAttack,
-                    LovelyConfigs.KitsuneAttackSpeed,
-                    LovelyConfigs.KitsuneBaseDefense,
-                    LovelyConfigs.KitsuneBaseToughness,
-                    0F, // No knockback resistance
-                    LovelyConfigs.KitsuneMovementSpeed) // Set custom formula for KITSUNE (tail-unlock progression)
-                .withFeature(LevelFeature.class, new LevelFeature(LovelyConfigs.VanillaMaxLevel,
-                        new LevelFeature.FormulaExpStrategy(level -> {
-                            // Base XP requirement
-                            int baseXP = 100;
-                            // Increase difficulty every 30 levels (tail unlocks)
-                            int tailTier = level / 30;
-                            // Exponential scaling per tier
-                            return baseXP * level * (1 + tailTier * tailTier);
-                        }))
-                );
-        */
     } // reloadFromConfig ()
 
 } // Class: LovelyRobotType

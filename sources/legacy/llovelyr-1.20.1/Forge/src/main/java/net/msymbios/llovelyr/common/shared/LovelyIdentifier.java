@@ -29,15 +29,23 @@ public class LovelyIdentifier {
     public static final String ROBOT_CORE = "robot_core";
 
     // SPAWN
+    public static final String BUNNY_SPAWN = "bunny_spawn";
     public static final String BUNNY2_SPAWN = "bunny2_spawn";
+    public static final String DRAGON_SPAWN = "dragon_spawn";
+    public static final String HONEY_SPAWN = "honey_spawn";
+    public static final String KITSUNE_SPAWN = "kitsune_spawn";
+    public static final String NEKO_SPAWN = "neko_spawn";
     public static final String VANILLA_SPAWN = "vanilla_spawn";
     public static final String ITEM_TAG_VARIANT = "variant";
 
     // -- Entities --
 
+    public static final String VARIANT_BUNNY = "bunny";
     public static final String VARIANT_BUNNY2 = "bunny2";
     public static final String VARIANT_DRAGON = "dragon";
+    public static final String VARIANT_HONEY = "honey";
     public static final String VARIANT_KITSUNE = "kitsune";
+    public static final String VARIANT_NEKO = "neko";
     public static final String VARIANT_VANILLA = "vanilla";
 
     // -- Stats --
@@ -160,9 +168,12 @@ public class LovelyIdentifier {
      */
     public static MutableComponent getTranslation(EntityVariant variant) {
         return switch (variant) {
+            case Bunny -> getVariantTranslation(VARIANT_BUNNY);
             case Bunny2 -> getVariantTranslation(VARIANT_BUNNY2);
             case Dragon -> getVariantTranslation(VARIANT_DRAGON);
+            case Honey -> getVariantTranslation(VARIANT_HONEY);
             case Kitsune -> getVariantTranslation(VARIANT_KITSUNE);
+            case Neko -> getVariantTranslation(VARIANT_NEKO);
             case Vanilla -> getVariantTranslation(VARIANT_VANILLA);
             default -> getVariantTranslation(VARIANT_VANILLA);
         };

@@ -25,4 +25,11 @@ public class LovelyResource {
     /** Empty/transparent layer texture for conditional rendering. */
     public static final ResourceLocation GENERAL_LAYER_EMPTY = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "general_empty.png");
 
+    public static final ResourceLocation KITSUNE_LAYER_AUTO_ATTACK = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "kitsune_auto_attack.png");
+    public static final ResourceLocation KITSUNE_LAYER_BASE_DEFENSE = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "kitsune_base_defence.png");
+
+    public static final ResourceLocation BUNNY_LAYER_AUTO_ATTACK = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "bunny_auto_attack.png");
+    public static final ResourceLocation BUNNY_LAYER_BASE_DEFENSE = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "bunny_base_defence.png");
+    public static final ResourceLocation BUNNY_LAYER_EMPTY = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "bunny_empty.png");
+
 } // Class: LovelyResource

@@ -234,6 +234,29 @@ public class LovelyConfigs {
         
         provider.push("Entity");
         
+        provider.push("Bunny");
+        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
+                .define("bunny-max-level", Common.BunnyMaxLevel);
+        
+        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.6]")
+                .define("bunny-attack-speed", Common.BunnyAttackSpeed);
+        
+        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
+                .define("bunny-movement-speed", Common.BunnyMovementSpeed);
+        
+        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
+                .define("bunny-base-toughness", Common.BunnyBaseToughness);
+        
+        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [16]")
+                .define("bunny-base-hp", Common.BunnyBaseHp);
+        
+        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
+                .define("bunny-base-attack", Common.BunnyBaseAttack);
+        
+        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [3]")
+                .define("bunny-base-defense", Common.BunnyBaseDefense);
+        provider.pop();
+        
         provider.push("Bunny2");
         provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
                 .define("bunny2-max-level", Common.Bunny2MaxLevel);
@@ -255,29 +278,6 @@ public class LovelyConfigs {
         
         provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [6]")
                 .define("bunny2-base-defense", Common.Bunny2BaseDefense);
-        provider.pop();
-        
-        provider.push("Vanilla");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("vanilla-max-level", Common.VanillaMaxLevel);
-        
-        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.0]")
-                .define("vanilla-attack-speed", Common.VanillaAttackSpeed);
-        
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("vanilla-movement-speed", Common.VanillaMovementSpeed);
-        
-        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
-                .define("vanilla-base-toughness", Common.VanillaBaseToughness);
-        
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [16]")
-                .define("vanilla-base-hp", Common.VanillaBaseHp);
-        
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("vanilla-base-attack", Common.VanillaBaseAttack);
-        
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("vanilla-base-defense", Common.VanillaBaseDefense);
         provider.pop();
         
         provider.push("Dragon");
@@ -303,27 +303,96 @@ public class LovelyConfigs {
                 .define("dragon-base-defense", Common.DragonBaseDefense);
         provider.pop();
         
+        provider.push("Honey");
+        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
+                .define("honey-max-level", Common.HoneyMaxLevel);
+        
+        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.0]")
+                .define("honey-attack-speed", Common.HoneyAttackSpeed);
+        
+        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
+                .define("honey-movement-speed", Common.HoneyMovementSpeed);
+        
+        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
+                .define("honey-base-toughness", Common.HoneyBaseToughness);
+        
+        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [14]")
+                .define("honey-base-hp", Common.HoneyBaseHp);
+        
+        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [1]")
+                .define("honey-base-attack", Common.HoneyBaseAttack);
+        
+        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
+                .define("honey-base-defense", Common.HoneyBaseDefense);
+        provider.pop();
+        
         provider.push("Kitsune");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [250]")
+        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
                 .define("kitsune-max-level", Common.KitsuneMaxLevel);
         
         provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.1]")
                 .define("kitsune-attack-speed", Common.KitsuneAttackSpeed);
         
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.28]")
+        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
                 .define("kitsune-movement-speed", Common.KitsuneMovementSpeed);
         
         provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
                 .define("kitsune-base-toughness", Common.KitsuneBaseToughness);
         
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [22]")
+        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [16]")
                 .define("kitsune-base-hp", Common.KitsuneBaseHp);
         
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [6]")
+        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
                 .define("kitsune-base-attack", Common.KitsuneBaseAttack);
         
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
+        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [1]")
                 .define("kitsune-base-defense", Common.KitsuneBaseDefense);
+        provider.pop();
+        
+        provider.push("Neko");
+        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
+                .define("neko-max-level", Common.NekoMaxLevel);
+        
+        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.1]")
+                .define("neko-attack-speed", Common.NekoAttackSpeed);
+        
+        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.40]")
+                .define("neko-movement-speed", Common.NekoMovementSpeed);
+        
+        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
+                .define("neko-base-toughness", Common.NekoBaseToughness);
+        
+        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [22]")
+                .define("neko-base-hp", Common.NekoBaseHp);
+        
+        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [6]")
+                .define("neko-base-attack", Common.NekoBaseAttack);
+        
+        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
+                .define("neko-base-defense", Common.NekoBaseDefense);
+        provider.pop();
+        
+        provider.push("Vanilla");
+        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
+                .define("vanilla-max-level", Common.VanillaMaxLevel);
+        
+        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [2.0]")
+                .define("vanilla-attack-speed", Common.VanillaAttackSpeed);
+        
+        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
+                .define("vanilla-movement-speed", Common.VanillaMovementSpeed);
+        
+        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
+                .define("vanilla-base-toughness", Common.VanillaBaseToughness);
+        
+        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [14]")
+                .define("vanilla-base-hp", Common.VanillaBaseHp);
+        
+        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [4]")
+                .define("vanilla-base-attack", Common.VanillaBaseAttack);
+        
+        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
+                .define("vanilla-base-defense", Common.VanillaBaseDefense);
         provider.pop();
         
         provider.pop();
@@ -404,6 +473,15 @@ public class LovelyConfigs {
         Common.StandbyToSitDelayMin = config.getOrDefault("standby-to-sit-delay-min", Common.StandbyToSitDelayMin);
         Common.StandbyToSitDelayMax = config.getOrDefault("standby-to-sit-delay-max", Common.StandbyToSitDelayMax);
         
+        // Entity-specific settings - BUNNY
+        Common.BunnyMaxLevel = config.getOrDefault("bunny-max-level", Common.BunnyMaxLevel);
+        Common.BunnyAttackSpeed = config.getOrDefault("bunny-attack-speed", Common.BunnyAttackSpeed);
+        Common.BunnyMovementSpeed = config.getOrDefault("bunny-movement-speed", Common.BunnyMovementSpeed);
+        Common.BunnyBaseToughness = config.getOrDefault("bunny-base-toughness", Common.BunnyBaseToughness);
+        Common.BunnyBaseHp = config.getOrDefault("bunny-base-hp", Common.BunnyBaseHp);
+        Common.BunnyBaseAttack = config.getOrDefault("bunny-base-attack", Common.BunnyBaseAttack);
+        Common.BunnyBaseDefense = config.getOrDefault("bunny-base-defense", Common.BunnyBaseDefense);
+        
         // Entity-specific settings - BUNNY2
         Common.Bunny2MaxLevel = config.getOrDefault("bunny2-max-level", Common.Bunny2MaxLevel);
         Common.Bunny2AttackSpeed = config.getOrDefault("bunny2-attack-speed", Common.Bunny2AttackSpeed);
@@ -412,15 +490,6 @@ public class LovelyConfigs {
         Common.Bunny2BaseHp = config.getOrDefault("bunny2-base-hp", Common.Bunny2BaseHp);
         Common.Bunny2BaseAttack = config.getOrDefault("bunny2-base-attack", Common.Bunny2BaseAttack);
         Common.Bunny2BaseDefense = config.getOrDefault("bunny2-base-defense", Common.Bunny2BaseDefense);
-        
-        // Entity-specific settings - VANILLA
-        Common.VanillaMaxLevel = config.getOrDefault("vanilla-max-level", Common.VanillaMaxLevel);
-        Common.VanillaAttackSpeed = config.getOrDefault("vanilla-attack-speed", Common.VanillaAttackSpeed);
-        Common.VanillaMovementSpeed = config.getOrDefault("vanilla-movement-speed", Common.VanillaMovementSpeed);
-        Common.VanillaBaseToughness = config.getOrDefault("vanilla-base-toughness", Common.VanillaBaseToughness);
-        Common.VanillaBaseHp = config.getOrDefault("vanilla-base-hp", Common.VanillaBaseHp);
-        Common.VanillaBaseAttack = config.getOrDefault("vanilla-base-attack", Common.VanillaBaseAttack);
-        Common.VanillaBaseDefense = config.getOrDefault("vanilla-base-defense", Common.VanillaBaseDefense);
         
         // Entity-specific settings - DRAGON
         Common.DragonMaxLevel = config.getOrDefault("dragon-max-level", Common.DragonMaxLevel);
@@ -431,6 +500,15 @@ public class LovelyConfigs {
         Common.DragonBaseAttack = config.getOrDefault("dragon-base-attack", Common.DragonBaseAttack);
         Common.DragonBaseDefense = config.getOrDefault("dragon-base-defense", Common.DragonBaseDefense);
         
+        // Entity-specific settings - HONEY
+        Common.HoneyMaxLevel = config.getOrDefault("honey-max-level", Common.HoneyMaxLevel);
+        Common.HoneyAttackSpeed = config.getOrDefault("honey-attack-speed", Common.HoneyAttackSpeed);
+        Common.HoneyMovementSpeed = config.getOrDefault("honey-movement-speed", Common.HoneyMovementSpeed);
+        Common.HoneyBaseToughness = config.getOrDefault("honey-base-toughness", Common.HoneyBaseToughness);
+        Common.HoneyBaseHp = config.getOrDefault("honey-base-hp", Common.HoneyBaseHp);
+        Common.HoneyBaseAttack = config.getOrDefault("honey-base-attack", Common.HoneyBaseAttack);
+        Common.HoneyBaseDefense = config.getOrDefault("honey-base-defense", Common.HoneyBaseDefense);
+        
         // Entity-specific settings - KITSUNE
         Common.KitsuneMaxLevel = config.getOrDefault("kitsune-max-level", Common.KitsuneMaxLevel);
         Common.KitsuneAttackSpeed = config.getOrDefault("kitsune-attack-speed", Common.KitsuneAttackSpeed);
@@ -439,9 +517,25 @@ public class LovelyConfigs {
         Common.KitsuneBaseHp = config.getOrDefault("kitsune-base-hp", Common.KitsuneBaseHp);
         Common.KitsuneBaseAttack = config.getOrDefault("kitsune-base-attack", Common.KitsuneBaseAttack);
         Common.KitsuneBaseDefense = config.getOrDefault("kitsune-base-defense", Common.KitsuneBaseDefense);
+        
+        // Entity-specific settings - NEKO
+        Common.NekoMaxLevel = config.getOrDefault("neko-max-level", Common.NekoMaxLevel);
+        Common.NekoAttackSpeed = config.getOrDefault("neko-attack-speed", Common.NekoAttackSpeed);
+        Common.NekoMovementSpeed = config.getOrDefault("neko-movement-speed", Common.NekoMovementSpeed);
+        Common.NekoBaseToughness = config.getOrDefault("neko-base-toughness", Common.NekoBaseToughness);
+        Common.NekoBaseHp = config.getOrDefault("neko-base-hp", Common.NekoBaseHp);
+        Common.NekoBaseAttack = config.getOrDefault("neko-base-attack", Common.NekoBaseAttack);
+        Common.NekoBaseDefense = config.getOrDefault("neko-base-defense", Common.NekoBaseDefense);
+        
+        // Entity-specific settings - VANILLA
+        Common.VanillaMaxLevel = config.getOrDefault("vanilla-max-level", Common.VanillaMaxLevel);
+        Common.VanillaAttackSpeed = config.getOrDefault("vanilla-attack-speed", Common.VanillaAttackSpeed);
+        Common.VanillaMovementSpeed = config.getOrDefault("vanilla-movement-speed", Common.VanillaMovementSpeed);
+        Common.VanillaBaseToughness = config.getOrDefault("vanilla-base-toughness", Common.VanillaBaseToughness);
+        Common.VanillaBaseHp = config.getOrDefault("vanilla-base-hp", Common.VanillaBaseHp);
+        Common.VanillaBaseAttack = config.getOrDefault("vanilla-base-attack", Common.VanillaBaseAttack);
+        Common.VanillaBaseDefense = config.getOrDefault("vanilla-base-defense", Common.VanillaBaseDefense);
     } // loadConfigValues()
-
-
 
     /**
      * Reloads configuration from file, validating new values before applying.
@@ -598,40 +692,67 @@ public class LovelyConfigs {
 
         // -- ENTITY --
 
+        // BUNNY
+        public static int BunnyMaxLevel = 200;
+        public static float BunnyAttackSpeed = 1.6F;
+        public static float BunnyMovementSpeed = 0.37F; // 0.30F
+        public static float BunnyBaseToughness = 0F;
+        public static int BunnyBaseHp = 16;
+        public static int BunnyBaseAttack = 2;
+        public static int BunnyBaseDefense = 3;
+
         // BUNNY2
         public static int Bunny2MaxLevel = 200;
         public static float Bunny2AttackSpeed = 1.8F;
-        public static float Bunny2MovementSpeed = 0.37F;
-        public static float Bunny2BaseToughness = 1F;
-        public static int Bunny2BaseHp = 24;
-        public static int Bunny2BaseAttack = 4;
-        public static int Bunny2BaseDefense = 6;
+        public static float Bunny2MovementSpeed = 0.37F; // 0.35F
+        public static float Bunny2BaseToughness = 0F;
+        public static int Bunny2BaseHp = 20;
+        public static int Bunny2BaseAttack = 3;
+        public static int Bunny2BaseDefense = 4;
 
         // DRAGON
-        public static int DragonMaxLevel = 300;
-        public static float DragonAttackSpeed = 0.8F;
-        public static float DragonMovementSpeed = 0.22F;
+        public static int DragonMaxLevel = 200;
+        public static float DragonAttackSpeed = 1.5F;
+        public static float DragonMovementSpeed = 0.37F; // 0.37F
         public static float DragonBaseToughness = 2F;
-        public static int DragonBaseHp = 30;
-        public static int DragonBaseAttack = 8;
-        public static int DragonBaseDefense = 4;
+        public static int DragonBaseHp = 24;
+        public static int DragonBaseAttack = 5;
+        public static int DragonBaseDefense = 5;
+
+        // HONEY
+        public static int HoneyMaxLevel = 200;
+        public static float HoneyAttackSpeed = 1.0F;
+        public static float HoneyMovementSpeed = 0.37F;
+        public static float HoneyBaseToughness = 1F;
+        public static int HoneyBaseHp = 14;
+        public static int HoneyBaseAttack = 1;
+        public static int HoneyBaseDefense = 2;
 
         // KITSUNE
-        public static int KitsuneMaxLevel = 250;
+        public static int KitsuneMaxLevel = 200;
         public static float KitsuneAttackSpeed = 1.1F;
-        public static float KitsuneMovementSpeed = 0.28F;
+        public static float KitsuneMovementSpeed = 0.37F;
         public static float KitsuneBaseToughness = 1F;
-        public static int KitsuneBaseHp = 22;
-        public static int KitsuneBaseAttack = 6;
-        public static int KitsuneBaseDefense = 2;
+        public static int KitsuneBaseHp = 16;
+        public static int KitsuneBaseAttack = 2;
+        public static int KitsuneBaseDefense = 1;
+
+        // NEKO
+        public static int NekoMaxLevel = 200;
+        public static float NekoAttackSpeed = 1.1F;
+        public static float NekoMovementSpeed = 0.40F;
+        public static float NekoBaseToughness = 1F;
+        public static int NekoBaseHp = 22;
+        public static int NekoBaseAttack = 6;
+        public static int NekoBaseDefense = 2;
 
         // VANILLA
         public static int VanillaMaxLevel = 200;
-        public static float VanillaAttackSpeed = 1.0F;
+        public static float VanillaAttackSpeed = 2F;
         public static float VanillaMovementSpeed = 0.37F; // 0.25F is too slow
         public static float VanillaBaseToughness = 0F;
-        public static int VanillaBaseHp = 16;
-        public static int VanillaBaseAttack = 2;
+        public static int VanillaBaseHp = 14;
+        public static int VanillaBaseAttack = 4;
         public static int VanillaBaseDefense = 2;
 
     } // Class Common

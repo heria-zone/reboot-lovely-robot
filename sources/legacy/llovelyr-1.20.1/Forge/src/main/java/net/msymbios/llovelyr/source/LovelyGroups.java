@@ -36,8 +36,13 @@ public class LovelyGroups {
             .icon(() -> new ItemStack(LovelyItems.ROBOT_CORE.get()))
             .displayItems((parameters, output) -> {
                 output.accept(LovelyItems.ROBOT_CORE.get());
-                output.accept(LovelyItems.VANILLA_SPAWN.get());
+                output.accept(LovelyItems.BUNNY_SPAWN.get());
                 output.accept(LovelyItems.BUNNY2_SPAWN.get());
+                output.accept(LovelyItems.DRAGON_SPAWN.get());
+                output.accept(LovelyItems.HONEY_SPAWN.get());
+                output.accept(LovelyItems.KITSUNE_SPAWN.get());
+                output.accept(LovelyItems.NEKO_SPAWN.get());
+                output.accept(LovelyItems.VANILLA_SPAWN.get());
             })
             .build()
     );
@@ -64,7 +69,12 @@ public class LovelyGroups {
     // Add the example block item to the building blocks tab
     private static void addSpawnEggs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS){
+            event.accept(LovelyItems.BUNNY_SPAWN);
             event.accept(LovelyItems.BUNNY2_SPAWN);
+            event.accept(LovelyItems.DRAGON_SPAWN);
+            event.accept(LovelyItems.HONEY_SPAWN);
+            event.accept(LovelyItems.KITSUNE_SPAWN);
+            event.accept(LovelyItems.NEKO_SPAWN);
             event.accept(LovelyItems.VANILLA_SPAWN);
         }
     } // addSpawnEggs ()

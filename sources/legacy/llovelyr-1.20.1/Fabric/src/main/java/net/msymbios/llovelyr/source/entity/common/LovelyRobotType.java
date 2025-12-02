@@ -45,6 +45,14 @@ public class LovelyRobotType {
     // -- Robot Types --
 
     /**
+     * BUNNY robot type - original bunny design.
+     * <p>
+     * <b>Characteristics:</b> Balanced stats, default XP progression.
+     * Configured via BunnyMaxLevel, BunnyBaseHp, etc.
+     */
+    public static final NativeEntityType BUNNY = create(EntityVariant.Bunny);
+
+    /**
      * BUNNY2 robot type - alternative bunny design.
      * <p>
      * <b>Characteristics:</b> Balanced stats, default XP progression.
@@ -62,6 +70,14 @@ public class LovelyRobotType {
     public static final NativeEntityType DRAGON = create(EntityVariant.Dragon);
 
     /**
+     * HONEY robot type - support-oriented companion.
+     * <p>
+     * <b>Characteristics:</b> Lower combat stats, default XP progression.
+     * Configured via HoneyMaxLevel, HoneyBaseHp, etc.
+     */
+    public static final NativeEntityType HONEY = create(EntityVariant.Honey);
+
+    /**
      * KITSUNE robot type - tail-unlock progression.
      * <p>
      * <b>Characteristics:</b> Moderate stats, custom XP formula with tail-unlock
@@ -69,6 +85,14 @@ public class LovelyRobotType {
      * KitsuneMaxHealth, etc.
      */
     public static final NativeEntityType KITSUNE = create(EntityVariant.Kitsune);
+
+    /**
+     * NEKO robot type - agile combat specialist.
+     * <p>
+     * <b>Characteristics:</b> High attack and speed, default XP progression.
+     * Configured via NekoMaxLevel, NekoBaseHp, etc.
+     */
+    public static final NativeEntityType NEKO = create(EntityVariant.Neko);
 
     /**
      * VANILLA robot type - general-purpose companion.
@@ -178,6 +202,25 @@ public class LovelyRobotType {
                         LovelyConfigs.Common.MaxLootEnchantment,
                         LovelyConfigs.Common.LootEnchantmentLevel);
 
+        // Configure BUNNY
+        BUNNY.withCombatStats(LovelyConfigs.Common.BunnyBaseHp,
+                        LovelyConfigs.Common.BunnyBaseAttack,
+                        LovelyConfigs.Common.BunnyAttackSpeed,
+                        LovelyConfigs.Common.BunnyBaseDefense,
+                        LovelyConfigs.Common.BunnyBaseToughness,
+                        0F,
+                        LovelyConfigs.Common.BunnyMovementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(LovelyConfigs.Common.BunnyMaxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                LovelyConfigs.Common.BunnyBaseHp,
+                                LovelyConfigs.Common.BunnyBaseAttack,
+                                LovelyConfigs.Common.BunnyBaseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
         // Configure BUNNY2
         BUNNY2.withCombatStats(LovelyConfigs.Common.Bunny2BaseHp,
                         LovelyConfigs.Common.Bunny2BaseAttack,
@@ -216,6 +259,25 @@ public class LovelyRobotType {
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
+        // Configure HONEY
+        HONEY.withCombatStats(LovelyConfigs.Common.HoneyBaseHp,
+                        LovelyConfigs.Common.HoneyBaseAttack,
+                        LovelyConfigs.Common.HoneyAttackSpeed,
+                        LovelyConfigs.Common.HoneyBaseDefense,
+                        LovelyConfigs.Common.HoneyBaseToughness,
+                        0F,
+                        LovelyConfigs.Common.HoneyMovementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(LovelyConfigs.Common.HoneyMaxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                LovelyConfigs.Common.HoneyBaseHp,
+                                LovelyConfigs.Common.HoneyBaseAttack,
+                                LovelyConfigs.Common.HoneyBaseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
         // Configure KITSUNE
         KITSUNE.withCombatStats(LovelyConfigs.Common.KitsuneBaseHp,
                         LovelyConfigs.Common.KitsuneBaseAttack,
@@ -230,6 +292,25 @@ public class LovelyRobotType {
                                 LovelyConfigs.Common.KitsuneBaseHp,
                                 LovelyConfigs.Common.KitsuneBaseAttack,
                                 LovelyConfigs.Common.KitsuneBaseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
+        // Configure NEKO
+        NEKO.withCombatStats(LovelyConfigs.Common.NekoBaseHp,
+                        LovelyConfigs.Common.NekoBaseAttack,
+                        LovelyConfigs.Common.NekoAttackSpeed,
+                        LovelyConfigs.Common.NekoBaseDefense,
+                        LovelyConfigs.Common.NekoBaseToughness,
+                        0F,
+                        LovelyConfigs.Common.NekoMovementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(LovelyConfigs.Common.NekoMaxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                LovelyConfigs.Common.NekoBaseHp,
+                                LovelyConfigs.Common.NekoBaseAttack,
+                                LovelyConfigs.Common.NekoBaseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)

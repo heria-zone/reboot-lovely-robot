@@ -1,8 +1,10 @@
-package net.msymbios.llovelyr.source.entity.custom;
+package net.msymbios.llovelyr.source.entity.custom.bunny;
 
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.util.Identifier;
 import net.msymbios.llovelyr.source.LovelyConfigs;
+import net.msymbios.llovelyr.source.entity.custom.RobotEntity;
+import net.msymbios.llovelyr.source.entity.custom.RobotModel;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
@@ -12,15 +14,15 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
  * Texture resolution delegated to entity - allows runtime texture switching
  * based on variant and color without renderer changes.
  */
-public class RobotRenderer extends GeoEntityRenderer<RobotEntity> {
+public class BunnyRenderer extends GeoEntityRenderer<RobotEntity> {
 
     // -- Constructor --
 
-    public RobotRenderer(EntityRendererFactory.Context context) {
+    public BunnyRenderer(EntityRendererFactory.Context context) {
         super(context, new RobotModel());
         this.shadowRadius = LovelyConfigs.Client.ShadowRadius;
-        addRenderLayer(new RobotLayer(this));
-    } // Constructor: RobotRenderer()
+        addRenderLayer(new BunnyLayer(this));
+    } // Constructor: BunnyRenderer()
 
     // -- Methods --
 
@@ -29,4 +31,4 @@ public class RobotRenderer extends GeoEntityRenderer<RobotEntity> {
         return entity.getTexture();
     } // getTextureLocation()
 
-} // Class: RobotRenderer
+} // Class: BunnyRenderer

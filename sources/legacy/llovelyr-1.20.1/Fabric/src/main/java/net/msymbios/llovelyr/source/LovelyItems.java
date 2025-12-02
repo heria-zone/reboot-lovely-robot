@@ -29,8 +29,13 @@ public class LovelyItems extends InternalItems {
     public static final Item ROBOT_CORE = registerItem(LovelyIdentifier.ROBOT_CORE, Rarity.UNCOMMON, 1);
 
     // SPAWNS
-    public static final Item VANILLA_SPAWN = registerItem(LovelyIdentifier.VANILLA_SPAWN, LovelyEntities.VANILLA, Rarity.RARE, 1);
+    public static final Item BUNNY_SPAWN = registerItem(LovelyIdentifier.BUNNY_SPAWN, LovelyEntities.BUNNY, Rarity.RARE, 1);
     public static final Item BUNNY2_SPAWN = registerItem(LovelyIdentifier.BUNNY2_SPAWN, LovelyEntities.BUNNY2, Rarity.RARE, 1);
+    public static final Item DRAGON_SPAWN = registerItem(LovelyIdentifier.DRAGON_SPAWN, LovelyEntities.DRAGON, Rarity.RARE, 1);
+    public static final Item HONEY_SPAWN = registerItem(LovelyIdentifier.HONEY_SPAWN, LovelyEntities.HONEY, Rarity.RARE, 1);
+    public static final Item KITSUNE_SPAWN = registerItem(LovelyIdentifier.KITSUNE_SPAWN, LovelyEntities.KITSUNE, Rarity.RARE, 1);
+    public static final Item NEKO_SPAWN = registerItem(LovelyIdentifier.NEKO_SPAWN, LovelyEntities.NEKO, Rarity.RARE, 1);
+    public static final Item VANILLA_SPAWN = registerItem(LovelyIdentifier.VANILLA_SPAWN, LovelyEntities.VANILLA, Rarity.RARE, 1);
 
     // -- Methods --
 
@@ -84,8 +89,13 @@ public class LovelyItems extends InternalItems {
      * are registered.
      */
     public static void registerModel() {
-        registerModel(LovelyItems.VANILLA_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+        registerModel(LovelyItems.BUNNY_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
         registerModel(LovelyItems.BUNNY2_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+        registerModel(LovelyItems.DRAGON_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+        registerModel(LovelyItems.HONEY_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+        registerModel(LovelyItems.KITSUNE_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+        registerModel(LovelyItems.NEKO_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
+        registerModel(LovelyItems.VANILLA_SPAWN, LovelyIdentifier.getId(LovelyIdentifier.ITEM_TAG_VARIANT), LovelyIdentifier.STAT_COLOR);
     } // registerModel()
 
 } // Class: LovelyItems
