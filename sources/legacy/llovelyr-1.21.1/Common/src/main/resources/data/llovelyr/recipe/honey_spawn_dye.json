@@ -1,0 +1,16 @@
+{
+  "type": "llovelyr:lovely_spawn_dye",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "llovelyr:honey_spawn"
+    },
+    {
+      "tag": "llovelyr:dyes"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "llovelyr:honey_spawn"
+  }
+}

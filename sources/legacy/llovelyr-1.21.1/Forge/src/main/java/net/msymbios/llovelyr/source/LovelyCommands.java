@@ -1,0 +1,716 @@
+package net.msymbios.llovelyr.source;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.msymbios.llovelyr.common.commands.ColorArgumentType;
+import net.msymbios.llovelyr.common.commands.NativeCommands;
+
+/**
+ * Centralizes command registration and execution for robot management.
+ * <p>
+ * <b>Architecture:</b> Uses Brigadier command tree structure to organize
+ * hierarchical commands under "/llovely" root. Each command branch
+ * handles specific robot management tasks (stats, enchantments, design).
+ * <p>
+ * <b>Permission Model:</b> All commands require OP level 2, preventing
+ * unauthorized stat manipulation while allowing server administrators
+ * full robot management capabilities.
+ * <p>
+ * <b>Entity Targeting:</b> Leverages Minecraft's EntityArgument for
+ * flexible entity selection (@e, @p, @a, @r with type filters), enabling
+ * batch operations on multiple robots simultaneously.
+ */
+public class LovelyCommands extends NativeCommands {
+
+    // -- API Methods --
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(
+                Commands.literal("llovely")
+                        .requires(source -> source.hasPermission(2))
+                        .then(buildCrossCommands())
+                        .then(buildTargetCommands())
+                        .then(buildOwnerCommands())
+                        .then(buildReloadCommand())
+        );
+    } // register ()
+
+    // -- Internal Methods --
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossCommands() {
+        return Commands.literal("robot")
+                .then(buildCrossAddCommands())
+                .then(buildCrossGetCommands())
+                .then(buildCrossSetCommands())
+                .then(Commands.literal("recall")
+                        .executes(LovelyCommands::executeCrosshairRecall)
+                )
+                .then(Commands.literal("heal")
+                        .executes(LovelyCommands::executeCrosshairHeal)
+                )
+                .then(Commands.literal("stats")
+                        .executes(LovelyCommands::executeCrosshairStats)
+                );
+    } // buildCrossCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossAddCommands() {
+        return Commands.literal("add")
+                .then(buildCrossAddCombatCommands());
+    } // buildCrossAddCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossSetCommands() {
+        return Commands.literal("set")
+                .then(buildCrossSetCombatCommands())
+                .then(buildCrossSetAttributeCommands())
+                .then(buildCrossSetProtectionCommands())
+                .then(buildCrossSetAppearanceCommands())
+                .then(buildCrossSetIdentifierCommands());
+    } // buildCrossSetCommands ()
+
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetCommands() {
+        return Commands.literal("target")
+                .then(Commands.argument("targets", EntityArgument.entities())
+                        .then(buildTargetAddCommands())
+                        .then(buildTargetSetCommands())
+                        .then(Commands.literal("heal").executes(LovelyCommands::executeTargetHeal))
+                        .then(Commands.literal("teleport")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(LovelyCommands::executeTargetTeleport)
+                                )
+                        )
+                        .then(Commands.literal("recall")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(LovelyCommands::executeTargetRecall)
+                                )
+                        )
+                        .then(Commands.literal("ownership")
+                                .then(Commands.argument("to_player", EntityArgument.player())
+                                        .executes(LovelyCommands::executeTargetTransfer)
+                                )
+                        )
+                );
+    } // buildTargetCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetAddCommands() {
+        return Commands.literal("add")
+                .then(buildTargetAddCombatCommands());
+    } // buildTargetAddCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetSetCommands() {
+        return Commands.literal("set")
+                .then(buildTargetSetCombatCommands())
+                .then(buildTargetSetAttributeCommands())
+                .then(buildTargetSetProtectionCommands())
+                .then(buildTargetSetAppearanceCommands())
+                .then(buildTargetSetIdentifierCommands());
+    } // buildTargetSetCommands ()
+
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerCommands() {
+        return Commands.literal("owner")
+                .then(buildOwnerListCommands())
+                .then(buildOwnerAddCommands())
+                .then(buildOwnerSetCommands())
+                .then(Commands.literal("teleport")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .executes(LovelyCommands::executeOwnerTeleport)
+                                )
+                        )
+                )
+                .then(Commands.literal("recall")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .executes(LovelyCommands::executeOwnerRecall)
+                                )
+                        )
+                )
+                .then(Commands.literal("heal")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .executes(LovelyCommands::executeOwnerHeal)
+                                )
+                        )
+                )
+                .then(Commands.literal("healall")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .executes(LovelyCommands::executeOwnerHealAll)
+                        )
+                )
+                .then(Commands.literal("stats")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .executes(LovelyCommands::executeOwnerStats)
+                                )
+                        )
+                )
+                .then(Commands.literal("transfer")
+                        .then(Commands.argument("from_player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("to_player", EntityArgument.player())
+                                                .executes(LovelyCommands::executeOwnerTransfer)
+                                        )
+                                )
+                        )
+                );
+    } // buildOwnerCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerListCommands() {
+        return Commands.literal("list")
+                .then(Commands.literal("player")
+                        .executes(LovelyCommands::executeListOwners)
+                )
+                .then(Commands.literal("robot")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(LovelyCommands::executeListPlayerRobots)
+                        )
+                );
+    } // buildOwnerListCommands ()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerAddCommands() {
+        return Commands.literal("add")
+                .then(buildOwnerAddCombatCommands());
+    } // buildOwnerAddCommands ()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerSetCommands() {
+        return Commands.literal("set")
+                .then(buildOwnerSetCombatCommands())
+                .then(buildOwnerSetAttributeCommands())
+                .then(buildOwnerSetProtectionCommands())
+                .then(buildOwnerSetAppearanceCommands())
+                .then(buildOwnerSetIdentifierCommands());
+    } // buildOwnerSetCommands ()
+
+    // TARGET COMMANDS
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetAddCombatCommands () {
+        return Commands.literal("combat")
+                .then(Commands.literal("exp")
+                        .then(Commands.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMinMaxExp)
+                                .executes(LovelyCommands::executeTargetAddXP)
+                        )
+                );
+    } // buildTargetAddCombatCommands ()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetSetCombatCommands () {
+        return Commands.literal("combat")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                .suggests(LovelyCommands::suggestMinMaxLevel)
+                                .then(Commands.argument("exp", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestMinMaxExpForLevel)
+                                        .executes(LovelyCommands::executeTargetSetAllCombat)
+                                )
+                        )
+                )
+                .then(Commands.literal("exp")
+                        .then(Commands.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMinMaxExp)
+                                .executes(LovelyCommands::executeTargetSetXP)
+                        )
+                )
+                .then(Commands.literal("level")
+                        .then(Commands.argument("level_value", IntegerArgumentType.integer(1))
+                                .suggests(LovelyCommands::suggestMinMaxLevel)
+                                .executes(LovelyCommands::executeTargetSetLevel)
+                        )
+                );
+    } // buildTargetSetCombatCommands ()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetSetAttributeCommands() {
+        return Commands.literal("attribute")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("hp", IntegerArgumentType.integer(1))
+                                .then(Commands.argument("attack", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("defense", IntegerArgumentType.integer(0))
+                                                .then(Commands.argument("speed", IntegerArgumentType.integer(1))
+                                                        .executes(LovelyCommands::executeTargetSetAllAttributes)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("hp")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeTargetSetHP)
+                        )
+                )
+                .then(Commands.literal("attack")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeTargetSetAttack)
+                        )
+                )
+                .then(Commands.literal("defense")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(0))
+                                .executes(LovelyCommands::executeTargetSetDefense)
+                        )
+                )
+                .then(Commands.literal("speed")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeTargetSetSpeed)
+                        )
+                );
+    } // buildTargetSetAttributeCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetSetProtectionCommands() {
+        return Commands.literal("protection")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("fire", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fire"))
+                                .then(Commands.argument("fall", IntegerArgumentType.integer(0))
+                                        .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fall"))
+                                        .then(Commands.argument("blast", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "blast"))
+                                                .then(Commands.argument("projectile", IntegerArgumentType.integer(0))
+                                                        .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "projectile"))
+                                                        .executes(LovelyCommands::executeTargetSetAllProtections)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("fire")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fire"))
+                                .executes(LovelyCommands::executeTargetSetFireProtection)
+                        )
+                )
+                .then(Commands.literal("fall")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "fall"))
+                                .executes(LovelyCommands::executeTargetSetFallProtection)
+                        )
+                )
+                .then(Commands.literal("blast")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "blast"))
+                                .executes(LovelyCommands::executeTargetSetBlastProtection)
+                        )
+                )
+                .then(Commands.literal("projectile")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .suggests((ctx, builder) -> suggestMinMaxProtection(ctx, builder, "projectile"))
+                                .executes(LovelyCommands::executeTargetSetProjectileProtection)
+                        )
+                );
+    } // buildTargetSetProtectionCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetSetAppearanceCommands() {
+        return Commands.literal("appearance")
+                .then(Commands.argument("color", ColorArgumentType.color())
+                        .executes(LovelyCommands::executeTargetSetAppearance)
+                );
+    } // buildTargetSetAppearanceCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildTargetSetIdentifierCommands() {
+        return Commands.literal("identifier")
+                .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                        .executes(LovelyCommands::executeTargetSetIdentifier)
+                );
+    } // buildTargetSetIdentifierCommands()
+
+    // CROSS-AIR COMMANDS
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossAddCombatCommands() {
+        return Commands.literal("combat")
+                .then(Commands.literal("exp")
+                        .then(Commands.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxExp)
+                                .executes(LovelyCommands::executeCrosshairAddXP)
+                        )
+                );
+    } // buildRobotCombatCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossSetCombatCommands () {
+        return Commands.literal("combat")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                .suggests(LovelyCommands::suggestMaxLevel)
+                                .then(Commands.argument("exp", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestMaxExpForLevel)
+                                        .executes(LovelyCommands::executeSetAllCombat)
+                                )
+                        )
+                )
+                .then(Commands.literal("exp")
+                        .then(Commands.argument("exp_value", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxExp)
+                                .executes(LovelyCommands::executeCrosshairSetXP)
+                        )
+                )
+                .then(Commands.literal("level")
+                        .then(Commands.argument("level_value", IntegerArgumentType.integer(1))
+                                .suggests(LovelyCommands::suggestMaxLevel)
+                                .executes(LovelyCommands::executeCrosshairSetLevel)
+                        )
+                );
+    } // buildCrossSetCombatCommands ()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossSetAttributeCommands() {
+        return Commands.literal("attribute")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("hp", IntegerArgumentType.integer(1))
+                                .then(Commands.argument("attack", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("defense", IntegerArgumentType.integer(0))
+                                                .then(Commands.argument("speed", IntegerArgumentType.integer(1))
+                                                        .executes(LovelyCommands::executeCrosshairSetAllAttributes)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("hp")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeCrosshairSetHP)
+                        )
+                )
+                .then(Commands.literal("attack")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeCrosshairSetAttack)
+                        )
+                )
+                .then(Commands.literal("defense")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(0))
+                                .executes(LovelyCommands::executeCrosshairSetDefense)
+                        )
+                )
+                .then(Commands.literal("speed")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                .executes(LovelyCommands::executeCrosshairSetSpeed)
+                        )
+                );
+    } // buildCrossSetAttributeCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossSetProtectionCommands() {
+        return Commands.literal("protection")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("fire", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxFireProtection)
+                                .then(Commands.argument("fall", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestMaxFallProtection)
+                                        .then(Commands.argument("blast", IntegerArgumentType.integer(0))
+                                                .suggests(LovelyCommands::suggestMaxBlastProtection)
+                                                .then(Commands.argument("projectile", IntegerArgumentType.integer(0))
+                                                        .suggests(LovelyCommands::suggestMaxProjectileProtection)
+                                                        .executes(LovelyCommands::executeCrosshairSetAllProtections)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("fire")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxFireProtection)
+                                .executes(LovelyCommands::executeCrosshairSetFireProtection)
+                        )
+                )
+                .then(Commands.literal("fall")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxFallProtection)
+                                .executes(LovelyCommands::executeCrosshairSetFallProtection)
+                        )
+                )
+                .then(Commands.literal("blast")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxBlastProtection)
+                                .executes(LovelyCommands::executeCrosshairSetBlastProtection)
+                        )
+                )
+                .then(Commands.literal("projectile")
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestMaxProjectileProtection)
+                                .executes(LovelyCommands::executeCrosshairSetProjectileProtection)
+                        )
+                );
+    } // buildCrossSetProtectionCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossSetAppearanceCommands() {
+        return Commands.literal("appearance")
+                .then(Commands.argument("color", ColorArgumentType.color())
+                        .executes(LovelyCommands::executeCrosshairSetAppearance)
+                );
+    } // buildCrossSetAppearanceCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossSetIdentifierCommands() {
+        return Commands.literal("identifier")
+                .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                        .executes(LovelyCommands::executeCrosshairSetIdentifier)
+                );
+    } // buildCrossSetIdentifierCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildCrossGetCommands() {
+        return Commands.literal("get")
+                .then(Commands.literal("owner")
+                        .executes(LovelyCommands::executeCrosshairGetOwner)
+                );
+    } // buildCrossGetCommands()
+
+    // OWNER COMMANDS
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerAddCombatCommands() {
+        return Commands.literal("combat")
+                .then(Commands.literal("exp")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("exp_value", IntegerArgumentType.integer(0))
+                                                .suggests(LovelyCommands::suggestOwnerMaxExp)
+                                                .executes(LovelyCommands::executeOwnerAddExp)
+                                        )
+                                )
+                        )
+                );
+    } // buildOwnerAddCombatCommands ()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerSetCombatCommands () {
+        return Commands.literal("combat")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                                .suggests(LovelyCommands::suggestOwnerMaxLevel)
+                                                .then(Commands.argument("exp", IntegerArgumentType.integer(0))
+                                                        .suggests(LovelyCommands::suggestOwnerMaxExpForLevel)
+                                                        .executes(LovelyCommands::executeOwnerSetAllCombat)
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("exp")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("exp_value", IntegerArgumentType.integer(0))
+                                                .suggests(LovelyCommands::suggestOwnerMaxExp)
+                                                .executes(LovelyCommands::executeOwnerSetExp)
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("level")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("level_value", IntegerArgumentType.integer(1))
+                                                .suggests(LovelyCommands::suggestOwnerMaxLevel)
+                                                .executes(LovelyCommands::executeOwnerSetLevel)
+                                        )
+                                )
+                        )
+                );
+    } // buildOwnerSetCombatCommands ()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerSetAttributeCommands() {
+        return Commands.literal("attribute")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("hp", IntegerArgumentType.integer(1))
+                                                .then(Commands.argument("attack", IntegerArgumentType.integer(1))
+                                                        .then(Commands.argument("defense", IntegerArgumentType.integer(0))
+                                                                .then(Commands.argument("speed", IntegerArgumentType.integer(1))
+                                                                        .executes(LovelyCommands::executeOwnerSetAllAttributes)
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("hp")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                                .executes(LovelyCommands::executeOwnerSetHP)
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("attack")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                                .executes(LovelyCommands::executeOwnerSetAttack)
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("defense")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("value", IntegerArgumentType.integer(0))
+                                                .executes(LovelyCommands::executeOwnerSetDefense)
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("speed")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("value", IntegerArgumentType.integer(1))
+                                                .executes(LovelyCommands::executeOwnerSetSpeed)
+                                        )
+                                )
+                        )
+                );
+    } // buildOwnerSetAttributeCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerSetProtectionCommands() {
+        return Commands.literal("protection")
+                .then(Commands.literal("all")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("fire", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fire"))
+                                                .then(Commands.argument("fall", IntegerArgumentType.integer(0))
+                                                        .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fall"))
+                                                        .then(Commands.argument("blast", IntegerArgumentType.integer(0))
+                                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "blast"))
+                                                                .then(Commands.argument("projectile", IntegerArgumentType.integer(0))
+                                                                        .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "projectile"))
+                                                                        .executes(LovelyCommands::executeOwnerSetAllProtections)
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("fire")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fire"))
+                                                .executes(LovelyCommands::executeOwnerSetFireProtection)
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("fall")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "fall"))
+                                                .executes(LovelyCommands::executeOwnerSetFallProtection)
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("blast")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "blast"))
+                                                .executes(LovelyCommands::executeOwnerSetBlastProtection)
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("projectile")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .suggests(LovelyCommands::suggestPlayerNames)
+                                .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                        .suggests(LovelyCommands::suggestRobotIndices)
+                                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                                .suggests((ctx, builder) -> suggestOwnerMaxProtection(ctx, builder, "projectile"))
+                                                .executes(LovelyCommands::executeOwnerSetProjectileProtection)
+                                        )
+                                )
+                        )
+                );
+    } // buildOwnerSetProtectionCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerSetAppearanceCommands() {
+        return Commands.literal("appearance")
+                .then(Commands.argument("player", EntityArgument.player())
+                        .suggests(LovelyCommands::suggestPlayerNames)
+                        .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestRobotIndices)
+                                .then(Commands.argument("color", ColorArgumentType.color())
+                                        .executes(LovelyCommands::executeOwnerSetAppearance)
+                                )
+                        )
+                );
+    } // buildOwnerSetAppearanceCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildOwnerSetIdentifierCommands() {
+        return Commands.literal("identifier")
+                .then(Commands.argument("player", EntityArgument.player())
+                        .suggests(LovelyCommands::suggestPlayerNames)
+                        .then(Commands.argument("robot_index", IntegerArgumentType.integer(0))
+                                .suggests(LovelyCommands::suggestRobotIndices)
+                                .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                                        .executes(LovelyCommands::executeOwnerSetIdentifier)
+                                )
+                        )
+                );
+    } // buildOwnerSetIdentifierCommands()
+
+    private static ArgumentBuilder<CommandSourceStack, ?> buildReloadCommand() {
+        return Commands.literal("reload")
+                .executes(LovelyCommands::executeReload);
+    } // buildReloadCommand()
+
+    // -- Reload Command Executor --
+
+    /**
+     * Reloads configuration from disk.
+     * <p>
+     * Triggers config reload without server restart.
+     */
+    protected static int executeReload(CommandContext<CommandSourceStack> ctx) {
+        try {
+            net.msymbios.llovelyr.source.LovelyConfigs.reload();
+            ctx.getSource().sendSuccess(
+                    () -> Component.literal("Configuration reloaded successfully").withStyle(ChatFormatting.GREEN),
+                    true
+            );
+            return 1;
+        } catch (Exception e) {
+            ctx.getSource().sendFailure(Component.literal("Failed to reload configuration: " + e.getMessage()));
+            return 0;
+        }
+    } // executeReload()
+
+} // Class: LovelyCommands

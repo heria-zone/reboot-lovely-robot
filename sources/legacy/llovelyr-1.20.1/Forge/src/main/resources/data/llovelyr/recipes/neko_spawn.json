@@ -1,5 +1,6 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "llovelyr:lovely_spawn",
+  "category": "misc",
   "pattern": [
     "INI",
     "ICI",
@@ -13,11 +14,11 @@
       "item": "minecraft:iron_ingot"
     },
     "C": {
-      "item": "rlovelyr:robot_core"
+      "item": "llovelyr:robot_core"
     }
   },
   "result": {
-    "item": "rlovelyr:neko_spawn",
+    "item": "llovelyr:neko_spawn",
     "count": 1
   }
 }

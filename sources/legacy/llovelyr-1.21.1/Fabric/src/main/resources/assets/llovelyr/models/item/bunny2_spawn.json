@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "llovelyr:item/bunny2_spawn"
+  },
+  "overrides": [
+    { "predicate": {"llovelyr:variant": 0.00}, "model": "llovelyr:item/bunny2/bunny2_00" },
+    { "predicate": {"llovelyr:variant": 0.03}, "model": "llovelyr:item/bunny2/bunny2_01" },
+    { "predicate": {"llovelyr:variant": 0.09}, "model": "llovelyr:item/bunny2/bunny2_02" },
+    { "predicate": {"llovelyr:variant": 0.15}, "model": "llovelyr:item/bunny2/bunny2_03" },
+    { "predicate": {"llovelyr:variant": 0.21}, "model": "llovelyr:item/bunny2/bunny2_04" },
+    { "predicate": {"llovelyr:variant": 0.27}, "model": "llovelyr:item/bunny2/bunny2_05" },
+    { "predicate": {"llovelyr:variant": 0.33}, "model": "llovelyr:item/bunny2/bunny2_06" },
+    { "predicate": {"llovelyr:variant": 0.39}, "model": "llovelyr:item/bunny2/bunny2_07" },
+    { "predicate": {"llovelyr:variant": 0.45}, "model": "llovelyr:item/bunny2/bunny2_08" },
+    { "predicate": {"llovelyr:variant": 0.51}, "model": "llovelyr:item/bunny2/bunny2_09" },
+    { "predicate": {"llovelyr:variant": 0.57}, "model": "llovelyr:item/bunny2/bunny2_10" },
+    { "predicate": {"llovelyr:variant": 0.63}, "model": "llovelyr:item/bunny2/bunny2_11" },
+    { "predicate": {"llovelyr:variant": 0.69}, "model": "llovelyr:item/bunny2/bunny2_12" },
+    { "predicate": {"llovelyr:variant": 0.75}, "model": "llovelyr:item/bunny2/bunny2_13" },
+    { "predicate": {"llovelyr:variant": 0.81}, "model": "llovelyr:item/bunny2/bunny2_14" },
+    { "predicate": {"llovelyr:variant": 0.87}, "model": "llovelyr:item/bunny2/bunny2_15" },
+    { "predicate": {"llovelyr:variant": 0.93}, "model": "llovelyr:item/bunny2/bunny2_16" }
+  ]
+}

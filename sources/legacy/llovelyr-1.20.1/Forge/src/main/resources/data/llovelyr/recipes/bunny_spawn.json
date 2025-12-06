@@ -1,5 +1,6 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "llovelyr:lovely_spawn",
+  "category": "misc",
   "pattern": [
     "NIN",
     "ICI",
@@ -13,11 +14,11 @@
       "item": "minecraft:iron_ingot"
     },
     "C": {
-      "item": "rlovelyr:robot_core"
+      "item": "llovelyr:robot_core"
     }
   },
   "result": {
-    "item": "rlovelyr:bunny_spawn",
+    "item": "llovelyr:bunny_spawn",
     "count": 1
   }
 }

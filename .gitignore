@@ -25,6 +25,7 @@ classes
 # other
 eclipse
 run
+runs
 
 # java
 hs_err_*.log

@@ -1,5 +1,6 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "llovelyr:lovely_spawn",
+  "category": "misc",
   "pattern": [
     "III",
     "ICI",
@@ -10,11 +11,11 @@
       "item": "minecraft:diamond"
     },
     "C": {
-      "item": "rlovelyr:robot_core"
+      "item": "llovelyr:robot_core"
     }
   },
   "result": {
-    "item": "rlovelyr:dragon_spawn",
+    "item": "llovelyr:dragon_spawn",
     "count": 1
   }
 }

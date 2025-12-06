@@ -1,0 +1,111 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.gradle.userdev' version '7.0.167'
+}
+
+version = mod_version
+group = mod_group
+
+base {
+    archivesName = "${mod_id}-neoforge-${minecraft_version}"
+}
+
+repositories {
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+}
+
+minecraft {
+    def aw = file("../common/src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessTransformers {
+            // Note: NeoForge uses Access Transformers instead of Access Wideners
+            // You may need to convert your accesswidener to an access transformer
+        }
+    }
+    
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.file at
+    }
+}
+
+runs {
+    configureEach {
+        modSource project.sourceSets.main
+    }
+    
+    client {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        workingDirectory project.file('runs/client')
+    }
+    
+    server {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        workingDirectory project.file('runs/server')
+        programArgument '--nogui'
+    }
+    
+    data {
+        workingDirectory project.file('runs/data')
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+    
+    // GeckoLib dependency
+    implementation "software.bernie.geckolib:${neoforge_geckolib}"
+}
+
+processResources {
+    var replaceProperties = [
+        minecraft_version: minecraft_version,
+        minecraft_version_range: minecraft_version_range,
+        neoforge_version: neoforge_version,
+        neoforge_version_range: neoforge_version_range,
+        neoforge_loader_version_range: neoforge_loader_version_range,
+        mod_id: mod_id,
+        mod_name: mod_name,
+        mod_license: mod_license,
+        mod_version: mod_version,
+        mod_authors: mod_authors,
+        mod_description: mod_description,
+        mod_homepage: mod_homepage,
+        mod_source: mod_source,
+        mod_issues: mod_issues,
+        mod_update: mod_update
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+    
+    filesMatching("${mod_id}.mixins.json") {
+        expand([mod_id: mod_id])
+    }
+}
+
+jar {
+    from("../common/LICENSE") {
+        rename { "${it}_${project.base.archivesName}"}
+    }
+    
+    manifest {
+        attributes([
+            'Specification-Title'     : mod_id,
+            'Specification-Vendor'    : mod_authors,
+            'Specification-Version'   : '1',
+            'Implementation-Title'    : project.name,
+            'Implementation-Version'  : project.jar.archiveVersion,
+            'Implementation-Vendor'   : mod_authors,
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
