@@ -26,6 +26,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.msymbios.llovelyr.LovelyConstant;
 import net.msymbios.llovelyr.common.Configs.SharedConfigs;
+import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.common.entity.enums.EntityModel;
 import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.framework.entity.enums.*;
@@ -731,22 +732,18 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
      * on terrain with elevation changes.
      * <p>
      * <b>Implementation:</b> Uses custom GroundPathNavigation subclass that
-     * overrides canUpdatePath() to be less restrictive about edge distances.
+     * prevents constant path recalculation on edges and allows walking off ledges.
      *
      * @param level the world level
      * @return configured ground path navigation
      */
     @Override
     protected PathNavigation createNavigation(Level level) {
-        GroundPathNavigation navigation = new GroundPathNavigation(this, level) {
-                    @Override
-                    protected boolean canUpdatePath() {
-                        // Allow path updates even at edges - prevents spinning behavior
-                        return true;
-                    }
-                };
+        GroundPathNavigation navigation = new GroundPathNavigation(this, level);
         navigation.setCanFloat(true);
-        navigation.canOpenDoors();
+        navigation.setCanOpenDoors(true);
+        // Allow walking off edges - prevents spinning on ledges
+        navigation.setCanPassDoors(true);
         return navigation;
     } // createNavigation()
 
@@ -993,8 +990,14 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     } // handleActivateCombatMode ()
 
     protected void handleCombatMode() {
-        // Check if robot has a target and activate combat mode
-        if(this.getTarget() != null && !combatMode) {
+        // Clear target if it's dead or removed
+        if(this.getTarget() != null && (!this.getTarget().isAlive() || this.getTarget().isRemoved())) {
+            this.setTarget(null);
+        }
+        
+        // Check if robot has a valid living target and activate combat mode
+        // Only consider swinging if there's actually a target to swing at
+        if((this.swinging && this.getTarget() != null) || (this.getTarget() != null && this.getTarget().isAlive())) {
             handleActivateCombatMode();
         }
 

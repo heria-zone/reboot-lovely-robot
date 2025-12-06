@@ -63,9 +63,6 @@ public class AiConditionalLookGoal extends LookAtPlayerGoal {
         // Don't look while following - causes spinning on edges
         if (entity.getCurrentState() == EntityState.Follow) return false;
 
-        // Don't look while moving - interferes with navigation
-        if (entity.getDeltaMovement().lengthSqr() > 0.001) return false;
-
         return super.canUse();
     } // canUse ()
 
@@ -81,9 +78,6 @@ public class AiConditionalLookGoal extends LookAtPlayerGoal {
     public boolean canContinueToUse() {
         // Stop looking if state changes to Follow
         if (entity.getCurrentState() == EntityState.Follow) return false;
-
-        // Stop looking if robot starts moving
-        if (entity.getDeltaMovement().lengthSqr() > 0.001) return false;
 
         return super.canContinueToUse();
     } // canContinueToUse ()

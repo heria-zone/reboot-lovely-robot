@@ -36,6 +36,8 @@ import net.msymbios.llovelyr.framework.utils.Version;
 import net.msymbios.llovelyr.lib.entity.features.LevelFeature;
 import net.msymbios.llovelyr.common.entity.goal.AiAutoAttackGoal;
 import net.msymbios.llovelyr.common.entity.goal.AiBaseDefenseGoal;
+import net.msymbios.llovelyr.common.entity.goal.AiConditionalLookGoal;
+import net.msymbios.llovelyr.common.entity.goal.AiConditionalRandomLookGoal;
 import net.msymbios.llovelyr.common.entity.goal.AiConditionalWanderGoal;
 import net.msymbios.llovelyr.common.entity.goal.AiFollowOwnerGoal;
 import net.msymbios.llovelyr.common.entity.internal.InternalEntity;
@@ -215,9 +217,9 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         this.goalSelector.addGoal(4, new AiFollowOwnerGoal(this, SharedConfigs.Common.MovementFollowOwner, SharedConfigs.Common.FollowDistanceMin, SharedConfigs.Common.FollowDistanceMax));
         this.goalSelector.addGoal(4, new AiBaseDefenseGoal(this, SharedConfigs.Common.MovementFollowOwner, SharedConfigs.Common.BaseDefenceRange, SharedConfigs.Common.BaseDefenceWarpRange));
         this.goalSelector.addGoal(6, new AiConditionalWanderGoal(this, SharedConfigs.Common.MovementWanderAround));
-        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, SharedConfigs.Common.LookRange));
-        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, SharedConfigs.Common.LookRange));
-        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(7, new AiConditionalLookGoal(this, Player.class, SharedConfigs.Common.LookRange));
+        this.goalSelector.addGoal(7, new AiConditionalLookGoal(this, LivingEntity.class, SharedConfigs.Common.LookRange));
+        this.goalSelector.addGoal(8, new AiConditionalRandomLookGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
@@ -378,6 +380,18 @@ public abstract class LovelyRobotEntity extends InternalEntity {
     } // setCurrentHealthValue ()
 
     @Override
+    public boolean attackable() {
+        if (super.attackable()) handleActivateCombatMode();
+        return super.attackable();
+    } // attackable ()
+
+    @Override
+    public void handleDamageEvent(@NotNull DamageSource source) {
+        handleActivateCombatMode();
+        super.handleDamageEvent(source);
+    } // handleDamageEvent ()
+
+    @Override
     public void onEnterCombat() {
         handleActivateCombatMode();
         super.onEnterCombat();
@@ -467,6 +481,10 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
         dataNBT.putBoolean("IsInSittingPose", isInSittingPose());
         dataNBT.putFloat("CurrentHealth", this.getHealth());
+        
+        // Save standby animation state to preserve REST/SIT state across world reloads
+        dataNBT.putInt("StandbyTicks", this.standbyTicks);
+        dataNBT.putInt("StandbyTargetTicks", this.standbyTargetTicks);
 
         super.addAdditionalSaveData(dataNBT);
     } // writeCustomDataToNbt ()
@@ -487,13 +505,22 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         this.setBaseX(dataNBT.getFloat("BaseX"));
 
         setInSittingPose(dataNBT.getBoolean("IsInSittingPose"));
-        if (!isInSittingPose()) enterSittingPose();
 
         // Restore health
         float savedHealth = dataNBT.getFloat("CurrentHealth");
         if (savedHealth > 0) {
             this.setHealth(savedHealth);
             setCurrentHealthValue(savedHealth);
+        }
+        
+        // Restore standby animation state to preserve REST/SIT state across world reloads
+        this.standbyTicks = dataNBT.getInt("StandbyTicks");
+        this.standbyTargetTicks = dataNBT.getInt("StandbyTargetTicks");
+        
+        // If not in sitting pose and timers are both 0 (first load or old save), 
+        // set standbyTicks to -1 to prevent immediate sitting on first tick
+        if (!isInSittingPose() && this.standbyTicks == 0 && this.standbyTargetTicks == 0) {
+            this.standbyTicks = -1;
         }
 
         // Refresh dimensions on next tick to ensure proper hitbox after world load
@@ -527,6 +554,10 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
         dataNBT.putBoolean("IsInSittingPose", isInSittingPose());
         dataNBT.putFloat("CurrentHealth", this.getHealth());
+        
+        // Save standby animation state to preserve REST/SIT state across world reloads
+        dataNBT.putInt("StandbyTicks", this.standbyTicks);
+        dataNBT.putInt("StandbyTargetTicks", this.standbyTargetTicks);
 
         return dataNBT;
     } // writeToNBT
@@ -555,9 +586,19 @@ public abstract class LovelyRobotEntity extends InternalEntity {
             this.setHealth(savedHealth);
             setCurrentHealthValue(savedHealth);
         }
+        
+        // Restore standby animation state to preserve REST/SIT state across world reloads
+        this.standbyTicks = dataNBT.getInt("StandbyTicks");
+        this.standbyTargetTicks = dataNBT.getInt("StandbyTargetTicks");
+        
+        // If not in sitting pose and timers are both 0 (first load or old save), 
+        // set standbyTicks to -1 to prevent immediate sitting on first tick
+        if (!isInSittingPose() && this.standbyTicks == 0 && this.standbyTargetTicks == 0) {
+            this.standbyTicks = -1;
+        }
 
-        // Refresh dimensions on next tick to ensure proper hitbox after world load
-        if (isInSittingPose() && !this.level().isClientSide) {
+        // Refresh dimensions on next tick to ensure proper hitbox matches sitting state
+        if (!this.level().isClientSide) {
             // Schedule dimension refresh for next tick
             this.level().getServer().execute(() -> {
                 if (this.isAlive()) refreshDimensions();
@@ -651,6 +692,28 @@ public abstract class LovelyRobotEntity extends InternalEntity {
                 Component.nullToEmpty(customName).copy().append(Utility.getRandomTitle()).withStyle(ChatFormatting.DARK_PURPLE));
         }
 
+        // Smart core recovery: Try to send to owner's inventory if nearby and in survival
+        Player owner = (Player) this.getOwner();
+        boolean sentToInventory = false;
+        
+        if (owner != null && !owner.getAbilities().instabuild) {
+            // Survival mode only - check if owner is nearby
+            double distanceToOwner = this.distanceTo(owner);
+            if (distanceToOwner <= SharedConfigs.Common.SmartCoreRetrievalDistance) {
+                // Owner is nearby - try to add to inventory if there's space
+                if (owner.getInventory().getFreeSlot() >= 0) {
+                    sentToInventory = owner.getInventory().add(dropItem);
+                    
+                    if (sentToInventory && dropItem.isEmpty()) {
+                        // Successfully sent to inventory - play sound at owner location
+                        playCoreRecoverySound(owner);
+                        return; // Don't drop on floor
+                    }
+                }
+            }
+        }
+        
+        // Creative mode OR inventory full OR owner not nearby OR not sent to inventory - drop on floor
         ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY() + (double)0.0F, this.getZ(), dropItem);
         itemEntity.setDefaultPickUpDelay();
 
@@ -1071,8 +1134,10 @@ public abstract class LovelyRobotEntity extends InternalEntity {
      * <b>Permission Check:</b> Validates player ownership before allowing retrieval.
      * Only the robot's owner can retrieve it.
      * <p>
-     * <b>Inventory Management:</b> Attempts to add spawn item to player inventory.
-     * If inventory is full, does nothing (no retrieval). Creative mode always succeeds.
+     * <b>Inventory Management:</b>
+     * - Creative mode: Always drops on floor (no inventory check)
+     * - Survival mode with space: Adds to inventory
+     * - Survival mode full: Drops on floor
      * <p>
      * <b>Feedback:</b> Spawns particle effects and plays sound to confirm retrieval.
      *
@@ -1090,37 +1155,26 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         // Validate ownership
         if (!this.isOwnedBy(player)) return false;
 
-        // Check inventory space (creative mode always has space)
-        if (!player.getAbilities().instabuild && player.getInventory().getFreeSlot() < 0) {
-            // Inventory full in survival - notify player
-            if (!this.level().isClientSide) {
-                player.displayClientMessage(
-                        Component.literal("Inventory full - cannot retrieve robot")
-                                .withStyle(ChatFormatting.RED),
-                        true
-                );
-            }
-            return false;
-        }
-
         // Create spawn item from current robot state
         ItemStack spawnItem = createSpawnItemFromEntity();
 
-        // Try to add to player inventory
-        boolean added = player.getInventory().add(spawnItem); // TODO: Inspect this later
-
-        // If item wasn't fully added (shouldn't happen in creative, but safety check)
-        if (!spawnItem.isEmpty()) {
-            // Drop the item at robot location
-            ItemEntity itemEntity = new ItemEntity(
-                    this.level(),
-                    this.getX(),
-                    this.getY(),
-                    this.getZ(),
-                    spawnItem
-            );
-            itemEntity.setDefaultPickUpDelay();
-            this.level().addFreshEntity(itemEntity);
+        // Creative mode: Always drop on floor, don't check inventory
+        if (player.getAbilities().instabuild) {
+            dropItemAtLocation(spawnItem, this.getX(), this.getY(), this.getZ());
+        } else {
+            // Survival mode: Try to add to inventory if there's space
+            if (player.getInventory().getFreeSlot() >= 0) {
+                // Has space - add to inventory
+                boolean added = player.getInventory().add(spawnItem);
+                
+                // If somehow not fully added, drop remainder
+                if (!spawnItem.isEmpty()) {
+                    dropItemAtLocation(spawnItem, this.getX(), this.getY(), this.getZ());
+                }
+            } else {
+                // Inventory full - drop on floor
+                dropItemAtLocation(spawnItem, this.getX(), this.getY(), this.getZ());
+            }
         }
 
         // Spawn particle effects (POOF particles)
@@ -1143,6 +1197,22 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
         return true;
     } // handlePickupRetrieval ()
+
+    /**
+     * Drops item at specified location with default pickup delay.
+     * <p>
+     * <b>Helper Method:</b> Centralizes item dropping logic for consistency.
+     *
+     * @param itemStack the item to drop
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param z z coordinate
+     */
+    private void dropItemAtLocation(ItemStack itemStack, double x, double y, double z) {
+        ItemEntity itemEntity = new ItemEntity(this.level(), x, y, z, itemStack);
+        itemEntity.setDefaultPickUpDelay();
+        this.level().addFreshEntity(itemEntity);
+    } // dropItemAtLocation ()
 
     /**
      * Creates spawn item from current robot entity with full NBT preservation.
@@ -1323,6 +1393,28 @@ public abstract class LovelyRobotEntity extends InternalEntity {
                 1.0F
         );
     } // playRetrievalSound ()
+
+    /**
+     * Plays sound effect at owner location when core is sent to inventory on death.
+     * <p>
+     * <b>Audio Feedback:</b> Uses ITEM_PICKUP sound to indicate successful smart
+     * core recovery. Provides immediate feedback that core was automatically retrieved.
+     * <p>
+     * <b>Usage:</b> Called from handleItemDrop() when core is sent to owner's
+     * inventory instead of dropping on floor.
+     *
+     * @param owner the robot's owner player
+     */
+    private void playCoreRecoverySound(Player owner) {
+        this.level().playSound(
+                null,
+                owner.blockPosition(),
+                SoundEvents.ITEM_PICKUP,
+                net.minecraft.sounds.SoundSource.PLAYERS,
+                1.0F,
+                1.0F
+        );
+    } // playCoreRecoverySound ()
 
     // -- Attribute Creation --
 

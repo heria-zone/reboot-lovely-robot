@@ -194,6 +194,7 @@ public class AiBaseDefenseGoal extends Goal {
      * Handles state transitions, combat interruptions, and teleportation.
      * <p>
      * <b>Combat Handling:</b> Pauses state timer during combat, resumes after.
+     * When exiting combat, resumes previous state behavior seamlessly.
      */
     @Override
     public void tick() {
@@ -214,11 +215,15 @@ public class AiBaseDefenseGoal extends Goal {
             return;
         }
 
-        // Pause state timer during combat
+        // During combat, pause state machine but don't return
+        // This allows the state to resume properly after combat ends
         if (entity.isWary()) {
-            return; // In combat, don't update state machine
+            // Stop any patrol/guard navigation during combat
+            navigation.stop();
+            return;
         }
 
+        // After combat ends, resume state behavior
         // Execute current state behavior
         switch (currentDefenseState) {
             case PATROL:
@@ -247,49 +252,21 @@ public class AiBaseDefenseGoal extends Goal {
      * <b>Pause Mechanic:</b> Pauses for 2-4 seconds at each patrol point before
      * selecting next destination. Prevents constant movement.
      * <p>
-     * <b>Head Stabilization:</b> Only updates look direction when paused to prevent
-     * head bobbing during movement. Maintains forward-facing orientation while walking.
+     * <b>Natural Orientation:</b> No manual head control during patrol - body
+     * orientation handles direction naturally through navigation system.
      * <p>
-     * <b>Directional Looking:</b> Looks horizontally around the area and toward the
-     * next patrol destination for purposeful, natural scanning behavior.
+     * <b>Combat Resume:</b> If navigation was stopped (e.g., by combat), resumes
+     * navigation to current patrol target.
      */
     private void tickPatrol() {
         // Check if pausing at patrol point
         if (patrolPauseTimer > 0) {
             patrolPauseTimer--;
-
-            // Look toward next patrol target or scan horizontally around the area
-            if (--lookTimer <= 0) {
-                lookTimer = 40; // Reset look timer (2 seconds between look changes)
-
-                if (currentPatrolTarget != null) {
-                    // Look toward the next patrol destination
-                    entity.getLookControl().setLookAt(
-                            currentPatrolTarget.getX() + 0.5,
-                            entity.getY(), // Keep Y at entity level for horizontal looking
-                            currentPatrolTarget.getZ() + 0.5,
-                            5.0F,  // Slow, smooth head turning
-                            (float) entity.getMaxHeadXRot()
-                    );
-                } else {
-                    // If no target yet, look around horizontally in the patrol area
-                    double lookRadius = minDistance * 0.6;
-                    entity.getLookControl().setLookAt(
-                            entity.getX() + (entity.getRandom().nextDouble() - 0.5) * lookRadius,
-                            entity.getY(), // Keep Y at entity level for horizontal looking
-                            entity.getZ() + (entity.getRandom().nextDouble() - 0.5) * lookRadius,
-                            5.0F,
-                            (float) entity.getMaxHeadXRot()
-                    );
-                }
-            }
+            // Just pause - no head movement, let body stay naturally oriented
             return;
         }
 
-        // While moving, don't update look control - let entity look in movement direction
-        // This prevents head bobbing and maintains natural forward-facing orientation
-
-        // Check if need new patrol target
+        // Check if need new patrol target or if navigation was interrupted
         if (currentPatrolTarget == null || navigation.isDone() || entity.distanceToSqr(currentPatrolTarget.getX(), currentPatrolTarget.getY(), currentPatrolTarget.getZ()) < 4.0) {
             // Select new random patrol point within base radius
             currentPatrolTarget = selectRandomPatrolPoint();
@@ -299,18 +276,10 @@ public class AiBaseDefenseGoal extends Goal {
                 // Set random pause duration for when we reach this point
                 int pauseRange = SharedConfigs.Common.PatrolPauseDurationMax - SharedConfigs.Common.PatrolPauseDurationMin;
                 patrolPauseTimer = SharedConfigs.Common.PatrolPauseDurationMin + entity.getRandom().nextInt(pauseRange + 1);
-
-                // Initialize look timer and immediately set look direction to prevent head snap
-                lookTimer = 40; // Will trigger on next pause tick
-                // Pre-set look direction toward next target to avoid transition glitch
-                entity.getLookControl().setLookAt(
-                        currentPatrolTarget.getX() + 0.5,
-                        entity.getY(),
-                        currentPatrolTarget.getZ() + 0.5,
-                        5.0F,
-                        (float) entity.getMaxHeadXRot()
-                );
             }
+        } else if (navigation.isDone() && currentPatrolTarget != null) {
+            // Navigation was stopped (e.g., by combat) but we still have a target - resume
+            navigation.moveTo(currentPatrolTarget.getX(), currentPatrolTarget.getY(), currentPatrolTarget.getZ(), speed);
         }
     } // tickPatrol
 
