@@ -2,6 +2,7 @@ package net.msymbios.llovelyr.source;
 
 import com.electronwill.nightconfig.core.Config;
 import net.msymbios.llovelyr.LovelyConstant;
+import net.msymbios.llovelyr.common.Configs.ConfigBounds;
 import net.msymbios.llovelyr.common.Configs.SharedConfigs;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -32,17 +33,15 @@ public class LovelyConfigs {
 
     // GENERAL
     private static final ModConfigSpec.ConfigValue<Integer> OWNER_MAX_ROBOT_NUM;
-    private static final ModConfigSpec.ConfigValue<Float> MOVEMENT_MELEE_ATTACK;
-    private static final ModConfigSpec.ConfigValue<Float> MOVEMENT_FOLLOW_OWNER;
-    private static final ModConfigSpec.ConfigValue<Float> MOVEMENT_WANDER_AROUND;
-    private static final ModConfigSpec.ConfigValue<Float> FOLLOW_DISTANCE_MAX;
-    private static final ModConfigSpec.ConfigValue<Float> FOLLOW_DISTANCE_MIN;
-    private static final ModConfigSpec.ConfigValue<Float> LOOK_RANGE;
+    private static final ModConfigSpec.ConfigValue<Double> MOVEMENT_MELEE_ATTACK;
+    private static final ModConfigSpec.ConfigValue<Double> MOVEMENT_FOLLOW_OWNER;
+    private static final ModConfigSpec.ConfigValue<Double> MOVEMENT_WANDER_AROUND;
+    private static final ModConfigSpec.ConfigValue<Double> FOLLOW_DISTANCE_MAX;
+    private static final ModConfigSpec.ConfigValue<Double> FOLLOW_DISTANCE_MIN;
+    private static final ModConfigSpec.ConfigValue<Double> LOOK_RANGE;
 
     // RENDERER
-    private static final ModConfigSpec.ConfigValue<Float> WIDTH;
-    private static final ModConfigSpec.ConfigValue<Float> HEIGHT;
-    private static final ModConfigSpec.ConfigValue<Float> SHADOW_RADIUS;
+    private static final ModConfigSpec.ConfigValue<Double> SHADOW_RADIUS;
 
 
     // LEVEL | EXPERIENCE
@@ -58,8 +57,8 @@ public class LovelyConfigs {
     private static final ModConfigSpec.ConfigValue<Boolean> LOOT_ENCHANTMENT;
     private static final ModConfigSpec.ConfigValue<Integer> LOOT_ENCHANTMENT_LEVEL;
     private static final ModConfigSpec.ConfigValue<Integer> MAX_LOOT_ENCHANTMENT;
-    private static final ModConfigSpec.ConfigValue<Float> BASE_DEFENCE_RANGE;
-    private static final ModConfigSpec.ConfigValue<Float> BASE_DEFENCE_WARP_RANGE;
+    private static final ModConfigSpec.ConfigValue<Double> BASE_DEFENCE_RANGE;
+    private static final ModConfigSpec.ConfigValue<Double> BASE_DEFENCE_WARP_RANGE;
 
     // PROTECTION
     private static final ModConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_FIRE;
@@ -100,63 +99,63 @@ public class LovelyConfigs {
 
     // BUNNY
     private static final ModConfigSpec.ConfigValue<Integer> BUNNY_MAX_LEVEL;
-    private static final ModConfigSpec.ConfigValue<Float> BUNNY_ATTACK_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> BUNNY_MOVEMENT_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> BUNNY_BASE_TOUGHNESS;
+    private static final ModConfigSpec.ConfigValue<Double> BUNNY_ATTACK_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> BUNNY_MOVEMENT_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> BUNNY_BASE_TOUGHNESS;
     private static final ModConfigSpec.ConfigValue<Integer> BUNNY_BASE_HP;
     private static final ModConfigSpec.ConfigValue<Integer> BUNNY_BASE_ATTACK;
     private static final ModConfigSpec.ConfigValue<Integer> BUNNY_BASE_DEFENSE;
 
     // BUNNY2
     private static final ModConfigSpec.ConfigValue<Integer> BUNNY2_MAX_LEVEL;
-    private static final ModConfigSpec.ConfigValue<Float> BUNNY2_ATTACK_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> BUNNY2_MOVEMENT_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> BUNNY2_BASE_TOUGHNESS;
+    private static final ModConfigSpec.ConfigValue<Double> BUNNY2_ATTACK_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> BUNNY2_MOVEMENT_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> BUNNY2_BASE_TOUGHNESS;
     private static final ModConfigSpec.ConfigValue<Integer> BUNNY2_BASE_HP;
     private static final ModConfigSpec.ConfigValue<Integer> BUNNY2_BASE_ATTACK;
     private static final ModConfigSpec.ConfigValue<Integer> BUNNY2_BASE_DEFENSE;
 
     // DRAGON
     private static final ModConfigSpec.ConfigValue<Integer> DRAGON_MAX_LEVEL;
-    private static final ModConfigSpec.ConfigValue<Float> DRAGON_ATTACK_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> DRAGON_MOVEMENT_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> DRAGON_BASE_TOUGHNESS;
+    private static final ModConfigSpec.ConfigValue<Double> DRAGON_ATTACK_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> DRAGON_MOVEMENT_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> DRAGON_BASE_TOUGHNESS;
     private static final ModConfigSpec.ConfigValue<Integer> DRAGON_BASE_HP;
     private static final ModConfigSpec.ConfigValue<Integer> DRAGON_BASE_ATTACK;
     private static final ModConfigSpec.ConfigValue<Integer> DRAGON_BASE_DEFENSE;
 
     // HONEY
     private static final ModConfigSpec.ConfigValue<Integer> HONEY_MAX_LEVEL;
-    private static final ModConfigSpec.ConfigValue<Float> HONEY_ATTACK_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> HONEY_MOVEMENT_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> HONEY_BASE_TOUGHNESS;
+    private static final ModConfigSpec.ConfigValue<Double> HONEY_ATTACK_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> HONEY_MOVEMENT_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> HONEY_BASE_TOUGHNESS;
     private static final ModConfigSpec.ConfigValue<Integer> HONEY_BASE_HP;
     private static final ModConfigSpec.ConfigValue<Integer> HONEY_BASE_ATTACK;
     private static final ModConfigSpec.ConfigValue<Integer> HONEY_BASE_DEFENSE;
 
     // KITSUNE
     private static final ModConfigSpec.ConfigValue<Integer> KITSUNE_MAX_LEVEL;
-    private static final ModConfigSpec.ConfigValue<Float> KITSUNE_ATTACK_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> KITSUNE_MOVEMENT_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> KITSUNE_BASE_TOUGHNESS;
+    private static final ModConfigSpec.ConfigValue<Double> KITSUNE_ATTACK_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> KITSUNE_MOVEMENT_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> KITSUNE_BASE_TOUGHNESS;
     private static final ModConfigSpec.ConfigValue<Integer> KITSUNE_BASE_HP;
     private static final ModConfigSpec.ConfigValue<Integer> KITSUNE_BASE_ATTACK;
     private static final ModConfigSpec.ConfigValue<Integer> KITSUNE_BASE_DEFENSE;
 
     // NEKO
     private static final ModConfigSpec.ConfigValue<Integer> NEKO_MAX_LEVEL;
-    private static final ModConfigSpec.ConfigValue<Float> NEKO_ATTACK_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> NEKO_MOVEMENT_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> NEKO_BASE_TOUGHNESS;
+    private static final ModConfigSpec.ConfigValue<Double> NEKO_ATTACK_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> NEKO_MOVEMENT_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> NEKO_BASE_TOUGHNESS;
     private static final ModConfigSpec.ConfigValue<Integer> NEKO_BASE_HP;
     private static final ModConfigSpec.ConfigValue<Integer> NEKO_BASE_ATTACK;
     private static final ModConfigSpec.ConfigValue<Integer> NEKO_BASE_DEFENSE;
 
     // VANILLA
     private static final ModConfigSpec.ConfigValue<Integer> VANILLA_MAX_LEVEL;
-    private static final ModConfigSpec.ConfigValue<Float> VANILLA_ATTACK_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> VANILLA_MOVEMENT_SPEED;
-    private static final ModConfigSpec.ConfigValue<Float> VANILLA_BASE_TOUGHNESS;
+    private static final ModConfigSpec.ConfigValue<Double> VANILLA_ATTACK_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> VANILLA_MOVEMENT_SPEED;
+    private static final ModConfigSpec.ConfigValue<Double> VANILLA_BASE_TOUGHNESS;
     private static final ModConfigSpec.ConfigValue<Integer> VANILLA_BASE_HP;
     private static final ModConfigSpec.ConfigValue<Integer> VANILLA_BASE_ATTACK;
     private static final ModConfigSpec.ConfigValue<Integer> VANILLA_BASE_DEFENSE;
@@ -169,125 +168,117 @@ public class LovelyConfigs {
         BUILDER.push("General");
         OWNER_MAX_ROBOT_NUM = BUILDER
                 .comment("How many robots each player can own at once.", "Set to -1 for unlimited robots.", "Range: -1 to no upper limit", "Example: [30]")
-                .define("owner-max-robot", 30);
+                .define("owner-max-robot", SharedConfigs.Common.OwnerMaxRobotNum);
 
         MOVEMENT_MELEE_ATTACK = BUILDER
                 .comment("How fast robots move when attacking enemies in melee combat.", "Higher values make robots move faster during attacks.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.8]")
-                .define("movement-melee-attack", 0.8F);
+                .defineInRange("movement-melee-attack", SharedConfigs.Common.MovementMeleeAttack, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         MOVEMENT_FOLLOW_OWNER = BUILDER
                 .comment("How fast robots move when following their owner.", "Higher values make robots keep up with you better.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.7]")
-                .define("movement-follow-owner", 0.7F);
+                .defineInRange("movement-follow-owner", SharedConfigs.Common.MovementFollowOwner, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         MOVEMENT_WANDER_AROUND = BUILDER
                 .comment("How fast robots move when wandering around on their own.", "Lower than follow speed to make wandering look more relaxed.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.6]")
-                .define("movement-wander-around", 0.6F);
+                .defineInRange("movement-wander-around", SharedConfigs.Common.MovementWanderAround, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         FOLLOW_DISTANCE_MAX = BUILDER
                 .comment("Maximum distance (in blocks) robots will stay from their owner before teleporting.", "If you get too far, your robot will teleport to you.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [10.0]")
-                .define("follow-distance-max", 10.0F);
+                .defineInRange("follow-distance-max", SharedConfigs.Common.FollowDistanceMax, ConfigBounds.FOLLOW_DISTANCE_MIN, ConfigBounds.FOLLOW_DISTANCE_MAX);
 
         FOLLOW_DISTANCE_MIN = BUILDER
                 .comment("Minimum distance (in blocks) robots try to maintain from their owner.", "Robots won't crowd you closer than this distance.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
-                .define("follow-distance-min", 4F);
+                .defineInRange("follow-distance-min", SharedConfigs.Common.FollowDistanceMin, ConfigBounds.FOLLOW_DISTANCE_MIN, ConfigBounds.FOLLOW_DISTANCE_MAX);
 
         LOOK_RANGE = BUILDER
                 .comment("How far (in blocks) robots can look at and track entities.", "Affects head rotation and attention behavior.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [8.0]")
-                .define("look-range", 8.0F);
+                .defineInRange("look-range", SharedConfigs.Common.LookRange, ConfigBounds.LOOK_RANGE_MIN, ConfigBounds.LOOK_RANGE_MAX);
         BUILDER.pop();
 
         BUILDER.push("Renderer");
-        WIDTH = BUILDER
-                .comment("Width of the robot's collision box (in blocks).", "Affects how much space robots take up and what gaps they can fit through.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.4]")
-                .define("width", 0.4F);
-
-        HEIGHT = BUILDER
-                .comment("Height of the robot's collision box (in blocks).", "Affects what spaces robots can fit under.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.9]")
-                .define("height", 1.9F);
-
         SHADOW_RADIUS = BUILDER
                 .comment("Size of the shadow rendered under robots.", "Purely visual - doesn't affect gameplay.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.4]")
-                .define("shadow-radius", 0.4F);
+                .defineInRange("shadow-radius", SharedConfigs.Client.ShadowRadius, ConfigBounds.SHADOW_RADIUS_MIN, ConfigBounds.SHADOW_RADIUS_MAX);
         BUILDER.pop();
 
         BUILDER.push("Level & Experience");
         EXPERIENCE_BASE = BUILDER
                 .comment("Base experience points needed for a robot to reach level 1.", "Each level requires more XP based on the multiplier below.", "Range: 0 to no upper limit (does not accept negative values)", "Example: [50]")
-                .define("experience-base", 50);
+                .defineInRange("experience-base", SharedConfigs.Common.ExperienceBase, ConfigBounds.EXPERIENCE_BASE_MIN, ConfigBounds.EXPERIENCE_BASE_MAX);
 
         EXPERIENCE_MULTIPLIER = BUILDER
                 .comment("How much more XP each level requires compared to the previous level.", "Level 2 needs base × multiplier, Level 3 needs base × multiplier², etc.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("experience-multiplier", 2);
+                .defineInRange("experience-multiplier", SharedConfigs.Common.ExperienceMultiplier, ConfigBounds.EXPERIENCE_MULTIPLIER_MIN, ConfigBounds.EXPERIENCE_MULTIPLIER_MAX);
         BUILDER.pop();
 
         BUILDER.push("Combat");
         FRIENDLY_FIRE = BUILDER
                 .comment("Whether players can damage their own robots.", "Set to true to allow accidentally hitting your robots, false to prevent it.", "Example: [false]")
-                .define("friendly-fire", false);
+                .define("friendly-fire", SharedConfigs.Common.FriendlyFire);
 
         ATTACK_CHANCE = BUILDER
                 .comment("How likely robots are to counter-attack when hit (higher = more aggressive).", "Affects how quickly robots retaliate when damaged.", "Range: 0 to no upper limit (does not accept negative values)", "Example: [5]")
-                .define("attack-chance", 5);
+                .defineInRange("attack-chance", SharedConfigs.Common.AttackChance, ConfigBounds.ATTACK_CHANCE_MIN, ConfigBounds.ATTACK_CHANCE_MAX);
 
         HEAL_INTERVAL = BUILDER
                 .comment("How often (in ticks) robots automatically heal themselves.", "20 ticks = 1 second. Lower values = faster healing.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [50]")
-                .define("heal-interval", 50);
+                .defineInRange("heal-interval", SharedConfigs.Common.HealInterval, ConfigBounds.HEAL_INTERVAL_MIN, ConfigBounds.HEAL_INTERVAL_MAX);
 
         WARY_TIME = BUILDER
                 .comment("How long (in ticks) robots stay alert after combat ends.", "20 ticks = 1 second. During this time, robots remain ready to fight.", "Range: 0 to no upper limit (does not accept negative values)", "Example: [50]")
-                .define("wary-time", 50);
+                .defineInRange("wary-time", SharedConfigs.Common.WaryTime, ConfigBounds.WARY_TIME_MIN, ConfigBounds.WARY_TIME_MAX);
 
         GLOBAL_AUTO_HEAL = BUILDER
                 .comment("Whether robots automatically heal over time.", "Set to false to disable automatic healing entirely.", "Example: [true]")
-                .define("global-heal", true);
+                .define("global-heal", SharedConfigs.Common.GlobalAutoHeal);
 
         LOOT_ENCHANTMENT = BUILDER
                 .comment("Whether robots can benefit from Looting enchantment on their weapon.", "When enabled, higher level robots get better mob drops.", "Example: [true]")
-                .define("loot-enchantment", true);
+                .define("loot-enchantment", SharedConfigs.Common.LootEnchantment);
 
         LOOT_ENCHANTMENT_LEVEL = BUILDER
                 .comment("What robot level is needed to gain Looting I enchantment effect.", "Looting II at 2× this level, Looting III at 3× this level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [10]")
-                .define("loot-enchantment-level", 10);
+                .defineInRange("loot-enchantment-level", SharedConfigs.Common.LootEnchantmentLevel, ConfigBounds.LOOT_ENCHANTMENT_LEVEL_MIN, ConfigBounds.LOOT_ENCHANTMENT_LEVEL_MAX);
 
         MAX_LOOT_ENCHANTMENT = BUILDER
                 .comment("Maximum Looting enchantment level robots can have.", "Limits how much bonus loot high-level robots can get.", "Range: 0 to 3", "Example: [3]")
-                .define("max-loot-enchantment", 3);
+                .defineInRange("max-loot-enchantment", SharedConfigs.Common.MaxLootEnchantment, ConfigBounds.MAX_LOOT_ENCHANTMENT_MIN, ConfigBounds.MAX_LOOT_ENCHANTMENT_MAX);
 
         BASE_DEFENCE_RANGE = BUILDER
                 .comment("How far (in blocks) robots will chase enemies from their guard position.", "In Defense mode, robots won't chase beyond this distance.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [15.0]")
-                .define("base-defence-range", 15.0F);
+                .defineInRange("base-defence-range", SharedConfigs.Common.BaseDefenceRange, ConfigBounds.DEFENSE_RANGE_MIN, ConfigBounds.DEFENSE_RANGE_MAX);
 
         BASE_DEFENCE_WARP_RANGE = BUILDER
                 .comment("How far (in blocks) robots can be from guard position before teleporting back.", "Prevents robots from getting stuck too far from their post.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [10.0]")
-                .define("base-defence-warp-range", 10.0F);
+                .defineInRange("base-defence-warp-range", SharedConfigs.Common.BaseDefenceWarpRange, ConfigBounds.DEFENSE_RANGE_MIN, ConfigBounds.DEFENSE_RANGE_MAX);
         BUILDER.pop();
 
         BUILDER.push("Protection");
         PROTECTION_LIMIT_FIRE = BUILDER
                 .comment("Maximum percentage of fire damage robots can resist.", "At 80%, robots take only 20% of fire damage. At 100%, they're immune to fire.", "Range: 0 to 100", "Example: [80]")
-                .define("limit-fire", 80);
+                .defineInRange("limit-fire", SharedConfigs.Common.ProtectionLimitFire, ConfigBounds.PROTECTION_LIMIT_MIN, ConfigBounds.PROTECTION_LIMIT_MAX);
 
         PROTECTION_LIMIT_FALL = BUILDER
                 .comment("Maximum percentage of fall damage robots can resist.", "At 80%, robots take only 20% of fall damage. At 100%, they never take fall damage.", "Range: 0 to 100", "Example: [80]")
-                .define("limit-fall", 80);
+                .defineInRange("limit-fall", SharedConfigs.Common.ProtectionLimitFall, ConfigBounds.PROTECTION_LIMIT_MIN, ConfigBounds.PROTECTION_LIMIT_MAX);
 
         PROTECTION_LIMIT_BLAST = BUILDER
                 .comment("Maximum percentage of explosion damage robots can resist.", "At 80%, robots take only 20% of explosion damage. At 100%, they're immune to explosions.", "Range: 0 to 100", "Example: [80]")
-                .define("limit-blast", 80);
+                .defineInRange("limit-blast", SharedConfigs.Common.ProtectionLimitBlast, ConfigBounds.PROTECTION_LIMIT_MIN, ConfigBounds.PROTECTION_LIMIT_MAX);
 
         PROTECTION_LIMIT_PROJECTILE = BUILDER
-                .comment("Maximum percentage of projectile damage robots can resist.", "At 80%, robots take only 20% of arrow/projectile damage. At 100%, they're immune.", "Range: 0 to 100", "Example: [80]")
-                .define("limit-projectile", 80);
+                .comment("Maximum percentage of projectile damage robots can resist.", "At 80%, robots take only 20% of arrow/projectile damage. At 100%, they're immune.", "Range: 0.0 to 100", "Example: [80]")
+                .defineInRange("limit-projectile", SharedConfigs.Common.ProtectionLimitProjectile, ConfigBounds.PROTECTION_LIMIT_MIN, ConfigBounds.PROTECTION_LIMIT_MAX);
         BUILDER.pop();
 
         BUILDER.push("Smart Core Retrieval");
         ENABLE_SMART_CORE_RETRIEVAL = BUILDER
                 .comment("Whether robot cores automatically go to your inventory when robots die nearby.", "When enabled, you don't need to pick up cores manually if you're close enough.", "Example: [true]")
-                .define("enable-smart-core-retrieval", true);
+                .define("enable-smart-core-retrieval", SharedConfigs.Common.EnableSmartCoreRetrieval);
 
         SMART_CORE_RETRIEVAL_DISTANCE = BUILDER
                 .comment("How close (in blocks) you need to be for automatic core retrieval to work.", "If your robot dies within this distance, the core goes straight to your inventory.", "Range: 0.0 to 128.0", "Example: [16.0]")
-                .defineInRange("smart-core-retrieval-distance", 16.0, 0.0, 128.0);
+                .defineInRange("smart-core-retrieval-distance", SharedConfigs.Common.SmartCoreRetrievalDistance, ConfigBounds.SMART_CORE_DISTANCE_MIN, ConfigBounds.SMART_CORE_DISTANCE_MAX);
         BUILDER.pop();
 
         BUILDER.push("AI Behavior");
@@ -295,93 +286,93 @@ public class LovelyConfigs {
         BUILDER.push("Follow Mode");
         OWNER_STILL_THRESHOLD = BUILDER
                 .comment("How long (in ticks) their owner must stand still before robots start wandering.", "20 ticks = 1 second. Robots stay put if you keep moving.", "Range: 0 to 6000", "Example: [100] (5 seconds)")
-                .defineInRange("owner-still-threshold", 100, 0, 6000);
+                .defineInRange("owner-still-threshold", SharedConfigs.Common.OwnerStillThreshold, ConfigBounds.OWNER_STILL_THRESHOLD_MIN, ConfigBounds.OWNER_STILL_THRESHOLD_MAX);
 
         WANDER_CHECK_INTERVAL = BUILDER
                 .comment("How often (in ticks) robots check if they should wander.", "20 ticks = 1 second. Lower values make robots more responsive.", "Range: 100 to 6000", "Example: [200] (10 seconds)")
-                .defineInRange("wander-check-interval", 200, 100, 6000);
+                .defineInRange("wander-check-interval", SharedConfigs.Common.WanderCheckInterval, ConfigBounds.WANDER_CHECK_INTERVAL_MIN, ConfigBounds.WANDER_CHECK_INTERVAL_MAX);
 
         WANDER_CHANCE = BUILDER
                 .comment("Chance robots will wander when their owner is standing still.", "0.15 = 15% chance per check. Higher values make robots wander more often.", "Range: 0.0 to 1.0", "Example: [0.15] (15%)")
-                .defineInRange("wander-chance", 0.15, 0.0, 1.0);
+                .defineInRange("wander-chance", SharedConfigs.Common.WanderChance, ConfigBounds.WANDER_CHANCE_MIN, ConfigBounds.WANDER_CHANCE_MAX);
 
         WANDER_RADIUS_MIN = BUILDER
                 .comment("Minimum distance (in blocks) robots will wander from their owner.", "Robots won't wander closer than this.", "Range: 1.0 to 32.0", "Example: [3.0]")
-                .defineInRange("wander-radius-min", 3.0, 1.0, 32.0);
+                .defineInRange("wander-radius-min", SharedConfigs.Common.WanderRadiusMin, ConfigBounds.WANDER_RADIUS_MIN, ConfigBounds.WANDER_RADIUS_MAX);
 
         WANDER_RADIUS_MAX = BUILDER
                 .comment("Maximum distance (in blocks) robots will wander from their owner.", "Robots won't wander farther than this.", "Range: 1.0 to 32.0", "Example: [6.0]")
-                .defineInRange("wander-radius-max", 6.0, 1.0, 32.0);
+                .defineInRange("wander-radius-max", SharedConfigs.Common.WanderRadiusMax, ConfigBounds.WANDER_RADIUS_MIN, ConfigBounds.WANDER_RADIUS_MAX);
 
         WANDER_DURATION_MIN = BUILDER
                 .comment("Minimum time (in ticks) robots will wander before returning.", "20 ticks = 1 second. Shorter wanders feel more cautious.", "Range: 20 to 6000", "Example: [100] (5 seconds)")
-                .defineInRange("wander-duration-min", 100, 20, 6000);
+                .defineInRange("wander-duration-min", SharedConfigs.Common.WanderDurationMin, ConfigBounds.WANDER_DURATION_MIN, ConfigBounds.WANDER_DURATION_MAX);
 
         WANDER_DURATION_MAX = BUILDER
                 .comment("Maximum time (in ticks) robots will wander before returning.", "20 ticks = 1 second. Longer wanders make robots more independent.", "Range: 20 to 6000", "Example: [200] (10 seconds)")
-                .defineInRange("wander-duration-max", 200, 20, 6000);
+                .defineInRange("wander-duration-max", SharedConfigs.Common.WanderDurationMax, ConfigBounds.WANDER_DURATION_MIN, ConfigBounds.WANDER_DURATION_MAX);
 
         WANDER_COOLDOWN_MIN = BUILDER
                 .comment("Minimum time (in ticks) before robots can wander again.", "20 ticks = 1 second. Prevents constant wandering.", "Range: 100 to 12000", "Example: [400] (20 seconds)")
-                .defineInRange("wander-cooldown-min", 400, 100, 12000);
+                .defineInRange("wander-cooldown-min", SharedConfigs.Common.WanderCooldownMin, ConfigBounds.WANDER_COOLDOWN_MIN, ConfigBounds.WANDER_COOLDOWN_MAX);
 
         WANDER_COOLDOWN_MAX = BUILDER
                 .comment("Maximum time (in ticks) before robots can wander again.", "20 ticks = 1 second. Adds variety to wandering behavior.", "Range: 100 to 12000", "Example: [800] (40 seconds)")
-                .defineInRange("wander-cooldown-max", 800, 100, 12000);
+                .defineInRange("wander-cooldown-max", SharedConfigs.Common.WanderCooldownMax, ConfigBounds.WANDER_COOLDOWN_MIN, ConfigBounds.WANDER_COOLDOWN_MAX);
         BUILDER.pop();
 
         BUILDER.push("Defense Mode");
         PATROL_DURATION_MIN = BUILDER
                 .comment("Minimum time (in ticks) robots patrol around their guard position.", "20 ticks = 1 second. In Defense mode, robots walk around looking for threats.", "Range: 100 to 6000", "Example: [600] (30 seconds)")
-                .defineInRange("patrol-duration-min", 600, 100, 6000);
+                .defineInRange("patrol-duration-min", SharedConfigs.Common.PatrolDurationMin, ConfigBounds.PATROL_DURATION_MIN, ConfigBounds.PATROL_DURATION_MAX);
 
         PATROL_DURATION_MAX = BUILDER
                 .comment("Maximum time (in ticks) robots patrol around their guard position.", "20 ticks = 1 second. Longer patrols make robots cover more area.", "Range: 100 to 6000", "Example: [900] (45 seconds)")
-                .defineInRange("patrol-duration-max", 900, 100, 6000);
+                .defineInRange("patrol-duration-max", SharedConfigs.Common.PatrolDurationMax, ConfigBounds.PATROL_DURATION_MIN, ConfigBounds.PATROL_DURATION_MAX);
 
         GUARD_DURATION_MIN = BUILDER
                 .comment("Minimum time (in ticks) robots stand guard and look around.", "20 ticks = 1 second. In Defense mode, robots alternate between patrolling and guarding.", "Range: 100 to 6000", "Example: [400] (20 seconds)")
-                .defineInRange("guard-duration-min", 400, 100, 6000);
+                .defineInRange("guard-duration-min", SharedConfigs.Common.GuardDurationMin, ConfigBounds.GUARD_DURATION_MIN, ConfigBounds.GUARD_DURATION_MAX);
 
         GUARD_DURATION_MAX = BUILDER
                 .comment("Maximum time (in ticks) robots stand guard and look around.", "20 ticks = 1 second. Longer guard times make robots more watchful.", "Range: 100 to 6000", "Example: [600] (30 seconds)")
-                .defineInRange("guard-duration-max", 600, 100, 6000);
+                .defineInRange("guard-duration-max", SharedConfigs.Common.GuardDurationMax, ConfigBounds.GUARD_DURATION_MIN, ConfigBounds.GUARD_DURATION_MAX);
 
         PATROL_PAUSE_DURATION_MIN = BUILDER
                 .comment("Minimum time (in ticks) robots pause at each patrol point.", "20 ticks = 1 second. Brief pauses make patrolling look more natural.", "Range: 10 to 600", "Example: [40] (2 seconds)")
-                .defineInRange("patrol-pause-duration-min", 40, 10, 600);
+                .defineInRange("patrol-pause-duration-min", SharedConfigs.Common.PatrolPauseDurationMin, ConfigBounds.PATROL_PAUSE_DURATION_MIN, ConfigBounds.PATROL_PAUSE_DURATION_MAX);
 
         PATROL_PAUSE_DURATION_MAX = BUILDER
                 .comment("Maximum time (in ticks) robots pause at each patrol point.", "20 ticks = 1 second. Longer pauses make robots more observant.", "Range: 10 to 600", "Example: [80] (4 seconds)")
-                .defineInRange("patrol-pause-duration-max", 80, 10, 600);
+                .defineInRange("patrol-pause-duration-max", SharedConfigs.Common.PatrolPauseDurationMax, ConfigBounds.PATROL_PAUSE_DURATION_MIN, ConfigBounds.PATROL_PAUSE_DURATION_MAX);
 
         GUARD_ROTATION_SPEED = BUILDER
                 .comment("How fast robots rotate their head while guarding.", "Higher values make robots scan faster. Lower values look more deliberate.", "Range: 0.01 to 0.5", "Example: [0.05]")
-                .defineInRange("guard-rotation-speed", 0.05, 0.01, 0.5);
+                .defineInRange("guard-rotation-speed", SharedConfigs.Common.GuardRotationSpeed, ConfigBounds.GUARD_ROTATION_SPEED_MIN, ConfigBounds.GUARD_ROTATION_SPEED_MAX);
         BUILDER.pop();
 
         BUILDER.push("Combat Radius");
         ENABLE_COMBAT_RADIUS_PARTICLES = BUILDER
                 .comment("Whether to show smoke particles when robots can't chase enemies further.", "Visual feedback when robots hit their chase distance limit in Defense mode.", "Example: [true]")
-                .define("enable-combat-radius-particles", true);
+                .define("enable-combat-radius-particles", SharedConfigs.Common.EnableCombatRadiusParticles);
 
         COMBAT_RADIUS_PARTICLE_COUNT = BUILDER
                 .comment("How many smoke particles appear when robots hit chase limit.", "More particles make the effect more visible.", "Range: 1 to 50", "Example: [8]")
-                .defineInRange("combat-radius-particle-count", 8, 1, 50);
+                .defineInRange("combat-radius-particle-count", SharedConfigs.Common.CombatRadiusParticleCount, ConfigBounds.COMBAT_RADIUS_PARTICLE_COUNT_MIN, ConfigBounds.COMBAT_RADIUS_PARTICLE_COUNT_MAX);
 
         COMBAT_RADIUS_PARTICLE_SPREAD = BUILDER
                 .comment("How spread out the smoke particles are.", "Higher values create a wider particle cloud.", "Range: 0.1 to 2.0", "Example: [0.3]")
-                .defineInRange("combat-radius-particle-spread", 0.3, 0.1, 2.0);
+                .defineInRange("combat-radius-particle-spread", SharedConfigs.Common.CombatRadiusParticleSpread, ConfigBounds.COMBAT_RADIUS_PARTICLE_SPREAD_MIN, ConfigBounds.COMBAT_RADIUS_PARTICLE_SPREAD_MAX);
         BUILDER.pop();
 
         BUILDER.push("Animation");
         STANDBY_TO_SIT_DELAY_MIN = BUILDER
                 .comment("Minimum time (in ticks) before idle robots sit down.", "20 ticks = 1 second. In Standby mode, robots eventually sit if nothing is happening.", "Range: 100 to 12000", "Example: [600] (30 seconds)")
-                .defineInRange("standby-to-sit-delay-min", 600, 100, 12000);
+                .defineInRange("standby-to-sit-delay-min", SharedConfigs.Common.StandbyToSitDelayMin, ConfigBounds.STANDBY_TO_SIT_DELAY_MIN, ConfigBounds.STANDBY_TO_SIT_DELAY_MAX);
 
         STANDBY_TO_SIT_DELAY_MAX = BUILDER
                 .comment("Maximum time (in ticks) before idle robots sit down.", "20 ticks = 1 second. Adds variety to when robots decide to sit.", "Range: 100 to 12000", "Example: [1800] (90 seconds)")
-                .defineInRange("standby-to-sit-delay-max", 1800, 100, 12000);
+                .defineInRange("standby-to-sit-delay-max", SharedConfigs.Common.StandbyToSitDelayMax, ConfigBounds.STANDBY_TO_SIT_DELAY_MIN, ConfigBounds.STANDBY_TO_SIT_DELAY_MAX);
         BUILDER.pop();
 
         BUILDER.pop();
@@ -391,211 +382,211 @@ public class LovelyConfigs {
         BUILDER.push("Bunny");
         BUNNY_MAX_LEVEL = BUILDER
                 .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("bunny-max-level", 200);
+                .defineInRange("bunny-max-level", SharedConfigs.Common.BunnyMaxLevel, ConfigBounds.MAX_LEVEL_MIN, ConfigBounds.MAX_LEVEL_MAX);
 
         BUNNY_ATTACK_SPEED = BUILDER
                 .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.6]")
-                .define("bunny-attack-speed", 1.6F);
+                .defineInRange("bunny-attack-speed", SharedConfigs.Common.BunnyAttackSpeed, ConfigBounds.ATTACK_SPEED_MIN, ConfigBounds.ATTACK_SPEED_MAX);
 
         BUNNY_MOVEMENT_SPEED = BUILDER
                 .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("bunny-movement-speed", 0.37F);
+                .defineInRange("bunny-movement-speed", SharedConfigs.Common.BunnyMovementSpeed, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         BUNNY_BASE_TOUGHNESS = BUILDER
                 .comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
-                .define("bunny-base-toughness", 0.0F);
+                .defineInRange("bunny-base-toughness", SharedConfigs.Common.BunnyBaseToughness, ConfigBounds.BASE_TOUGHNESS_MIN, ConfigBounds.BASE_TOUGHNESS_MAX);
 
         BUNNY_BASE_HP = BUILDER
                 .comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [16]")
-                .define("bunny-base-hp", 16);
+                .defineInRange("bunny-base-hp", SharedConfigs.Common.BunnyBaseHp, ConfigBounds.BASE_HP_MIN, ConfigBounds.BASE_HP_MAX);
 
         BUNNY_BASE_ATTACK = BUILDER
                 .comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("bunny-base-attack", 2);
+                .defineInRange("bunny-base-attack", SharedConfigs.Common.BunnyBaseAttack, ConfigBounds.BASE_ATTACK_MIN, ConfigBounds.BASE_ATTACK_MAX);
 
         BUNNY_BASE_DEFENSE = BUILDER
                 .comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [3]")
-                .define("bunny-base-defense", 3);
+                .defineInRange("bunny-base-defense", SharedConfigs.Common.BunnyBaseDefense, ConfigBounds.BASE_DEFENSE_MIN, ConfigBounds.BASE_DEFENSE_MAX);
         BUILDER.pop();
 
         BUILDER.push("Bunny2");
         BUNNY2_MAX_LEVEL = BUILDER
                 .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("bunny2-max-level", 200);
+                .defineInRange("bunny2-max-level", SharedConfigs.Common.Bunny2MaxLevel, ConfigBounds.MAX_LEVEL_MIN, ConfigBounds.MAX_LEVEL_MAX);
 
         BUNNY2_ATTACK_SPEED = BUILDER
                 .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.8]")
-                .define("bunny2-attack-speed",  1.8F);
+                .defineInRange("bunny2-attack-speed", SharedConfigs.Common.Bunny2AttackSpeed, ConfigBounds.ATTACK_SPEED_MIN, ConfigBounds.ATTACK_SPEED_MAX);
 
         BUNNY2_MOVEMENT_SPEED = BUILDER
                 .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("bunny2-movement-speed", 0.37F);
+                .defineInRange("bunny2-movement-speed", SharedConfigs.Common.Bunny2MovementSpeed, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         BUNNY2_BASE_TOUGHNESS = BUILDER
                 .comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
-                .define("bunny2-base-toughness", 0.0F);
+                .defineInRange("bunny2-base-toughness", SharedConfigs.Common.Bunny2BaseToughness, ConfigBounds.BASE_TOUGHNESS_MIN, ConfigBounds.BASE_TOUGHNESS_MAX);
 
         BUNNY2_BASE_HP = BUILDER
                 .comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [20]")
-                .define("bunny2-base-hp", 20);
+                .defineInRange("bunny2-base-hp", SharedConfigs.Common.Bunny2BaseHp, ConfigBounds.BASE_HP_MIN, ConfigBounds.BASE_HP_MAX);
 
         BUNNY2_BASE_ATTACK = BUILDER
                 .comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [3]")
-                .define("bunny2-base-attack", 3);
+                .defineInRange("bunny2-base-attack", SharedConfigs.Common.Bunny2BaseAttack, ConfigBounds.BASE_ATTACK_MIN, ConfigBounds.BASE_ATTACK_MAX);
 
         BUNNY2_BASE_DEFENSE = BUILDER
                 .comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [4]")
-                .define("bunny2-base-defense", 4);
+                .defineInRange("bunny2-base-defense", SharedConfigs.Common.Bunny2BaseDefense, ConfigBounds.BASE_DEFENSE_MIN, ConfigBounds.BASE_DEFENSE_MAX);
         BUILDER.pop();
 
         BUILDER.push("Dragon");
         DRAGON_MAX_LEVEL = BUILDER
                 .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("dragon-max-level", 200);
+                .defineInRange("dragon-max-level", SharedConfigs.Common.DragonMaxLevel, ConfigBounds.MAX_LEVEL_MIN, ConfigBounds.MAX_LEVEL_MAX);
 
         DRAGON_ATTACK_SPEED = BUILDER
                 .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.5]")
-                .define("dragon-attack-speed", 1.5F);
+                .defineInRange("dragon-attack-speed", SharedConfigs.Common.DragonAttackSpeed, ConfigBounds.ATTACK_SPEED_MIN, ConfigBounds.ATTACK_SPEED_MAX);
 
         DRAGON_MOVEMENT_SPEED = BUILDER
                 .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("dragon-movement-speed", 0.37F);
+                .defineInRange("dragon-movement-speed", SharedConfigs.Common.DragonMovementSpeed, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         DRAGON_BASE_TOUGHNESS = BUILDER
                 .comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
-                .define("dragon-base-toughness", 2.0F);
+                .defineInRange("dragon-base-toughness", SharedConfigs.Common.DragonBaseToughness, ConfigBounds.BASE_TOUGHNESS_MIN, ConfigBounds.BASE_TOUGHNESS_MAX);
 
         DRAGON_BASE_HP = BUILDER
                 .comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [24]")
-                .define("dragon-base-hp", 24);
+                .defineInRange("dragon-base-hp", SharedConfigs.Common.DragonBaseHp, ConfigBounds.BASE_HP_MIN, ConfigBounds.BASE_HP_MAX);
 
         DRAGON_BASE_ATTACK = BUILDER
                 .comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [5]")
-                .define("dragon-base-attack", 5);
+                .defineInRange("dragon-base-attack", SharedConfigs.Common.DragonBaseAttack, ConfigBounds.BASE_ATTACK_MIN, ConfigBounds.BASE_ATTACK_MAX);
 
         DRAGON_BASE_DEFENSE = BUILDER
                 .comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [5]")
-                .define("dragon-base-defense", 5);
+                .defineInRange("dragon-base-defense", SharedConfigs.Common.DragonBaseDefense, ConfigBounds.BASE_DEFENSE_MIN, ConfigBounds.BASE_DEFENSE_MAX);
         BUILDER.pop();
 
         BUILDER.push("Honey");
         HONEY_MAX_LEVEL = BUILDER
                 .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("honey-max-level", 200);
+                .defineInRange("honey-max-level", SharedConfigs.Common.HoneyMaxLevel, ConfigBounds.MAX_LEVEL_MIN, ConfigBounds.MAX_LEVEL_MAX);
 
         HONEY_ATTACK_SPEED = BUILDER
                 .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.0]")
-                .define("honey-attack-speed", 1.0F);
+                .defineInRange("honey-attack-speed", SharedConfigs.Common.HoneyAttackSpeed, ConfigBounds.ATTACK_SPEED_MIN, ConfigBounds.ATTACK_SPEED_MAX);
 
         HONEY_MOVEMENT_SPEED = BUILDER
                 .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("honey-movement-speed", 0.37F);
+                .defineInRange("honey-movement-speed", SharedConfigs.Common.HoneyMovementSpeed, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         HONEY_BASE_TOUGHNESS = BUILDER
                 .comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
-                .define("honey-base-toughness", 1.0F);
+                .defineInRange("honey-base-toughness", SharedConfigs.Common.HoneyBaseToughness, ConfigBounds.BASE_TOUGHNESS_MIN, ConfigBounds.BASE_TOUGHNESS_MAX);
 
         HONEY_BASE_HP = BUILDER
                 .comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [14]")
-                .define("honey-base-hp", 14);
+                .defineInRange("honey-base-hp", SharedConfigs.Common.HoneyBaseHp, ConfigBounds.BASE_HP_MIN, ConfigBounds.BASE_HP_MAX);
 
         HONEY_BASE_ATTACK = BUILDER
                 .comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [1]")
-                .define("honey-base-attack", 1);
+                .defineInRange("honey-base-attack", SharedConfigs.Common.HoneyBaseAttack, ConfigBounds.BASE_ATTACK_MIN, ConfigBounds.BASE_ATTACK_MAX);
 
         HONEY_BASE_DEFENSE = BUILDER
                 .comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("honey-base-defense", 2);
+                .defineInRange("honey-base-defense", SharedConfigs.Common.HoneyBaseDefense, ConfigBounds.BASE_DEFENSE_MIN, ConfigBounds.BASE_DEFENSE_MAX);
         BUILDER.pop();
 
         BUILDER.push("Kitsune");
         KITSUNE_MAX_LEVEL = BUILDER
                 .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("kitsune-max-level", 200);
+                .defineInRange("kitsune-max-level", SharedConfigs.Common.KitsuneMaxLevel, ConfigBounds.MAX_LEVEL_MIN, ConfigBounds.MAX_LEVEL_MAX);
 
         KITSUNE_ATTACK_SPEED = BUILDER
                 .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.1]")
-                .define("kitsune-attack-speed", 1.1F);
+                .defineInRange("kitsune-attack-speed", SharedConfigs.Common.KitsuneAttackSpeed, ConfigBounds.ATTACK_SPEED_MIN, ConfigBounds.ATTACK_SPEED_MAX);
 
         KITSUNE_MOVEMENT_SPEED = BUILDER
                 .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("kitsune-movement-speed", 0.37F);
+                .defineInRange("kitsune-movement-speed", SharedConfigs.Common.KitsuneMovementSpeed, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         KITSUNE_BASE_TOUGHNESS = BUILDER
                 .comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
-                .define("kitsune-base-toughness", 1.0F);
+                .defineInRange("kitsune-base-toughness", SharedConfigs.Common.KitsuneBaseToughness, ConfigBounds.BASE_TOUGHNESS_MIN, ConfigBounds.BASE_TOUGHNESS_MAX);
 
         KITSUNE_BASE_HP = BUILDER
                 .comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [16]")
-                .define("kitsune-base-hp", 16);
+                .defineInRange("kitsune-base-hp", SharedConfigs.Common.KitsuneBaseHp, ConfigBounds.BASE_HP_MIN, ConfigBounds.BASE_HP_MAX);
 
         KITSUNE_BASE_ATTACK = BUILDER
                 .comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("kitsune-base-attack", 2);
+                .defineInRange("kitsune-base-attack", SharedConfigs.Common.KitsuneBaseAttack, ConfigBounds.BASE_ATTACK_MIN, ConfigBounds.BASE_ATTACK_MAX);
 
         KITSUNE_BASE_DEFENSE = BUILDER
                 .comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [1]")
-                .define("kitsune-base-defense", 1);
+                .defineInRange("kitsune-base-defense", SharedConfigs.Common.KitsuneBaseDefense, ConfigBounds.BASE_DEFENSE_MIN, ConfigBounds.BASE_DEFENSE_MAX);
         BUILDER.pop();
 
         BUILDER.push("Neko");
         NEKO_MAX_LEVEL = BUILDER
                 .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("neko-max-level", 200);
+                .defineInRange("neko-max-level", SharedConfigs.Common.NekoMaxLevel, ConfigBounds.MAX_LEVEL_MIN, ConfigBounds.MAX_LEVEL_MAX);
 
         NEKO_ATTACK_SPEED = BUILDER
                 .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.1]")
-                .define("neko-attack-speed", 1.1F);
+                .defineInRange("neko-attack-speed", SharedConfigs.Common.NekoAttackSpeed, ConfigBounds.ATTACK_SPEED_MIN, ConfigBounds.ATTACK_SPEED_MAX);
 
         NEKO_MOVEMENT_SPEED = BUILDER
                 .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.40]")
-                .define("neko-movement-speed", 0.40F);
+                .defineInRange("neko-movement-speed", SharedConfigs.Common.NekoMovementSpeed, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         NEKO_BASE_TOUGHNESS = BUILDER
                 .comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
-                .define("neko-base-toughness", 1.0F);
+                .defineInRange("neko-base-toughness", SharedConfigs.Common.NekoBaseToughness, ConfigBounds.BASE_TOUGHNESS_MIN, ConfigBounds.BASE_TOUGHNESS_MAX);
 
         NEKO_BASE_HP = BUILDER
                 .comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [22]")
-                .define("neko-base-hp", 22);
+                .defineInRange("neko-base-hp", SharedConfigs.Common.NekoBaseHp, ConfigBounds.BASE_HP_MIN, ConfigBounds.BASE_HP_MAX);
 
         NEKO_BASE_ATTACK = BUILDER
                 .comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [6]")
-                .define("neko-base-attack", 6);
+                .defineInRange("neko-base-attack", SharedConfigs.Common.NekoBaseAttack, ConfigBounds.BASE_ATTACK_MIN, ConfigBounds.BASE_ATTACK_MAX);
 
         NEKO_BASE_DEFENSE = BUILDER
                 .comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("neko-base-defense", 2);
+                .defineInRange("neko-base-defense", SharedConfigs.Common.NekoBaseDefense, ConfigBounds.BASE_DEFENSE_MIN, ConfigBounds.BASE_DEFENSE_MAX);
         BUILDER.pop();
 
         BUILDER.push("Vanilla");
         VANILLA_MAX_LEVEL = BUILDER
                 .comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("vanilla-max-level", 200);
+                .defineInRange("vanilla-max-level", SharedConfigs.Common.VanillaMaxLevel, ConfigBounds.MAX_LEVEL_MIN, ConfigBounds.MAX_LEVEL_MAX);
 
         VANILLA_ATTACK_SPEED = BUILDER
                 .comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [2.0]")
-                .define("vanilla-attack-speed", 2.0F);
+                .defineInRange("vanilla-attack-speed", SharedConfigs.Common.VanillaAttackSpeed, ConfigBounds.ATTACK_SPEED_MIN, ConfigBounds.ATTACK_SPEED_MAX);
 
         VANILLA_MOVEMENT_SPEED = BUILDER
                 .comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("vanilla-movement-speed", 0.37F);
+                .defineInRange("vanilla-movement-speed", SharedConfigs.Common.VanillaMovementSpeed, ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
 
         VANILLA_BASE_TOUGHNESS = BUILDER
                 .comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
-                .define("vanilla-base-toughness", 0.0F);
+                .defineInRange("vanilla-base-toughness", SharedConfigs.Common.VanillaBaseToughness, ConfigBounds.BASE_TOUGHNESS_MIN, ConfigBounds.BASE_TOUGHNESS_MAX);
 
         VANILLA_BASE_HP = BUILDER
                 .comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [14]")
-                .define("vanilla-base-hp", 14);
+                .defineInRange("vanilla-base-hp", SharedConfigs.Common.VanillaBaseHp, ConfigBounds.BASE_HP_MIN, ConfigBounds.BASE_HP_MAX);
 
         VANILLA_BASE_ATTACK = BUILDER
                 .comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [4]")
-                .define("vanilla-base-attack", 4);
+                .defineInRange("vanilla-base-attack", SharedConfigs.Common.VanillaBaseAttack, ConfigBounds.BASE_ATTACK_MIN, ConfigBounds.BASE_ATTACK_MAX);
 
         VANILLA_BASE_DEFENSE = BUILDER
                 .comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("vanilla-base-defense", 2);
+                .defineInRange("vanilla-base-defense", SharedConfigs.Common.VanillaBaseDefense, ConfigBounds.BASE_DEFENSE_MIN, ConfigBounds.BASE_DEFENSE_MAX);
         BUILDER.pop();
 
         BUILDER.pop();
@@ -642,18 +633,16 @@ public class LovelyConfigs {
         //LovelyConstant.LOGGER.info("Loading configuration from: {}", event.getConfig().getFileName());
 
         // GENERAL
-        SharedConfigs.Common.OwnerMaxRobotNum = OWNER_MAX_ROBOT_NUM.get();
-        SharedConfigs.Common.MovementMeleeAttack = MOVEMENT_MELEE_ATTACK.get();
-        SharedConfigs.Common.MovementFollowOwner = MOVEMENT_FOLLOW_OWNER.get();
-        SharedConfigs.Common.MovementWanderAround = MOVEMENT_WANDER_AROUND.get();
-        SharedConfigs.Common.FollowDistanceMax = FOLLOW_DISTANCE_MAX.get();
-        SharedConfigs.Common.FollowDistanceMin = FOLLOW_DISTANCE_MIN.get();
-        SharedConfigs.Common.LookRange = LOOK_RANGE.get();
+        SharedConfigs.Common.OwnerMaxRobotNum = ConfigBounds.validateOwnerMaxRobot(OWNER_MAX_ROBOT_NUM.get());
+        SharedConfigs.Common.MovementMeleeAttack = MOVEMENT_MELEE_ATTACK.get().floatValue();
+        SharedConfigs.Common.MovementFollowOwner = MOVEMENT_FOLLOW_OWNER.get().floatValue();
+        SharedConfigs.Common.MovementWanderAround = MOVEMENT_WANDER_AROUND.get().floatValue();
+        SharedConfigs.Common.FollowDistanceMax = FOLLOW_DISTANCE_MAX.get().floatValue();
+        SharedConfigs.Common.FollowDistanceMin = FOLLOW_DISTANCE_MIN.get().floatValue();
+        SharedConfigs.Common.LookRange = LOOK_RANGE.get().floatValue();
 
         // -- RENDERER --
-        SharedConfigs.Common.Width = WIDTH.get();
-        SharedConfigs.Common.Height = HEIGHT.get();
-        SharedConfigs.Client.ShadowRadius = SHADOW_RADIUS.get();
+        SharedConfigs.Client.ShadowRadius = SHADOW_RADIUS.get().floatValue();
 
         // -- LEVEL | EXPERIENCE ---
         SharedConfigs.Common.ExperienceBase = EXPERIENCE_BASE.get();
@@ -668,8 +657,8 @@ public class LovelyConfigs {
         SharedConfigs.Common.LootEnchantment = LOOT_ENCHANTMENT.get();
         SharedConfigs.Common.LootEnchantmentLevel = LOOT_ENCHANTMENT_LEVEL.get();
         SharedConfigs.Common.MaxLootEnchantment = MAX_LOOT_ENCHANTMENT.get();
-        SharedConfigs.Common.BaseDefenceRange = BASE_DEFENCE_RANGE.get();
-        SharedConfigs.Common.BaseDefenceWarpRange = BASE_DEFENCE_WARP_RANGE.get();
+        SharedConfigs.Common.BaseDefenceRange = BASE_DEFENCE_RANGE.get().floatValue();
+        SharedConfigs.Common.BaseDefenceWarpRange = BASE_DEFENCE_WARP_RANGE.get().floatValue();
 
         // -- PROTECTION --
         SharedConfigs.Common.ProtectionLimitFire = PROTECTION_LIMIT_FIRE.get();
@@ -710,63 +699,63 @@ public class LovelyConfigs {
 
         // BUNNY
         SharedConfigs.Common.BunnyMaxLevel = BUNNY_MAX_LEVEL.get();
-        SharedConfigs.Common.BunnyAttackSpeed = BUNNY_ATTACK_SPEED.get();
-        SharedConfigs.Common.BunnyMovementSpeed = BUNNY_MOVEMENT_SPEED.get();
-        SharedConfigs.Common.BunnyBaseToughness = BUNNY_BASE_TOUGHNESS.get();
+        SharedConfigs.Common.BunnyAttackSpeed = BUNNY_ATTACK_SPEED.get().floatValue();
+        SharedConfigs.Common.BunnyMovementSpeed = BUNNY_MOVEMENT_SPEED.get().floatValue();
+        SharedConfigs.Common.BunnyBaseToughness = BUNNY_BASE_TOUGHNESS.get().floatValue();
         SharedConfigs.Common.BunnyBaseHp = BUNNY_BASE_HP.get();
         SharedConfigs.Common.BunnyBaseAttack = BUNNY_BASE_ATTACK.get();
         SharedConfigs.Common.BunnyBaseDefense = BUNNY_BASE_DEFENSE.get();
 
         // BUNNY2
-        SharedConfigs.Common.Bunny2MaxLevel = BUNNY2_MAX_LEVEL.get();
-        SharedConfigs.Common.Bunny2AttackSpeed = BUNNY2_ATTACK_SPEED.get();
-        SharedConfigs.Common.Bunny2MovementSpeed = BUNNY2_MOVEMENT_SPEED.get();
-        SharedConfigs.Common.Bunny2BaseToughness = BUNNY2_BASE_TOUGHNESS.get();
-        SharedConfigs.Common.Bunny2BaseHp = BUNNY2_BASE_HP.get();
-        SharedConfigs.Common.Bunny2BaseAttack = BUNNY2_BASE_ATTACK.get();
-        SharedConfigs.Common.Bunny2BaseDefense = BUNNY2_BASE_DEFENSE.get();
+        SharedConfigs.Common.Bunny2MaxLevel = ConfigBounds.validateInt(BUNNY2_MAX_LEVEL.get(), ConfigBounds.MAX_LEVEL_MIN, ConfigBounds.MAX_LEVEL_MAX);
+        SharedConfigs.Common.Bunny2AttackSpeed = ConfigBounds.validateFloat(BUNNY2_ATTACK_SPEED.get().floatValue(), ConfigBounds.ATTACK_SPEED_MIN, ConfigBounds.ATTACK_SPEED_MAX);
+        SharedConfigs.Common.Bunny2MovementSpeed = ConfigBounds.validateFloat(BUNNY2_MOVEMENT_SPEED.get().floatValue(), ConfigBounds.MOVEMENT_SPEED_MIN, ConfigBounds.MOVEMENT_SPEED_MAX);
+        SharedConfigs.Common.Bunny2BaseToughness = ConfigBounds.validateFloat(BUNNY2_BASE_TOUGHNESS.get().floatValue(), ConfigBounds.BASE_TOUGHNESS_MIN, ConfigBounds.BASE_TOUGHNESS_MAX);
+        SharedConfigs.Common.Bunny2BaseHp = ConfigBounds.validateInt(BUNNY2_BASE_HP.get(), ConfigBounds.BASE_HP_MIN, ConfigBounds.BASE_HP_MAX);
+        SharedConfigs.Common.Bunny2BaseAttack = ConfigBounds.validateInt(BUNNY2_BASE_ATTACK.get(), ConfigBounds.BASE_ATTACK_MIN, ConfigBounds.BASE_ATTACK_MAX);
+        SharedConfigs.Common.Bunny2BaseDefense = ConfigBounds.validateInt(BUNNY2_BASE_DEFENSE.get(), ConfigBounds.BASE_DEFENSE_MIN, ConfigBounds.BASE_DEFENSE_MAX);
 
         // DRAGON
         SharedConfigs.Common.DragonMaxLevel = DRAGON_MAX_LEVEL.get();
-        SharedConfigs.Common.DragonAttackSpeed = DRAGON_ATTACK_SPEED.get();
-        SharedConfigs.Common.DragonMovementSpeed = DRAGON_MOVEMENT_SPEED.get();
-        SharedConfigs.Common.DragonBaseToughness = DRAGON_BASE_TOUGHNESS.get();
+        SharedConfigs.Common.DragonAttackSpeed = DRAGON_ATTACK_SPEED.get().floatValue();
+        SharedConfigs.Common.DragonMovementSpeed = DRAGON_MOVEMENT_SPEED.get().floatValue();
+        SharedConfigs.Common.DragonBaseToughness = DRAGON_BASE_TOUGHNESS.get().floatValue();
         SharedConfigs.Common.DragonBaseHp = DRAGON_BASE_HP.get();
         SharedConfigs.Common.DragonBaseAttack = DRAGON_BASE_ATTACK.get();
         SharedConfigs.Common.DragonBaseDefense = DRAGON_BASE_DEFENSE.get();
 
         // HONEY
         SharedConfigs.Common.HoneyMaxLevel = HONEY_MAX_LEVEL.get();
-        SharedConfigs.Common.HoneyAttackSpeed = HONEY_ATTACK_SPEED.get();
-        SharedConfigs.Common.HoneyMovementSpeed = HONEY_MOVEMENT_SPEED.get();
-        SharedConfigs.Common.HoneyBaseToughness = HONEY_BASE_TOUGHNESS.get();
+        SharedConfigs.Common.HoneyAttackSpeed = HONEY_ATTACK_SPEED.get().floatValue();
+        SharedConfigs.Common.HoneyMovementSpeed = HONEY_MOVEMENT_SPEED.get().floatValue();
+        SharedConfigs.Common.HoneyBaseToughness = HONEY_BASE_TOUGHNESS.get().floatValue();
         SharedConfigs.Common.HoneyBaseHp = HONEY_BASE_HP.get();
         SharedConfigs.Common.HoneyBaseAttack = HONEY_BASE_ATTACK.get();
         SharedConfigs.Common.HoneyBaseDefense = HONEY_BASE_DEFENSE.get();
 
         // KITSUNE
         SharedConfigs.Common.KitsuneMaxLevel = KITSUNE_MAX_LEVEL.get();
-        SharedConfigs.Common.KitsuneAttackSpeed = KITSUNE_ATTACK_SPEED.get();
-        SharedConfigs.Common.KitsuneMovementSpeed = KITSUNE_MOVEMENT_SPEED.get();
-        SharedConfigs.Common.KitsuneBaseToughness = KITSUNE_BASE_TOUGHNESS.get();
+        SharedConfigs.Common.KitsuneAttackSpeed = KITSUNE_ATTACK_SPEED.get().floatValue();
+        SharedConfigs.Common.KitsuneMovementSpeed = KITSUNE_MOVEMENT_SPEED.get().floatValue();
+        SharedConfigs.Common.KitsuneBaseToughness = KITSUNE_BASE_TOUGHNESS.get().floatValue();
         SharedConfigs.Common.KitsuneBaseHp = KITSUNE_BASE_HP.get();
         SharedConfigs.Common.KitsuneBaseAttack = KITSUNE_BASE_ATTACK.get();
         SharedConfigs.Common.KitsuneBaseDefense = KITSUNE_BASE_DEFENSE.get();
 
         // NEKO
         SharedConfigs.Common.NekoMaxLevel = NEKO_MAX_LEVEL.get();
-        SharedConfigs.Common.NekoAttackSpeed = NEKO_ATTACK_SPEED.get();
-        SharedConfigs.Common.NekoMovementSpeed = NEKO_MOVEMENT_SPEED.get();
-        SharedConfigs.Common.NekoBaseToughness = NEKO_BASE_TOUGHNESS.get();
+        SharedConfigs.Common.NekoAttackSpeed = NEKO_ATTACK_SPEED.get().floatValue();
+        SharedConfigs.Common.NekoMovementSpeed = NEKO_MOVEMENT_SPEED.get().floatValue();
+        SharedConfigs.Common.NekoBaseToughness = NEKO_BASE_TOUGHNESS.get().floatValue();
         SharedConfigs.Common.NekoBaseHp = NEKO_BASE_HP.get();
         SharedConfigs.Common.NekoBaseAttack = NEKO_BASE_ATTACK.get();
         SharedConfigs.Common.NekoBaseDefense = NEKO_BASE_DEFENSE.get();
 
         // VANILLA
         SharedConfigs.Common.VanillaMaxLevel = VANILLA_MAX_LEVEL.get();
-        SharedConfigs.Common.VanillaAttackSpeed = VANILLA_ATTACK_SPEED.get();
-        SharedConfigs.Common.VanillaMovementSpeed = VANILLA_MOVEMENT_SPEED.get();
-        SharedConfigs.Common.VanillaBaseToughness = VANILLA_BASE_TOUGHNESS.get();
+        SharedConfigs.Common.VanillaAttackSpeed = VANILLA_ATTACK_SPEED.get().floatValue();
+        SharedConfigs.Common.VanillaMovementSpeed = VANILLA_MOVEMENT_SPEED.get().floatValue();
+        SharedConfigs.Common.VanillaBaseToughness = VANILLA_BASE_TOUGHNESS.get().floatValue();
         SharedConfigs.Common.VanillaBaseHp = VANILLA_BASE_HP.get();
         SharedConfigs.Common.VanillaBaseAttack = VANILLA_BASE_ATTACK.get();
         SharedConfigs.Common.VanillaBaseDefense = VANILLA_BASE_DEFENSE.get();

@@ -54,6 +54,18 @@ public class ConfigProvider implements SimpleConfig.DefaultConfig {
             }
             contents += indent + key + "=" + value + "\n";
         }
+
+        public <T extends Number> void defineInRange(String key, T value, T min, T max) {
+            Pair<String, T> pair = Pair.of(key, value);
+            configsList.add(pair);
+
+            String indent = getIndent();
+            for (String comment : comments) {
+                contents += indent + "# " + comment + "\n";
+            }
+            contents += indent + "# Range: " + min + " to " + max + "\n";
+            contents += indent + key + "=" + value + "\n";
+        }
     } // Class: ConfigBuilder
 
     // -- Properties --

@@ -1,6 +1,7 @@
 package net.msymbios.llovelyr.source;
 
 import net.msymbios.llovelyr.LovelyConstant;
+import net.msymbios.llovelyr.common.Configs.ConfigBounds;
 import net.msymbios.llovelyr.common.Configs.SharedConfigs;
 import net.msymbios.llovelyr.lib.configs.ConfigProvider;
 import net.msymbios.llovelyr.lib.configs.SimpleConfig;
@@ -86,14 +87,8 @@ public class LovelyConfigs {
         provider.pop();
 
         provider.push("Renderer");
-        provider.comment("Width of the robot's collision box (in blocks).", "Affects how much space robots take up and what gaps they can fit through.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.4]")
-                .define("width", SharedConfigs.Common.Width);
-
-        provider.comment("Height of the robot's collision box (in blocks).", "Affects what spaces robots can fit under.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.9]")
-                .define("height", SharedConfigs.Common.Height);
-
         provider.comment("Size of the shadow rendered under robots.", "Purely visual - doesn't affect gameplay.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.4]")
-                .define("shadow-radius", SharedConfigs.Client.ShadowRadius);
+                .defineInRange("shadow-radius", SharedConfigs.Client.ShadowRadius, ConfigBounds.SHADOW_RADIUS_MIN, ConfigBounds.SHADOW_RADIUS_MAX);
         provider.pop();
 
         provider.push("Level & Experience");
@@ -400,13 +395,13 @@ public class LovelyConfigs {
     } // buildConfigProvider()
 
     /**
-     * Loads config values from SimpleConfig with type-safe retrieval.
+     * Loads config values from SimpleConfig with type-safe retrieval and validation.
      * <p>
      * <b>Type Safety:</b> Uses SimpleConfig's type-safe getters with automatic
      * fallback to defaults on parse failure. Logs warnings for invalid values.
      * <p>
-     * <b>Validation:</b> SimpleConfig handles validation and error logging,
-     * ensuring robust config loading without manual error handling.
+     * <b>Validation:</b> All values are validated against ConfigBounds to prevent
+     * invalid configurations that could break mod functionality or crash the system.
      */
     private static void loadConfigValues() {
         // General settings
@@ -419,8 +414,6 @@ public class LovelyConfigs {
         SharedConfigs.Common.LookRange = config.getOrDefault("look-range", SharedConfigs.Common.LookRange);
 
         // Renderer settings
-        SharedConfigs.Common.Width = config.getOrDefault("width", SharedConfigs.Common.Width);
-        SharedConfigs.Common.Height = config.getOrDefault("height", SharedConfigs.Common.Height);
         SharedConfigs.Client.ShadowRadius = config.getOrDefault("shadow-radius", SharedConfigs.Client.ShadowRadius);
 
         // Level/Experience settings
@@ -474,7 +467,7 @@ public class LovelyConfigs {
         SharedConfigs.Common.StandbyToSitDelayMin = config.getOrDefault("standby-to-sit-delay-min", SharedConfigs.Common.StandbyToSitDelayMin);
         SharedConfigs.Common.StandbyToSitDelayMax = config.getOrDefault("standby-to-sit-delay-max", SharedConfigs.Common.StandbyToSitDelayMax);
 
-        // Entity-specific settings - BUNNY
+        // Entity settings - Bunny
         SharedConfigs.Common.BunnyMaxLevel = config.getOrDefault("bunny-max-level", SharedConfigs.Common.BunnyMaxLevel);
         SharedConfigs.Common.BunnyAttackSpeed = config.getOrDefault("bunny-attack-speed", SharedConfigs.Common.BunnyAttackSpeed);
         SharedConfigs.Common.BunnyMovementSpeed = config.getOrDefault("bunny-movement-speed", SharedConfigs.Common.BunnyMovementSpeed);
@@ -483,7 +476,7 @@ public class LovelyConfigs {
         SharedConfigs.Common.BunnyBaseAttack = config.getOrDefault("bunny-base-attack", SharedConfigs.Common.BunnyBaseAttack);
         SharedConfigs.Common.BunnyBaseDefense = config.getOrDefault("bunny-base-defense", SharedConfigs.Common.BunnyBaseDefense);
 
-        // Entity-specific settings - BUNNY2
+        // Entity settings - Bunny2
         SharedConfigs.Common.Bunny2MaxLevel = config.getOrDefault("bunny2-max-level", SharedConfigs.Common.Bunny2MaxLevel);
         SharedConfigs.Common.Bunny2AttackSpeed = config.getOrDefault("bunny2-attack-speed", SharedConfigs.Common.Bunny2AttackSpeed);
         SharedConfigs.Common.Bunny2MovementSpeed = config.getOrDefault("bunny2-movement-speed", SharedConfigs.Common.Bunny2MovementSpeed);
@@ -492,7 +485,7 @@ public class LovelyConfigs {
         SharedConfigs.Common.Bunny2BaseAttack = config.getOrDefault("bunny2-base-attack", SharedConfigs.Common.Bunny2BaseAttack);
         SharedConfigs.Common.Bunny2BaseDefense = config.getOrDefault("bunny2-base-defense", SharedConfigs.Common.Bunny2BaseDefense);
 
-        // Entity-specific settings - DRAGON
+        // Entity settings - Dragon
         SharedConfigs.Common.DragonMaxLevel = config.getOrDefault("dragon-max-level", SharedConfigs.Common.DragonMaxLevel);
         SharedConfigs.Common.DragonAttackSpeed = config.getOrDefault("dragon-attack-speed", SharedConfigs.Common.DragonAttackSpeed);
         SharedConfigs.Common.DragonMovementSpeed = config.getOrDefault("dragon-movement-speed", SharedConfigs.Common.DragonMovementSpeed);
@@ -501,7 +494,7 @@ public class LovelyConfigs {
         SharedConfigs.Common.DragonBaseAttack = config.getOrDefault("dragon-base-attack", SharedConfigs.Common.DragonBaseAttack);
         SharedConfigs.Common.DragonBaseDefense = config.getOrDefault("dragon-base-defense", SharedConfigs.Common.DragonBaseDefense);
 
-        // Entity-specific settings - HONEY
+        // Entity settings - Honey
         SharedConfigs.Common.HoneyMaxLevel = config.getOrDefault("honey-max-level", SharedConfigs.Common.HoneyMaxLevel);
         SharedConfigs.Common.HoneyAttackSpeed = config.getOrDefault("honey-attack-speed", SharedConfigs.Common.HoneyAttackSpeed);
         SharedConfigs.Common.HoneyMovementSpeed = config.getOrDefault("honey-movement-speed", SharedConfigs.Common.HoneyMovementSpeed);
@@ -510,7 +503,7 @@ public class LovelyConfigs {
         SharedConfigs.Common.HoneyBaseAttack = config.getOrDefault("honey-base-attack", SharedConfigs.Common.HoneyBaseAttack);
         SharedConfigs.Common.HoneyBaseDefense = config.getOrDefault("honey-base-defense", SharedConfigs.Common.HoneyBaseDefense);
 
-        // Entity-specific settings - KITSUNE
+        // Entity settings - Kitsune
         SharedConfigs.Common.KitsuneMaxLevel = config.getOrDefault("kitsune-max-level", SharedConfigs.Common.KitsuneMaxLevel);
         SharedConfigs.Common.KitsuneAttackSpeed = config.getOrDefault("kitsune-attack-speed", SharedConfigs.Common.KitsuneAttackSpeed);
         SharedConfigs.Common.KitsuneMovementSpeed = config.getOrDefault("kitsune-movement-speed", SharedConfigs.Common.KitsuneMovementSpeed);
@@ -519,7 +512,7 @@ public class LovelyConfigs {
         SharedConfigs.Common.KitsuneBaseAttack = config.getOrDefault("kitsune-base-attack", SharedConfigs.Common.KitsuneBaseAttack);
         SharedConfigs.Common.KitsuneBaseDefense = config.getOrDefault("kitsune-base-defense", SharedConfigs.Common.KitsuneBaseDefense);
 
-        // Entity-specific settings - NEKO
+        // Entity settings - Neko
         SharedConfigs.Common.NekoMaxLevel = config.getOrDefault("neko-max-level", SharedConfigs.Common.NekoMaxLevel);
         SharedConfigs.Common.NekoAttackSpeed = config.getOrDefault("neko-attack-speed", SharedConfigs.Common.NekoAttackSpeed);
         SharedConfigs.Common.NekoMovementSpeed = config.getOrDefault("neko-movement-speed", SharedConfigs.Common.NekoMovementSpeed);
@@ -528,7 +521,7 @@ public class LovelyConfigs {
         SharedConfigs.Common.NekoBaseAttack = config.getOrDefault("neko-base-attack", SharedConfigs.Common.NekoBaseAttack);
         SharedConfigs.Common.NekoBaseDefense = config.getOrDefault("neko-base-defense", SharedConfigs.Common.NekoBaseDefense);
 
-        // Entity-specific settings - VANILLA
+        // Entity settings - Vanilla
         SharedConfigs.Common.VanillaMaxLevel = config.getOrDefault("vanilla-max-level", SharedConfigs.Common.VanillaMaxLevel);
         SharedConfigs.Common.VanillaAttackSpeed = config.getOrDefault("vanilla-attack-speed", SharedConfigs.Common.VanillaAttackSpeed);
         SharedConfigs.Common.VanillaMovementSpeed = config.getOrDefault("vanilla-movement-speed", SharedConfigs.Common.VanillaMovementSpeed);
@@ -536,6 +529,7 @@ public class LovelyConfigs {
         SharedConfigs.Common.VanillaBaseHp = config.getOrDefault("vanilla-base-hp", SharedConfigs.Common.VanillaBaseHp);
         SharedConfigs.Common.VanillaBaseAttack = config.getOrDefault("vanilla-base-attack", SharedConfigs.Common.VanillaBaseAttack);
         SharedConfigs.Common.VanillaBaseDefense = config.getOrDefault("vanilla-base-defense", SharedConfigs.Common.VanillaBaseDefense);
+    
     } // loadConfigValues()
 
     /**

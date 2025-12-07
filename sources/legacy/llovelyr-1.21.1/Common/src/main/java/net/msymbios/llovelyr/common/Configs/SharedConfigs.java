@@ -35,16 +35,15 @@ public class SharedConfigs {
 
         // -- GENERAL --
         public static int OwnerMaxRobotNum = 30;
-        public static double MovementMeleeAttack = 0.8F;
+        public static float MovementMeleeAttack = 0.8F;
         public static float MovementFollowOwner = 0.7F;
-        public static double MovementWanderAround = 0.6F;
+        public static float MovementWanderAround = 0.6F;
         public static float FollowDistanceMax = 10F;
         public static float FollowDistanceMin = 4F;
         public static float LookRange = 8F;
 
         // -- RENDERER --
-        public static float Width = 0.4F;
-        public static float Height = 1.9F;
+        // Width and Height removed - entity dimensions are now hardcoded in EntityDimensions
 
         // -- LEVEL | EXPERIENCE ---
         public static int ExperienceBase = 50;
