@@ -763,6 +763,40 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         return navigation;
     } // createNavigation()
 
+    // -- Entity Lifecycle --
+
+    /**
+     * Handles entity removal and ensures registry cleanup.
+     * <p>
+     * <b>Architecture:</b> Overrides Entity.remove() to intercept all removal scenarios
+     * including death, despawn, chunk unload, and manual removal. Ensures robot is
+     * unregistered from owner's registry to prevent memory leaks and incorrect spawn limits.
+     * <p>
+     * <b>Registry Cleanup:</b> Calls unregisterRobot() before super.remove() to ensure
+     * registry entry is removed while entity data is still accessible.
+     * <p>
+     * <b>Thread Safety:</b> Only unregisters on server side to avoid client-side issues.
+     * <p>
+     * <b>Use Cases:</b>
+     * - Robot dies (RemovalReason.KILLED)
+     * - Robot picked up (RemovalReason.DISCARDED)
+     * - Robot despawns (RemovalReason.DISCARDED)
+     * - Chunk unloads (RemovalReason.UNLOADED_TO_CHUNK)
+     * - Manual removal via commands (RemovalReason.DISCARDED)
+     *
+     * @param reason the reason for entity removal
+     */
+    @Override
+    public void remove(RemovalReason reason) {
+        // Unregister from owner's registry before removal
+        // This ensures registry doesn't accumulate dead/removed robots
+        if (!this.level().isClientSide && this.isTame() && this.getOwnerUUID() != null) {
+            unregisterRobot();
+        }
+
+        super.remove(reason);
+    } // remove()
+
     // -- Inherited Methods --
 
     // Sound

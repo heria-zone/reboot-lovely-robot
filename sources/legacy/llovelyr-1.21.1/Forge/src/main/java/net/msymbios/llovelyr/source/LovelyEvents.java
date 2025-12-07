@@ -64,6 +64,32 @@ public class LovelyEvents {
             LovelyConstant.LOGGER.info("Registered LovelyRobotEntity commands");
         } // onRegisterCommands()
 
+        /**
+         * Claims accumulated experience when entities die.
+         * <p>
+         * <b>Architecture:</b> When an entity dies, all robots that damaged it
+         * claim their accumulated experience. This prevents farming immortal
+         * entities while ensuring robots get credit for kills.
+         * <p>
+         * <b>Experience System:</b> Robots accumulate exp per hit (based on
+         * target max HP), then claim all accumulated exp when target dies.
+         *
+         * @param event the living death event
+         */
+        @SubscribeEvent
+        public static void onLivingDeath(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
+            if (event.getEntity().level().isClientSide) return;
+            
+            java.util.UUID deadEntityId = event.getEntity().getUUID();
+            
+            // Find all robots in the world and let them claim exp from this entity
+            event.getEntity().level().getEntitiesOfClass(
+                net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity.class,
+                event.getEntity().getBoundingBox().inflate(100.0),
+                robot -> true
+            ).forEach(robot -> robot.claimAccumulatedExp(deadEntityId));
+        } // onLivingDeath()
+
     } // Class: ForgeEvents
 
     /**

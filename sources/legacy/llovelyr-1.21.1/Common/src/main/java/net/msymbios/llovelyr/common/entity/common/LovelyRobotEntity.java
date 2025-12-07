@@ -700,10 +700,11 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         dropItem.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(nbt));
 
         // Set custom name using DataComponents.CUSTOM_NAME
-        if (!customName.isEmpty()) {
-            dropItem.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, 
-                Component.nullToEmpty(customName).copy().append(Utility.getRandomTitle()).withStyle(ChatFormatting.DARK_PURPLE));
-        }
+        // Title generation disabled - feature not ready yet
+        // if (!customName.isEmpty()) {
+        //     dropItem.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, 
+        //         Component.nullToEmpty(customName).copy().append(Utility.getRandomTitle()).withStyle(ChatFormatting.DARK_PURPLE));
+        // }
 
         // Smart core recovery: Try to send to owner's inventory if nearby and in survival
         Player owner = (Player) this.getOwner();
@@ -1314,24 +1315,17 @@ public abstract class LovelyRobotEntity extends InternalEntity {
      * <b>Feedback:</b> On success, spawns particles, plays sound, and sends confirmation
      * message to owner.
      * <p>
-     * <b>Creative Mode:</b> In creative mode, always succeeds regardless of inventory state.
+     * <b>Creative Mode:</b> In creative mode, returns false to skip auto-retrieval
+     * and drop core on ground instead. This allows creative players to see and
+     * collect cores normally without them disappearing into the void.
      *
      * @param owner the robot's owner player
-     * @return true if core was successfully added to inventory, false if inventory full
+     * @return true if core was successfully added to inventory, false if inventory full or creative mode
      */
     private boolean attemptAutoRetrieval(Player owner) {
-        // Creative mode always succeeds (items go to creative inventory)
+        // Creative mode - skip auto-retrieval and drop on ground instead
         if (owner.getAbilities().instabuild) {
-            InternalParticle.HappyVillager(this);
-            playRetrievalSound(owner);
-
-            String robotName = getRobotDisplayName();
-            owner.displayClientMessage(
-                    Component.literal(robotName + " core retrieved")
-                            .withStyle(ChatFormatting.GREEN),
-                    true
-            );
-            return true;
+            return false; // Return false to trigger normal drop behavior
         }
 
         // Survival/Adventure mode - check inventory space

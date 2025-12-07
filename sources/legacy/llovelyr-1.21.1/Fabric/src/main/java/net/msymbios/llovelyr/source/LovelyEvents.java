@@ -35,6 +35,21 @@ public class LovelyEvents {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             LovelyCommands.register(dispatcher);
         });
+
+        // Register entity death handler for experience claiming
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_UNLOAD.register((entity, world) -> {
+            // Check if entity is dead (not just unloading)
+            if (entity instanceof net.minecraft.world.entity.LivingEntity livingEntity && !livingEntity.isAlive()) {
+                java.util.UUID deadEntityId = entity.getUUID();
+                
+                // Find all robots in the world and let them claim exp from this entity
+                world.getEntitiesOfClass(
+                    net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity.class,
+                    entity.getBoundingBox().inflate(100.0),
+                    robot -> true
+                ).forEach(robot -> robot.claimAccumulatedExp(deadEntityId));
+            }
+        });
     } // register()
 
 } // Class: LovelyEvents
