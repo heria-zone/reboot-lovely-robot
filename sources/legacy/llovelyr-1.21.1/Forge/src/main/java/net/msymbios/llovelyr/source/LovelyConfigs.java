@@ -60,6 +60,8 @@ public class LovelyConfigs {
     private static final ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_FALL;
     private static final ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_BLAST;
     private static final ForgeConfigSpec.ConfigValue<Integer> PROTECTION_LIMIT_PROJECTILE;
+    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_ENCHANTED_BOOK_PROTECTION;
+    private static final ForgeConfigSpec.ConfigValue<Double> ENCHANTED_BOOK_CONTRIBUTION;
 
     // SMART CORE RETRIEVAL
     private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_CORE_RETRIEVAL;
@@ -264,6 +266,14 @@ public class LovelyConfigs {
         PROTECTION_LIMIT_PROJECTILE = BUILDER
                 .comment("Maximum percentage of projectile damage robots can resist.", "At 80%, robots take only 20% of arrow/projectile damage. At 100%, they're immune.", "Range: 0 to 100", "Example: [80]")
                 .defineInRange("limit-projectile", SharedConfigs.Common.ProtectionLimitProjectile, ConfigBounds.PROTECTION_LIMIT_MIN, ConfigBounds.PROTECTION_LIMIT_MAX);
+
+        ENABLE_ENCHANTED_BOOK_PROTECTION = BUILDER
+                .comment("Allow robots to consume enchanted books to increase protection values.", "Books with Fire/Blast/Feather Falling/Projectile Protection enchantments can be fed to robots.", "Formula: protectionGain = enchantmentLevel × contribution × maxProtection", "Example: Fire Protection II with 25% contribution and max=80 gives 40 points")
+                .define("enable-enchanted-book-protection", SharedConfigs.Common.EnableEnchantedBookProtection);
+
+        ENCHANTED_BOOK_CONTRIBUTION = BUILDER
+                .comment("Percentage contribution per enchantment level (0.25 = 25%).", "Determines how much protection each enchantment level provides.", "Formula: protectionGain = level × percentage × maxProtection", "Example: Level II with 25% = 2 × 0.25 × 80 = 40 points", "Range: 0.01 to 1.0")
+                .defineInRange("enchanted-book-contribution", SharedConfigs.Common.EnchantedBookContributionPercentage, 0.01, 1.0);
         BUILDER.pop();
 
         BUILDER.push("Smart Core Retrieval");
@@ -657,6 +667,8 @@ public class LovelyConfigs {
         SharedConfigs.Common.ProtectionLimitFall = PROTECTION_LIMIT_FALL.get();
         SharedConfigs.Common.ProtectionLimitBlast = PROTECTION_LIMIT_BLAST.get();
         SharedConfigs.Common.ProtectionLimitProjectile = PROTECTION_LIMIT_PROJECTILE.get();
+        SharedConfigs.Common.EnableEnchantedBookProtection = ENABLE_ENCHANTED_BOOK_PROTECTION.get();
+        SharedConfigs.Common.EnchantedBookContributionPercentage = ENCHANTED_BOOK_CONTRIBUTION.get();
 
         // -- SMART CORE RETRIEVAL --
         SharedConfigs.Common.EnableSmartCoreRetrieval = ENABLE_SMART_CORE_RETRIEVAL.get();

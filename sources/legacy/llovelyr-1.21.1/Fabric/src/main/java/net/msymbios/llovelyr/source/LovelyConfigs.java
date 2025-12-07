@@ -143,6 +143,12 @@ public class LovelyConfigs {
 
         provider.comment("Maximum percentage of projectile damage robots can resist.", "At 80%, robots take only 20% of arrow/projectile damage. At 100%, they're immune.", "Range: 0 to 100", "Example: [80]")
                 .define("limit-projectile", SharedConfigs.Common.ProtectionLimitProjectile);
+
+        provider.comment("Allow robots to consume enchanted books to increase protection values.", "Books with Fire/Blast/Feather Falling/Projectile Protection enchantments can be fed to robots.", "Formula: protectionGain = enchantmentLevel × contribution × maxProtection", "Example: Fire Protection II with 25% contribution and max=80 gives 40 points")
+                .define("enable-enchanted-book-protection", SharedConfigs.Common.EnableEnchantedBookProtection);
+
+        provider.comment("Percentage contribution per enchantment level (0.25 = 25%).", "Determines how much protection each enchantment level provides.", "Formula: protectionGain = level × percentage × maxProtection", "Example: Level II with 25% = 2 × 0.25 × 80 = 40 points", "Range: 0.01 to 1.0")
+                .define("enchanted-book-contribution", SharedConfigs.Common.EnchantedBookContributionPercentage);
         provider.pop();
 
         provider.push("Smart Core Retrieval");
@@ -437,6 +443,8 @@ public class LovelyConfigs {
         SharedConfigs.Common.ProtectionLimitFall = config.getOrDefault("limit-fall", SharedConfigs.Common.ProtectionLimitFall);
         SharedConfigs.Common.ProtectionLimitBlast = config.getOrDefault("limit-blast", SharedConfigs.Common.ProtectionLimitBlast);
         SharedConfigs.Common.ProtectionLimitProjectile = config.getOrDefault("limit-projectile", SharedConfigs.Common.ProtectionLimitProjectile);
+        SharedConfigs.Common.EnableEnchantedBookProtection = config.getOrDefault("enable-enchanted-book-protection", SharedConfigs.Common.EnableEnchantedBookProtection);
+        SharedConfigs.Common.EnchantedBookContributionPercentage = config.getOrDefault("enchanted-book-contribution", SharedConfigs.Common.EnchantedBookContributionPercentage);
 
         // Smart Core Retrieval
         SharedConfigs.Common.EnableSmartCoreRetrieval = config.getOrDefault("enable-smart-core-retrieval", SharedConfigs.Common.EnableSmartCoreRetrieval);
