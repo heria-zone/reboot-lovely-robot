@@ -19,7 +19,7 @@ public class RobotRegistryEntry {
 
     private final UUID robotId;
     private final UUID ownerId;
-    private final WeakReference<Object> entityRef; // Object to avoid Minecraft dependency
+    private WeakReference<Object> entityRef; // Object to avoid Minecraft dependency (non-final to allow updates from disk load)
     private String robotType;
     private long lastUpdate;
 
@@ -27,10 +27,13 @@ public class RobotRegistryEntry {
 
     /**
      * Creates a registry entry for a robot.
+     * <p>
+     * <b>Entity Reference:</b> Can be null when loading from disk. Entity reference
+     * will be populated when the entity loads and calls ensureRegistered().
      *
      * @param robotId unique robot identifier
      * @param ownerId owner player identifier
-     * @param entity the living entity (will be wrapped in WeakReference)
+     * @param entity the living entity (will be wrapped in WeakReference), can be null
      * @param robotType robot type key
      */
     public RobotRegistryEntry(UUID robotId, UUID ownerId, Object entity, String robotType) {
@@ -40,16 +43,13 @@ public class RobotRegistryEntry {
         if (ownerId == null) {
             throw new IllegalArgumentException("Owner ID cannot be null");
         }
-        if (entity == null) {
-            throw new IllegalArgumentException("Entity cannot be null");
-        }
         if (robotType == null || robotType.isEmpty()) {
             throw new IllegalArgumentException("Robot type cannot be null or empty");
         }
 
         this.robotId = robotId;
         this.ownerId = ownerId;
-        this.entityRef = new WeakReference<>(entity);
+        this.entityRef = entity != null ? new WeakReference<>(entity) : new WeakReference<>(null);
         this.robotType = robotType;
         this.lastUpdate = System.currentTimeMillis();
     } // Constructor: RobotRegistryEntry ()
@@ -75,13 +75,26 @@ public class RobotRegistryEntry {
     } // getOwnerId ()
 
     /**
-     * Gets the entity reference (it may be null if garbage collected).
+     * Gets the entity reference (it may be null if garbage collected or not yet loaded).
      *
      * @return entity or null
      */
     public Object getEntity() {
         return entityRef.get();
     } // getEntity ()
+    
+    /**
+     * Updates the entity reference.
+     * <p>
+     * <b>Use Case:</b> Called when entity loads from NBT to populate the entity
+     * reference in a registry entry that was loaded from disk.
+     *
+     * @param entity the entity to reference
+     */
+    public void setEntity(Object entity) {
+        this.entityRef = entity != null ? new WeakReference<>(entity) : new WeakReference<>(null);
+        this.lastUpdate = System.currentTimeMillis();
+    } // setEntity ()
 
     /**
      * Checks if the entity reference is still valid.

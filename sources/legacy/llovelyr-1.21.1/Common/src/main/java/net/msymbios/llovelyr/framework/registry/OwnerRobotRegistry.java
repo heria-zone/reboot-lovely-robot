@@ -33,9 +33,14 @@ public class OwnerRobotRegistry {
 
     /**
      * Checks if an owner can spawn another robot.
+     * <p>
+     * <b>Limit Handling:</b>
+     * - maxRobots = -1: Unlimited robots allowed
+     * - maxRobots = 0: No robots allowed
+     * - maxRobots > 0: Specific limit enforced
      *
      * @param ownerId owner's unique identifier
-     * @param maxRobots maximum robots allowed per owner
+     * @param maxRobots maximum robots allowed per owner (-1 for unlimited)
      * @return true if spawn is allowed
      */
     public boolean canSpawnRobot(UUID ownerId, int maxRobots) {
@@ -43,9 +48,19 @@ public class OwnerRobotRegistry {
             return false;
         }
 
+        // -1 means unlimited robots
+        if (maxRobots == -1) {
+            return true;
+        }
+
+        // 0 or negative (other than -1) means no robots allowed
+        if (maxRobots <= 0) {
+            return false;
+        }
+
         Set<RobotRegistryEntry> robots = ownerToRobots.get(ownerId);
         if (robots == null) {
-            return true;
+            return true; // No robots yet, can spawn
         }
 
         // Count only valid entries
@@ -255,5 +270,18 @@ public class OwnerRobotRegistry {
 
         return Collections.unmodifiableMap(result);
     } // getAllOwners ()
+
+    /**
+     * Gets all registered robots across all owners.
+     * <p>
+     * <b>Use Case:</b> SavedData persistence needs to iterate all entries for saving.
+     * <p>
+     * <b>Performance:</b> O(1) access to internal map values.
+     *
+     * @return collection of all robot registry entries
+     */
+    public Collection<RobotRegistryEntry> getAllRobots() {
+        return Collections.unmodifiableCollection(robotIdToEntry.values());
+    } // getAllRobots ()
 
 } // Class: OwnerRobotRegistry
