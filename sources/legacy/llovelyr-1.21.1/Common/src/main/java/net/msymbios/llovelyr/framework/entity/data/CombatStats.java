@@ -206,4 +206,24 @@ public class CombatStats {
                 && defense >= 0;
     } // isValid ()
 
+    /**
+     * Creates deep copy of combat stats.
+     *
+     * @return new CombatStats instance with copied values
+     */
+    public CombatStats copy() {
+        return new CombatStats(level, experience, currentHp, maxHp, attack, defense);
+    } // copy ()
+
+    @Override
+    public String toString() {
+        return "CombatStats{" +
+                "level=" + level +
+                ", exp=" + experience +
+                ", hp=" + currentHp + "/" + maxHp +
+                ", atk=" + attack +
+                ", def=" + defense +
+                '}';
+    } // toString ()
+
 } // Class: CombatStats

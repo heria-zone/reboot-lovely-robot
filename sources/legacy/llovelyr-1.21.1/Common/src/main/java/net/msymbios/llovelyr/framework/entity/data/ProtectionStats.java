@@ -181,4 +181,23 @@ public class ProtectionStats {
                 && projectileProtection >= 0;
     } // isValid ()
 
+    /**
+     * Creates deep copy of protection stats.
+     *
+     * @return new ProtectionStats instance with copied values
+     */
+    public ProtectionStats copy() {
+        return new ProtectionStats(fireProtection, fallProtection, blastProtection, projectileProtection);
+    } // copy ()
+
+    @Override
+    public String toString() {
+        return "ProtectionStats{" +
+                "fire=" + fireProtection +
+                ", fall=" + fallProtection +
+                ", blast=" + blastProtection +
+                ", projectile=" + projectileProtection +
+                '}';
+    } // toString ()
+
 } // Class: ProtectionStats

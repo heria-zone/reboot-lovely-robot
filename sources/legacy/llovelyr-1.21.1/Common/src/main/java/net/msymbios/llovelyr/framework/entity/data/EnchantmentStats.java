@@ -115,4 +115,22 @@ public class EnchantmentStats {
                 && knockbackLevel >= 0;
     } // isValid ()
 
+    /**
+     * Creates deep copy of enchantment stats.
+     *
+     * @return new EnchantmentStats instance with copied values
+     */
+    public EnchantmentStats copy() {
+        return new EnchantmentStats(lootingLevel, sharpnessLevel, knockbackLevel);
+    } // copy ()
+
+    @Override
+    public String toString() {
+        return "EnchantmentStats{" +
+                "looting=" + lootingLevel +
+                ", sharpness=" + sharpnessLevel +
+                ", knockback=" + knockbackLevel +
+                '}';
+    } // toString ()
+
 } // Class: EnchantmentStats
