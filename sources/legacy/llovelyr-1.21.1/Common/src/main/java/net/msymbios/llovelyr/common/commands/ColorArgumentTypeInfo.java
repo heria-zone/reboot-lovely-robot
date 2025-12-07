@@ -1,10 +1,9 @@
-package net.msymbios.llovelyr.lib.commands;
+package net.msymbios.llovelyr.common.commands;
 
 import com.google.gson.JsonObject;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
-import net.msymbios.llovelyr.common.commands.ColorArgumentType;
 
 /**
  * Serializer for ColorArgumentType to enable client-server synchronization.

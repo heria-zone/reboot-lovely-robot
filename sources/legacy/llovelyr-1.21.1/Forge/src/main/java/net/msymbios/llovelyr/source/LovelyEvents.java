@@ -9,6 +9,7 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.msymbios.llovelyr.common.commands.LovelyCommands;
 
 /**
  * Centralizes Forge event handler registration with side-specific subscribers.

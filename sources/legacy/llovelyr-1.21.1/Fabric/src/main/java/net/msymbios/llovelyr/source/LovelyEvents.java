@@ -1,6 +1,7 @@
 package net.msymbios.llovelyr.source;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.msymbios.llovelyr.common.commands.LovelyCommands;
 
 /**
  * Centralizes Fabric event handler registration.

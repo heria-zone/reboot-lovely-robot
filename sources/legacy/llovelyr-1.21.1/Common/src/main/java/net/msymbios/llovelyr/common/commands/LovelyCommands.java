@@ -1,16 +1,11 @@
-package net.msymbios.llovelyr.source;
+package net.msymbios.llovelyr.common.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
-import net.msymbios.llovelyr.common.commands.ColorArgumentType;
-import net.msymbios.llovelyr.common.commands.NativeCommands;
 
 /**
  * Centralizes command registration and execution for robot management.
@@ -39,7 +34,6 @@ public class LovelyCommands extends NativeCommands {
                         .then(buildTargetCommands())
                         .then(buildOwnerCommands())
                         .then(buildMeCommands())
-                        .then(buildReloadCommand())
         );
     } // register ()
 
@@ -913,31 +907,5 @@ public class LovelyCommands extends NativeCommands {
                         )
                 );
     } // buildMeSetIdentifierCommands()
-
-    private static ArgumentBuilder<CommandSourceStack, ?> buildReloadCommand() {
-        return Commands.literal("reload")
-                .executes(LovelyCommands::executeReload);
-    } // buildReloadCommand()
-
-    // -- Reload Command Executor --
-
-    /**
-     * Reloads configuration from disk.
-     * <p>
-     * Triggers config reload without server restart.
-     */
-    protected static int executeReload(CommandContext<CommandSourceStack> ctx) {
-        try {
-            net.msymbios.llovelyr.source.LovelyConfigs.reload();
-            ctx.getSource().sendSuccess(
-                    () -> Component.literal("Configuration reloaded successfully").withStyle(ChatFormatting.GREEN),
-                    true
-            );
-            return 1;
-        } catch (Exception e) {
-            ctx.getSource().sendFailure(Component.literal("Failed to reload configuration: " + e.getMessage()));
-            return 0;
-        }
-    } // executeReload()
 
 } // Class: LovelyCommands

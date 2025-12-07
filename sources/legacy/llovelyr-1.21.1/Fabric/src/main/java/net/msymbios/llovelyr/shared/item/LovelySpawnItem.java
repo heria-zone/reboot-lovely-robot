@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.common.items.custom;
+package net.msymbios.llovelyr.shared.item;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
