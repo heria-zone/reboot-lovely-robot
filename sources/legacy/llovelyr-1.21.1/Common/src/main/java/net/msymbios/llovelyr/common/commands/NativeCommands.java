@@ -102,6 +102,18 @@ public abstract class NativeCommands {
         return robot != null ? List.of(robot) : List.of();
     }; // OWNER_SELECTOR
 
+    /**
+     * Selects robot by command sender (me) and index from registry.
+     * <p>
+     * <b>Convenience:</b> Auto-detects sender, eliminating need to specify player name.
+     */
+    private static final RobotSelector ME_SELECTOR = ctx -> {
+        Player player = ctx.getSource().getPlayerOrException();
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        return robot != null ? List.of(robot) : List.of();
+    }; // ME_SELECTOR
+
     // -- Unified Command Executor --
 
     /**
@@ -843,6 +855,144 @@ public abstract class NativeCommands {
         return builder.buildFuture();
     } // suggestOwnerMaxProtection()
 
+    // -- Me Command Suggestions --
+
+    /**
+     * Suggests robot indices for sender's robots.
+     * <p>
+     * <b>Convenience:</b> Auto-detects sender, displays robot count and valid indices.
+     */
+    protected static CompletableFuture<Suggestions> suggestMeRobotIndices(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        try {
+            Player player = ctx.getSource().getPlayerOrException();
+            ServerLevel world = (ServerLevel) player.level();
+            OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+
+            List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUUID());
+
+            if (!robots.isEmpty()) {
+                // Suggest first few indices with robot names
+                for (int i = 0; i < Math.min(robots.size(), 5); i++) {
+                    RobotRegistryEntry entry = robots.get(i);
+                    Object entityObj = entry.getEntity();
+
+                    String robotInfo;
+                    if (entityObj instanceof InternalEntity robot && robot.hasCustomName()) {
+                        robotInfo = robot.getCustomName().getString();
+                    } else {
+                        robotInfo = entry.getRobotType().replace("entity.llovelyr.", "");
+                    }
+
+                    builder.suggest(i, Component.literal(robotInfo));
+                }
+
+                // If more robots exist, suggest the count
+                if (robots.size() > 5) {
+                    builder.suggest(robots.size() - 1, Component.literal("Last robot (total: " + robots.size() + ")"));
+                }
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestMeRobotIndices()
+
+    /**
+     * Suggests max level for sender's robot at specified index.
+     * <p>
+     * <b>Convenience:</b> Auto-detects sender, retrieves robot from registry.
+     */
+    protected static CompletableFuture<Suggestions> suggestMeMaxLevel(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        try {
+            Player player = ctx.getSource().getPlayerOrException();
+            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            if (robot != null) {
+                int maxLevel = robot.getLevelSystem()
+                        .map(LevelFeature::getMaxLevel)
+                        .orElse(200);
+                builder.suggest(maxLevel, Component.literal("Maximum level for this robot"));
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestMeMaxLevel()
+
+    /**
+     * Suggests max XP for sender's robot at specified index.
+     * <p>
+     * <b>Convenience:</b> Auto-detects sender, displays max XP for current level.
+     */
+    protected static CompletableFuture<Suggestions> suggestMeMaxExp(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        try {
+            Player player = ctx.getSource().getPlayerOrException();
+            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            if (robot != null) {
+                int maxExp = robot.getLevelSystem()
+                        .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
+                        .orElse(Integer.MAX_VALUE);
+                builder.suggest(maxExp, Component.literal("Maximum XP for current level (surplus will level up)"));
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestMeMaxExp()
+
+    /**
+     * Suggests max XP for the level being typed in "me all" command.
+     * <p>
+     * <b>Convenience:</b> Auto-detects sender, dynamically calculates max XP based on level argument.
+     */
+    protected static CompletableFuture<Suggestions> suggestMeMaxExpForLevel(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
+        try {
+            Player player = ctx.getSource().getPlayerOrException();
+            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+            int targetLevel;
+            try {
+                targetLevel = IntegerArgumentType.getInteger(ctx, "level");
+            } catch (IllegalArgumentException e) {
+                targetLevel = 1;
+            }
+
+            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            if (robot != null) {
+                int finalTargetLevel = targetLevel;
+                int maxExp = robot.getLevelSystem()
+                        .map(feature -> feature.getExpForLevel(finalTargetLevel))
+                        .orElse(Integer.MAX_VALUE);
+                builder.suggest(maxExp, Component.literal("Maximum XP for level " + targetLevel));
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestMeMaxExpForLevel()
+
+    /**
+     * Suggests max protection level for sender's robot at specified index.
+     * <p>
+     * <b>Convenience:</b> Auto-detects sender, retrieves robot from registry.
+     */
+    protected static CompletableFuture<Suggestions> suggestMeMaxProtection(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder, String protectionType) {
+        try {
+            Player player = ctx.getSource().getPlayerOrException();
+            int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            if (robot != null) {
+                int maxLevel = robot.nativeEntity.getFeature(net.msymbios.llovelyr.lib.entity.features.ProtectionFeature.class)
+                        .map(feature -> switch (protectionType) {
+                            case "fire" -> feature.getMaxFireProtection();
+                            case "fall" -> feature.getMaxFallProtection();
+                            case "blast" -> feature.getMaxBlastProtection();
+                            case "projectile" -> feature.getMaxProjectileProtection();
+                            default -> 80;
+                        })
+                        .orElse(80);
+                builder.suggest(maxLevel, Component.literal("Maximum " + protectionType + " protection for this robot"));
+            }
+        } catch (Exception ignored) {}
+        return builder.buildFuture();
+    } // suggestMeMaxProtection()
+
     // -- Command Executors --
 
     // -- Crosshair Commands --
@@ -1539,6 +1689,323 @@ public abstract class NativeCommands {
         );
         return 1;
     } // executeOwnerTransfer()
+
+    // -- Me Commands (Convenience Variants) --
+
+    /**
+     * Adds XP to sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     * <b>Convenience:</b> Equivalent to owner command with sender as player.
+     */
+    protected static int executeMeAddExp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, CombatOperations.addXP(), true);
+    } // executeMeAddExp()
+
+    /**
+     * Sets exact XP for sender's robot selected by index with validation.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetExp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, CombatOperations.setXP(), true);
+    } // executeMeSetExp()
+
+    /**
+     * Sets level for sender's robot selected by index with validation.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetLevel(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, CombatOperations.setLevel(), true);
+    } // executeMeSetLevel()
+
+    /**
+     * Sets both level and XP atomically for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetAllCombat(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, CombatOperations.setAllCombat(), true);
+    } // executeMeSetAllCombat()
+
+    /**
+     * Sets HP attribute for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetHP(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, AttributeOperations.setHP(), true);
+    } // executeMeSetHP()
+
+    /**
+     * Sets attack damage attribute for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetAttack(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, AttributeOperations.setAttack(), true);
+    } // executeMeSetAttack()
+
+    /**
+     * Sets armor defense attribute for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetDefense(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, AttributeOperations.setDefense(), true);
+    } // executeMeSetDefense()
+
+    /**
+     * Sets movement speed attribute for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetSpeed(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, AttributeOperations.setSpeed(), true);
+    } // executeMeSetSpeed()
+
+    /**
+     * Sets all attributes atomically for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetAllAttributes(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, AttributeOperations.setAllAttributes(), true);
+    } // executeMeSetAllAttributes()
+
+    /**
+     * Sets fire protection level for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetFireProtection(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, ProtectionOperations.setFireProtection(), true);
+    } // executeMeSetFireProtection()
+
+    /**
+     * Sets fall protection level for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetFallProtection(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, ProtectionOperations.setFallProtection(), true);
+    } // executeMeSetFallProtection()
+
+    /**
+     * Sets blast protection level for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetBlastProtection(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, ProtectionOperations.setBlastProtection(), true);
+    } // executeMeSetBlastProtection()
+
+    /**
+     * Sets projectile protection level for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetProjectileProtection(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, ProtectionOperations.setProjectileProtection(), true);
+    } // executeMeSetProjectileProtection()
+
+    /**
+     * Sets all protection levels atomically for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetAllProtections(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, ProtectionOperations.setAllProtections(), true);
+    } // executeMeSetAllProtections()
+
+    /**
+     * Sets texture/color appearance for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetAppearance(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, UtilityOperations.setAppearance(), true);
+    } // executeMeSetAppearance()
+
+    /**
+     * Sets custom name for sender's robot selected by index with visibility enabled.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeSetIdentifier(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, UtilityOperations.setIdentifier(), true);
+    } // executeMeSetIdentifier()
+
+    /**
+     * Teleports sender to their robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     * <i>Note:</i> Fails gracefully if robot is offline or unloaded.
+     */
+    protected static int executeMeTeleport(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException();
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        if (robot == null) {
+            ctx.getSource().sendFailure(Component.literal("Robot not found or offline"));
+            return 0;
+        }
+
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        serverPlayer.teleportTo(
+                (ServerLevel) robot.level(),
+                robot.getX(),
+                robot.getY(),
+                robot.getZ(),
+                robot.getYRot(),
+                robot.getXRot()
+        );
+
+        String robotName = Utility.getEntityCustomName(robot);
+        ctx.getSource().sendSuccess(() -> Component.literal("Teleported to " + robotName), false);
+        return 1;
+    } // executeMeTeleport()
+
+    /**
+     * Teleports sender's robot to sender's location by registry lookup.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeRecall(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, (robot, c) -> {
+            Player player = c.getSource().getPlayerOrException();
+            robot.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
+            return new CommandResult(true, "Recalled " + Utility.getEntityCustomName(robot));
+        }, true);
+    } // executeMeRecall()
+
+    /**
+     * Heals sender's robot selected by index to full health.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     */
+    protected static int executeMeHeal(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return executeRobotCommand(ctx, ME_SELECTOR, UtilityOperations.heal(), true);
+    } // executeMeHeal()
+
+    /**
+     * Heals all robots owned by sender to full health.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, all robots in registry for sender's UUID.
+     * <i>Note:</i> Skips offline or unloaded robots automatically.
+     */
+    protected static int executeMeHealAll(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException();
+        ServerLevel world = (ServerLevel) player.level();
+        OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+
+        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUUID());
+        int healedCount = 0;
+
+        for (RobotRegistryEntry entry : robots) {
+            Object entityObj = entry.getEntity();
+            if (entityObj instanceof LovelyRobotEntity robot && entry.isEntityValid()) {
+                robot.setHealth(robot.getMaxHealth());
+                healedCount++;
+            }
+        }
+
+        int finalCount = healedCount;
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("Healed " + finalCount + " of your robot(s)"),
+                true
+        );
+        return healedCount;
+    } // executeMeHealAll()
+
+    /**
+     * Displays comprehensive stats for sender's robot selected by index.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, registry lookup by robot index.
+     * <i>Note:</i> Fails gracefully if robot is offline or unloaded.
+     */
+    protected static int executeMeStats(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException();
+        int index = IntegerArgumentType.getInteger(ctx, "robot_index");
+
+        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        if (robot == null) {
+            ctx.getSource().sendFailure(Component.literal("Robot not found or offline"));
+            return 0;
+        }
+
+        robot.displayGeneralMessage(true, false);
+        return 1;
+    } // executeMeStats()
+
+    /**
+     * Lists all robots owned by sender with detailed information.
+     * <p>
+     * <b>Selection:</b> Auto-detects sender, all robots in registry for sender's UUID.
+     * <b>Convenience:</b> Equivalent to list command with sender as player.
+     */
+    protected static int executeMeList(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException();
+        ServerLevel world = (ServerLevel) player.level();
+        OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
+
+        List<RobotRegistryEntry> robots = registry.getRobotsForOwner(player.getUUID());
+
+        if (robots.isEmpty()) {
+            ctx.getSource().sendSuccess(
+                    () -> Component.literal("You don't own any robots").withStyle(ChatFormatting.GRAY),
+                    false
+            );
+            return 0;
+        }
+
+        // Header with separator
+        ctx.getSource().sendSuccess(() -> LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BAR).withStyle(ChatFormatting.WHITE), false);
+
+        // Player name in brackets
+        ctx.getSource().sendSuccess(() -> Component.literal("Your Robots:").withStyle(ChatFormatting.WHITE), false);
+
+        for (int i = 0; i < robots.size(); i++) {
+            RobotRegistryEntry entry = robots.get(i);
+            final int index = i;
+
+            Object entityObj = entry.getEntity();
+            if (entityObj instanceof InternalEntity robot) {
+                // Get robot type name using LovelyIdentifier translation
+                Component robotTypeName = LovelyIdentifier.getTranslation(java.util.Objects.requireNonNull(EntityVariant.byName(robot.nativeEntity.getKey())));
+
+                // Build display: [index] Type (CustomName)
+                Component display = Component.literal("[" + index + "] ");
+
+                if (robot.hasCustomName()) {
+                    display = display.copy().append(robotTypeName).append(Component.literal(" (" + Utility.getEntityCustomName(robot) + ")"));
+                } else {
+                    display = display.copy().append(robotTypeName);
+                }
+
+                Component finalDisplay = display;
+                ctx.getSource().sendSuccess(() -> finalDisplay.copy().withStyle(ChatFormatting.WHITE), false);
+            } else {
+                // For offline robots, use translation key
+                EntityVariant variant = EntityVariant.byName(entry.getRobotType().replace("entity.llovelyr.", ""));
+                Component robotTypeName = variant != null
+                        ? LovelyIdentifier.getTranslation(variant)
+                        : Component.literal(entry.getRobotType());
+
+                ctx.getSource().sendSuccess(
+                        () -> Component.literal("[" + index + "] Offline/Unloaded (")
+                                .append(robotTypeName)
+                                .append(Component.literal(")"))
+                                .withStyle(ChatFormatting.GRAY),
+                        false
+                );
+            }
+        }
+
+        return robots.size();
+    } // executeMeList()
 
     // -- List Command Executors --
 
