@@ -1,117 +1,104 @@
 package net.msymbios.llovelyr;
 
-import org.slf4j.Logger;
-
-import com.mojang.logging.LogUtils;
-
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
-import net.neoforged.api.distmarker.Dist;
+import net.msymbios.llovelyr.common.entity.common.LovelyRobotType;
+import net.msymbios.llovelyr.source.*;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.*;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
-@Mod(LovelyLegacy.MODID)
+/**
+ * Main mod class for Legacy variant (NeoForge loader).
+ * <p>
+ * <b>Architecture:</b> Serves as entry point for NeoForge mod initialization,
+ * coordinating registration of all mod content (blocks, items, entities,
+ * creative tabs) through NeoForge's event-driven lifecycle.
+ * <p>
+ * <b>Registration Flow:</b> Constructor registers deferred registers with MOD
+ * bus, then lifecycle events (commonSetup, clientSetup) fire for side-specific
+ * initialization. Automatic event subscriber classes handle additional events.
+ * <p>
+ * <b>Mod ID:</b> "llovelyr" - Must match META-INF/neoforge.mods.toml entry for NeoForge
+ * to recognize and load the mod.
+ */
+@Mod(LovelyConstant.MODID)
 public class LovelyLegacy {
-    // Define mod id in a common place for everything to reference
-    public static final String MODID = "llovelyr";
-    // Directly reference a slf4j logger
-    public static final Logger LOGGER = LogUtils.getLogger();
-    // Create a Deferred Register to hold Blocks which will all be registered under the "llovelyr" namespace
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
-    // Create a Deferred Register to hold Items which will all be registered under the "llovelyr" namespace
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
-    // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "llovelyr" namespace
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    // Creates a new Block with the id "llovelyr:example_block", combining the namespace and path
-    public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", BlockBehaviour.Properties.of().mapColor(MapColor.STONE));
-    // Creates a new BlockItem with the id "llovelyr:example_block", combining the namespace and path
-    public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK);
+    // -- Constructor --
 
-    // Creates a new food item with the id "llovelyr:example_id", nutrition 1 and saturation 2
-    public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", new Item.Properties().food(new FoodProperties.Builder()
-            .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
-
-    // Creates a creative tab with the id "llovelyr:example_tab" for the example item, that is placed after the combat tab
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.llovelyr")) //The language key for the title of your CreativeModeTab
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> {
-                output.accept(EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
-            }).build());
-
-    // The constructor for the mod class is the first code that is run when your mod is loaded.
-    // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
+    /**
+     * Mod constructor invoked by NeoForge during mod loading phase.
+     * <p>
+     * <b>Registration Order:</b>
+     * 1. Configuration system
+     * 2. Lifecycle event listeners (commonSetup, clientSetup)
+     * 3. Deferred registers (items, creative tabs, entities, recipes, commands)
+     * 4. FORGE event bus registration (gameplay events)
+     * 5. Creative tab item population
+     * <p>
+     * <b>Event Buses:</b> Uses MOD bus for registration events, FORGE bus for
+     * gameplay events. Separation prevents registration timing issues.
+     * <p>
+     * <b>NeoForge Pattern:</b> Constructor receives IEventBus and ModContainer
+     * parameters automatically from NeoForge's dependency injection system.
+     *
+     * @param modEventBus NeoForge mod event bus for registration
+     * @param modContainer mod container for configuration registration
+     */
     public LovelyLegacy(IEventBus modEventBus, ModContainer modContainer) {
-        // Register the commonSetup method for modloading
+        // Register configuration system
+        LovelyConfigs.register(modContainer);
+        LovelyConfigs.onLoadCallback(LovelyRobotType::reloadFromConfig);
+
+        // Register deferred registers
+        LovelyItems.register(modEventBus);
+        LovelyGroups.register(modEventBus);
+        LovelyEntities.register(modEventBus);
+        LovelyRecipes.register(modEventBus);
+        LovelyCommandArguments.register(modEventBus);
+
+        // Register lifecycle event listeners
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::clientSetup);
 
-        // Register the Deferred Register to the mod event bus so blocks get registered
-        BLOCKS.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so items get registered
-        ITEMS.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so tabs get registered
-        CREATIVE_MODE_TABS.register(modEventBus);
+        // Register creative tab item population
+        LovelyGroups.registerItems(modEventBus);
 
-        // Register ourselves for server and other game events we are interested in.
-        // Note that this is necessary if and only if we want *this* class (LovelyLegacy) to respond directly to events.
-        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
-        NeoForge.EVENT_BUS.register(this);
+        LovelyConstant.LOGGER.info("LovelyLegacy (NeoForge) initialized");
+    } // LovelyLegacy()
 
-        // Register the item to a creative tab
-        modEventBus.addListener(this::addCreative);
+    // -- Custom Methods --
 
-        // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-    }
+    /**
+     * Common setup phase for both client and server.
+     * <p>
+     * <b>Timing:</b> Fires after registry events complete but before world
+     * loading. Suitable for cross-side initialization (network handlers,
+     * data registration).
+     * <p>
+     * <b>Thread Safety:</b> Uses enqueueWork to ensure command argument
+     * registration happens on the main thread.
+     *
+     * @param event the common setup event
+     */
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        LovelyCommandArguments.register(event);
+        LovelyConstant.LOGGER.info("Common setup complete");
+    } // commonSetup()
 
-    private void commonSetup(FMLCommonSetupEvent event) {
-        // Some common setup code
-        LOGGER.info("HELLO FROM COMMON SETUP");
+    /**
+     * Client-only setup phase for rendering and client-side systems.
+     * <p>
+     * <b>Timing:</b> Fires after common setup on physical clients only.
+     * Suitable for renderer registration, keybind setup, client-only handlers.
+     * <p>
+     * <i>Note:</i> Currently placeholder for future client initialization.
+     *
+     * @param event the client setup event
+     */
+    private void clientSetup(final FMLClientSetupEvent event) {
+        LovelyConstant.LOGGER.info("Client setup complete");
+    } // clientSetup()
 
-        if (Config.LOG_DIRT_BLOCK.getAsBoolean()) {
-            LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
-        }
-
-        LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
-
-        Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
-    }
-
-    // Add the example block item to the building blocks tab
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(EXAMPLE_BLOCK_ITEM);
-        }
-    }
-
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
-    }
-}
+} // Class: LovelyLegacy
