@@ -7,8 +7,6 @@ public class LovelyConstant {
 
     // -- Constants --
 
-    // -- Constants --
-
     /**
      * Mod identifier used across all registrations and resource locations.
      * <p>
@@ -21,5 +19,12 @@ public class LovelyConstant {
      */
     public static final Logger LOGGER = LogUtils.getLogger();
 
+    public static final net.msymbios.llovelyr.framework.utils.Version VERSION = new net.msymbios.llovelyr.framework.utils.Version("1.0");
+
+    public static class Version {
+
+        public static final net.msymbios.llovelyr.framework.utils.Version CURRENT = new net.msymbios.llovelyr.framework.utils.Version("1.0");
+
+    } // Class: Version
 
 } // LovelyConstant

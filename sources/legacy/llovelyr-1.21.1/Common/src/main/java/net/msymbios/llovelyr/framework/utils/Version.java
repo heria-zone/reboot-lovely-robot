@@ -59,7 +59,7 @@ public class Version {
      * @param versionString the string to test
      * @return true if the string is a valid version string
      */
-    public boolean isValidVersion(@NotNull String versionString) {
+    public static boolean isValidVersion(@NotNull String versionString) {
         String[] splitVersionString = versionString.split("\\.");
 
         if (splitVersionString.length < 1 || splitVersionString.length > 4) return false;
