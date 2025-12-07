@@ -1,4 +1,4 @@
-package net.msymbios.llovelyr.shared.item;
+package net.msymbios.llovelyr.common.items.custom;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,7 +39,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import static net.msymbios.llovelyr.common.items.utils.TooltipUtils.*;
 
