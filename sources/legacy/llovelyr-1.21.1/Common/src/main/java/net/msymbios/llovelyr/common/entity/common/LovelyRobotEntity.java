@@ -32,6 +32,7 @@ import net.msymbios.llovelyr.common.Configs.SharedConfigs;
 import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.common.entity.internal.*;
+import net.msymbios.llovelyr.common.utils.EnchantmentProtectionCalculator;
 import net.msymbios.llovelyr.common.utils.Utility;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 import net.msymbios.llovelyr.framework.utils.Version;
@@ -814,6 +815,7 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
     @Override
     protected boolean canInteractWithItems(ItemStack stack) {
+        if(stack.is(Items.ENCHANTED_BOOK)) return false;
         if(stack.getItem() instanceof DyeItem) return false;
         if(stack.getItem() instanceof SwordItem) return false;
         if(stack.is(Items.BOOK) || stack.is(Items.WRITABLE_BOOK) || stack.is(Items.OAK_BUTTON)) return false;
@@ -825,6 +827,7 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         super.handleInteract(stack, player);
         handlePickupRetrieval(stack, player);
         handleAutoAttack(stack);
+        handleProtectionLevelUpInteraction(stack, player);
         handleDisplayInteraction(stack);
     } // handleInteract
 
@@ -863,6 +866,210 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         }
         return false;
     } // handleTexture ()
+
+    /**
+     * Handles enchanted book feeding to increase robot protection values.
+     * <p>
+     * <b>Architecture:</b> Extracts protection enchantments from enchanted books
+     * and converts them to robot protection points using percentage-based contribution.
+     * <p>
+     * <b>Supported Enchantments:</b>
+     * <ul>
+     * <li>Fire Protection → Fire Protection stat</li>
+     * <li>Blast Protection → Blast Protection stat</li>
+     * <li>Feather Falling → Fall Protection stat</li>
+     * <li>Projectile Protection → Projectile Protection stat</li>
+     * <li>Protection (generic) → Random protection type</li>
+     * </ul>
+     * <p>
+     * <b>Formula:</b> protectionGain = enchantmentLevel × 0.25 × maxProtection
+     * <p>
+     * <b>Design Decision:</b> Books are fully consumed on success. Multi-enchanted
+     * books apply all valid protections. Feeding is prevented if already at max.
+     *
+     * @param stack item stack to check
+     * @param player player feeding the book
+     */
+    protected void handleProtectionLevelUpInteraction(ItemStack stack, Player player) {
+        // Check if feature is enabled
+        if (!SharedConfigs.Common.EnableEnchantedBookProtection) return;
+        
+        // Check if item is enchanted book
+        if (!stack.is(Items.ENCHANTED_BOOK)) return;
+        
+        // Server-side only
+        if (level().isClientSide) return;
+        
+        // Extract and apply enchantments
+        processEnchantedBook(stack, player);
+    } // handleProtectionLevelUpInteraction()
+
+    /**
+     * Processes enchanted book and applies protection enchantments.
+     * <p>
+     * <b>Implementation:</b> Extracts enchantments using 1.21.1 DataComponents API,
+     * calculates protection gains, updates robot stats, and provides feedback.
+     *
+     * @param stack enchanted book stack
+     * @param player player feeding the book
+     */
+    protected void processEnchantedBook(ItemStack stack, Player player) {
+        // Get enchantments from book using 1.21.1 API
+        var enchantments = stack.get(DataComponents.STORED_ENCHANTMENTS);
+        if (enchantments == null || enchantments.isEmpty()) {
+            player.displayClientMessage(
+                Component.literal("This book has no enchantments").withStyle(ChatFormatting.RED),
+                true
+            );
+            return;
+        }
+
+        boolean appliedAny = false;
+        StringBuilder feedbackMessage = new StringBuilder();
+        
+        // Get enchantment registry
+        var enchantmentRegistry = level().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        
+        // Process each enchantment
+        for (var entry : enchantments.entrySet()) {
+            var enchantmentHolder = entry.getKey();
+            int level = entry.getIntValue();
+            
+            // Get the enchantment key
+            var enchantmentKey = enchantmentRegistry.getKey(enchantmentHolder.value());
+            if (enchantmentKey == null) continue;
+            
+            String enchantmentPath = enchantmentKey.getPath();
+            boolean applied = false;
+            String protectionName = "";
+            int gainedPoints = 0;
+            
+            // Check enchantment type and apply
+            if (enchantmentPath.equals("fire_protection")) {
+                if (EnchantmentProtectionCalculator.canApplyProtection(getFireProtection(), SharedConfigs.Common.ProtectionLimitFire)) {
+                    gainedPoints = EnchantmentProtectionCalculator.calculateProtectionGain(level, SharedConfigs.Common.ProtectionLimitFire);
+                    int oldValue = getFireProtection();
+                    int newValue = EnchantmentProtectionCalculator.applyProtectionGain(oldValue, gainedPoints, SharedConfigs.Common.ProtectionLimitFire);
+                    setFireProtection(newValue);
+                    protectionName = "Fire Protection";
+                    applied = true;
+                }
+            } else if (enchantmentPath.equals("blast_protection")) {
+                if (EnchantmentProtectionCalculator.canApplyProtection(getBlastProtection(), SharedConfigs.Common.ProtectionLimitBlast)) {
+                    gainedPoints = EnchantmentProtectionCalculator.calculateProtectionGain(level, SharedConfigs.Common.ProtectionLimitBlast);
+                    int oldValue = getBlastProtection();
+                    int newValue = EnchantmentProtectionCalculator.applyProtectionGain(oldValue, gainedPoints, SharedConfigs.Common.ProtectionLimitBlast);
+                    setBlastProtection(newValue);
+                    protectionName = "Blast Protection";
+                    applied = true;
+                }
+            } else if (enchantmentPath.equals("feather_falling")) {
+                if (EnchantmentProtectionCalculator.canApplyProtection(getFallProtection(), SharedConfigs.Common.ProtectionLimitFall)) {
+                    gainedPoints = EnchantmentProtectionCalculator.calculateProtectionGain(level, SharedConfigs.Common.ProtectionLimitFall);
+                    int oldValue = getFallProtection();
+                    int newValue = EnchantmentProtectionCalculator.applyProtectionGain(oldValue, gainedPoints, SharedConfigs.Common.ProtectionLimitFall);
+                    setFallProtection(newValue);
+                    protectionName = "Fall Protection";
+                    applied = true;
+                }
+            } else if (enchantmentPath.equals("projectile_protection")) {
+                if (EnchantmentProtectionCalculator.canApplyProtection(getProjectileProtection(), SharedConfigs.Common.ProtectionLimitProjectile)) {
+                    gainedPoints = EnchantmentProtectionCalculator.calculateProtectionGain(level, SharedConfigs.Common.ProtectionLimitProjectile);
+                    int oldValue = getProjectileProtection();
+                    int newValue = EnchantmentProtectionCalculator.applyProtectionGain(oldValue, gainedPoints, SharedConfigs.Common.ProtectionLimitProjectile);
+                    setProjectileProtection(newValue);
+                    protectionName = "Projectile Protection";
+                    applied = true;
+                }
+            } else if (enchantmentPath.equals("protection")) {
+                // Generic protection - apply to random non-maxed type
+                // Build list of available (non-maxed) protection types
+                java.util.List<EnchantmentProtectionCalculator.ProtectionType> availableTypes = new java.util.ArrayList<>();
+                
+                if (EnchantmentProtectionCalculator.canApplyProtection(getFireProtection(), SharedConfigs.Common.ProtectionLimitFire)) {
+                    availableTypes.add(EnchantmentProtectionCalculator.ProtectionType.FIRE);
+                }
+                if (EnchantmentProtectionCalculator.canApplyProtection(getFallProtection(), SharedConfigs.Common.ProtectionLimitFall)) {
+                    availableTypes.add(EnchantmentProtectionCalculator.ProtectionType.FALL);
+                }
+                if (EnchantmentProtectionCalculator.canApplyProtection(getBlastProtection(), SharedConfigs.Common.ProtectionLimitBlast)) {
+                    availableTypes.add(EnchantmentProtectionCalculator.ProtectionType.BLAST);
+                }
+                if (EnchantmentProtectionCalculator.canApplyProtection(getProjectileProtection(), SharedConfigs.Common.ProtectionLimitProjectile)) {
+                    availableTypes.add(EnchantmentProtectionCalculator.ProtectionType.PROJECTILE);
+                }
+                
+                // Only apply if there are available types
+                if (!availableTypes.isEmpty()) {
+                    var randomType = availableTypes.get(random.nextInt(availableTypes.size()));
+                    
+                    switch (randomType) {
+                        case FIRE:
+                            gainedPoints = EnchantmentProtectionCalculator.calculateProtectionGain(level, SharedConfigs.Common.ProtectionLimitFire);
+                            int fireOldValue = getFireProtection();
+                            int fireNewValue = EnchantmentProtectionCalculator.applyProtectionGain(fireOldValue, gainedPoints, SharedConfigs.Common.ProtectionLimitFire);
+                            setFireProtection(fireNewValue);
+                            protectionName = "Fire Protection";
+                            applied = true;
+                            break;
+                        case FALL:
+                            gainedPoints = EnchantmentProtectionCalculator.calculateProtectionGain(level, SharedConfigs.Common.ProtectionLimitFall);
+                            int fallOldValue = getFallProtection();
+                            int fallNewValue = EnchantmentProtectionCalculator.applyProtectionGain(fallOldValue, gainedPoints, SharedConfigs.Common.ProtectionLimitFall);
+                            setFallProtection(fallNewValue);
+                            protectionName = "Fall Protection";
+                            applied = true;
+                            break;
+                        case BLAST:
+                            gainedPoints = EnchantmentProtectionCalculator.calculateProtectionGain(level, SharedConfigs.Common.ProtectionLimitBlast);
+                            int blastOldValue = getBlastProtection();
+                            int blastNewValue = EnchantmentProtectionCalculator.applyProtectionGain(blastOldValue, gainedPoints, SharedConfigs.Common.ProtectionLimitBlast);
+                            setBlastProtection(blastNewValue);
+                            protectionName = "Blast Protection";
+                            applied = true;
+                            break;
+                        case PROJECTILE:
+                            gainedPoints = EnchantmentProtectionCalculator.calculateProtectionGain(level, SharedConfigs.Common.ProtectionLimitProjectile);
+                            int projectileOldValue = getProjectileProtection();
+                            int projectileNewValue = EnchantmentProtectionCalculator.applyProtectionGain(projectileOldValue, gainedPoints, SharedConfigs.Common.ProtectionLimitProjectile);
+                            setProjectileProtection(projectileNewValue);
+                            protectionName = "Projectile Protection";
+                            applied = true;
+                            break;
+                    }
+                }
+            }
+            
+            if (applied) {
+                appliedAny = true;
+                if (feedbackMessage.length() > 0) feedbackMessage.append(", ");
+                feedbackMessage.append(protectionName).append(" +").append(gainedPoints);
+            }
+        }
+        
+        if (!appliedAny) {
+            player.displayClientMessage(
+                Component.literal("All protections are already at maximum!").withStyle(ChatFormatting.YELLOW),
+                true
+            );
+            return;
+        }
+        
+        // Consume book
+        if (!player.getAbilities().instabuild) {
+            stack.shrink(1);
+        }
+        
+        // Visual and audio feedback
+        level().playSound(null, this.getX(), this.getY(), this.getZ(), 
+            SoundEvents.ENCHANTMENT_TABLE_USE, this.getSoundSource(), 1.0F, 1.0F);
+        
+        // Show feedback message
+        player.displayClientMessage(
+            Component.literal(feedbackMessage.toString()).withStyle(ChatFormatting.GREEN),
+            true
+        );
+    } // processEnchantedBook()
 
     // -- Custom Methods --
 

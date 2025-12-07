@@ -67,6 +67,10 @@ public class SharedConfigs {
         public static int ProtectionLimitBlast = 80;
         public static int ProtectionLimitProjectile = 80;
 
+        // -- ENCHANTED BOOK PROTECTION --
+        public static boolean EnableEnchantedBookProtection = true;
+        public static double EnchantedBookContributionPercentage = 0.25;
+
         // -- SMART CORE RETRIEVAL --
         public static boolean EnableSmartCoreRetrieval = true;
         public static double SmartCoreRetrievalDistance = 16.0;
