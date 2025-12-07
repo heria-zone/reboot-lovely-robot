@@ -39,7 +39,7 @@ public class SharedConfigs {
         public static float MovementFollowOwner = 0.7F;
         public static double MovementWanderAround = 0.6F;
         public static float FollowDistanceMax = 10F;
-        public static float FollowDistanceMin = 2F;
+        public static float FollowDistanceMin = 4F;
         public static float LookRange = 8F;
 
         // -- RENDERER --
@@ -105,6 +105,14 @@ public class SharedConfigs {
 
         public static int StandbyToSitDelayMin = 600; // ticks (30 seconds)
         public static int StandbyToSitDelayMax = 1800; // ticks (90 seconds)
+
+        // -- COLLISION AVOIDANCE --
+
+        public static boolean EnableCollisionAvoidance = true;
+        public static double CollisionDetectionRadius = 3.0; // blocks
+        public static double MinRobotSpacing = 2.0; // blocks
+        public static double SpacingOffset = 1.5; // repulsion multiplier
+        public static int CollisionCheckInterval = 5; // ticks (0.25s)
 
         // -- ENTITY --
 

@@ -184,7 +184,7 @@ public class LovelyConfigs {
 
         FOLLOW_DISTANCE_MIN = BUILDER
                 .comment("Minimum distance (in blocks) robots try to maintain from their owner.", "Robots won't crowd you closer than this distance.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
-                .define("follow-distance-min", 2F);
+                .define("follow-distance-min", 4F);
 
         LOOK_RANGE = BUILDER
                 .comment("How far (in blocks) robots can look at and track entities.", "Affects head rotation and attention behavior.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [8.0]")
