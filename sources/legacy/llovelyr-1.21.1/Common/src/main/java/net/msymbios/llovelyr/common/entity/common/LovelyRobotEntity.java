@@ -235,9 +235,6 @@ public abstract class LovelyRobotEntity extends InternalEntity {
     public void tick() {
         super.tick();
 
-        // Register robot on first tick if not already registered (handles world load/chunk load)
-        if (!this.level().isClientSide && this.tickCount == 1 && this.isTame() && this.getOwnerUUID() != null) ensureRegistered();
-
         handleStandbyAnimation();
         handleCombatMode();
         handleAutoHeal();
@@ -541,6 +538,12 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         }
 
         super.readAdditionalSaveData(dataNBT);
+        
+        // Register robot immediately after loading from NBT to prevent race condition
+        // This ensures registry is populated before any spawn limit checks occur
+        if (!this.level().isClientSide && this.isTame() && this.getOwnerUUID() != null) {
+            ensureRegistered();
+        }
     } // readCustomDataFromNbt ()
 
     @Override

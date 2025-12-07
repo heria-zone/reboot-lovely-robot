@@ -645,9 +645,10 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     /**
      * Ensures robot is registered in owner registry.
      * <p>
-     * <b>Use Case:</b> Called on first tick after entity loads from NBT (world reload,
-     * chunk load). Prevents duplicate registration by checking if robot already exists
-     * in registry.
+     * <b>Use Case:</b> Called when entity loads from NBT (world reload, chunk load).
+     * Handles two scenarios:
+     * 1. Entry exists (loaded from SavedData) - updates entity reference
+     * 2. Entry doesn't exist (new robot) - creates new entry
      * <p>
      * <b>Thread Safety:</b> Only runs on server side to avoid client-side issues.
      */
@@ -655,8 +656,12 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         if (this.level() instanceof ServerLevel serverLevel) {
             OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(serverLevel);
 
-            // Check if already registered
-            if (registry.getRobotById(this.getUUID()) == null) {
+            RobotRegistryEntry existingEntry = registry.getRobotById(this.getUUID());
+            
+            if (existingEntry != null) {
+                // Entry exists (loaded from disk) - update entity reference
+                existingEntry.setEntity(this);
+            } else {
                 // Not registered - register now
                 String robotType = this.getType().getDescriptionId();
                 RobotRegistryEntry registryEntry =
@@ -667,6 +672,9 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
                                 robotType
                         );
                 registry.registerRobot(registryEntry);
+                
+                // Mark dirty to save new registration
+                RobotRegistryManager.markDirty(serverLevel);
             }
         }
     } // ensureRegistered()
@@ -679,14 +687,21 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
      * <p>
      * <b>State Impact:</b> Removes registry entry. Robot will no longer appear
      * in owner list commands or count toward spawn limits.
+     * <p>
+     * <b>Persistence:</b> Marks registry as dirty to save removal to disk.
      */
     protected void unregisterRobot() {
         // Only unregister on server side
         if (this.level().isClientSide) return;
         try {
             ServerLevel serverLevel = (ServerLevel) this.level();
-            RobotRegistryManager.getRegistry(serverLevel)
+            boolean removed = RobotRegistryManager.getRegistry(serverLevel)
                     .unregisterRobot(this.getUUID());
+            
+            // Mark dirty if robot was actually removed
+            if (removed) {
+                RobotRegistryManager.markDirty(serverLevel);
+            }
         } catch (Exception e) {
             // Log error but don't fail removal
             LovelyConstant.LOGGER.error("Failed to unregister robot {}", this.getUUID(), e);
