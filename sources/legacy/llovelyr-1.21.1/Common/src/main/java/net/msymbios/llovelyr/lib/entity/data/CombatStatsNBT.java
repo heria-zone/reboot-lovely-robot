@@ -81,10 +81,11 @@ public class CombatStatsNBT implements IReadWriteNBT {
         Objects.requireNonNull(tagVersion, "Version cannot be null");
 
         // Read all combat stat fields with defaults for missing data
+        // CRITICAL: Set maxHp BEFORE currentHp to avoid validation error
         stats.setLevel(tag.contains(TAG_LEVEL) ? tag.getInt(TAG_LEVEL) : 0);
         stats.setExperience(tag.contains(TAG_EXPERIENCE) ? tag.getInt(TAG_EXPERIENCE) : 0);
-        stats.setCurrentHp(tag.contains(TAG_CURRENT_HP) ? tag.getInt(TAG_CURRENT_HP) : 20);
         stats.setMaxHp(tag.contains(TAG_MAX_HP) ? tag.getInt(TAG_MAX_HP) : 20);
+        stats.setCurrentHp(tag.contains(TAG_CURRENT_HP) ? tag.getInt(TAG_CURRENT_HP) : 20);
         stats.setAttack(tag.contains(TAG_ATTACK) ? tag.getInt(TAG_ATTACK) : 2);
         stats.setDefense(tag.contains(TAG_DEFENSE) ? tag.getInt(TAG_DEFENSE) : 0);
 
