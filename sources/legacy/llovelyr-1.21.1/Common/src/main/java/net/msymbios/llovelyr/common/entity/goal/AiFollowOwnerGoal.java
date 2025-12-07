@@ -7,11 +7,14 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.msymbios.llovelyr.common.Configs.SharedConfigs;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.framework.entity.enums.EntityState;
 
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * Wolf-style owner following goal with state-based execution.
@@ -42,6 +45,11 @@ public class AiFollowOwnerGoal extends Goal {
     private LivingEntity owner;
     private int timeToRecalcPath;
     private float oldWaterCost;
+    
+    // -- Collision Avoidance --
+    
+    private Vec3 cachedTargetPosition = Vec3.ZERO;
+    private int collisionCheckCooldown = 0;
 
     // -- Constructor --
 
@@ -153,6 +161,9 @@ public class AiFollowOwnerGoal extends Goal {
      * <p>
      * <b>Wolf-style Behavior:</b> Periodically recalculates path, teleports if too far.
      * Navigation system handles body orientation naturally - no manual look control needed.
+     * <p>
+     * <b>Collision Avoidance:</b> When enabled, applies repulsion forces to prevent
+     * robots from stacking on top of each other when following the same owner.
      */
     @Override
     public void tick() {
@@ -165,12 +176,142 @@ public class AiFollowOwnerGoal extends Goal {
                 if (entity.distanceToSqr(this.owner) >= 144.0) {
                     this.teleportToOwner();
                 } else {
-                    // Navigate to owner - navigation will handle body orientation
-                    this.navigation.moveTo(this.owner, this.speedModifier);
+                    // Calculate target position with collision avoidance
+                    Vec3 targetPosition = calculateTargetPosition();
+                    
+                    // Navigate to adjusted target position
+                    this.navigation.moveTo(
+                            targetPosition.x,
+                            targetPosition.y,
+                            targetPosition.z,
+                            this.speedModifier
+                    );
                 }
             }
         }
     } // tick ()
+    
+    /**
+     * Calculates target follow position with optional collision avoidance.
+     * <p>
+     * <b>Architecture:</b> Throttles collision checks to reduce performance impact.
+     * Uses cached position between checks for smooth movement.
+     * <p>
+     * <b>Collision Avoidance:</b> When enabled and conditions met, applies repulsion
+     * forces from nearby robots to prevent stacking. Falls back to owner position
+     * when disabled or in combat.
+     *
+     * @return target position to navigate toward
+     */
+    private Vec3 calculateTargetPosition() {
+        Vec3 ownerPosition = this.owner.position();
+        
+        // Check if collision avoidance should be applied
+        if (!shouldAvoidCollision()) {
+            cachedTargetPosition = ownerPosition;
+            return ownerPosition;
+        }
+        
+        // Throttle collision checks for performance
+        if (collisionCheckCooldown > 0) {
+            collisionCheckCooldown--;
+            return cachedTargetPosition; // Use cached position
+        }
+        
+        // Reset cooldown
+        collisionCheckCooldown = SharedConfigs.Common.CollisionCheckInterval;
+        
+        // Calculate new position with collision avoidance
+        cachedTargetPosition = applyCollisionAvoidance(ownerPosition);
+        return cachedTargetPosition;
+    } // calculateTargetPosition ()
+    
+    /**
+     * Determines if collision avoidance should be applied.
+     * <p>
+     * <b>Conditions:</b>
+     * - Feature enabled in config
+     * - Robot in Follow state
+     * - Not sitting
+     * - Not in combat (wary)
+     * <p>
+     * <b>Design Decision:</b> Disable during combat to avoid interfering with
+     * combat positioning and target engagement.
+     *
+     * @return true if collision avoidance should be applied
+     */
+    private boolean shouldAvoidCollision() {
+        return SharedConfigs.Common.EnableCollisionAvoidance &&
+               entity.getCurrentState() == EntityState.Follow &&
+               !entity.isOrderedToSit() &&
+               !entity.isWary();
+    } // shouldAvoidCollision ()
+    
+    /**
+     * Applies collision avoidance by detecting nearby robots and calculating repulsion.
+     * <p>
+     * <b>Algorithm:</b>
+     * 1. Scan for nearby robots in Follow mode with same owner
+     * 2. Calculate repulsion vector from each nearby robot
+     * 3. Sum repulsion forces (stronger when closer)
+     * 4. Apply offset to owner position
+     * <p>
+     * <b>Performance:</b> Uses Minecraft's optimized AABB entity query system.
+     * Typical cost: O(log n + m) where n = entities in chunk, m = nearby robots.
+     * <p>
+     * <b>Emergent Behavior:</b> Robots naturally spread in circle around owner
+     * when stationary, maintain loose formation when moving.
+     *
+     * @param ownerPosition the owner's current position
+     * @return adjusted target position with collision avoidance applied
+     */
+    private Vec3 applyCollisionAvoidance(Vec3 ownerPosition) {
+        // Create detection box around robot
+        AABB detectionBox = entity.getBoundingBox().inflate(
+                SharedConfigs.Common.CollisionDetectionRadius
+        );
+        
+        // Find nearby robots following same owner
+        List<LovelyRobotEntity> nearbyRobots = entity.level().getEntitiesOfClass(
+                LovelyRobotEntity.class,
+                detectionBox,
+                robot -> robot != entity &&
+                         robot.isAlive() &&
+                         robot.getCurrentState() == EntityState.Follow &&
+                         robot.getOwner() == entity.getOwner()
+        );
+        
+        // No nearby robots - no collision avoidance needed
+        if (nearbyRobots.isEmpty()) {
+            return ownerPosition;
+        }
+        
+        // Calculate repulsion force from all nearby robots
+        Vec3 repulsionForce = Vec3.ZERO;
+        double minSpacing = SharedConfigs.Common.MinRobotSpacing;
+        
+        for (LovelyRobotEntity nearbyRobot : nearbyRobots) {
+            double distance = entity.distanceTo(nearbyRobot);
+            
+            // Only apply repulsion if too close
+            if (distance < minSpacing && distance > 0.1) { // Avoid division by zero
+                // Calculate direction away from nearby robot
+                Vec3 awayVector = entity.position()
+                        .subtract(nearbyRobot.position())
+                        .normalize();
+                
+                // Stronger repulsion when closer (inverse relationship)
+                double repulsionStrength = (minSpacing - distance) / minSpacing;
+                
+                // Accumulate repulsion forces
+                repulsionForce = repulsionForce.add(awayVector.scale(repulsionStrength));
+            }
+        }
+        
+        // Apply repulsion offset to owner position
+        double spacingOffset = SharedConfigs.Common.SpacingOffset;
+        return ownerPosition.add(repulsionForce.scale(spacingOffset));
+    } // applyCollisionAvoidance ()
 
     // -- Helper Methods --
 

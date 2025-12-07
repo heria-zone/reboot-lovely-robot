@@ -61,7 +61,7 @@ public class AiConditionalLookGoal extends LookAtPlayerGoal {
     @Override
     public boolean canUse() {
         // Don't look while following - causes spinning on edges
-        if (entity.getCurrentState() == EntityState.Follow) return false;
+        //if (entity.getCurrentState() == EntityState.Follow) return false;
 
         return super.canUse();
     } // canUse ()
@@ -77,7 +77,7 @@ public class AiConditionalLookGoal extends LookAtPlayerGoal {
     @Override
     public boolean canContinueToUse() {
         // Stop looking if state changes to Follow
-        if (entity.getCurrentState() == EntityState.Follow) return false;
+        //if (entity.getCurrentState() == EntityState.Follow) return false;
 
         return super.canContinueToUse();
     } // canContinueToUse ()
