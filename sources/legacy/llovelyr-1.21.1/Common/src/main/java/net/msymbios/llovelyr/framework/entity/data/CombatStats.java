@@ -23,7 +23,7 @@ public class CombatStats {
      * Creates combat stats with default values.
      */
     public CombatStats() {
-        this(1, 0, 20, 20, 5, 5);
+        this(0, 0, 20, 20, 5, 5);
     } // Constructor: CombatStats ()
 
     /**
