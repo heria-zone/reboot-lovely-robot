@@ -14,9 +14,6 @@ logoBlur=false
 authors="${mod_authors}"
 description="${mod_description}"
 
-[[mixins]]
-config = "${mod_id}.common.mixins.json"
-
 [[dependencies."${mod_id}"]]
     modId="neoforge"
     type="required"
@@ -29,4 +26,11 @@ config = "${mod_id}.common.mixins.json"
     type="required"
     versionRange="[${minecraft_version},)"
     ordering="NONE"
+    side="BOTH"
+
+[[dependencies."${mod_id}"]]
+    modId="geckolib"
+    type="required"
+    versionRange="[4.0,)"
+    ordering="AFTER"
     side="BOTH"
