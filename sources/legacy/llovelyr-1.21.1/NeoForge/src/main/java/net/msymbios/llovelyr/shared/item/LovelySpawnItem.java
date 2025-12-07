@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.msymbios.llovelyr.common.Configs.SharedConfigs;
 import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
@@ -46,7 +46,7 @@ import static net.msymbios.llovelyr.common.items.utils.TooltipUtils.*;
 /**
  * Spawn egg for summoning robots with component-stored customization.
  * <p>
- * <b>Architecture:</b> Extends ForgeSpawnEggItem to leverage Minecraft's spawn
+ * <b>Architecture:</b> Extends DeferredSpawnEggItem to leverage Minecraft's spawn
  * egg mechanics while adding robot-specific initialization from data components.
  * <p>
  * <b>Migration Note:</b> Minecraft 1.21.1 replaced NBT tags with typed data components.
@@ -56,7 +56,7 @@ import static net.msymbios.llovelyr.common.items.utils.TooltipUtils.*;
  * to spawn in liquid, or use on spawner to configure it. Transfers component data
  * (name, color, level, protections) to spawned entity.
  */
-public class LovelySpawnItem extends ForgeSpawnEggItem {
+public class LovelySpawnItem extends DeferredSpawnEggItem {
 
     // -- Constructor --
 
