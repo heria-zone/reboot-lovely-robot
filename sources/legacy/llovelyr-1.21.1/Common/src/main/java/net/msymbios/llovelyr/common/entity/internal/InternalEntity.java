@@ -42,6 +42,9 @@ import net.msymbios.llovelyr.lib.entity.InternalEntityType;
 import net.msymbios.llovelyr.lib.entity.data.CombatStatsNBT;
 import net.msymbios.llovelyr.lib.entity.data.ProtectionStatsNBT;
 import net.msymbios.llovelyr.lib.entity.data.EnchantmentStatsNBT;
+import net.msymbios.llovelyr.lib.entity.data.ExperienceTracker;
+import net.msymbios.llovelyr.lib.entity.data.EntityData;
+import net.msymbios.llovelyr.lib.entity.data.EntityDataMigration;
 import net.msymbios.llovelyr.framework.utils.Version;
 import net.msymbios.llovelyr.lib.entity.features.*;
 import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
@@ -111,6 +114,19 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
      * <p>Handles NBT serialization for enchantment stats.<p>
      */
     protected EnchantmentStatsNBT enchantmentStatsNBT = new EnchantmentStatsNBT(enchantmentStats);
+
+    // -- Experience Tracking --
+
+    /**
+     * <p>Tracks pending experience from attacked entities.<p>
+     * <p>
+     * <b>Architecture:</b> Prevents infinite exp gain from immortal entities by
+     * accumulating exp per entity and only awarding on death.
+     * <p>
+     * <b>Performance:</b> Automatically purges stale entries every 5 minutes to
+     * prevent memory leaks.
+     */
+    protected ExperienceTracker expTracker = new ExperienceTracker();
 
     // -- Properties --
 
@@ -854,77 +870,46 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         dataNBT.putInt("State", this.getCurrentStateID());
         dataNBT.putBoolean("Notification", this.getNotification());
 
-        // Save stat objects using NBT handlers
-        CompoundTag statsData = new CompoundTag();
-        combatStatsNBT.writeToNBT(statsData);
-        dataNBT.put("CombatStats", statsData);
+        // Use new EntityData system for consolidated stat storage
+        EntityData entityData = new EntityData(combatStats, protectionStats, enchantmentStats);
+        entityData.toParentNBT(dataNBT);
 
-        CompoundTag protectionData = new CompoundTag();
-        protectionStatsNBT.writeToNBT(protectionData);
-        dataNBT.put("ProtectionStats", protectionData);
-
-        CompoundTag enchantmentData = new CompoundTag();
-        enchantmentStatsNBT.writeToNBT(enchantmentData);
-        dataNBT.put("EnchantmentStats", enchantmentData);
-
-        CompoundTag entityData = new CompoundTag();
-        entityData.putString("VersionNBT", new Version("1.0").toString());
-        writeToNBT(entityData);
-        dataNBT.put("EntityData", entityData);
+        // Save entity-specific data
+        CompoundTag customData = new CompoundTag();
+        customData.putString("VersionNBT", LovelyConstant.Version.CURRENT.toString());
+        writeToNBT(customData);
+        dataNBT.put("CustomEntityData", customData);
     } // addAdditionalSaveData ()
 
     @Override
     public void readAdditionalSaveData(CompoundTag dataNBT) {
         super.readAdditionalSaveData(dataNBT);
 
-        this.setTexture(dataNBT.getInt("TextureID"));
-        this.setCurrentState(dataNBT.getInt("State"));
-        this.setNotification(dataNBT.getBoolean("Notification"));
+        // Use EntityDataMigration to handle both old and new formats
+        EntityData loadedData = EntityDataMigration.migrate(dataNBT, LovelyConstant.Version.CURRENT);
 
-        // Check if new format exists
-        boolean hasNewFormat = dataNBT.contains("CombatStats") || dataNBT.contains("ProtectionStats") || dataNBT.contains("EnchantmentStats");
+        // Update stat objects from loaded data
+        this.combatStats = loadedData.getCombatStats();
+        this.protectionStats = loadedData.getProtectionStats();
+        this.enchantmentStats = loadedData.getEnchantmentStats();
 
-        if (hasNewFormat) {
-            // Load stat objects using NBT handlers (new format)
-            Version version = new Version("1.0");
+        // Recreate NBT handlers with loaded stats
+        this.combatStatsNBT = new CombatStatsNBT(combatStats);
+        this.protectionStatsNBT = new ProtectionStatsNBT(protectionStats);
+        this.enchantmentStatsNBT = new EnchantmentStatsNBT(enchantmentStats);
 
-            if (dataNBT.contains("CombatStats"))
-                combatStatsNBT.readFromNBT(dataNBT.getCompound("CombatStats"), version);
+        // Read entity-specific custom data
+        if (dataNBT.contains("CustomEntityData")) {
+            CompoundTag customData = dataNBT.getCompound("CustomEntityData");
 
-            if (dataNBT.contains("ProtectionStats"))
-                protectionStatsNBT.readFromNBT(dataNBT.getCompound("ProtectionStats"), version);
-
-            if (dataNBT.contains("EnchantmentStats"))
-                enchantmentStatsNBT.readFromNBT(dataNBT.getCompound("EnchantmentStats"), version);
-            
-            // Read entity-specific data
-            if (dataNBT.contains("EntityData")) {
-                CompoundTag entityData = dataNBT.getCompound("EntityData");
-                readFromNBT(entityData, ObjectUtil.coalesce(new Version(entityData.getString("VersionNBT")), version));
-            }
+            Version version = dataNBT.contains("VersionNBT") && Version.isValidVersion(customData.getString("VersionNBT"))
+                ? new Version(customData.getString("VersionNBT"))
+                : LovelyConstant.Version.CURRENT;
+            readFromNBT(customData, version);
         } else {
-            // Migrate from legacy format
-            LovelyConstant.LOGGER.warn("Migrating robot {} from legacy NBT format to new format", this.getUUID());
-
-            // Migrate combat stats (if they exist in legacy format)
-            // Note: Legacy format may have stored these differently or not at all
-            // Use default values for missing fields
-            if (dataNBT.contains("Level")) combatStats.setLevel(dataNBT.getInt("Level"));
-            if (dataNBT.contains("Experience")) combatStats.setExperience(dataNBT.getInt("Experience"));
-
-            // Current HP will be set from entity health
-            combatStats.setCurrentHp((int) this.getHealth());
-            combatStats.setMaxHp((int) this.getMaxHealth());
-
-            // Migrate protection stats (if they exist in legacy format)
-            if (dataNBT.contains("FireProtection")) protectionStats.setFireProtection(dataNBT.getInt("FireProtection"));
-            if (dataNBT.contains("FallProtection")) protectionStats.setFallProtection(dataNBT.getInt("FallProtection"));
-            if (dataNBT.contains("BlastProtection")) protectionStats.setBlastProtection(dataNBT.getInt("BlastProtection"));
-            if (dataNBT.contains("ProjectileProtection")) protectionStats.setProjectileProtection(dataNBT.getInt("ProjectileProtection"));
-
-            // Enchantment stats will be calculated from level during recalculation
-            // No need to migrate as they're derived values
-            LovelyConstant.LOGGER.info("Successfully migrated robot {} to new format", this.getUUID());
+            this.setTexture(dataNBT.getInt("TextureID"));
+            this.setCurrentState(dataNBT.getInt("State"));
+            this.setNotification(dataNBT.getBoolean("Notification"));
         }
 
         // Recalculate attributes after loading to ensure consistency

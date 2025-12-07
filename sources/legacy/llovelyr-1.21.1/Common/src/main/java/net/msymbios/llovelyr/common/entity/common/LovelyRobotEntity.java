@@ -1,6 +1,7 @@
 package net.msymbios.llovelyr.common.entity.common;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.msymbios.llovelyr.common.Configs.SharedConfigs;
@@ -241,6 +243,11 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         handleAutoHeal();
         handleHealthSync();
         displayExtra();
+        
+        // Purge stale exp entries every 20 ticks (once per second) to prevent memory leaks
+        if (!this.level().isClientSide && this.tickCount % 20 == 0) {
+            expTracker.purgeStaleEntries();
+        }
     } // tick ()
 
     /**
@@ -613,7 +620,10 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         handleActivateCombatMode();
         if(this.getCurrentLevel() < this.getMaxLevel() && !(target instanceof Player) && !this.level().isClientSide) {
             final int maxHp = (int)((LivingEntity)target).getMaxHealth();
-            addExp(maxHp / 4);
+            int expAmount = maxHp / 4;
+            
+            // Accumulate exp instead of immediate award to prevent farming immortal entities
+            expTracker.accumulateExp(target.getUUID(), expAmount);
         }
         this.level().broadcastEntityEvent(this, (byte)4);
     } // handleAttackTarget ()
@@ -652,7 +662,10 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
         if (this.getCurrentLevel() < this.getMaxLevel() && !(entity instanceof Player) && entity instanceof LivingEntity && !this.level().isClientSide) {
             final int maxHp = (int)((LivingEntity)entity).getMaxHealth();
-            addExp(maxHp / 6);
+            int expAmount = maxHp / 6;
+            
+            // Accumulate exp instead of immediate award to prevent farming immortal entities
+            expTracker.accumulateExp(entity.getUUID(), expAmount);
         }
 
         return true;
@@ -848,6 +861,26 @@ public abstract class LovelyRobotEntity extends InternalEntity {
     } // handleTexture ()
 
     // -- Custom Methods --
+
+    /**
+     * Claims accumulated experience from a killed entity.
+     * <p>
+     * <b>Architecture:</b> Called when an entity dies to award all accumulated exp
+     * from previous attacks. Prevents exp farming from immortal entities.
+     * <p>
+     * <b>Use Case:</b> Should be called from entity death event handlers or when
+     * detecting entity death in combat.
+     *
+     * @param entityId UUID of the entity that died
+     */
+    public void claimAccumulatedExp(@NotNull java.util.UUID entityId) {
+        if (this.level().isClientSide) return;
+        
+        int accumulatedExp = expTracker.claimExp(entityId);
+        if (accumulatedExp > 0) {
+            addExp(accumulatedExp);
+        }
+    } // claimAccumulatedExp ()
 
     /**
      * Calculates total experience after applying bonuses and adding to current XP.
@@ -1254,7 +1287,7 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
 
         // Store custom data in DataComponents.CUSTOM_DATA
-        spawnItemStack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(nbt));
+        spawnItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
 
         // Apply custom name with title (commented for future use)
         // if (!customName.isEmpty()) {
