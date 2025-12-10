@@ -3,6 +3,8 @@ package net.msymbios.llovelyr.lib.rendering;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
 
+import java.util.function.Predicate;
+
 /**
  * Base texture layer rendering the primary robot appearance.
  * <p>
@@ -13,9 +15,14 @@ import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
  * <b>Design Decision:</b> Separated from renderer to allow texture swapping
  * without renderer changes. Entity controls texture selection based on state.
  */
-public class BaseTextureLayer<T extends LovelyRobotEntity> extends BaseInternalRenderLayer<T> {
+public class BaseTextureLayer<T extends LovelyRobotEntity> implements IInternalRenderLayer<T> {
 
-    // -- Constructor --
+    // -- Fields --
+
+    private final String texturePath;
+    private final Predicate<T> renderCondition;
+
+    // -- Constructors --
 
     /**
      * Creates base texture layer with entity texture resolution.
@@ -24,21 +31,66 @@ public class BaseTextureLayer<T extends LovelyRobotEntity> extends BaseInternalR
      * on the primary entity renderer for texture resolution.
      */
     public BaseTextureLayer() {
-        super(null); // Base texture handled by primary renderer
+        this.texturePath = null;
+        this.renderCondition = entity -> true;
+    } // Constructor: BaseTextureLayer()
+
+    /**
+     * Creates base texture layer with specific texture path.
+     *
+     * @param texturePath texture path string
+     */
+    public BaseTextureLayer(String texturePath) {
+        this.texturePath = texturePath;
+        this.renderCondition = entity -> true;
+    } // Constructor: BaseTextureLayer()
+
+    /**
+     * Creates base texture layer with conditional rendering.
+     *
+     * @param texturePath texture path string
+     * @param renderCondition predicate determining if layer should render
+     */
+    public BaseTextureLayer(String texturePath, Predicate<T> renderCondition) {
+        this.texturePath = texturePath;
+        this.renderCondition = renderCondition;
     } // Constructor: BaseTextureLayer()
 
     // -- IInternalRenderLayer Implementation --
 
     @Override
     public boolean shouldRender(T entity, float partialTick) {
-        return true; // Base texture always renders
+        return renderCondition.test(entity);
     } // shouldRender()
 
     @Override
     public LayerRenderContext getRenderContext(T entity, float partialTick) {
-        // Base texture layer uses primary entity texture
-        // Actual texture resolution happens in loader-specific renderer
-        return LayerRenderContext.texture(null);
+        // Convert string path to ResourceLocation
+        net.minecraft.resources.ResourceLocation texture = null;
+        if (texturePath != null && !texturePath.isEmpty()) {
+            texture = net.minecraft.resources.ResourceLocation.parse(texturePath);
+        }
+        
+        return LayerRenderContext.texture(texture, entity);
     } // getRenderContext()
+
+    /**
+     * Gets the texture path for this layer.
+     *
+     * @return texture path string
+     */
+    public String getTexturePath() {
+        return texturePath;
+    } // getTexturePath()
+
+    /**
+     * Helper method for backward compatibility with LayerRenderContext-based shouldRender.
+     *
+     * @param context layer render context
+     * @return true if layer should render
+     */
+    public boolean shouldRender(LayerRenderContext context) {
+        return shouldRender((T) context.getEntity(), 0.0f);
+    } // shouldRender()
 
 } // Class: BaseTextureLayer

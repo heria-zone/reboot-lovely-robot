@@ -73,8 +73,18 @@ public class EmissiveLayer<T extends LovelyRobotEntity> extends BaseInternalRend
                 baseContext.color(),
                 baseContext.alpha(),
                 false, // No overlay for emissive
-                baseContext.additionalConditions()
+                baseContext.additionalConditions(),
+                entity
         );
     } // getRenderContext()
+
+    /**
+     * Gets the texture path for this emissive layer.
+     *
+     * @return texture path string
+     */
+    public String getTexturePath() {
+        return getTexture() != null ? getTexture().toString() : null;
+    } // getTexturePath()
 
 } // Class: EmissiveLayer
