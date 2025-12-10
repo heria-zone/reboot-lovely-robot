@@ -1,8 +1,6 @@
 package net.msymbios.llovelyr.shared.recipe;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
@@ -10,49 +8,55 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import net.msymbios.llovelyr.lib.recipes.serializers.BaseRecipeSerializer;
+import net.msymbios.llovelyr.lib.recipes.serializers.RecipeCodecHelper;
+import net.msymbios.llovelyr.lib.recipes.serializers.NetworkSerializationHelper;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Serializer for spawn egg crafting recipes with data transfer.
+ * Fabric wrapper for spawn egg crafting recipe serialization.
  * <p>
- * <b>Architecture:</b> Uses codec-based serialization matching vanilla ShapedRecipe
- * format while wrapping in custom recipe class for data transfer logic.
+ * <b>Architecture:</b> Thin wrapper around Common BaseRecipeSerializer that handles
+ * Fabric-specific codec and stream codec interfaces. Delegates business logic
+ * to Common module while keeping loader-specific dependencies in Fabric.
  * <p>
- * <b>Migration Note:</b> Minecraft 1.21.1 uses codec-based serialization. This
- * serializer directly parses the recipe JSON using the same structure as vanilla
- * shaped recipes (group, category, pattern/key, result).
- * <p>
- * <b>Design Decision:</b> Direct codec approach ensures full compatibility with
- * vanilla recipe format and proper pattern validation. Uses supplier pattern to
- * break cyclical dependency with registry class.
+ * <b>Design Decision:</b> Wrapper pattern maintains loader isolation while
+ * extracting reusable recipe serialization logic to Common module.
  */
 public class LovelySpawnRecipeSerializer implements RecipeSerializer<LovelySpawnRecipe> {
 
-    // -- Variables --
+    // -- Fields --
 
-    private final Item robotCoreItem;
+    private final BaseRecipeSerializer commonSerializer;
     private final MapCodec<LovelySpawnRecipe> codecInstance;
     private final StreamCodec<RegistryFriendlyByteBuf, LovelySpawnRecipe> streamCodecInstance;
 
     // -- Constructor --
 
     public LovelySpawnRecipeSerializer(Item robotCoreItem) {
-        this.robotCoreItem = robotCoreItem;
-        
-        this.codecInstance = RecordCodecBuilder.mapCodec(instance ->
-                instance.group(
-                        Codec.STRING.optionalFieldOf("group", "").forGetter(LovelySpawnRecipe::getGroup),
-                        CraftingBookCategory.CODEC.optionalFieldOf("category", CraftingBookCategory.MISC).forGetter(LovelySpawnRecipe::category),
-                        ShapedRecipePattern.MAP_CODEC.forGetter(LovelySpawnRecipe::pattern),
-                        ItemStack.STRICT_SINGLE_ITEM_CODEC.fieldOf("result").forGetter(recipe -> recipe.getResultItem(null))
-                ).apply(instance, (group, category, pattern, result) ->
-                        new LovelySpawnRecipe(group, category, pattern, result, robotCoreItem))
+        // Delegate codec creation to Common helper
+        this.codecInstance = RecipeCodecHelper.createShapedRecipeCodec(
+            (group, category, pattern, result) -> 
+                new LovelySpawnRecipe(group, category, pattern, result, robotCoreItem)
         );
         
-        this.streamCodecInstance = StreamCodec.of(this::toNetwork, this::fromNetwork);
-    } // Constructor: LovelySpawnRecipeSerializer ()
+        // Delegate network serialization to Common helper
+        this.streamCodecInstance = NetworkSerializationHelper.createShapedRecipeNetworkCodec(
+            (group, category, pattern, result) -> 
+                new LovelySpawnRecipe(group, category, pattern, result, robotCoreItem),
+            recipe -> recipe.getGroup(),
+            recipe -> recipe.category(),
+            recipe -> recipe.pattern(),
+            recipe -> recipe.getResultItem(null)
+        );
+        
+        this.commonSerializer = new BaseRecipeSerializer<>(
+                () -> this.codecInstance,
+                this.streamCodecInstance
+        );
+    } // Constructor: LovelySpawnRecipeSerializer()
 
-    // -- Inherited Methods --
+    // -- RecipeSerializer Implementation --
 
     @Override
     public @NotNull MapCodec<LovelySpawnRecipe> codec() {
@@ -64,21 +68,6 @@ public class LovelySpawnRecipeSerializer implements RecipeSerializer<LovelySpawn
         return streamCodecInstance;
     } // streamCodec()
 
-    // -- Network Serialization --
 
-    private LovelySpawnRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
-        String group = buf.readUtf();
-        CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);
-        ShapedRecipePattern pattern = ShapedRecipePattern.STREAM_CODEC.decode(buf);
-        ItemStack result = ItemStack.STREAM_CODEC.decode(buf);
-        return new LovelySpawnRecipe(group, category, pattern, result, robotCoreItem);
-    } // fromNetwork()
-
-    private void toNetwork(RegistryFriendlyByteBuf buf, LovelySpawnRecipe recipe) {
-        buf.writeUtf(recipe.getGroup());
-        buf.writeEnum(recipe.category());
-        ShapedRecipePattern.STREAM_CODEC.encode(buf, recipe.pattern());
-        ItemStack.STREAM_CODEC.encode(buf, recipe.getResultItem(null));
-    } // toNetwork()
 
 } // Class: LovelySpawnRecipeSerializer
