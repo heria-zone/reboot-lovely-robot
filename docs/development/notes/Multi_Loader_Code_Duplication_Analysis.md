@@ -3,7 +3,7 @@
 **Status**: Active Analysis  
 **Date**: 2025-01-10  
 **Author**: AI Agent  
-**Related Documents**: [Multi-Loader Code Extraction Spec](.kiro/specs/multi-loader-code-extraction/)
+**Related Documents**: [Multi-Loader Code Extraction Spec](specs/multi-loader-code-extraction/)
 
 ## Executive Summary
 

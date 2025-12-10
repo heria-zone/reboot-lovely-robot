@@ -6,7 +6,7 @@
 **Related Documents**: 
 - [Extraction Documentation](docs/development/extraction-documentation.md)
 - [Developer Guidelines](docs/development/developer-guidelines-future-development.md)
-- [Requirements](.kiro/specs/multi-loader-code-extraction/requirements.md)
+- [Requirements](specs/multi-loader-code-extraction/requirements.md)
 
 ## Purpose
 

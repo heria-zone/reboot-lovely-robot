@@ -4,9 +4,9 @@
 **Last Updated**: 2024-12-10  
 **Author(s)**: AI Agent  
 **Related Documents**: 
-- [Requirements](.kiro/specs/multi-loader-code-extraction/requirements.md)
-- [Design](.kiro/specs/multi-loader-code-extraction/design.md)
-- [Tasks](.kiro/specs/multi-loader-code-extraction/tasks.md)
+- [Requirements](specs/multi-loader-code-extraction/requirements.md)
+- [Design](specs/multi-loader-code-extraction/design.md)
+- [Tasks](specs/multi-loader-code-extraction/tasks.md)
 - [Architectural Extraction Strategy](docs/development/architectural_extraction_doc.md)
 
 ## Purpose

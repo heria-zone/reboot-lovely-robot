@@ -179,15 +179,15 @@ All code designed for future extraction to external HZLib library.
 ### Project Documentation
 - **HZLib Architecture**: `docs/development/HZLib-EntityType-Architecture.md`
 - **Refactoring Plan**: `docs/development/Legacy-1.20.1-Refactoring-Plan.md`
-- **Current Tasks**: `.kiro/specs/hzlib-entitytype-legacy-1-20-1/tasks.md`
+- **Current Tasks**: `specs/hzlib-entitytype-legacy-1-20-1/tasks.md`
 - **Development Checklist**: `docs/development/tasks/November-2025-Development-Checklist.md`
 
 ### Steering Documents
-- **Coding Standards**: `.kiro/steering/project-coding-style.md`
-- **Project Structure**: `.kiro/steering/project-structure.md`
-- **Development Guidelines**: `.kiro/steering/development.md`
-- **Documentation Standards**: `.kiro/steering/documentation.md`
-- **Workflows**: `.kiro/steering/workflows.md`
+- **Coding Standards**: `steering/project-coding-style.md`
+- **Project Structure**: `steering/project-structure.md`
+- **Development Guidelines**: `steering/development.md`
+- **Documentation Standards**: `steering/documentation.md`
+- **Workflows**: `steering/workflows.md`
 
 ## Status
 

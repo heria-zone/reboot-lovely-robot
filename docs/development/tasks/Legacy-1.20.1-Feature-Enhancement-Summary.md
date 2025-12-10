@@ -293,8 +293,8 @@ New config entries needed:
 
 - **HZLib Architecture**: `docs/development/HZLib-EntityType-Architecture.md`
 - **Refactoring Plan**: `docs/development/Legacy-1.20.1-Refactoring-Plan.md`
-- **Current Tasks**: `.kiro/specs/hzlib-entitytype-legacy-1-20-1/tasks.md`
-- **Coding Standards**: `.kiro/steering/project-coding-style.md`
+- **Current Tasks**: `specs/hzlib-entitytype-legacy-1-20-1/tasks.md`
+- **Coding Standards**: `steering/project-coding-style.md`
 
 ---
 

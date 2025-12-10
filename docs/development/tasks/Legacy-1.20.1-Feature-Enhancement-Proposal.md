@@ -2112,10 +2112,10 @@ All framework and lib code is designed for future extraction:
 
 - **HZLib EntityType Architecture**: `docs/development/HZLib-EntityType-Architecture.md`
 - **Legacy 1.20.1 Refactoring Plan**: `docs/development/Legacy-1.20.1-Refactoring-Plan.md`
-- **Project Coding Style**: `.kiro/steering/project-coding-style.md`
-- **Project Structure**: `.kiro/steering/project-structure.md`
-- **Development Guidelines**: `.kiro/steering/development.md`
-- **Documentation Standards**: `.kiro/steering/documentation.md`
+- **Project Coding Style**: `steering/project-coding-style.md`
+- **Project Structure**: `steering/project-structure.md`
+- **Development Guidelines**: `steering/development.md`
+- **Documentation Standards**: `steering/documentation.md`
 
 ---
 
