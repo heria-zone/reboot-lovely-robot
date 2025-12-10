@@ -12,43 +12,40 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
 
 /**
- * Emissive layer for glowing parts that ignore lighting.
+ * Fabric wrapper for emissive layer rendering.
  * <p>
- * <b>Architecture:</b> Renders specific model parts with full brightness regardless
- * of world lighting. Uses eyes render type for consistent glow effect.
+ * <b>Architecture:</b> Thin wrapper around Common EmissiveLayer that handles
+ * GeckoLib-specific rendering calls. Delegates business logic to Common module
+ * while keeping GeckoLib dependencies in Fabric loader.
  * <p>
- * <b>Design Decision:</b> Separate emissive texture allows glowing elements (eyes,
- * power indicators) without affecting main texture. Grayscale emissive texture
- * can be tinted for color variation.
- * <p>
- * <b>Performance:</b> Additional render pass, but emissive textures are typically
- * small (mostly transparent). Negligible performance impact.
+ * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
+ * extracting reusable emissive rendering logic to Common module.
  */
 public class EmissiveLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
-    private final ResourceLocation emissiveTexture;
+    private final net.msymbios.llovelyr.lib.rendering.EmissiveLayer<T> commonLayer;
 
     // -- Constructor --
 
     /**
-     * Creates emissive layer with specified glow texture.
+     * Creates Fabric emissive layer wrapper.
      *
      * @param renderer parent GeoRenderer managing this entity
-     * @param emissiveTexture texture containing glowing parts (white = glow, transparent = no glow)
+     * @param emissiveTexture texture containing glowing parts
      */
     public EmissiveLayer(GeoRenderer<T> renderer, ResourceLocation emissiveTexture) {
         this.renderer = renderer;
-        this.emissiveTexture = emissiveTexture;
+        this.commonLayer = new net.msymbios.llovelyr.lib.rendering.EmissiveLayer<>(emissiveTexture);
     } // Constructor: EmissiveLayer()
 
     // -- IInternalRenderLayer Implementation --
 
     @Override
     public boolean shouldRender(T entity, float partialTick) {
-        return emissiveTexture != null; // Only render if texture is provided
+        return commonLayer.shouldRender(entity, partialTick);
     } // shouldRender()
 
     @Override
@@ -56,6 +53,9 @@ public class EmissiveLayer<T extends LovelyRobotEntity & GeoEntity> implements I
                        MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick,
                        int packedLight, int packedOverlay) {
 
+        // Get texture from common layer
+        ResourceLocation emissiveTexture = ResourceLocation.parse(commonLayer.getTexturePath());
+        
         // Render with eyes type for full brightness
         RenderType emissiveRenderType = RenderType.eyes(emissiveTexture);
 

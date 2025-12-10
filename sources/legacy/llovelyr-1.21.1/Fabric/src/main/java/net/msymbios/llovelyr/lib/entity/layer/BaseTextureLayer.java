@@ -10,20 +10,20 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
 
 /**
- * Base texture layer rendering the primary robot appearance.
+ * Fabric wrapper for base texture layer rendering.
  * <p>
- * <b>Architecture:</b> Foundation layer that renders the main textured model.
- * Always renders first in layer stack. Texture is resolved from entity's
- * variant and color configuration.
+ * <b>Architecture:</b> Thin wrapper that delegates business logic to Common module
+ * while maintaining GeckoLib-specific rendering calls in Fabric module.
  * <p>
- * <b>Design Decision:</b> Separated from renderer to allow texture swapping
- * without renderer changes. Entity controls texture selection based on state.
+ * <b>Design Decision:</b> Preserves GeckoLib integration patterns while extracting
+ * layer rendering logic to shared Common implementation.
  */
 public class BaseTextureLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
+    private final net.msymbios.llovelyr.lib.rendering.BaseTextureLayer commonLayer;
 
     // -- Constructor --
 
@@ -34,13 +34,15 @@ public class BaseTextureLayer<T extends LovelyRobotEntity & GeoEntity> implement
      */
     public BaseTextureLayer(GeoRenderer<T> renderer) {
         this.renderer = renderer;
+        this.commonLayer = new net.msymbios.llovelyr.lib.rendering.BaseTextureLayer<>();
     } // Constructor: BaseTextureLayer()
 
     // -- IInternalRenderLayer Implementation --
 
     @Override
     public boolean shouldRender(T entity, float partialTick) {
-        return true; // Base texture always renders
+        // Delegate to Common layer logic
+        return commonLayer.shouldRender(entity, partialTick);
     } // shouldRender()
 
     @Override
@@ -48,9 +50,12 @@ public class BaseTextureLayer<T extends LovelyRobotEntity & GeoEntity> implement
                        MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick,
                        int packedLight, int packedOverlay) {
 
-        // Render base model with entity's texture - this is the primary render
-        // No need to call anything here as the base render happens in GeoEntityRenderer
-        // This layer exists for consistency in the layer system
+        // Delegate business logic to Common layer
+        if (commonLayer.shouldRender(entity, partialTick)) {
+            // GeckoLib-specific rendering remains in Fabric module
+            // Base texture rendering is handled by the main renderer
+            // This layer exists for consistency in the layer system
+        }
     } // render()
 
 } // Class: BaseTextureLayer

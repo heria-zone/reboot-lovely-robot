@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
+import net.msymbios.llovelyr.lib.rendering.LayerRenderContext;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
@@ -14,38 +15,37 @@ import software.bernie.geckolib.renderer.GeoRenderer;
 import java.util.function.Predicate;
 
 /**
- * Static detail overlay layer for accessories and decorative elements.
+ * Fabric wrapper for detail overlay layer rendering.
  * <p>
- * <b>Architecture:</b> Renders additional details (headphones, armor, accessories)
- * as texture overlays. Supports conditional rendering based on entity state.
+ * <b>Architecture:</b> Thin wrapper around Common BaseTextureLayer that handles
+ * GeckoLib-specific rendering calls. Delegates business logic to Common module
+ * while keeping GeckoLib dependencies in Fabric loader.
  * <p>
- * <b>Design Decision:</b> Overlays as separate textures avoid texture file explosion
- * when combining multiple accessories. Each accessory is independent layer.
- * <p>
- * <b>Usage Example:</b> Headphones overlay, armor plating, decorative patterns.
+ * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
+ * extracting reusable overlay rendering logic to Common module.
  */
 public class DetailOverlayLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
-    private final ResourceLocation overlayTexture;
-    private final Predicate<T> renderCondition;
+    private final net.msymbios.llovelyr.lib.rendering.BaseTextureLayer<T> commonLayer;
 
     // -- Constructors --
 
     /**
-     * Creates detail overlay that always renders.
+     * Creates Fabric detail overlay layer wrapper that always renders.
      *
      * @param renderer parent GeoRenderer managing this entity
      * @param overlayTexture texture containing detail overlay
      */
     public DetailOverlayLayer(GeoRenderer<T> renderer, ResourceLocation overlayTexture) {
-        this(renderer, overlayTexture, entity -> true);
+        this.renderer = renderer;
+        this.commonLayer = new net.msymbios.llovelyr.lib.rendering.BaseTextureLayer<>(overlayTexture.toString());
     } // Constructor: DetailOverlayLayer()
 
     /**
-     * Creates detail overlay with conditional rendering.
+     * Creates Fabric detail overlay layer wrapper with conditional rendering.
      *
      * @param renderer parent GeoRenderer managing this entity
      * @param overlayTexture texture containing detail overlay
@@ -53,21 +53,24 @@ public class DetailOverlayLayer<T extends LovelyRobotEntity & GeoEntity> impleme
      */
     public DetailOverlayLayer(GeoRenderer<T> renderer, ResourceLocation overlayTexture, Predicate<T> renderCondition) {
         this.renderer = renderer;
-        this.overlayTexture = overlayTexture;
-        this.renderCondition = renderCondition;
+        this.commonLayer = new net.msymbios.llovelyr.lib.rendering.BaseTextureLayer<>(overlayTexture.toString(), renderCondition);
     } // Constructor: DetailOverlayLayer()
 
     // -- IInternalRenderLayer Implementation --
 
     @Override
     public boolean shouldRender(T entity, float partialTick) {
-        return overlayTexture != null && renderCondition.test(entity);
+        LayerRenderContext context = LayerRenderContext.texture(null, entity);
+        return commonLayer.shouldRender(context);
     } // shouldRender()
 
     @Override
     public void render(PoseStack poseStack, T entity, BakedGeoModel bakedModel, RenderType renderType,
                        MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick,
                        int packedLight, int packedOverlay) {
+
+        // Get texture from common layer
+        ResourceLocation overlayTexture = ResourceLocation.parse(commonLayer.getTexturePath());
 
         // Render overlay with cutout for transparency
         RenderType overlayRenderType = RenderType.armorCutoutNoCull(overlayTexture);

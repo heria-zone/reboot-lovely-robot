@@ -9,37 +9,24 @@ import net.minecraft.resources.ResourceLocation;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.lib.entity.layer.IInternalRenderLayer;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Composable layer-based renderer for robot entities.
  * <p>
- * <b>Architecture:</b> Replaces monolithic renderer with flexible layer system.
- * Layers are rendered in order added, allowing visual effect composition without
- * texture file explosion or renderer subclassing.
+ * <b>Architecture:</b> Thin wrapper around common InternalLayerRenderer that handles
+ * GeckoLib-specific rendering integration. Delegates layer management to common
+ * implementation while maintaining GeckoLib boundary.
  * <p>
- * <b>Design Decision:</b> Layer composition over inheritance. Single renderer class
- * handles all robot variants by configuring different layer stacks. New visual effects
- * require new layer class, not new renderer.
- * <p>
- * <b>Performance:</b> Each layer adds one render pass. Typical robot uses 2-4 layers
- * (base, emissive, 1-2 overlays). Layers with shouldRender() returning false are
- * skipped with minimal overhead.
- * <p>
- * <b>Usage Example:</b>
- * <pre>{@code
- * new InternalLayerRenderer(context, model)
- *     .addLayer(new BaseTextureLayer<>(this))
- *     .addLayer(new EmissiveLayer<>(this, EMISSIVE_TEXTURE))
- *     .addLayer(new DetailOverlayLayer<>(this, HEADPHONES_TEXTURE))
- *     .addLayer(new DynamicColorLayer<>(this, COLLAR_MASK, DynamicColorLayer::healthGradientColor));
- * }</pre>
+ * <b>Design Decision:</b> Wrapper pattern preserves existing API while enabling
+ * code reuse through common layer system. Layer composition logic is shared
+ * across all loaders.
  */
 public class InternalLayerRenderer<T extends LovelyRobotEntity & GeoEntity> extends GeoEntityRenderer<T> {
 
