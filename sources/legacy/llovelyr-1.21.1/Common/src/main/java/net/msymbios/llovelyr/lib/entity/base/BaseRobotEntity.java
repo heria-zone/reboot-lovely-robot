@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.common.entity.enums.EntityVariant;
+import net.msymbios.llovelyr.lib.entity.helpers.EntitySpawnHelper;
 
 /**
  * Base class for robot entity implementations across different loaders.
@@ -113,7 +114,7 @@ public abstract class BaseRobotEntity extends LovelyRobotEntity {
         // ensureRegistered() is called automatically during tick() and data loading
         
         // Validate entity data consistency
-        net.msymbios.llovelyr.lib.entity.helpers.EntitySpawnHelper.validateEntityData(this);
+        EntitySpawnHelper.validateEntityData(this);
     } // handlePostSpawnInitialization()
 
     /**
