@@ -5,42 +5,46 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
+import net.msymbios.llovelyr.lib.rendering.LayerRenderContext;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
 
 /**
- * Base texture layer rendering the primary robot appearance.
+ * NeoForge wrapper for base texture layer rendering.
  * <p>
- * <b>Architecture:</b> Foundation layer that renders the main textured model.
- * Always renders first in layer stack. Texture is resolved from entity's
- * variant and color configuration.
+ * <b>Architecture:</b> Thin wrapper around Common BaseTextureLayer that handles
+ * NeoForge-specific GeckoLib rendering calls. Delegates business logic to Common module
+ * while keeping GeckoLib dependencies in NeoForge loader.
  * <p>
- * <b>Design Decision:</b> Separated from renderer to allow texture swapping
- * without renderer changes. Entity controls texture selection based on state.
+ * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
+ * extracting reusable base texture logic to Common module.
  */
 public class BaseTextureLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
+    private final net.msymbios.llovelyr.lib.rendering.BaseTextureLayer<T> commonLayer;
 
     // -- Constructor --
 
     /**
-     * Creates base texture layer with parent renderer reference.
+     * Creates NeoForge base texture layer wrapper.
      *
      * @param renderer parent GeoRenderer managing this entity
      */
     public BaseTextureLayer(GeoRenderer<T> renderer) {
         this.renderer = renderer;
+        this.commonLayer = new net.msymbios.llovelyr.lib.rendering.BaseTextureLayer<>();
     } // Constructor: BaseTextureLayer()
 
     // -- IInternalRenderLayer Implementation --
 
     @Override
     public boolean shouldRender(T entity, float partialTick) {
-        return true; // Base texture always renders
+        LayerRenderContext context = LayerRenderContext.texture(null, entity);
+        return commonLayer.shouldRender(context);
     } // shouldRender()
 
     @Override
@@ -48,9 +52,9 @@ public class BaseTextureLayer<T extends LovelyRobotEntity & GeoEntity> implement
                        MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick,
                        int packedLight, int packedOverlay) {
 
-        // Render base model with entity's texture - this is the primary render
-        // No need to call anything here as the base render happens in GeoEntityRenderer
+        // Base texture rendering is handled by the primary GeoEntityRenderer
         // This layer exists for consistency in the layer system
+        // No additional rendering needed here
     } // render()
 
 } // Class: BaseTextureLayer

@@ -6,8 +6,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
+import net.msymbios.llovelyr.lib.rendering.LayerRenderContext;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
@@ -16,48 +16,38 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * Dynamic color layer for runtime-tinted visual indicators.
+ * NeoForge wrapper for dynamic color layer rendering.
  * <p>
- * <b>Architecture:</b> Renders grayscale mask texture tinted with color calculated
- * from entity state. Enables dynamic visual feedback (health indicators, combat mode,
- * status effects) without texture file proliferation.
+ * <b>Architecture:</b> Thin wrapper around Common DynamicColorLayer that handles
+ * NeoForge-specific GeckoLib rendering calls. Delegates business logic to Common module
+ * while keeping GeckoLib dependencies in NeoForge loader.
  * <p>
- * <b>Design Decision:</b> Single grayscale mask + runtime tinting vs separate colored
- * textures. Reduces texture count from N colors to 1 mask. Color calculation happens
- * per-frame but is typically simple (health percentage, state enum).
- * <p>
- * <b>Usage Examples:</b>
- * - Health collar: Green (full) → Yellow (half) → Red (critical)
- * - Combat mode: Blue (passive) → Orange (wary) → Red (aggressive)
- * - Status effects: Purple (poisoned), White (regenerating)
- * <p>
- * <b>Performance:</b> Color calculation runs every frame. Keep color functions
- * lightweight. Cache complex calculations in entity tick logic.
+ * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
+ * extracting reusable dynamic color logic to Common module.
  */
 public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
-    private final ResourceLocation maskTexture;
-    private final Function<T, Integer> colorProvider;
-    private final Predicate<T> renderCondition;
+    private final net.msymbios.llovelyr.lib.rendering.DynamicColorLayer<T> commonLayer;
 
     // -- Constructors --
 
     /**
-     * Creates dynamic color layer that always renders.
+     * Creates NeoForge dynamic color layer wrapper that always renders.
      *
      * @param renderer parent GeoRenderer managing this entity
      * @param maskTexture grayscale mask texture (white = tinted, transparent = no tint)
      * @param colorProvider function calculating ARGB color from entity state
      */
     public DynamicColorLayer(GeoRenderer<T> renderer, ResourceLocation maskTexture, Function<T, Integer> colorProvider) {
-        this(renderer, maskTexture, colorProvider, entity -> true);
+        this.renderer = renderer;
+        this.commonLayer = new net.msymbios.llovelyr.lib.rendering.DynamicColorLayer<>(maskTexture, colorProvider);
     } // Constructor: DynamicColorLayer()
 
     /**
-     * Creates dynamic color layer with conditional rendering.
+     * Creates NeoForge dynamic color layer wrapper with conditional rendering.
      *
      * @param renderer parent GeoRenderer managing this entity
      * @param maskTexture grayscale mask texture (white = tinted, transparent = no tint)
@@ -67,16 +57,14 @@ public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implemen
     public DynamicColorLayer(GeoRenderer<T> renderer, ResourceLocation maskTexture,
                              Function<T, Integer> colorProvider, Predicate<T> renderCondition) {
         this.renderer = renderer;
-        this.maskTexture = maskTexture;
-        this.colorProvider = colorProvider;
-        this.renderCondition = renderCondition;
+        this.commonLayer = new net.msymbios.llovelyr.lib.rendering.DynamicColorLayer<>(maskTexture, colorProvider, renderCondition);
     } // Constructor: DynamicColorLayer()
 
     // -- IInternalRenderLayer Implementation --
 
     @Override
     public boolean shouldRender(T entity, float partialTick) {
-        return maskTexture != null && renderCondition.test(entity);
+        return commonLayer.shouldRender(entity, partialTick);
     } // shouldRender()
 
     @Override
@@ -84,8 +72,10 @@ public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implemen
                        MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick,
                        int packedLight, int packedOverlay) {
 
-        // Calculate color from entity state
-        int color = colorProvider.apply(entity);
+        // Get color and texture from common layer
+        LayerRenderContext context = LayerRenderContext.texture(null, entity);
+        int color = commonLayer.calculateColor(context);
+        ResourceLocation maskTexture = ResourceLocation.parse(commonLayer.getTexturePath());
 
         // Render mask with calculated tint
         RenderType colorRenderType = RenderType.armorCutoutNoCull(maskTexture);
@@ -104,46 +94,16 @@ public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implemen
         );
     } // render()
 
-    // -- Color Utility Methods --
+    // -- Color Utility Methods (Delegated to Common) --
 
     /**
      * Creates health-based color gradient (bright green → yellow → red).
-     * <p>
-     * <b>Usage:</b> Health indicators on collar, eyes, or body parts.
-     * <p>
-     * <b>Color Palette:</b>
-     * - 100% health: Bright lime green (RGB 50, 255, 100) - matches headphone green
-     * - 50% health: Yellow (RGB 255, 255, 0)
-     * - 0% health: Red (RGB 255, 0, 0)
      *
      * @param entity robot entity with health data
      * @return ARGB color representing health percentage
      */
     public static int healthGradientColor(LovelyRobotEntity entity) {
-        float healthPercent = entity.getHealth() / entity.getMaxHealth();
-
-        // Bright lime green (similar to headphone green)
-        final int HEALTH_GREEN_RED = 50;
-        final int HEALTH_GREEN_GREEN = 255;
-        final int HEALTH_GREEN_BLUE = 100;
-
-        int red, green, blue;
-        
-        if (healthPercent > 0.5f) {
-            // Bright green to yellow (100% → 50%)
-            // Interpolate from bright green to yellow
-            float t = (1.0f - healthPercent) * 2.0f; // 0.0 at 100%, 1.0 at 50%
-            red = (int) (HEALTH_GREEN_RED + (255 - HEALTH_GREEN_RED) * t);
-            green = (int) (HEALTH_GREEN_GREEN + (255 - HEALTH_GREEN_GREEN) * t);
-            blue = (int) (HEALTH_GREEN_BLUE + (0 - HEALTH_GREEN_BLUE) * t);
-        } else {
-            // Yellow to red (50% → 0%)
-            red = 255;
-            green = (int) (healthPercent * 2.0f * 255);
-            blue = 0;
-        }
-
-        return FastColor.ARGB32.color(255, red, green, blue);
+        return net.msymbios.llovelyr.lib.rendering.DynamicColorLayer.healthGradientColor(entity);
     } // healthGradientColor()
 
     /**
@@ -155,7 +115,7 @@ public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implemen
      * @return ARGB color with full opacity
      */
     public static int solidColor(int red, int green, int blue) {
-        return FastColor.ARGB32.color(255, red, green, blue);
+        return net.msymbios.llovelyr.lib.rendering.DynamicColorLayer.solidColor(red, green, blue);
     } // solidColor()
 
     /**
@@ -168,7 +128,7 @@ public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implemen
      * @return ARGB color with specified opacity
      */
     public static int colorWithAlpha(int red, int green, int blue, int alpha) {
-        return FastColor.ARGB32.color(alpha, red, green, blue);
+        return net.msymbios.llovelyr.lib.rendering.DynamicColorLayer.colorWithAlpha(red, green, blue, alpha);
     } // colorWithAlpha()
 
 } // Class: DynamicColorLayer
