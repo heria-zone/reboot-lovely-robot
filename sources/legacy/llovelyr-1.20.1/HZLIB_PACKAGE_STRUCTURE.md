@@ -175,9 +175,9 @@ hzlib/
 ## References
 
 - **Architecture Document**: `docs/development/HZLib-EntityType-Architecture.md`
-- **Design Document**: `.kiro/specs/hzlib-entitytype-legacy-1-20-1/design.md`
-- **Requirements Document**: `.kiro/specs/hzlib-entitytype-legacy-1-20-1/requirements.md`
-- **Implementation Tasks**: `.kiro/specs/hzlib-entitytype-legacy-1-20-1/tasks.md`
+- **Design Document**: `specs/hzlib-entitytype-legacy-1-20-1/design.md`
+- **Requirements Document**: `specs/hzlib-entitytype-legacy-1-20-1/requirements.md`
+- **Implementation Tasks**: `specs/hzlib-entitytype-legacy-1-20-1/tasks.md`
 
 ## Version History
 
