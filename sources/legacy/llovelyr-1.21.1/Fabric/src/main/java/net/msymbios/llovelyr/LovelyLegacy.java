@@ -2,6 +2,8 @@ package net.msymbios.llovelyr;
 
 import net.fabricmc.api.ModInitializer;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotType;
+import net.msymbios.llovelyr.lib.services.FabricServices;
+import net.msymbios.llovelyr.lib.services.Services;
 import net.msymbios.llovelyr.source.*;
 
 /**
@@ -41,6 +43,14 @@ public class LovelyLegacy implements ModInitializer {
 	 */
 	@Override
 	public void onInitialize() {
+		// Initialize platform services first
+		Services.setInstance(new FabricServices());
+		
+		// Test platform services functionality
+		LovelyConstant.LOGGER.info("Platform: {}", Services.get().getPlatformName());
+		LovelyConstant.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
+		LovelyConstant.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
+		
 		LovelyConfigs.register();
 		LovelyRobotType.reloadFromConfig();
 		LovelyGroups.register();

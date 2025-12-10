@@ -1,6 +1,8 @@
 package net.msymbios.llovelyr;
 
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotType;
+import net.msymbios.llovelyr.lib.services.NeoForgeServices;
+import net.msymbios.llovelyr.lib.services.Services;
 import net.msymbios.llovelyr.source.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -47,6 +49,14 @@ public class LovelyLegacy {
      * @param modContainer mod container for configuration registration
      */
     public LovelyLegacy(IEventBus modEventBus, ModContainer modContainer) {
+        // Initialize platform services first
+        Services.setInstance(new NeoForgeServices());
+        
+        // Test platform services functionality
+        LovelyConstant.LOGGER.info("Platform: {}", Services.get().getPlatformName());
+        LovelyConstant.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
+        LovelyConstant.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
+        
         // Register configuration system
         LovelyConfigs.register(modContainer);
         LovelyConfigs.onLoadCallback(LovelyRobotType::reloadFromConfig);

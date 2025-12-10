@@ -1,7 +1,10 @@
 package net.msymbios.llovelyr.source;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.minecraft.world.entity.LivingEntity;
 import net.msymbios.llovelyr.common.commands.LovelyCommands;
+import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
 
 /**
  * Centralizes Fabric event handler registration.
@@ -37,14 +40,14 @@ public class LovelyEvents {
         });
 
         // Register entity death handler for experience claiming
-        net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_UNLOAD.register((entity, world) -> {
+        ServerEntityEvents.ENTITY_UNLOAD.register((entity, world) -> {
             // Check if entity is dead (not just unloading)
-            if (entity instanceof net.minecraft.world.entity.LivingEntity livingEntity && !livingEntity.isAlive()) {
+            if (entity instanceof LivingEntity livingEntity && !livingEntity.isAlive()) {
                 java.util.UUID deadEntityId = entity.getUUID();
                 
                 // Find all robots in the world and let them claim exp from this entity
                 world.getEntitiesOfClass(
-                    net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity.class,
+                    LovelyRobotEntity.class,
                     entity.getBoundingBox().inflate(100.0),
                     robot -> true
                 ).forEach(robot -> robot.claimAccumulatedExp(deadEntityId));

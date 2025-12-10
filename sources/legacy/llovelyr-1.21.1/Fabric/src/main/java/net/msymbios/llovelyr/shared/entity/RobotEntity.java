@@ -6,6 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
+import net.msymbios.llovelyr.lib.entity.base.BaseRobotEntity;
 import net.msymbios.llovelyr.lib.entity.InternalAnimation;
 import net.msymbios.llovelyr.source.LovelyItems;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -14,13 +15,19 @@ import software.bernie.geckolib.animatable.instance.SingletonAnimatableInstanceC
 import software.bernie.geckolib.animation.AnimatableManager;
 
 /**
- * Unified entity implementation for all robot variants.
+ * Fabric-specific robot entity implementation with GeckoLib integration.
+ * <p>
+ * <b>Architecture:</b> Extends BaseRobotEntity for common behavior while implementing
+ * GeoEntity for Fabric-specific GeckoLib animation system integration.
  * <p>
  * <b>Design Decision:</b> Composition over inheritance - single entity class with
  * behavior configured via NativeEntityType instead of separate classes per variant.
  * Reduces code duplication and simplifies variant addition.
+ * <p>
+ * <b>Fabric Specifics:</b> Uses constructor-injected pickup item for flexibility
+ * and direct item references without Supplier wrappers.
  */
-public class RobotEntity extends LovelyRobotEntity implements GeoEntity {
+public class RobotEntity extends BaseRobotEntity implements GeoEntity {
 
     // -- Variables --
 
@@ -33,6 +40,7 @@ public class RobotEntity extends LovelyRobotEntity implements GeoEntity {
     public RobotEntity(EntityType<? extends LovelyRobotEntity> entityType, Level level, NativeEntityType nativeEntity, Item item) {
         super(entityType, level, nativeEntity);
         pickupItem = item;
+        handlePostSpawnInitialization();
     } // Constructor: RobotEntity()
 
     // -- Inherited Methods --
@@ -53,19 +61,8 @@ public class RobotEntity extends LovelyRobotEntity implements GeoEntity {
 
     @Override
     public Item getPickupItem() {
-        return pickupItem;
-        //EntityVariant variant = EntityVariant.byName(this.nativeEntity.getKey());
-        //assert variant != null;
-        //return switch (variant) {
-        //    case Bunny -> LovelyItems.BUNNY_SPAWN;
-        //    case Bunny2 -> LovelyItems.BUNNY2_SPAWN;
-        //    case Dragon -> LovelyItems.DRAGON_SPAWN;
-        //    case Honey -> LovelyItems.HONEY_SPAWN;
-        //    case Kitsune -> LovelyItems.KITSUNE_SPAWN;
-        //    case Neko -> LovelyItems.NEKO_SPAWN;
-        //    case Vanilla -> LovelyItems.VANILLA_SPAWN;
-        //    default -> getDropItem().getItem();
-        //};
+        // Fabric uses constructor-injected pickup item for flexibility
+        return pickupItem != null ? pickupItem : getDropItem().getItem();
     } // getPickupItem ()
 
 } // Class: RobotEntity

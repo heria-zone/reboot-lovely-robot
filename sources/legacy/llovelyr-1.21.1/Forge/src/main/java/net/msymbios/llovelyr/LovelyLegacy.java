@@ -1,6 +1,8 @@
 package net.msymbios.llovelyr;
 
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotType;
+import net.msymbios.llovelyr.lib.services.ForgeServices;
+import net.msymbios.llovelyr.lib.services.Services;
 import net.msymbios.llovelyr.source.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -44,6 +46,14 @@ public class LovelyLegacy {
      */
     public LovelyLegacy(FMLJavaModLoadingContext context) {
         IEventBus events = context.getModEventBus();
+
+        // Initialize platform services first
+        Services.setInstance(new ForgeServices());
+        
+        // Test platform services functionality
+        LovelyConstant.LOGGER.info("Platform: {}", Services.get().getPlatformName());
+        LovelyConstant.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
+        LovelyConstant.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
 
         LovelyConfigs.register(context);
         LovelyConfigs.onLoadCallback(LovelyRobotType::reloadFromConfig);
