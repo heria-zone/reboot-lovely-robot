@@ -2,7 +2,7 @@ package net.msymbios.llovelyr.common.entity.internal;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.core.particles.ParticleTypes;
-import net.msymbios.llovelyr.common.utils.Utility;
+import net.msymbios.llovelyr.lib.utils.MathUtils;
 
 /**
  * Manages particle effect spawning for robot entities.
@@ -144,7 +144,7 @@ public class InternalParticle {
      * @return random velocity value
      */
     private static double calculateVelocity() {
-        return Utility.random.nextGaussian() * VELOCITY_MULTIPLIER;
+        return MathUtils.RANDOM.nextGaussian() * VELOCITY_MULTIPLIER;
     } // calculateVelocity ()
 
     /**
@@ -154,7 +154,7 @@ public class InternalParticle {
      * @return random velocity value
      */
     private static double calculateVelocity(double multiplier) {
-        return Utility.random.nextGaussian() * multiplier;
+        return MathUtils.RANDOM.nextGaussian() * multiplier;
     } // calculateVelocity ()
 
 } // Class: InternalParticle

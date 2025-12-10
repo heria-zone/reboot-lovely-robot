@@ -63,7 +63,7 @@ public class CombatStats {
      * been initialized yet. Level will be set to 1 or higher during first interaction.
      *
      * @param level new level (0 or higher)
-     * @throws IllegalArgumentException if level < 0
+     * @throws IllegalArgumentException if level &lt; 0
      */
     public void setLevel(int level) {
         if (level < 0) {
@@ -85,7 +85,7 @@ public class CombatStats {
      * Sets the current experience points.
      *
      * @param experience new experience
-     * @throws IllegalArgumentException if experience < 0
+     * @throws IllegalArgumentException if experience &lt; 0
      */
     public void setExperience(int experience) {
         if (experience < 0) {
@@ -107,7 +107,7 @@ public class CombatStats {
      * Sets the current health points.
      *
      * @param currentHp new current HP
-     * @throws IllegalArgumentException if currentHp < 0 or currentHp > maxHp
+     * @throws IllegalArgumentException if currentHp &lt; 0 or currentHp &gt; maxHp
      */
     public void setCurrentHp(int currentHp) {
         if (currentHp < 0) {
@@ -132,7 +132,7 @@ public class CombatStats {
      * Sets the maximum health points.
      *
      * @param maxHp new max HP
-     * @throws IllegalArgumentException if maxHp < 1
+     * @throws IllegalArgumentException if maxHp &lt; 1
      */
     public void setMaxHp(int maxHp) {
         if (maxHp < 1) {
@@ -158,7 +158,7 @@ public class CombatStats {
      * Sets the attack damage.
      *
      * @param attack new attack
-     * @throws IllegalArgumentException if attack < 0
+     * @throws IllegalArgumentException if attack &lt; 0
      */
     public void setAttack(int attack) {
         if (attack < 0) {
@@ -180,7 +180,7 @@ public class CombatStats {
      * Sets the defense value.
      *
      * @param defense new defense
-     * @throws IllegalArgumentException if defense < 0
+     * @throws IllegalArgumentException if defense &lt; 0
      */
     public void setDefense(int defense) {
         if (defense < 0) {

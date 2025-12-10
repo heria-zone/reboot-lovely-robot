@@ -2,10 +2,10 @@ package net.msymbios.llovelyr.common.utils;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
+import net.msymbios.llovelyr.lib.utils.MathUtils;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 /**
  * Common utility methods and constants used throughout the mod.
@@ -22,10 +22,7 @@ public class Utility {
     // -- Constants --
 
     /** Mathematical constant PI for angle calculations. */
-    public static final double PI = 3.14159265358979323846;
-
-    /** Shared random instance for consistent randomization across mod. */
-    public static final Random random = new Random();
+    public static final double PI = MathUtils.PI;
 
     // -- Entity Name Methods --
 
@@ -94,20 +91,22 @@ public class Utility {
                 "Valley", "Caves", "Plains"
         );
 
-        String connector = connectors.get(random.nextInt(connectors.size()));
+        String connector = connectors.get(MathUtils.RANDOM.nextInt(connectors.size()));
         String title;
 
         // Use place titles for location-based connectors
         if (connector.equals(" of the ") || connector.equals(" from the ") ||
                 connector.equals(" among the ") || connector.equals(" beneath the ") ||
                 connector.equals(" above the ")) {
-            title = placeTitles.get(random.nextInt(placeTitles.size()));
+            title = placeTitles.get(MathUtils.RANDOM.nextInt(placeTitles.size()));
         } else {
-            title = titles.get(random.nextInt(titles.size()));
+            title = titles.get(MathUtils.RANDOM.nextInt(titles.size()));
         }
 
         return connector + title;
-    } // getRandomTitle ()`n    // -- Boolean Operations --
+    } // getRandomTitle ()
+
+    // -- Boolean Operations --
 
     /**
      * Inverts boolean value.
