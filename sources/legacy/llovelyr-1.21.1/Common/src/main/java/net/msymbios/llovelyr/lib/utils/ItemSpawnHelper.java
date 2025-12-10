@@ -13,6 +13,8 @@ import net.msymbios.llovelyr.common.shared.LovelyIdentifier;
 import net.msymbios.llovelyr.framework.entity.enums.EntityTexture;
 import net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry;
 import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
+import net.msymbios.llovelyr.lib.items.helpers.ItemNBTHelper;
+import net.msymbios.llovelyr.lib.items.helpers.ItemValidationHelper;
 
 /**
  * Provides utility methods for spawn item operations and entity initialization.
@@ -24,6 +26,9 @@ import net.msymbios.llovelyr.lib.registry.RobotRegistryManager;
  * <b>Design Decision:</b> Static utility methods avoid object creation overhead
  * while providing consistent behavior across all loaders. Data component handling
  * is abstracted to support Minecraft 1.21.1's migration from NBT to typed components.
+ * <p>
+ * <b>Delegation Pattern:</b> Delegates to specialized helper classes for NBT processing
+ * and validation while maintaining backward compatibility with existing code.
  */
 public class ItemSpawnHelper {
 
@@ -43,13 +48,12 @@ public class ItemSpawnHelper {
      * @return true if spawn is allowed, false if limit exceeded
      */
     public static boolean canSpawnRobot(ServerLevel level, Player player) {
-        OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(level);
-        
-        if (!registry.canSpawnRobot(player.getUUID(), SharedConfigs.Common.OwnerMaxRobotNum)) {
+        if (!net.msymbios.llovelyr.lib.entity.helpers.EntitySpawnHelper.checkSpawnLimit(level, player, SharedConfigs.Common.OwnerMaxRobotNum)) {
             // Display error message to player
+            int currentCount = net.msymbios.llovelyr.lib.entity.helpers.EntitySpawnHelper.getCurrentRobotCount(level, player);
             player.displayClientMessage(
                     Component.literal("Cannot spawn robot: limit of " + SharedConfigs.Common.OwnerMaxRobotNum + " reached (" +
-                            registry.getRobotsForOwner(player.getUUID()).size() + " active)"),
+                            currentCount + " active)"),
                     true
             );
             return false;
@@ -65,18 +69,14 @@ public class ItemSpawnHelper {
      * <p>
      * <b>Migration Support:</b> Handles Minecraft 1.21.1's transition from NBT
      * to typed data components. Returns null if no custom data present.
+     * <p>
+     * <b>Delegation:</b> Delegates to ItemValidationHelper for consistent data access.
      *
      * @param itemStack item stack to extract data from
      * @return CompoundTag with custom data, or null if not present
      */
     public static CompoundTag extractCustomData(ItemStack itemStack) {
-        if (itemStack.has(DataComponents.CUSTOM_DATA)) {
-            CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
-            if (customData != null) {
-                return customData.copyTag();
-            }
-        }
-        return null;
+        return ItemValidationHelper.extractCustomData(itemStack);
     } // extractCustomData()
 
     /**
@@ -84,71 +84,98 @@ public class ItemSpawnHelper {
      * <p>
      * <b>Default Values:</b> Sets random color and level 0 as baseline robot state.
      * Used when spawn egg lacks custom data from crafting or other sources.
+     * <p>
+     * <b>Delegation:</b> Delegates to ItemValidationHelper for consistent initialization.
      *
      * @param itemStack item stack to initialize
      */
     public static void initializeDefaultData(ItemStack itemStack) {
-        if (!itemStack.has(DataComponents.CUSTOM_DATA)) {
-            CompoundTag compound = new CompoundTag();
-            compound.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.RANDOM.getId());
-            compound.putInt(LovelyIdentifier.STAT_LEVEL, 0);
-            itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compound));
-        }
+        ItemValidationHelper.initializeDefaultItemData(itemStack);
     } // initializeDefaultData()
+
+    // -- Enhanced Item Operations --
+
+    /**
+     * Validates and sanitizes item data, ensuring spawn item integrity.
+     * <p>
+     * <b>Data Integrity:</b> Ensures item contains valid data for entity spawning,
+     * correcting invalid values and adding missing fields as needed.
+     *
+     * @param itemStack the ItemStack to validate
+     * @return true if item is valid or was successfully corrected
+     */
+    public static boolean validateSpawnItem(ItemStack itemStack) {
+        return ItemValidationHelper.validateAndSanitizeItemData(itemStack);
+    } // validateSpawnItem()
+
+    /**
+     * Checks if ItemStack represents a valid spawn item.
+     * <p>
+     * <b>Completeness Check:</b> Verifies item has required data for spawning.
+     *
+     * @param itemStack the ItemStack to check
+     * @return true if item is valid for spawning
+     */
+    public static boolean isValidSpawnItem(ItemStack itemStack) {
+        return ItemValidationHelper.isValidSpawnItem(itemStack);
+    } // isValidSpawnItem()
 
     // -- Entity Initialization --
 
     /**
      * Transfers NBT data from spawn item to spawned robot entity.
      * <p>
-     * <b>Data Transfer:</b> Applies custom name, texture, level, experience,
-     * health, and protection enchantments from item data to entity state.
-     * <p>
-     * <b>Validation:</b> Only applies non-default values to avoid overwriting
-     * entity defaults with empty data. Handles missing data gracefully.
+     * <b>Delegation:</b> Uses EntitySpawnHelper for comprehensive entity initialization
+     * including data validation and registry management.
      *
      * @param dataNBT the NBT compound from spawn item
      * @param entity the spawned robot entity to initialize
      */
     public static void initializeEntityFromData(CompoundTag dataNBT, LovelyRobotEntity entity) {
-        if (dataNBT == null) return;
+        if (dataNBT == null || entity == null) return;
+        
+        // Validate data before applying
+        CompoundTag validatedData = net.msymbios.llovelyr.lib.entity.helpers.EntityDataHelper.validateEntityData(dataNBT);
         
         // Apply custom name if present
-        if (!dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME).isEmpty()) {
-            entity.setCustomName(Component.literal(dataNBT.getString(LovelyIdentifier.STAT_CUSTOM_NAME)));
+        if (!validatedData.getString(LovelyIdentifier.STAT_CUSTOM_NAME).isEmpty()) {
+            entity.setCustomName(Component.literal(validatedData.getString(LovelyIdentifier.STAT_CUSTOM_NAME)));
         }
         
         // Apply texture if not random
-        if (dataNBT.getInt(LovelyIdentifier.STAT_COLOR) != EntityTexture.RANDOM.getId()) {
-            entity.setTexture(dataNBT.getInt(LovelyIdentifier.STAT_COLOR));
+        if (validatedData.getInt(LovelyIdentifier.STAT_COLOR) != EntityTexture.RANDOM.getId()) {
+            entity.setTexture(validatedData.getInt(LovelyIdentifier.STAT_COLOR));
         }
 
         // Apply level and experience if greater than 0
-        if (dataNBT.getInt(LovelyIdentifier.STAT_LEVEL) > 0) {
-            entity.setCurrentLevel(dataNBT.getInt(LovelyIdentifier.STAT_LEVEL));
+        if (validatedData.getInt(LovelyIdentifier.STAT_LEVEL) > 0) {
+            entity.setCurrentLevel(validatedData.getInt(LovelyIdentifier.STAT_LEVEL));
         }
-        if (dataNBT.getInt(LovelyIdentifier.STAT_EXP) > 0) {
-            entity.setExp(dataNBT.getInt(LovelyIdentifier.STAT_EXP));
+        if (validatedData.getInt(LovelyIdentifier.STAT_EXP) > 0) {
+            entity.setExp(validatedData.getInt(LovelyIdentifier.STAT_EXP));
         }
         
         // Apply health if specified
-        if (dataNBT.contains(LovelyIdentifier.STAT_HP)) {
-            entity.setCurrentHealthValue(dataNBT.getFloat(LovelyIdentifier.STAT_HP));
+        if (validatedData.contains(LovelyIdentifier.STAT_HP)) {
+            entity.setCurrentHealthValue(validatedData.getFloat(LovelyIdentifier.STAT_HP));
         }
 
         // Apply protection enchantments if greater than 0
-        if (dataNBT.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION) > 0) {
-            entity.setFireProtection(dataNBT.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION));
+        if (validatedData.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION) > 0) {
+            entity.setFireProtection(validatedData.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION));
         }
-        if (dataNBT.getInt(LovelyIdentifier.STAT_FALL_PROTECTION) > 0) {
-            entity.setFallProtection(dataNBT.getInt(LovelyIdentifier.STAT_FALL_PROTECTION));
+        if (validatedData.getInt(LovelyIdentifier.STAT_FALL_PROTECTION) > 0) {
+            entity.setFallProtection(validatedData.getInt(LovelyIdentifier.STAT_FALL_PROTECTION));
         }
-        if (dataNBT.getInt(LovelyIdentifier.STAT_BLAST_PROTECTION) > 0) {
-            entity.setBlastProtection(dataNBT.getInt(LovelyIdentifier.STAT_BLAST_PROTECTION));
+        if (validatedData.getInt(LovelyIdentifier.STAT_BLAST_PROTECTION) > 0) {
+            entity.setBlastProtection(validatedData.getInt(LovelyIdentifier.STAT_BLAST_PROTECTION));
         }
-        if (dataNBT.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION) > 0) {
-            entity.setProjectileProtection(dataNBT.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION));
+        if (validatedData.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION) > 0) {
+            entity.setProjectileProtection(validatedData.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION));
         }
+        
+        // Validate final entity state
+        net.msymbios.llovelyr.lib.entity.helpers.EntitySpawnHelper.validateEntityData(entity);
     } // initializeEntityFromData()
 
 } // Class: ItemSpawnHelper
