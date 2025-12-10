@@ -1,8 +1,9 @@
 package net.msymbios.llovelyr.lib.entity;
 
 import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
-import net.msymbios.llovelyr.common.entity.enums.EntityAnimation;
-import net.msymbios.llovelyr.framework.entity.enums.EntityState;
+import net.msymbios.llovelyr.lib.animation.AnimationDefinitions;
+import net.msymbios.llovelyr.lib.animation.AnimationStateManager;
+import net.msymbios.llovelyr.lib.animation.BoneTransformations;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.cache.object.GeoBone;
@@ -13,111 +14,107 @@ import software.bernie.geckolib.model.data.EntityModelData;
 /**
  * Manages GeckoLib animation controllers and bone transformations for robot entities.
  * <p>
- * <b>Architecture:</b> Bridges entity behavior state with GeckoLib's animation system,
- * translating game logic (walking, attacking, sitting) into animation playback commands.
- * Separate controllers handle locomotion and combat to prevent animation conflicts.
+ * <b>Architecture:</b> Thin wrapper around common animation system that handles
+ * GeckoLib-specific integration. Delegates business logic to common animation
+ * classes while maintaining GeckoLib boundary.
  * <p>
- * <b>Design Decision:</b> Static methods allow reuse across all robot types without
- * inheritance complexity. Each robot can customize animations by overriding controller
- * creation while sharing common animation logic.
- * <p>
- * <b>Performance:</b> Animation controllers are created once per entity and cached by
- * GeckoLib. Bone transformations run every render frame but are optimized by GeckoLib's
- * animation processor.
+ * <b>Design Decision:</b> Wrapper pattern preserves existing API while enabling
+ * code reuse through common animation system. Animation logic is shared across
+ * all loaders.
  */
 public class InternalAnimation {
 
-    // -- Animation Definitions --
+    // -- Animation Definitions (GeckoLib-specific) --
 
     /** Neutral standing animation, loops indefinitely. */
-    public static final RawAnimation IDLE = RawAnimation.begin().thenLoop(EntityAnimation.Idle.getName());
+    public static final RawAnimation IDLE = RawAnimation.begin().thenLoop(AnimationDefinitions.IDLE);
 
     /** Walking animation, loops while entity is moving. */
-    public static final RawAnimation WALK = RawAnimation.begin().thenLoop(EntityAnimation.Walk.getName());
+    public static final RawAnimation WALK = RawAnimation.begin().thenLoop(AnimationDefinitions.WALK);
 
     /** Standing idle animation in standby mode, loops indefinitely. */
-    public static final RawAnimation REST = RawAnimation.begin().thenLoop(EntityAnimation.Rest.getName());
+    public static final RawAnimation REST = RawAnimation.begin().thenLoop(AnimationDefinitions.REST);
 
     /** Sitting/resting animation in standby mode after delay, loops indefinitely. */
-    public static final RawAnimation SIT = RawAnimation.begin().thenLoop(EntityAnimation.Sit.getName());
+    public static final RawAnimation SIT = RawAnimation.begin().thenLoop(AnimationDefinitions.SIT);
 
     /** Attack swing animation, plays once per attack. */
-    public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then(EntityAnimation.Attack.getName(), Animation.LoopType.PLAY_ONCE);
+    public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then(AnimationDefinitions.ATTACK, Animation.LoopType.PLAY_ONCE);
 
     // -- Animation Controllers --
 
     /**
      * Creates attack animation controller for combat actions.
      * <p>
-     * <b>Architecture:</b> Separate controller prevents attack animations from being
-     * interrupted by locomotion. 5-tick transition ensures smooth blending.
-     * <p>
-     * <b>Usage:</b> Triggered by entity's swinging flag, synced with damage application.
+     * <b>Architecture:</b> Delegates logic to common AnimationStateManager while
+     * handling GeckoLib-specific animation creation and playback.
      *
      * @param animatable robot entity to animate
      * @param <T> entity type extending LovelyRobotEntity and GeoAnimatable
      * @return configured attack animation controller
      */
     public static <T extends LovelyRobotEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
-        return new AnimationController<>(animatable, "Attack", 0, state -> {
-            if (animatable.swinging) {
+        return new AnimationController<>(animatable, AnimationDefinitions.ControllerType.ATTACK.getName(), 
+                AnimationDefinitions.Config.ATTACK_TRANSITION_TICKS, state -> {
+            if (AnimationStateManager.shouldPlayAttackAnimation(animatable)) {
                 return state.setAndContinue(ATTACK_SWING);
             }
             state.getController().forceAnimationReset();
             return PlayState.STOP;
         });
-    } // attackAnimation ()
-
+    } // attackAnimation()
     /**
      * Creates locomotion animation controller for movement and idle states.
      * <p>
-     * <b>Architecture:</b> Handles all non-combat animations with priority order:
-     * moving > sitting (in standby) > resting (in standby) > idle. State checks
-     * run every tick to ensure responsive animation transitions.
-     * <p>
-     * <b>Standby Animation Flow:</b> When in standby mode, robot starts with REST
-     * (standing idle). After configurable delay without movement, transitions to
-     * SIT (sitting pose with smaller hitbox). Movement interrupts sitting and
-     * returns to REST after stopping.
-     * <p>
-     * <b>Design Decision:</b> 5-tick blend time provides smooth transitions between
-     * REST and SIT animations. Movement detection includes velocity check for
-     * extra safety against animation glitches.
+     * <b>Architecture:</b> Delegates logic to common AnimationStateManager while
+     * handling GeckoLib-specific animation creation and playback.
      *
      * @param entity robot entity to animate
      * @param <T> entity type extending LovelyRobotEntity and GeoAnimatable
      * @return configured locomotion animation controller
      */
     public static <T extends LovelyRobotEntity & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
-        return new AnimationController<T>(entity, "Locomotion", 2, state -> {
+        return new AnimationController<T>(entity, AnimationDefinitions.ControllerType.LOCOMOTION.getName(), 
+                AnimationDefinitions.Config.LOCOMOTION_TRANSITION_TICKS, state -> {
             // Check movement with both animation state and velocity
             boolean isMoving = state.isMoving();
-
-            if (isMoving) {
-                return state.setAndContinue(WALK);
-            } else if (entity.getCurrentState() == EntityState.Standby) {
-                // In standby mode - check if should be sitting or resting
-                if (entity.isInSittingPose()) {
-                    return state.setAndContinue(SIT);
-                } else {
-                    return state.setAndContinue(REST);
-                }
-            } else {
-                return state.setAndContinue(IDLE);
-            }
+            
+            String animationName = AnimationStateManager.getLocomotionAnimation(entity, isMoving);
+            RawAnimation animation = getAnimationByName(animationName);
+            
+            return state.setAndContinue(animation);
         });
-    } // locomotionAnimation ()
+    } // locomotionAnimation()
+
+    // -- Animation Mapping --
+
+    /**
+     * Maps animation name to GeckoLib RawAnimation.
+     *
+     * @param animationName animation name from common system
+     * @return corresponding RawAnimation
+     */
+    private static RawAnimation getAnimationByName(String animationName) {
+        if (animationName.equals(AnimationDefinitions.WALK)) {
+            return WALK;
+        } else if (animationName.equals(AnimationDefinitions.REST)) {
+            return REST;
+        } else if (animationName.equals(AnimationDefinitions.SIT)) {
+            return SIT;
+        } else if (animationName.equals(AnimationDefinitions.ATTACK)) {
+            return ATTACK_SWING;
+        } else {
+            return IDLE;
+        }
+    } // getAnimationByName()
 
     // -- Bone Transformations --
 
     /**
      * Applies head rotation to follow entity's look direction.
      * <p>
-     * <b>Architecture:</b> Transforms head bone based on entity's pitch/yaw, creating
-     * natural head tracking. Runs every render frame for smooth head movement.
-     * <p>
-     * <b>Performance:</b> Bone lookup is cached by GeckoLib's animation processor.
-     * Null check prevents crashes if model lacks head bone.
+     * <b>Architecture:</b> Delegates calculation to common BoneTransformations
+     * while handling GeckoLib-specific bone manipulation.
      *
      * @param renderer GeoModel containing bone hierarchy
      * @param event animation state with entity data
@@ -127,21 +124,19 @@ public class InternalAnimation {
         GeoBone head = renderer.getAnimationProcessor().getBone("head");
         if (head != null) {
             EntityModelData entityData = event.getData(DataTickets.ENTITY_MODEL_DATA);
-            head.setRotX(entityData.headPitch() * ((float) Math.PI / 180F));
-            head.setRotY(entityData.netHeadYaw() * ((float) Math.PI / 180F));
+            float[] rotation = BoneTransformations.calculateHeadRotation(
+                    entityData.headPitch(), 
+                    entityData.netHeadYaw()
+            );
+            head.setRotX(rotation[0]);
+            head.setRotY(rotation[1]);
         }
-    } // headAnimation ()
-
+    } // headAnimation()
     /**
      * Configures tail visibility based on entity level for progressive unlocking.
      * <p>
-     * <b>Architecture:</b> Implements Kitsune's 9-tail progression system where tails
-     * unlock as robot levels up. Each tail requires specific level threshold.
-     * <p>
-     * <b>Design Decision:</b> Level-based unlocking provides visual progression feedback
-     * and gameplay incentive for leveling. Final tail (tail09) requires max level.
-     * <p>
-     * <i>Note:</i> Specific to Kitsune variant. Other robots should override or skip.
+     * <b>Architecture:</b> Delegates calculation to common BoneTransformations
+     * while handling GeckoLib-specific bone visibility manipulation.
      *
      * @param entity robot entity with level data
      * @param renderer GeoModel containing tail bones
@@ -149,36 +144,27 @@ public class InternalAnimation {
      * @param <T> entity type extending LovelyRobotEntity and GeoAnimatable
      */
     public static <T extends LovelyRobotEntity & GeoAnimatable> void tailConfigAnimation(LovelyRobotEntity entity, GeoModel renderer, AnimationState<T> event) {
-        var maxLevel = entity.getMaxLevel();
-        var maxTails = 8;
-        int levelPerTails = maxLevel / maxTails;
-        boolean[] tailVisibility = new boolean[maxTails];
-
-        // Show only base tail if below first threshold
-        if (entity.getCurrentLevel() < levelPerTails) {
-            renderer.getAnimationProcessor().getBone("tail0").setHidden(false);
-            for (int i = 0; i <= maxTails; i++) {
-                renderer.getAnimationProcessor().getBone("tail0" + (i + 1)).setHidden(true);
-            }
-            return;
+        BoneTransformations.TailVisibilityConfig config = BoneTransformations.calculateTailVisibility(entity);
+        
+        // Apply visibility to base tail
+        GeoBone baseTail = renderer.getAnimationProcessor().getBone("tail0");
+        if (baseTail != null) {
+            baseTail.setHidden(!config.isBaseTailVisible());
         }
-
-        // Calculate which tails should be visible based on level
-        for (int i = 0; i < maxTails; i++) {
-            int levelToUnlockTail = levelPerTails * i;
-            if (entity.getCurrentLevel() >= levelToUnlockTail) {
-                tailVisibility[i] = true;
+        
+        // Apply visibility to numbered tails (tail01-tail08)
+        for (int i = 1; i <= 8; i++) {
+            GeoBone tail = renderer.getAnimationProcessor().getBone("tail0" + i);
+            if (tail != null) {
+                tail.setHidden(!config.isTailVisible(i));
             }
         }
-
-        // Apply visibility to tail bones
-        renderer.getAnimationProcessor().getBone("tail0").setHidden(true);
-        for (int i = 0; i < maxTails; i++) {
-            renderer.getAnimationProcessor().getBone("tail0" + (i + 1)).setHidden(!tailVisibility[i]);
+        
+        // Apply visibility to final tail (tail09)
+        GeoBone finalTail = renderer.getAnimationProcessor().getBone("tail09");
+        if (finalTail != null) {
+            finalTail.setHidden(!config.isTail09Visible());
         }
-
-        // Final tail requires max level
-        renderer.getAnimationProcessor().getBone("tail09").setHidden(entity.getCurrentLevel() < maxLevel);
-    } // tailConfigAnimation ()
+    } // tailConfigAnimation()
 
 } // Class: InternalAnimation
