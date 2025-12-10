@@ -695,6 +695,8 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
         nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
 
+        // Note: Current health is intentionally NOT included so crafted robots spawn at max health
+
         nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
         nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());
         nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
@@ -1490,7 +1492,8 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
         nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
-        nbt.putFloat(LovelyIdentifier.STAT_HP, this.getCurrentHealthValue());
+
+        // Note: Current health is intentionally NOT included so crafted robots spawn at max health
 
         nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
         nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());
@@ -1555,6 +1558,9 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
         nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
+
+        // Note: Current health is intentionally NOT included so crafted robots spawn at max health
+
         nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
         nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());
         nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
@@ -1674,5 +1680,35 @@ public abstract class LovelyRobotEntity extends InternalEntity {
                 .add(Attributes.ARMOR_TOUGHNESS, entity.getData().getArmorToughness())
                 .build();
     } // createAttributes ()
+
+    // -- Headphone Support Methods --
+
+    /**
+     * Checks if this robot type supports headphone rendering.
+     * <p>
+     * <b>Architecture:</b> Allows robot variants to opt-out of headphone rendering
+     * if the model doesn't support it or if it conflicts with the design.
+     *
+     * @return true if headphones can be rendered on this robot type
+     */
+    public boolean supportsHeadphones() {
+        // Default implementation - most robots support headphones
+        // Override in specific robot classes to disable if needed
+        return true;
+    } // supportsHeadphones()
+
+    /**
+     * Checks if headphones are currently enabled for this entity.
+     * <p>
+     * <b>Architecture:</b> Entity-specific headphone setting that can be toggled
+     * per robot instance. Allows players to customize individual robots.
+     *
+     * @return true if headphones should be rendered on this entity
+     */
+    public boolean hasHeadphonesEnabled() {
+        // Default implementation - headphones enabled by default
+        // This could be extended to read from entity NBT data or config
+        return true;
+    } // hasHeadphonesEnabled()
 
 } // Class LovelyRobotEntity
