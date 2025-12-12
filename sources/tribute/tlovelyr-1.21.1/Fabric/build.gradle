@@ -11,7 +11,7 @@ dependencies {
     
     // GeckoLib for Fabric (if needed)
     if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
-        modImplementation "${fabric_geckolib}"
+        modImplementation "software.bernie.geckolib:${fabric_geckolib}"
     }
     
     // Local library dependencies (Fabric versions) - only if JARs exist
