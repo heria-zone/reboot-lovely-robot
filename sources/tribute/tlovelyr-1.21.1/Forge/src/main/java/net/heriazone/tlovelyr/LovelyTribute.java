@@ -1,6 +1,5 @@
-package net.heriazone.tlovelyr.forge;
+package net.heriazone.tlovelyr;
 
-import net.heriazone.tlovelyr.common.Tribute;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;

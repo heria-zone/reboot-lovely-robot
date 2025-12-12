@@ -17,10 +17,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "${mod_group}.fabric.LovelyTribute"
+      "${mod_group}.LovelyTribute"
     ],
     "client": [
-      "${mod_group}.fabric.LovelyTribute"
+      "${mod_group}.LovelyTribute"
     ]
   },
   "mixins": [

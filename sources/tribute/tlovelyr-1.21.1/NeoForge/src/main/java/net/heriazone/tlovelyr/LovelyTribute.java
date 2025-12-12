@@ -1,6 +1,5 @@
-package net.heriazone.tlovelyr.neoforge;
+package net.heriazone.tlovelyr;
 
-import net.heriazone.tlovelyr.common.Tribute;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;

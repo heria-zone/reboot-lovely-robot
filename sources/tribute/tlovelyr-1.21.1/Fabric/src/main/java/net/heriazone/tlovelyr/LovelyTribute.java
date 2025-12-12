@@ -1,8 +1,7 @@
-package net.heriazone.tlovelyr.fabric;
+package net.heriazone.tlovelyr;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
-import net.heriazone.tlovelyr.common.Tribute;
 
 /**
  * <p>Fabric-specific initialization for the Lovely Tribute mod.</p>

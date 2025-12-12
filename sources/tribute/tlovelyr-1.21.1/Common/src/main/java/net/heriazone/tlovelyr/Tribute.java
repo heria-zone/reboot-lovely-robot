@@ -1,6 +1,6 @@
-package net.heriazone.tlovelyr.common;
+package net.heriazone.tlovelyr;
 
-import net.heriazone.lovelylib.Common;
+import net.heriazone.lovelylib.Lovely;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class Tribute {
 
         // TODO: Add LovelyLib initialization call
         // LovelyLibrary.initialize();
-        Common.initialize();
+        Lovely.initialize();
 
         // TODO: Add common initialization logic here
         // - Register common content
