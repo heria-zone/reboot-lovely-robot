@@ -61,8 +61,10 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // GeckoLib dependency
-    implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
+    // GeckoLib dependency (conditional)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
+    }
 }
 
 processResources {

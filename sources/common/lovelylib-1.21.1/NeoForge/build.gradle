@@ -8,7 +8,7 @@ dependencies {
     
     // GeckoLib for NeoForge (if needed)
     if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
-        implementation "${neoforge_geckolib}"
+        implementation "software.bernie.geckolib:${neoforge_geckolib}"
     }
     
     // HZ Lib dependency (NeoForge version, if needed)
