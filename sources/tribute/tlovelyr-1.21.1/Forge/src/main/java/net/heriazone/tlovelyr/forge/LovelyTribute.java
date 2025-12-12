@@ -1,5 +1,6 @@
 package net.heriazone.tlovelyr.forge;
 
+import net.heriazone.tlovelyr.common.Tribute;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -8,7 +9,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.heriazone.tlovelyr.Common;
 
 /**
  * <p>Forge-specific initialization and event handling for the Lovely Tribute mod.</p>
@@ -20,7 +20,7 @@ import net.heriazone.tlovelyr.Common;
  * <b>Event Coordination:</b> Manages Forge event bus registration and
  * delegates lifecycle events to appropriate handlers.
  */
-@Mod(Common.MOD_ID)
+@Mod(Tribute.MOD_ID)
 public class LovelyTribute {
 
     /**
@@ -30,7 +30,7 @@ public class LovelyTribute {
      * actual initialization to lifecycle events for proper timing.
      */
     public LovelyTribute() {
-        Common.LOGGER.info("Constructing Lovely Tribute for Forge");
+        Tribute.LOGGER.info("Constructing Lovely Tribute for Forge");
         
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         
@@ -44,8 +44,8 @@ public class LovelyTribute {
         
         // Register with Forge event bus for game events
         MinecraftForge.EVENT_BUS.register(this);
-        
-        Common.LOGGER.info("Lovely Tribute Forge constructor complete");
+
+        Tribute.LOGGER.info("Lovely Tribute Forge constructor complete");
     }
 
     /**
@@ -57,15 +57,15 @@ public class LovelyTribute {
      * @param event FML common setup event
      */
     private void onCommonSetup(final FMLCommonSetupEvent event) {
-        Common.LOGGER.info("Lovely Tribute Forge common setup starting");
+        Tribute.LOGGER.info("Lovely Tribute Forge common setup starting");
         
         // Initialize common functionality
-        Common.init();
+        Tribute.init();
         
         // TODO: Forge-specific common setup
         // Register Forge-specific features here
-        
-        Common.LOGGER.info("Lovely Tribute Forge common setup complete");
+
+        Tribute.LOGGER.info("Lovely Tribute Forge common setup complete");
     }
 
     /**
@@ -77,15 +77,15 @@ public class LovelyTribute {
      * @param event FML client setup event
      */
     private void onClientSetup(final FMLClientSetupEvent event) {
-        Common.LOGGER.info("Lovely Tribute Forge client setup starting");
+        Tribute.LOGGER.info("Lovely Tribute Forge client setup starting");
         
         // TODO: Initialize client-side functionality
         // Common.initClient();
         
         // TODO: Forge-specific client setup
         // Register client-side features here
-        
-        Common.LOGGER.info("Lovely Tribute Forge client setup complete");
+
+        Tribute.LOGGER.info("Lovely Tribute Forge client setup complete");
     }
 
 } // Class: LovelyTribute

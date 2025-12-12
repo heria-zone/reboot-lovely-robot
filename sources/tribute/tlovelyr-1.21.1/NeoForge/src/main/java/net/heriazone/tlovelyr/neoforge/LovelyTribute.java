@@ -1,6 +1,6 @@
 package net.heriazone.tlovelyr.neoforge;
 
-import net.heriazone.tlovelyr.common.LovelyTributeCommon;
+import net.heriazone.tlovelyr.common.Tribute;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * <b>Initialization:</b> Automatically invoked by NeoForge mod loader during
  * mod construction phase, ensuring proper setup before game initialization.
  */
-@Mod(LovelyTributeCommon.MOD_ID)
+@Mod(Tribute.MOD_ID)
 public class LovelyTribute {
 
     /**
@@ -55,7 +55,7 @@ public class LovelyTribute {
         
         event.enqueueWork(() -> {
             // Initialize the common mod functionality
-            LovelyTributeCommon.init();
+            Tribute.init();
         });
         
         LOGGER.info("Lovely Tribute NeoForge common setup complete");

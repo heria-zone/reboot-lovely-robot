@@ -2,7 +2,7 @@ package net.heriazone.tlovelyr.fabric;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
-import net.heriazone.tlovelyr.Common;
+import net.heriazone.tlovelyr.common.Tribute;
 
 /**
  * <p>Fabric-specific initialization for the Lovely Tribute mod.</p>
@@ -24,16 +24,16 @@ public class LovelyTribute implements ModInitializer, ClientModInitializer {
      */
     @Override
     public void onInitialize() {
-        Common.LOGGER.info("Initializing Lovely Tribute for Fabric");
+        Tribute.LOGGER.info("Initializing Lovely Tribute for Fabric");
         
         // Initialize common functionality
-        Common.init();
+        Tribute.init();
         
         // TODO: Fabric-specific initialization
         // Register Fabric-specific features here
-        
-        Common.LOGGER.info("Lovely Tribute Fabric initialization complete");
-    }
+
+        Tribute.LOGGER.info("Lovely Tribute Fabric initialization complete");
+    } // onInitialize ()
 
     /**
      * Fabric client-side initialization entry point.
@@ -43,15 +43,15 @@ public class LovelyTribute implements ModInitializer, ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-        Common.LOGGER.info("Initializing Lovely Tribute client for Fabric");
+        Tribute.LOGGER.info("Initializing Lovely Tribute client for Fabric");
         
         // TODO: Initialize client-side functionality
         // Common.initClient();
         
         // TODO: Fabric-specific client initialization
         // Register client-side features here
-        
-        Common.LOGGER.info("Lovely Tribute Fabric client initialization complete");
-    }
+
+        Tribute.LOGGER.info("Lovely Tribute Fabric client initialization complete");
+    } // onInitializeClient ()
 
 } // Class: LovelyTribute
