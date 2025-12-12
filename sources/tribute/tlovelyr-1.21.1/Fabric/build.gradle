@@ -1,6 +1,6 @@
 plugins {
+    id 'multiloader-loader'
     id 'fabric-loom'
-    id 'multiloader-common'
 }
 
 dependencies {
@@ -14,15 +14,22 @@ dependencies {
         modImplementation "${fabric_geckolib}"
     }
     
-    // Library dependencies (Fabric versions)
-    if (project.hasProperty('use_lovelylib') && use_lovelylib.toBoolean()) {
-        modApi "net.msymbios.lovelylib:lovelylib-fabric:${minecraft_version}-${lovelylib_version}"
-    } else if (project.hasProperty('use_hzlib') && use_hzlib.toBoolean()) {
-        modApi "net.heriazone.hzlib:hzlib-fabric:${minecraft_version}-${hzlib_version}"
+    // Local library dependencies (Fabric versions) - only if JARs exist
+    if (project.hasProperty('depends_on_lovelylib') && depends_on_lovelylib.toBoolean()) {
+        def lovelyLibJar = rootProject.file("libs/lovelylib-fabric-${minecraft_version}-${lovelylib_version}.jar")
+        if (lovelyLibJar.exists()) {
+            modApi name: "lovelylib-fabric-${minecraft_version}-${lovelylib_version}", version: ''
+        } else {
+            logger.warn("LovelyLib Fabric JAR not found: ${lovelyLibJar.path}. Run 'gradle refreshDependencies' first.")
+        }
+    } else if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibJar = rootProject.file("libs/hzlib-fabric-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            modApi name: "hzlib-fabric-${minecraft_version}-${hzlib_version}", version: ''
+        }
     }
     
-    // Common module dependency
-    implementation project(':Common')
+
 }
 
 loom {
@@ -31,14 +38,60 @@ loom {
             client()
             setConfigName("Fabric Client")
             ideConfigGenerated(true)
-            runDir("run")
+            runDir("runs/client")
+            programArgs("--username=Dev")
         }
         server {
             server()
             setConfigName("Fabric Server")
             ideConfigGenerated(true)
-            runDir("run")
+            runDir("runs/server")
         }
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mod_id", mod_id
+    inputs.property "mod_name", mod_name
+    inputs.property "mod_version", mod_version
+    inputs.property "mod_description", mod_description
+    inputs.property "mod_authors", mod_authors
+    inputs.property "mod_license", mod_license
+    inputs.property "mod_group", mod_group
+    inputs.property "mod_homepage", mod_homepage
+    inputs.property "mod_source", mod_source
+    inputs.property "mod_issues", mod_issues
+    inputs.property "fabric_loader_version", fabric_loader_version
+    inputs.property "minecraft_version", minecraft_version
+    inputs.property "minecraft_version_range", minecraft_version_range
+    inputs.property "java_version", java_version
+
+    filesMatching("fabric.mod.json") {
+        expand(
+            "version": inputs.properties.version,
+            "mod_id": inputs.properties.mod_id,
+            "mod_name": inputs.properties.mod_name,
+            "mod_version": inputs.properties.mod_version,
+            "mod_description": inputs.properties.mod_description,
+            "mod_authors": inputs.properties.mod_authors,
+            "mod_license": inputs.properties.mod_license,
+            "mod_group": inputs.properties.mod_group,
+            "mod_homepage": inputs.properties.mod_homepage,
+            "mod_source": inputs.properties.mod_source,
+            "mod_issues": inputs.properties.mod_issues,
+            "fabric_loader_version": inputs.properties.fabric_loader_version,
+            "minecraft_version": inputs.properties.minecraft_version,
+            "minecraft_version_range": inputs.properties.minecraft_version_range,
+            "java_version": inputs.properties.java_version
+        )
+    }
+
+    filesMatching("${mod_id}.mixins.json") {
+        expand(
+            "mod_id": inputs.properties.mod_id,
+            "mod_group": inputs.properties.mod_group
+        )
     }
 }
 

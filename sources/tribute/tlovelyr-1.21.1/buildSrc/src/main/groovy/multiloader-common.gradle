@@ -35,26 +35,27 @@ repositories {
         url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
     }
     
-    // Library dependencies (conditional based on gradle.properties)
-    if (project.hasProperty('use_hzlib') && use_hzlib.toBoolean()) {
-        flatDir {
-            dirs '../hzlib-1.21.1/build/libs'
-        }
-    }
-    
-    if (project.hasProperty('use_lovelylib') && use_lovelylib.toBoolean()) {
-        flatDir {
-            dirs '../lovelylib-1.21.1/build/libs'
-        }
+    // Local library dependencies
+    flatDir {
+        dirs rootProject.file('libs')  // Local JARs directory
     }
 }
 
 dependencies {
-    // Conditional library dependencies
-    if (project.hasProperty('use_lovelylib') && use_lovelylib.toBoolean()) {
-        api "net.msymbios.lovelylib:lovelylib-common:${minecraft_version}-${lovelylib_version}"
-    } else if (project.hasProperty('use_hzlib') && use_hzlib.toBoolean()) {
-        api "net.heriazone.hzlib:hzlib-common:${minecraft_version}-${hzlib_version}"
+    // Local library dependencies using flatDir - only if JARs exist
+    // Only include common jars for the Common module, not for loader-specific modules
+    if (project.name == 'Common' && project.hasProperty('depends_on_lovelylib') && depends_on_lovelylib.toBoolean()) {
+        def lovelyLibJar = rootProject.file("libs/lovelylib-common-${minecraft_version}-${lovelylib_version}.jar")
+        if (lovelyLibJar.exists()) {
+            api name: "lovelylib-common-${minecraft_version}-${lovelylib_version}", version: ''
+        } else {
+            logger.warn("LovelyLib Common JAR not found: ${lovelyLibJar.path}. Run 'gradle refreshDependencies' first.")
+        }
+    } else if (project.name == 'Common' && project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibJar = rootProject.file("libs/hzlib-common-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            api name: "hzlib-common-${minecraft_version}-${hzlib_version}", version: ''
+        }
     }
 }
 
@@ -65,6 +66,17 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(GenerateModuleMetadata) {
     enabled = false
+}
+
+// Declare capabilities on the outgoing configurations.
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations."$variant".outgoing {
+        capability("$group:$mod_id-${project.name}:$version")
+        capability("$group:$mod_id:$version")
+    }
+    publishing.publications.configureEach {
+        suppressPomMetadataWarningsFor(variant)
+    }
 }
 
 jar {

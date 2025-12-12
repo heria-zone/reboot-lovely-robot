@@ -1,35 +1,39 @@
 {
   "schemaVersion": 1,
-  "id": "tlovelyr",
-  "version": "1.0.0",
-  "name": "Lovely Tribute",
-  "description": "Lovely Tribute - Faithful recreation of the original LovelyRobot mod.",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
   "authors": [
-    "MSymbios"
+    "${mod_authors}"
   ],
   "contact": {
-    "homepage": "https://github.com/msymbios/lovely-tribute",
-    "sources": "https://github.com/msymbios/lovely-tribute",
-    "issues": "https://github.com/msymbios/lovely-tribute/issues"
+    "homepage": "${mod_homepage}",
+    "sources": "${mod_source}",
+    "issues": "${mod_issues}"
   },
-  "license": "MIT License",
-  "icon": "assets/tlovelyr/icon.png",
+  "license": "${mod_license}",
+  "icon": "assets/${mod_id}/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.heriazone.tlovelyr.fabric.TributeFabric"
+      "${mod_group}.fabric.LovelyTribute"
+    ],
+    "client": [
+      "${mod_group}.fabric.LovelyTribute"
     ]
   },
   "mixins": [
-    "tlovelyr.mixins.json"
+    "${mod_id}.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.16.9",
+    "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
-    "minecraft": "~1.21.1",
-    "java": ">=21"
+    "minecraft": "~${minecraft_version}",
+    "java": ">=${java_version}"
   },
   "suggests": {
-    "lovelylib": "*"
+    "lovelylib": "*",
+    "geckolib": "*"
   }
 }
