@@ -31,10 +31,10 @@ public class LovelyLib implements ModInitializer {
     
     @Override
     public void onInitialize() {
-        LOGGER.info("Lovely Lib {} initializing for Fabric", Common.VERSION);
+        LOGGER.info("Lovely Lib {} initializing for Fabric", Lovely.VERSION);
         
         // Initialize the core library
-        Common.initialize();
+        Lovely.initialize();
         
         // Initialize Fabric-specific features
         initializeFabricFeatures();

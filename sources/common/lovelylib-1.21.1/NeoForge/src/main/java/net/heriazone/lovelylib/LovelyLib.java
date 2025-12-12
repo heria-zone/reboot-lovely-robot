@@ -1,6 +1,5 @@
 package net.heriazone.lovelylib;
 
-import net.heriazone.lovelylib.Common;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -34,7 +33,7 @@ public class LovelyLib {
     // -- Constructor --
     
     public LovelyLib(IEventBus modEventBus) {
-        LOGGER.info("Lovely Lib {} initializing for NeoForge", Common.VERSION);
+        LOGGER.info("Lovely Lib {} initializing for NeoForge", Lovely.VERSION);
         
         // Register setup event
         modEventBus.addListener(this::onCommonSetup);
@@ -57,7 +56,7 @@ public class LovelyLib {
         
         event.enqueueWork(() -> {
             // Initialize the core library
-            Common.initialize();
+            Lovely.initialize();
             
             // Initialize NeoForge-specific features
             initializeNeoForgeFeatures();

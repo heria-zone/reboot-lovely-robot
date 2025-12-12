@@ -34,7 +34,7 @@ public class LovelyLib {
     // -- Constructor --
     
     public LovelyLib() {
-        LOGGER.info("Lovely Lib {} initializing for Forge", Common.VERSION);
+        LOGGER.info("Lovely Lib {} initializing for Forge", Lovely.VERSION);
         
         // Get the mod event bus
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -60,7 +60,7 @@ public class LovelyLib {
         
         event.enqueueWork(() -> {
             // Initialize the core library
-            Common.initialize();
+            Lovely.initialize();
             
             // Initialize Forge-specific features
             initializeForgeFeatures();
