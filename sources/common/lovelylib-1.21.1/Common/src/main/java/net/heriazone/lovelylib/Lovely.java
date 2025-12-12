@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  * @since 1.21.1
  */
-public class Common {
+public class Lovely {
 
     // -- Constants --
     
@@ -102,4 +102,4 @@ public class Common {
         return LIBRARY_ID;
     }
 
-} // Class: Common
+} // Class: Lovely

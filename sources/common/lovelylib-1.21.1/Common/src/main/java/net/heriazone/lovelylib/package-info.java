@@ -7,14 +7,14 @@
  * <p>
  * <b>Key Components:</b>
  * <ul>
- * <li>{@link net.heriazone.lovelylib.Common} - Main library initialization and management</li>
+ * <li>{@link net.heriazone.lovelylib.Lovely} - Main library initialization and management</li>
  * <li>Robot entity management systems</li>
  * <li>AI behavior coordination</li>
  * <li>Cross-loader compatibility layer</li>
  * </ul>
  * <p>
  * <b>Usage:</b> Initialize the library during your mod's initialization phase by calling
- * {@link net.heriazone.lovelylib.Common#initialize()}.
+ * {@link net.heriazone.lovelylib.Lovely#initialize()}.
  * 
  * @author MSymbios
  * @version 1.0.0
