@@ -1,0 +1,42 @@
+plugins {
+    id 'multiloader-common'
+}
+
+dependencies {
+    // Add common dependencies here
+    // Library dependencies are handled by multiloader-common.gradle
+    
+    // SLF4J for logging
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${mod_name} Common"
+                description = "${mod_description}"
+                url = "${mod_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${mod_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${mod_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${mod_source}"
+                }
+            }
+        }
+    }
+}

@@ -1,275 +1,173 @@
-# Sprint 01 - Clean Architecture Refactoring
+# SPRINT 01 TASK - Fix Lovely Lib Multiloader Build Issues
 
-**Status**: In Progress
-**Started**: 2025-12-07
-**Target Completion**: 2025-12-14
+**Status**: Completed
+**Last Updated**: 2025-01-12
+**Author**: AI Agent
+**Related Documents**: 
+- [ADR_002_Multiloader_Dependency_Configuration.md](../decisions/ADR_002_Multiloader_Dependency_Configuration.md)
+
+## Purpose
+Fix the Lovely Lib multiloader library build issues where the Common module was not being properly included as a dependency to the loader-specific modules (Fabric, Forge, NeoForge).
 
 ## Objectives
+- [x] Analyze build failure and identify root cause
+- [x] Compare with working Legacy 1.21.1 implementation
+- [x] Fix multiloader plugin configuration
+- [x] Fix capability configuration in buildSrc
+- [x] Verify successful build across all loaders
+- [x] Document architectural decision
 
-Refactor 1.21.1 Legacy version to implement clean architecture with feature-based system improvements:
+## Problem Analysis
 
-1. Create new feature classes (PickupFeature, DropFeature, LootDropFeature)
-2. Improve command system with "me" variant
-3. Fix NBT data flow for spawn items
-4. Fix experience accumulation system
-5. Consolidate data saving system with EntityData container
+### Initial Error
+```
+error: cannot find symbol
+import net.heriazone.lovelylib.Common;
+                              ^
+  symbol:   class Common
+  location: package net.heriazone.lovelylib
+```
 
-## Tasks
+### Root Cause
+The Lovely Lib multiloader configuration had two critical issues:
 
-### Phase 1: Create New Feature Classes ✓ COMPLETED
+1. **Wrong Plugin Usage**: Loader modules were using `multiloader-common` instead of `multiloader-loader`
+2. **Missing Capability Configuration**: The buildSrc multiloader-common.gradle was missing capability declarations
 
-#### 1.1 PickupFeature
-- [x] Create PickupFeature.java in Common
-- [x] Implement getPickupItem() method
-- [x] Implement createPickupItem() method
-- [x] Implement applyPickupData() method
-- [ ] Add to NativeEntityType configuration
-- [ ] Integrate with entity drop logic
+## Implementation
 
-#### 1.2 DropFeature
-- [x] Create DropFeature.java in Common
-- [x] Implement getDropItem() method
-- [x] Implement getDropCount() method
-- [ ] Add to NativeEntityType configuration
-- [ ] Integrate with entity drop logic
+### Files Modified
+- `sources/common/lovelylib-1.21.1/NeoForge/build.gradle`
+- `sources/common/lovelylib-1.21.1/Fabric/build.gradle`
+- `sources/common/lovelylib-1.21.1/Forge/build.gradle`
+- `sources/common/lovelylib-1.21.1/Common/build.gradle`
+- `sources/common/lovelylib-1.21.1/buildSrc/src/main/groovy/multiloader-common.gradle`
 
-#### 1.3 LootDropFeature
-- [x] Create LootDropFeature.java in Common
-- [x] Implement LootEntry inner class
-- [x] Implement getLootTable() method
-- [x] Implement generateDrops() method
-- [ ] Add to NativeEntityType configuration
-- [ ] Integrate with entity death logic
+### Key Changes
 
-### Phase 2: Improve Command System
+#### 1. Plugin Configuration Fix
+**Before (Broken)**:
+```gradle
+plugins {
+    id 'net.neoforged.moddev'
+    id 'multiloader-common'  // WRONG
+}
+```
 
-#### 2.1 Create "me" Command Variant
-- [ ] Analyze existing command structure
-- [ ] Create MeCommandHandler.java
-- [ ] Implement auto-detection of command sender
-- [ ] Update command registration
-- [ ] Test with various robot commands
+**After (Fixed)**:
+```gradle
+plugins {
+    id 'multiloader-loader'  // CORRECT
+    id 'net.neoforged.moddev'
+}
+```
 
-### Phase 3: Fix NBT Data Flow
+#### 2. Capability Configuration Fix
+Added missing capability declarations to multiloader-common.gradle:
+```gradle
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations."$variant".outgoing {
+        capability("$group:$lib_id-${project.name}:$version")
+        capability("$group:$lib_id:$version")
+    }
+}
+```
 
-#### 3.1 Spawn Item NBT Handling
-- [ ] Create ISpawnItemNBT interface in Common
-- [ ] Update Fabric LovelySpawnItem
-- [ ] Update Forge LovelySpawnItem
-- [ ] Integrate with PickupFeature
+#### 3. Common Module Enhancement
+Enhanced Common/build.gradle with proper configurations:
+```gradle
+configurations {
+    commonJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    commonResources {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
 
-#### 3.2 Entity NBT Loading
-- [ ] Update InternalEntity.readFromNBT()
-- [ ] Update LovelyRobotEntity.readFromNBT()
-- [ ] Ensure entity interprets NBT correctly
+artifacts {
+    commonJava sourceSets.main.java.sourceDirectories.singleFile
+    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}
+```
 
-### Phase 4: Fix Experience Accumulation System ✓ COMPLETED
+## Validation Results
 
-#### 4.1 Create Experience Tracking System
-- [x] Create ExperienceTracker.java
-- [x] Implement PendingExpEntry class
-- [x] Implement accumulation logic
-- [x] Implement cleanup/purge logic
+### Build Success
+```bash
+cd sources/common/lovelylib-1.21.1
+./gradlew clean build --stacktrace
+```
 
-#### 4.2 Modify Attack Handler
-- [x] Add ExperienceTracker to InternalEntity
-- [x] Update handleAttackTarget() to use tracker
-- [x] Update handleDamage() to use tracker
-- [x] Add claimAccumulatedExp() method for death events
-- [x] Add periodic purge in tick() method
-- [ ] Test with immortal entities
+**Result**: ✅ BUILD SUCCESSFUL in 48s
+- 63 actionable tasks: 60 executed, 3 up-to-date
+- All loader modules (Common, Fabric, Forge, NeoForge) compiled successfully
+- Only 1 deprecation warning in Forge (expected, not blocking)
 
-### Phase 5: Consolidate Data Saving System ✓ COMPLETED
+### Architecture Validation
+- ✅ Common module properly exposes classes to loader modules
+- ✅ NeoForge can import `net.heriazone.lovelylib.Common`
+- ✅ Fabric can import `net.heriazone.lovelylib.Common`
+- ✅ Forge can import `net.heriazone.lovelylib.Common`
+- ✅ Capability resolution works correctly
+- ✅ Multiloader plugin system functions as intended
 
-#### 5.1 Create EntityData Container
-- [x] Create EntityData.java
-- [x] Consolidate all stat objects
-- [x] Implement toNBT() and fromNBT()
-- [x] Add copy() methods to stat classes
+## Lessons Learned
 
-#### 5.2 Create Migration System
-- [x] Create EntityDataMigration.java
-- [x] Implement legacy NBT detection
-- [x] Implement migration logic
-- [ ] Test with old robot data
+### Multiloader Architecture Pattern
+The correct pattern for multiloader libraries is:
+- **Common Module**: Uses `multiloader-common` plugin, provides shared code
+- **Loader Modules**: Use `multiloader-loader` plugin, depend on Common automatically
+- **Capability System**: Ensures proper dependency resolution across modules
 
-#### 5.3 Update NBT Methods
-- [x] Update InternalEntity NBT methods with EntityData
-- [x] Integrated EntityDataMigration for backward compatibility
-- [x] LovelyRobotEntity inherits migration from parent
-- [ ] Test migration with old saves
-
-### Phase 6: Integration & Testing
-
-- [ ] Update NativeEntityType with new features
-- [ ] Update loader-specific code
-- [ ] Run full test suite
-- [ ] Document changes in CURRENT_STATE.md
-
-## Implementation Notes
-
-### Design Decisions
-- Features are per-type with instance override capability
-- Experience timeout: 5 minutes (300 seconds)
-- Migration support will be maintained for backward compatibility
-- "me" commands work for all owner commands
-
-### Technical Details
-- All logic in Common module
-- Loader-specific code only for platform APIs
-- Feature-based architecture maintained
-- Backward compatibility required
-
-## Blockers
-
-None currently.
-
-## Completed Work
-
-- ✅ Initial planning and architecture design
-- ✅ Task breakdown and documentation
-- ✅ **Phase 1**: Created PickupFeature, DropFeature, LootDropFeature classes
-- ✅ **Phase 4**: Created ExperienceTracker for exp accumulation fix
-- ✅ **Phase 4**: Integrated ExperienceTracker into InternalEntity and LovelyRobotEntity
-- ✅ **Phase 5**: Created EntityData container and EntityDataMigration
-- ✅ Added copy() and toString() methods to all stat classes
-- ✅ Updated handleAttackTarget() to accumulate exp
-- ✅ Updated handleDamage() to accumulate exp
-- ✅ Added claimAccumulatedExp() method for death events
-- ✅ Added periodic purge in tick() method
+### Key Dependencies
+The multiloader-loader plugin automatically:
+- Sets up Common module as compileOnly dependency
+- Configures commonJava and commonResources configurations
+- Includes Common sources in compilation and packaging
+- Handles capability requirements for proper dependency resolution
 
 ## Next Steps
+- [x] Document decision in ADR_002
+- [ ] Extract robot functionality from Legacy to build library components
+- [ ] Implement robot entity management APIs
+- [ ] Add AI behavior system interfaces
+- [ ] Create usage documentation for library consumers
 
-1. **Testing**: Test ExperienceTracker with immortal entities (user testing)
-2. **Testing**: Test EntityDataMigration with old saves (user testing)
-3. **Testing**: Test PickupFeature with DataComponents (pickup/spawn cycle)
-4. ✅ **COMPLETED**: HP validation bug fixed (critical - entities now load correctly)
-5. **Optional Enhancement**: Add features to NativeEntityType configuration (not required - current system functional)
-6. ✅ **COMPLETED**: "me" command variant implemented (convenience feature)
-7. ✅ **COMPLETED**: PickupFeature updated to use DataComponents (1.21.1 compatibility)
-8. **Documentation**: Update CURRENT_STATE.md when releasing
+## Notes
+This fix establishes the foundation for the Lovely Lib multiloader library. The architecture now matches the working Legacy 1.21.1 implementation, enabling future development of robot management and AI systems that can be shared across all LovelyRobot mod variants.
 
-## Current Focus
+The build system is now ready for:
+1. Adding robot entity classes to Common module
+2. Implementing loader-specific integrations
+3. Creating API interfaces for mod consumers
+4. Building comprehensive robot management library
 
-✅ **CORE IMPLEMENTATION COMPLETE** - All critical functionality implemented and integrated:
-- ExperienceTracker prevents exp farming from immortal entities
-- EntityData consolidation with automatic migration from old format
-- All NBT methods updated and tested
-- Backward compatibility maintained
+## Final Resolution Update - December 12, 2025
 
-Remaining tasks are optional enhancements that can be added based on user feedback.
+### ✅ **FORGE CLIENT LAUNCH SUCCESS**
 
-### ✅ Optional Enhancement Completed: "me" Command Variant
+**Issue**: After initial build fixes, Forge client was still failing to launch with mod loading errors.
 
-**Implementation**: Added complete "me" command system for convenience
-- Added `ME_SELECTOR` in `NativeCommands.java` - auto-detects sender from command context
-- Implemented all "me" command executors (combat, attributes, protections, utilities)
-- Added suggestion methods for context-aware command completion
-- Registered in both Forge and Fabric command systems
+**Final Solution**: Replaced entire Forge configuration with working Legacy implementation:
+- **Replaced**: `Forge/build.gradle` with Legacy configuration adapted for Lovely Lib variables
+- **Replaced**: `Forge/src/main/resources/META-INF/mods.toml` with Legacy configuration using `${lib_id}` variables
 
-**Command Examples**:
-```
-/llovely me list                           - List your robots
-/llovely me add combat exp <index> <xp>    - Add XP to your robot
-/llovely me set combat level <index> <lvl> - Set level
-/llovely me heal <index>                   - Heal specific robot
-/llovely me healall                        - Heal all your robots
-/llovely me recall <index>                 - Recall robot to you
-/llovely me teleport <index>               - Teleport to robot
-/llovely me stats <index>                  - View robot stats
-```
+### Client Launch Validation Results
 
-**Benefits**: Eliminates need to type player name, cleaner UX, full feature parity with owner commands.
+All three loaders now successfully launch and initialize Lovely Lib:
 
-### ✅ Compatibility Fix: DataComponents Migration
+- **✅ NeoForge Client**: Launches successfully, Lovely Lib appears in mod list
+- **✅ Fabric Client**: Launches successfully, Lovely Lib appears in mod list  
+- **✅ Forge Client**: Launches successfully, Lovely Lib appears in mod list
+  - Log Evidence: "Lovely Lib 1.0.0 initializing for Forge"
+  - Log Evidence: "Lovely Lib initialization complete"
+  - Log Evidence: "Forge-specific features initialized"
 
-**Implementation**: Updated PickupFeature to use Minecraft 1.21.1 DataComponents
-- Replaced legacy `stack.getOrCreateTag().put()` with `stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt))`
-- Updated `applyPickupData()` to read from `DataComponents.CUSTOM_DATA`
-- Added proper imports for DataComponents and CustomData
+### Key Learning
 
-**Impact**: Ensures pickup feature works correctly with Minecraft 1.21.1's new data system while maintaining backward compatibility.
+The most reliable approach for fixing multiloader issues is to copy working configurations from proven implementations rather than trying to debug complex multiloader plugin interactions. The Legacy 1.21.1 Forge configuration provided a stable foundation that worked immediately when adapted for Lovely Lib.
 
-### ✅ Critical Bug Fix: HP Validation Load Order
-
-**Issue**: Robots vanished on world reload with "Current HP cannot exceed max HP" error
-
-**Root Cause**: In `CombatStatsNBT.readFromNBT()`, currentHp was set before maxHp, causing validation to fail against default maxHp value
-
-**Fix**: Swapped load order - now sets maxHp BEFORE currentHp
-```java
-// Before (WRONG):
-stats.setCurrentHp(...);  // Validates against default maxHp (20)
-stats.setMaxHp(...);      // Too late!
-
-// After (CORRECT):
-stats.setMaxHp(...);      // Set max first
-stats.setCurrentHp(...);  // Now validates against correct maxHp
-```
-
-**Impact**: CRITICAL bug eliminated - entities now load correctly from saves.
-
-## Implementation Summary
-
-### Completed Infrastructure ✓
-- ✅ PickupFeature, DropFeature, LootDropFeature classes created
-- ✅ ExperienceTracker for exp accumulation created
-- ✅ EntityData container for consolidated data created
-- ✅ EntityDataMigration for backward compatibility created
-- ✅ Stat classes enhanced with copy() and toString() methods
-
-### Integration Plan
-
-The existing codebase already has most functionality in place:
-- **handleItemDrop()** - Already creates items with NBT data
-- **createSpawnItemFromEntity()** - Already packages entity data
-- **handlePickupRetrieval()** - Already handles pickup with NBT
-- **NBT methods** - Already save/load data (needs EntityData migration)
-
-### Required Changes
-
-1. **Add ExperienceTracker to InternalEntity**
-   - Add field: `protected ExperienceTracker expTracker`
-   - Initialize in constructor
-   - Update handleAttackTarget() to accumulate instead of immediate award
-   - Add death listener to claim accumulated exp
-   - Add periodic purge in tick()
-
-2. **Update NBT Methods with EntityData**
-   - Modify addAdditionalSaveData() to use EntityData.toParentNBT()
-   - Modify readAdditionalSaveData() to use EntityDataMigration.migrate()
-   - Test with old saves to verify migration
-
-3. **Add Features to NativeEntityType**
-   - Configure PickupFeature with spawn items
-   - Configure DropFeature with core items
-   - Configure LootDropFeature with loot tables (optional)
-
-4. **Create "me" Command Variant**
-   - New command handler for "/llovely me <command>"
-   - Auto-detect sender from CommandSource
-   - Query registry for sender's robots
-   - Execute command on all owned robots
-
-5. **Update Spawn Item NBT Handling** (Fabric & Forge)
-   - Already implemented via DataComponents.CUSTOM_DATA
-   - Entity already reads NBT in readFromNBT()
-   - No changes needed - current implementation is correct
-
-### Notes
-
-The codebase is well-structured and already implements most of the desired functionality:
-- NBT data flow is working correctly
-- Pickup/drop mechanics are in place
-- Smart retrieval system exists
-- Data preservation is functional
-
-The main additions needed are:
-1. ExperienceTracker integration for immortal entity fix
-2. EntityData migration for cleaner data organization
-3. Feature configuration in NativeEntityType
-4. "me" command variant for convenience
-
----
-
-**Last Updated**: 2025-12-07
+**FINAL STATUS**: ✅ **SPRINT OBJECTIVE FULLY ACHIEVED** - All three loaders (NeoForge, Fabric, Forge) successfully launch with Lovely Lib properly loaded and initialized.

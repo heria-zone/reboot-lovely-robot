@@ -1,0 +1,74 @@
+plugins {
+    id 'net.neoforged.moddev'
+    id 'multiloader-common'
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+    
+    // GeckoLib for NeoForge (if needed)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        implementation "${neoforge_geckolib}"
+    }
+    
+    // Library dependencies (NeoForge versions)
+    if (project.hasProperty('use_lovelylib') && use_lovelylib.toBoolean()) {
+        implementation "net.msymbios.lovelylib:lovelylib-neoforge:${minecraft_version}-${lovelylib_version}"
+    } else if (project.hasProperty('use_hzlib') && use_hzlib.toBoolean()) {
+        implementation "net.heriazone.hzlib:hzlib-neoforge:${minecraft_version}-${hzlib_version}"
+    }
+    
+    // Common module dependency
+    implementation project(':Common')
+}
+
+neoForge {
+    version = neoforge_version
+    
+    runs {
+        client {
+            client()
+        }
+        
+        server {
+            server()
+        }
+    }
+    
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${mod_name} NeoForge"
+                description = "${mod_description} - NeoForge implementation"
+                url = "${mod_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${mod_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${mod_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${mod_source}"
+                }
+            }
+        }
+    }
+}

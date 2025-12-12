@@ -1,0 +1,107 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+}
+
+version = lib_version
+group = lib_group
+
+base {
+    archivesName = "${lib_id}-forge-${minecraft_version}"
+}
+
+repositories {
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+}
+
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+
+    // Official mappings at runtime - no reobf needed
+    reobf = false
+
+    copyIdeResources = true
+
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformer = at
+    }
+
+    runs {
+        configureEach {
+            workingDirectory project.file('runs')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', lib_id
+            workingDirectory project.file('runs/client')
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', lib_id
+            workingDirectory project.file('runs/server')
+            args '--nogui'
+        }
+
+        data {
+            workingDirectory project.file('runs/data')
+            args '--mod', lib_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // GeckoLib dependency
+    implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
+}
+
+processResources {
+    var replaceProperties = [
+            minecraft_version: minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version,
+            forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            lib_id: lib_id,
+            lib_name: lib_name,
+            lib_license: lib_license,
+            lib_version: lib_version,
+            lib_authors: lib_authors,
+            lib_description: lib_description,
+            lib_homepage: lib_homepage,
+            lib_source: lib_source,
+            lib_issues: lib_issues
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+
+    filesMatching("${lib_id}.mixins.json") {
+        expand([lib_id: lib_id])
+    }
+}
+
+jar {
+    from("../common/LICENSE") {
+        rename { "${it}_${project.base.archivesName}"}
+    }
+}
+
+// Merge resources and classes into same directory for Java modules
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}

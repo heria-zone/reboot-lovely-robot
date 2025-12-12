@@ -1,0 +1,82 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '6.0.24'
+    id 'multiloader-common'
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    
+    // GeckoLib for Forge (if needed)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        implementation "${forge_geckolib}"
+    }
+    
+    // Library dependencies (Forge versions)
+    if (project.hasProperty('use_lovelylib') && use_lovelylib.toBoolean()) {
+        implementation "net.msymbios.lovelylib:lovelylib-forge:${minecraft_version}-${lovelylib_version}"
+    } else if (project.hasProperty('use_hzlib') && use_hzlib.toBoolean()) {
+        implementation "net.heriazone.hzlib:hzlib-forge:${minecraft_version}-${hzlib_version}"
+    }
+    
+    // Common module dependency
+    implementation project(':Common')
+}
+
+minecraft {
+    mappings channel: mapping_channel, version: mapping_version
+    
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+        
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${mod_name} Forge"
+                description = "${mod_description} - Forge implementation"
+                url = "${mod_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${mod_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${mod_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${mod_source}"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[2,)"
+license="${lib_license}"
+issueTrackerURL="${lib_issues}"
+
+[[mods]]
+modId="${lib_id}"
+version="${lib_version}"
+displayName="${lib_name}"
+displayURL="${lib_homepage}"
+logoFile="assets/${lib_id}/icon.png"
+logoBlur=false
+authors="${lib_authors}"
+description="${lib_description}"
+
+[[dependencies."${lib_id}"]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neoforge_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies."${lib_id}"]]
+    modId="minecraft"
+    type="required"
+    versionRange="[${minecraft_version},)"
+    ordering="NONE"
+    side="BOTH"

@@ -1,0 +1,6 @@
+{
+    "pack": {
+        "description": "${lib_name}",
+        "pack_format": 8
+    }
+}

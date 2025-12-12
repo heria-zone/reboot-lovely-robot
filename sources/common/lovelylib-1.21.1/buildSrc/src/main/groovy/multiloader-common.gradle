@@ -1,0 +1,173 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${lib_id}-${project.name}"
+}
+
+version = "${minecraft_version}-${lib_version}"
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(java_version))
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+    
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Sponge'
+                url = uri('https://repo.spongepowered.org/repository/maven-public')
+            }
+        }
+        filter {
+            includeGroupAndSubgroups("org.spongepowered")
+        }
+    }
+    
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+    
+    // HZ Lib dependency (if needed)
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        flatDir {
+            dirs '../hzlib-1.21.1/build/libs'
+        }
+    }
+}
+
+dependencies {
+    // HZ Lib dependency (conditional)
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        api "net.heriazone.hzlib:hzlib-common:${minecraft_version}-${hzlib_version}"
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = java_version as Integer
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
+
+
+// Declare capabilities on the outgoing configurations.
+// Read more about capabilities here: https://docs.gradle.org/current/userguide/component_capabilities.html#sec:declaring-additional-capabilities-for-a-local-component
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations."$variant".outgoing {
+        capability("$group:$lib_id-${project.name}:$version")
+        capability("$group:$lib_id:$version")
+    }
+    publishing.publications.configureEach {
+        suppressPomMetadataWarningsFor(variant)
+    }
+}
+
+sourcesJar {
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${lib_id}" }
+    }
+}
+
+jar {
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${lib_id}" }
+    }
+
+    manifest {
+        attributes([
+            'Specification-Title'   : lib_name,
+            'Specification-Vendor'  : lib_authors,
+            'Specification-Version' : project.jar.archiveVersion,
+            'Implementation-Title'  : project.name,
+            'Implementation-Version': project.jar.archiveVersion,
+            'Implementation-Vendor' : lib_authors,
+            'Built-On-Minecraft'    : minecraft_version
+        ])
+    }
+}
+
+processResources {
+    def expandProps = [
+            "group"                        : project.group,
+            "version"                      : project.version,
+            "minecraft_version"            : minecraft_version,
+            "minecraft_version_range"      : minecraft_version_range,
+            "fabric_api_version"           : fabric_api_version,
+            "fabric_loader_version"        : fabric_loader_version,
+            "neoforge_version"             : neoforge_version,
+            "neoforge_version_range"       : neoforge_version_range,
+            "neoforge_loader_version_range": neoforge_loader_version_range,
+            "forge_version"                : forge_version,
+            "forge_version_range"          : forge_version_range,
+            "loader_version_range"         : loader_version_range,
+            "lib_name"                     : lib_name,
+            "lib_version"                  : lib_version,
+            "lib_authors"                  : lib_authors,
+            "lib_id"                       : lib_id,
+            "lib_group"                    : lib_group,
+            "lib_license"                  : lib_license,
+            "lib_description"              : lib_description,
+            "lib_homepage"                 : lib_homepage,
+            "lib_source"                   : lib_source,
+            "lib_issues"                   : lib_issues,
+            "java_version"                 : java_version
+    ]
+    
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
+        expand expandProps
+    }
+    
+    inputs.properties(expandProps)
+}
+
+// Mute javadoc warnings
+tasks.withType(Javadoc).configureEach {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+// Use the UTF-8 charset for Java compilation
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId base.archivesName.get()
+            from components.java
+
+            // Exclude these from the published pom since it causes errors
+            def excludedGroups = [
+                "net.minecraftforge",
+                "net.neoforged",
+                "net.sf.jopt-simple"
+            ]
+            pom.withXml {
+                asNode().dependencies.'*'.findAll() {
+                    excludedGroups.contains(it.groupId.text())
+                }.each() {
+                    it.parent().remove(it)
+                }
+            }
+        }
+    }
+    
+    repositories {
+        // Add your publishing repositories here
+        // Example for local maven:
+        // maven {
+        //     url "file://${project.projectDir}/mcmodsrepo"
+        // }
+    }
+}

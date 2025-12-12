@@ -1,0 +1,13 @@
+{
+    "required": true,
+    "package": "${lib_group}.mixins",
+    "compatibilityLevel": "JAVA_21",
+    "refmap": "${lib_id}.refmap.json",
+    "mixins": [
+    ],
+    "client": [
+    ],
+    "server": [
+    ],
+    "minVersion": "0.8"
+}

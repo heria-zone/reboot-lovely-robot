@@ -1,0 +1,73 @@
+plugins {
+    id 'multiloader-common'
+    id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT'
+}
+
+minecraft {
+    version(minecraft_version)
+    def aw = file("src/main/resources/${lib_id}.accesswidener")
+    if (aw.exists()) {
+        accessWideners(aw)
+    }
+}
+
+dependencies {
+    compileOnly "org.spongepowered:mixin:0.8.5"
+    compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+    annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+    
+    // HZ Lib dependency (conditional based on gradle.properties)
+    // This is handled by multiloader-common.gradle
+    
+    // SLF4J API for logging
+    api 'org.slf4j:slf4j-api:2.0.9'
+    
+    // Add other common dependencies here
+}
+
+configurations {
+    commonJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    commonResources {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
+
+artifacts {
+    commonJava sourceSets.main.java.sourceDirectories.singleFile
+    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${lib_name} Common"
+                description = "${lib_description}"
+                url = "${lib_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${lib_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${lib_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${lib_source}"
+                }
+            }
+        }
+    }
+}

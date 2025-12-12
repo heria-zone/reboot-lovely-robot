@@ -1,0 +1,105 @@
+plugins {
+    id 'multiloader-loader'
+    id 'fabric-loom'
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings "net.fabricmc:yarn:${fabric_yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    
+    // GeckoLib for Fabric (if needed)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        modImplementation "${fabric_geckolib}"
+    }
+    
+    // HZ Lib dependency (Fabric version, if needed)
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        modApi "net.heriazone.hzlib:hzlib-fabric:${minecraft_version}-${hzlib_version}"
+    }
+    
+
+}
+
+processResources {
+    inputs.property "lib_id", lib_id
+    inputs.property "lib_name", lib_name
+    inputs.property "lib_version", lib_version
+    inputs.property "lib_group", lib_group
+    inputs.property "lib_authors", lib_authors
+    inputs.property "lib_license", lib_license
+    inputs.property "lib_description", lib_description
+    inputs.property "lib_homepage", lib_homepage
+    inputs.property "lib_source", lib_source
+    inputs.property "lib_issues", lib_issues
+    inputs.property "minecraft_version_range", minecraft_version_range
+    inputs.property "fabric_loader_version", fabric_loader_version
+    inputs.property "java_version", java_version
+
+    filesMatching(['fabric.mod.json', '*.mixins.json']) {
+        expand([
+            lib_id: lib_id,
+            lib_name: lib_name,
+            lib_version: lib_version,
+            lib_group: lib_group,
+            lib_authors: lib_authors,
+            lib_license: lib_license,
+            lib_description: lib_description,
+            lib_homepage: lib_homepage,
+            lib_source: lib_source,
+            lib_issues: lib_issues,
+            minecraft_version_range: minecraft_version_range,
+            fabric_loader_version: fabric_loader_version,
+            java_version: java_version
+        ])
+    }
+}
+
+loom {
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${lib_name} Fabric"
+                description = "${lib_description} - Fabric implementation"
+                url = "${lib_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${lib_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${lib_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${lib_source}"
+                }
+            }
+        }
+    }
+}

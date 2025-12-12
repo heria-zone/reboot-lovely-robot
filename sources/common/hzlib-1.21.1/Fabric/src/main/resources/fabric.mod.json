@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "${lib_id}",
+	"version": "${version}",
+	"name": "${lib_name}",
+	"description": "${lib_description}",
+	"authors": [ "${lib_authors}" ],
+	"contact": {
+		"homepage": "${lib_homepage}",
+		"sources": "${lib_source}",
+        "issues": "${lib_issues}"
+	},
+	"license": "${lib_license}",
+	"icon": "assets/${lib_id}/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"${lib_group}.HZLibFabric"
+		]
+	},
+	"mixins": [
+		"${lib_id}.fabric.mixins.json",
+		"${lib_id}.common.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=${fabric_loader_version}",
+		"fabric": "*",
+		"minecraft": "${minecraft_version}",
+		"java": ">=${java_version}"
+	},
+	"custom": {
+		"modmenu": {
+			"description": "General utilities library for Heria Zone projects",
+			"links": {
+				"modmenu.discord": "https://discord.gg/heria-zone"
+			}
+		}
+	}
+}

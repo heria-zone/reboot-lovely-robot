@@ -1,0 +1,73 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+    
+    // GeckoLib for NeoForge (if needed)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        implementation "${neoforge_geckolib}"
+    }
+    
+    // HZ Lib dependency (NeoForge version, if needed)
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        implementation "net.heriazone.hzlib:hzlib-neoforge:${minecraft_version}-${hzlib_version}"
+    }
+    
+
+}
+
+neoForge {
+    version = neoforge_version
+    
+    runs {
+        client {
+            client()
+        }
+        
+        server {
+            server()
+        }
+    }
+    
+    mods {
+        "${lib_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${lib_name} NeoForge"
+                description = "${lib_description} - NeoForge implementation"
+                url = "${lib_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${lib_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${lib_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${lib_source}"
+                }
+            }
+        }
+    }
+}

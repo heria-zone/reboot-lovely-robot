@@ -1,0 +1,41 @@
+plugins {
+    id 'multiloader-common'
+}
+
+dependencies {
+    // HZ Lib dependency (conditional based on gradle.properties)
+    // This is handled by multiloader-common.gradle
+    
+    // Add other common dependencies here
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${lib_name} Common"
+                description = "${lib_description}"
+                url = "${lib_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${lib_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${lib_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${lib_source}"
+                }
+            }
+        }
+    }
+}

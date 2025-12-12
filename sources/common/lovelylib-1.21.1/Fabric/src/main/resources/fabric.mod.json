@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "${lib_id}",
+  "version": "${lib_version}",
+  "name": "${lib_name}",
+  "description": "${lib_description}",
+  "authors": [
+    "${lib_authors}"
+  ],
+  "contact": {
+    "homepage": "${lib_homepage}",
+    "sources": "${lib_source}",
+    "issues": "${lib_issues}"
+  },
+  "license": "${lib_license}",
+  "icon": "assets/${lib_id}/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "${lib_group}.LovelyLib"
+    ]
+  },
+  "mixins": [
+    "${lib_id}.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version_range}",
+    "java": ">=${java_version}"
+  },
+  "suggests": {
+    "hzlib": "*",
+    "geckolib": "*"
+  }
+}
