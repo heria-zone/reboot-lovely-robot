@@ -88,6 +88,9 @@ cd sources/common/lovelylib-1.21.1
 - Links to ADR_001_Library_Architecture_Strategy.md
 - Future: ADR for Common module API design
 
+## Implementation References
+- [GeckoLib Implementation Process](../notes/GeckoLib_Implementation_Process.md) - Complete guide for adding GeckoLib dependency to multiloader projects
+
 ## Implementation Notes
 
 The multiloader-loader.gradle plugin in buildSrc automatically:
