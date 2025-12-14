@@ -159,25 +159,37 @@ public class AiFollowOwnerGoal extends Goal {
     /**
      * Updates goal state each tick.
      * <p>
-     * <b>Wolf-style Behavior:</b> Periodically recalculates path, teleports if too far.
-     * Navigation system handles body orientation naturally - no manual look control needed.
+     * <b>Enhanced Behavior:</b> Combines Wolf-style pathfinding with natural look-at behavior.
+     * Robot looks at owner with coordinated body-head movement while following.
+     * <p>
+     * <b>Natural Movement:</b> Body and head rotate together for natural engagement,
+     * avoiding awkward head-only turning. Includes position prediction for responsive following.
      * <p>
      * <b>Collision Avoidance:</b> When enabled, applies repulsion forces to prevent
      * robots from stacking on top of each other when following the same owner.
      */
     @Override
     public void tick() {
-        // Recalculate path periodically
+        // Natural coordinated look-at behavior
+        applyNaturalLookAtBehavior();
+        
+        // Coordinate body-head rotation for natural posture
+        coordinateBodyHeadRotation();
+        
+        // Dynamic path recalculation based on owner movement
+        boolean ownerMoving = this.owner.getDeltaMovement().length() > 0.1;
+        int updateInterval = ownerMoving ? 3 : 10; // More frequent updates when owner is moving
+        
         if (--this.timeToRecalcPath <= 0) {
-            this.timeToRecalcPath = this.adjustedTickDelay(10);
+            this.timeToRecalcPath = this.adjustedTickDelay(updateInterval);
             
             if (!entity.isLeashed() && !entity.isPassenger()) {
                 // Teleport if too far
                 if (entity.distanceToSqr(this.owner) >= 144.0) {
                     this.teleportToOwner();
                 } else {
-                    // Calculate target position with collision avoidance
-                    Vec3 targetPosition = calculateTargetPosition();
+                    // Calculate target position with collision avoidance and prediction
+                    Vec3 targetPosition = calculateTargetPositionWithPrediction();
                     
                     // Navigate to adjusted target position
                     this.navigation.moveTo(
@@ -192,19 +204,78 @@ public class AiFollowOwnerGoal extends Goal {
     } // tick ()
     
     /**
-     * Calculates target follow position with optional collision avoidance.
+     * Applies natural look-at behavior with coordinated body-head movement.
+     * <p>
+     * <b>Natural Engagement:</b> Robot looks at owner with moderate turn speed
+     * for natural movement, avoiding robotic snapping or awkward head-only rotation.
+     * <p>
+     * <b>Coordination:</b> Body and head work together to create natural posture
+     * and engagement while following.
+     */
+    private void applyNaturalLookAtBehavior() {
+        // Natural coordinated look-at behavior
+        Vec3 ownerPos = new Vec3(this.owner.getX(), this.owner.getEyeY(), this.owner.getZ());
+        
+        // Use moderate turn speed for natural movement
+        entity.getLookControl().setLookAt(
+            ownerPos.x, 
+            ownerPos.y, 
+            ownerPos.z,
+            8.0F,  // Moderate turn speed for natural movement
+            entity.getMaxHeadXRot()
+        );
+    } // applyNaturalLookAtBehavior ()
+    
+    /**
+     * Coordinates body and head rotation for natural movement.
+     * <p>
+     * <b>Natural Posture:</b> Gradually aligns body with head direction when not
+     * actively pathfinding to prevent awkward "owl-like" head rotation.
+     * <p>
+     * <b>Context Awareness:</b> Only applies alignment when stationary or navigation
+     * is complete, allowing pathfinding to handle body orientation during movement.
+     */
+    private void coordinateBodyHeadRotation() {
+        // Allow body to gradually align with head direction when not actively pathfinding
+        // This creates natural "turning to look" behavior instead of owl-like head rotation
+        if (this.navigation.isDone() || this.navigation.getPath() == null) {
+            float headYaw = entity.getYHeadRot();
+            float bodyYaw = entity.getYRot();
+            float yawDiff = net.minecraft.util.Mth.wrapDegrees(headYaw - bodyYaw);
+            
+            // Gradually rotate body toward head direction for natural posture
+            if (Math.abs(yawDiff) > 15.0F) {
+                entity.setYRot(entity.getYRot() + Math.signum(yawDiff) * 2.0F);
+            }
+        }
+    } // coordinateBodyHeadRotation ()
+    
+    /**
+     * Calculates target follow position with prediction and collision avoidance.
+     * <p>
+     * <b>Position Prediction:</b> Predicts where owner will be based on their velocity
+     * to reduce following lag and create more responsive movement.
      * <p>
      * <b>Architecture:</b> Throttles collision checks to reduce performance impact.
      * Uses cached position between checks for smooth movement.
      * <p>
      * <b>Collision Avoidance:</b> When enabled and conditions met, applies repulsion
-     * forces from nearby robots to prevent stacking. Falls back to owner position
-     * when disabled or in combat.
+     * forces from nearby robots to prevent stacking.
      *
-     * @return target position to navigate toward
+     * @return target position to navigate toward with prediction applied
      */
-    private Vec3 calculateTargetPosition() {
+    private Vec3 calculateTargetPositionWithPrediction() {
         Vec3 ownerPosition = this.owner.position();
+        
+        // Apply position prediction for moving owners
+        Vec3 ownerVelocity = this.owner.getDeltaMovement();
+        double velocityMagnitude = ownerVelocity.length();
+        
+        if (velocityMagnitude > 0.1) { // Owner is moving
+            // Predict where owner will be in 3 ticks for more responsive following
+            int predictionTicks = 3;
+            ownerPosition = ownerPosition.add(ownerVelocity.scale(predictionTicks));
+        }
         
         // Check if collision avoidance should be applied
         if (!shouldAvoidCollision()) {
@@ -224,7 +295,7 @@ public class AiFollowOwnerGoal extends Goal {
         // Calculate new position with collision avoidance
         cachedTargetPosition = applyCollisionAvoidance(ownerPosition);
         return cachedTargetPosition;
-    } // calculateTargetPosition ()
+    } // calculateTargetPositionWithPrediction ()
     
     /**
      * Determines if collision avoidance should be applied.
