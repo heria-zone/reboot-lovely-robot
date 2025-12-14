@@ -132,7 +132,9 @@ public class ItemSpawnHelper {
      * @param entity the spawned robot entity to initialize
      */
     public static void initializeEntityFromData(CompoundTag dataNBT, LovelyRobotEntity entity) {
-        if (dataNBT == null || entity == null) return;
+        if (dataNBT == null || entity == null) {
+            return;
+        }
         
         // Validate data before applying
         CompoundTag validatedData = net.msymbios.llovelyr.lib.entity.helpers.EntityDataHelper.validateEntityData(dataNBT);
@@ -143,9 +145,11 @@ public class ItemSpawnHelper {
         }
         
         // Apply texture if not random
-        if (validatedData.getInt(LovelyIdentifier.STAT_COLOR) != EntityTexture.RANDOM.getId()) {
-            entity.setTexture(validatedData.getInt(LovelyIdentifier.STAT_COLOR));
+        int textureId = validatedData.getInt(LovelyIdentifier.STAT_COLOR);
+        if (textureId != EntityTexture.RANDOM.getId()) {
+            entity.setTexture(textureId);
         }
+        // If texture is RANDOM, keep the entity's already-selected random texture
 
         // Apply level and experience if greater than 0
         if (validatedData.getInt(LovelyIdentifier.STAT_LEVEL) > 0) {
@@ -155,10 +159,17 @@ public class ItemSpawnHelper {
             entity.setExp(validatedData.getInt(LovelyIdentifier.STAT_EXP));
         }
         
-        // Apply health if specified
+        // Apply health if specified AND it's not the default 1.0F
         if (validatedData.contains(LovelyIdentifier.STAT_HP)) {
-            entity.setCurrentHealthValue(validatedData.getFloat(LovelyIdentifier.STAT_HP));
+            float healthValue = validatedData.getFloat(LovelyIdentifier.STAT_HP);
+            // Only apply health if it's not the default 1.0F value
+            // This allows entities to keep their natural max health for "default" spawn items
+            if (Math.abs(healthValue - 1.0F) > 0.01F) {
+                entity.setCurrentHealthValue(healthValue);
+            }
+            // If health is 1.0F, keep the entity's natural max health
         }
+        // If no health in NBT, keep the entity's natural max health
 
         // Apply protection enchantments if greater than 0
         if (validatedData.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION) > 0) {

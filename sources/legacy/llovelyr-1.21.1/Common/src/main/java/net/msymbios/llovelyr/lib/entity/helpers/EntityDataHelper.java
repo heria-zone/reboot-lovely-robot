@@ -87,7 +87,8 @@ public class EntityDataHelper {
 
         // Validate texture ID
         int textureId = validatedNbt.getInt(LovelyIdentifier.STAT_COLOR);
-        if (textureId < 0 || textureId > 15) {
+        // Allow RANDOM (16) as a valid texture ID, only fix invalid values
+        if (textureId < 0 || (textureId > 15 && textureId != EntityTexture.RANDOM.getId())) {
             validatedNbt.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.WHITE.getId());
         }
 
@@ -103,11 +104,14 @@ public class EntityDataHelper {
             validatedNbt.putInt(LovelyIdentifier.STAT_EXP, 0);
         }
 
-        // Validate health (positive)
-        float health = validatedNbt.getFloat(LovelyIdentifier.STAT_HP);
-        if (health <= 0) {
-            validatedNbt.putFloat(LovelyIdentifier.STAT_HP, 1.0F);
+        // Validate health (positive) - only if health was explicitly set
+        if (validatedNbt.contains(LovelyIdentifier.STAT_HP)) {
+            float health = validatedNbt.getFloat(LovelyIdentifier.STAT_HP);
+            if (health <= 0) {
+                validatedNbt.putFloat(LovelyIdentifier.STAT_HP, 1.0F);
+            }
         }
+        // Don't add default health if it wasn't there originally
 
         // Validate protection values (non-negative)
         validateProtectionValue(validatedNbt, LovelyIdentifier.STAT_FIRE_PROTECTION);
