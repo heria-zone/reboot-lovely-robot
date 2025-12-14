@@ -26,7 +26,6 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.msymbios.llovelyr.LovelyConstant;
 import net.msymbios.llovelyr.common.Configs.SharedConfigs;
-import net.msymbios.llovelyr.common.entity.common.LovelyRobotEntity;
 import net.msymbios.llovelyr.common.entity.enums.EntityModel;
 import net.msymbios.llovelyr.common.entity.NativeEntityType;
 import net.msymbios.llovelyr.framework.entity.enums.*;
@@ -37,7 +36,6 @@ import net.msymbios.llovelyr.framework.entity.data.ProtectionStats;
 import net.msymbios.llovelyr.framework.entity.data.EnchantmentStats;
 import net.msymbios.llovelyr.framework.registry.OwnerRobotRegistry;
 import net.msymbios.llovelyr.framework.registry.RobotRegistryEntry;
-import net.msymbios.llovelyr.framework.utils.ObjectUtil;
 import net.msymbios.llovelyr.lib.entity.InternalEntityType;
 import net.msymbios.llovelyr.lib.entity.data.CombatStatsNBT;
 import net.msymbios.llovelyr.lib.entity.data.ProtectionStatsNBT;
@@ -158,6 +156,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
             if (((NativeEntityType) nativeEntity).hasColor(EntityTexture.byId(value))) {
                 this.entityData.set(TEXTURE_ID, value);
             }
+            // Ignore invalid colors for this entity type
         } else {
             this.entityData.set(TEXTURE_ID, value);
         }
@@ -739,6 +738,14 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         super(entityType, world);
         this.nativeEntity = nativeEntityType;
 
+        // Use NativeEntityType's random color system
+        if (nativeEntity != null) {
+            int randomColorId = ((NativeEntityType) nativeEntity).getRandomColorId();
+            this.setTexture(randomColorId);
+        } else {
+            this.setTexture(0);  // Default to WHITE
+        }
+
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(nativeEntity.getData().getMaxHealth());
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(nativeEntity.getData().getAttackDamage());
         this.getAttribute(Attributes.ATTACK_SPEED).setBaseValue(nativeEntity.getData().getAttackSpeed());
@@ -747,7 +754,11 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         this.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(nativeEntity.getData().getArmorToughness());
 
         this.recalculateAttributes();
-    } // Constructor InternalEntity ()
+
+        // Initialize health to max health after all attributes are set
+        float maxHealth = this.getMaxHealth();
+        this.setHealth(maxHealth);
+    } // Constructor: InternalEntity ()
 
     // -- Navigation Override --
 
@@ -830,11 +841,6 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor levelAccessor, @NotNull DifficultyInstance instance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData) {
-        // Use NativeEntityType's random color system
-        if (nativeEntity instanceof NativeEntityType) {
-            this.setTexture(((NativeEntityType) nativeEntity).getRandomColorId());
-        } else this.setTexture(0);  // Default to WHITE
-
         rotate(Rotation.getRandom(this.getRandom()));
 
         recalculateAttributes();

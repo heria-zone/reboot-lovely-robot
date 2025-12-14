@@ -217,17 +217,15 @@ public class EntitySpawnHelper {
      */
     public static void validateEntityData(LovelyRobotEntity entity) {
         // Validate health bounds
-        if (entity.getHealth() > entity.getMaxHealth()) {
-            entity.setHealth(entity.getMaxHealth());
-        }
-        if (entity.getHealth() <= 0) {
-            entity.setHealth(1.0F); // Minimum viable health
-        }
+        //if (entity.getHealth() > entity.getMaxHealth()) entity.setHealth(entity.getMaxHealth());
+
+        //if (entity.getHealth() <= 0) entity.setHealth(1.0F); // Minimum viable health
         
         // Validate level bounds
         if (entity.getCurrentLevel() > entity.getMaxLevel()) {
             entity.setCurrentLevel(entity.getMaxLevel());
         }
+        
         if (entity.getCurrentLevel() < 0) {
             entity.setCurrentLevel(0);
         }
