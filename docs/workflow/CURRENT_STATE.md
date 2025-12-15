@@ -260,6 +260,7 @@ The LovelyRobot project consists of three distinct variants, each serving differ
 **Advanced Animation Features**:
 - ✅ **GeckoLib isolation** - Business logic separated from GeckoLib dependencies
 - ✅ **State machine** - Complex animation state transitions
+- ✅ **Vehicle sitting animation** - Automatic SIT animation when riding boats, minecarts, horses, etc.
 - ✅ **Bone manipulation** - Dynamic bone transformations for sitting poses
 - ✅ **Cross-loader compatibility** - Identical animation behavior on all loaders
 - ✅ **Performance optimization** - Efficient animation updates and caching
@@ -529,7 +530,7 @@ Each robot type has configurable stats in Common module:
 1. **Robot Retrieval System** - Cross-loader Ctrl+Shift retrieval with ownership validation
 2. **Core Glow Effects** - Color-coded glow system using scoreboard teams (16 colors)
 3. **Smart Auto-Retrieval** - Distance-based automatic pickup with permission checks
-4. **Dynamic Sitting Animation** - Hitbox resize and random delay system
+4. **Dynamic Sitting Animation** - Hitbox resize and random delay system + vehicle sitting support
 5. **Advanced Base Defense** - 4 scan patterns with patrol/guard state machine
 6. **Health Persistence** - Proper health sync across world reloads
 7. **Command Integration** - Full `/llovely` command tree with custom argument types

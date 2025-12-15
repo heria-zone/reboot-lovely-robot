@@ -67,7 +67,8 @@ public class InternalAnimation {
      * Creates locomotion animation controller for movement and idle states.
      * <p>
      * <b>Architecture:</b> Delegates logic to common AnimationStateManager while
-     * handling GeckoLib-specific animation creation and playback.
+     * handling GeckoLib-specific animation creation and playback. Supports vehicle
+     * sitting animation when robot is riding boats, minecarts, or other entities.
      *
      * @param entity robot entity to animate
      * @param <T> entity type extending LovelyRobotEntity and GeoAnimatable

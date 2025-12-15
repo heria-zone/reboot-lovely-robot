@@ -38,9 +38,13 @@ public class AnimationStateManager {
     /**
      * Determines the appropriate locomotion animation for current entity state.
      * <p>
-     * <b>Architecture:</b> Handles priority order: moving > sitting (in standby) >
-     * resting (in standby) > idle. State checks run every tick to ensure responsive
-     * animation transitions.
+     * <b>Architecture:</b> Handles priority order: vehicle sitting > moving > 
+     * sitting (in standby) > resting (in standby) > idle. State checks run every 
+     * tick to ensure responsive animation transitions.
+     * <p>
+     * <b>Vehicle Animation:</b> When robot is riding any vehicle (boat, minecart, 
+     * horse, etc.), uses SIT animation for natural sitting posture. This takes 
+     * highest priority over all other animations.
      * <p>
      * <b>Standby Animation Flow:</b> When in standby mode, robot starts with REST
      * (standing idle). After configurable delay without movement, transitions to
@@ -52,6 +56,11 @@ public class AnimationStateManager {
      * @return animation name that should be playing
      */
     public static String getLocomotionAnimation(LovelyRobotEntity entity, boolean isMoving) {
+        // Highest priority: Vehicle sitting animation
+        if (entity.getVehicle() != null) {
+            return AnimationDefinitions.SIT;
+        }
+        
         if (isMoving) {
             return AnimationDefinitions.WALK;
         } else if (entity.getCurrentState() == EntityState.Standby) {

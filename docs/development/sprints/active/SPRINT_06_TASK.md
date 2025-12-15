@@ -321,6 +321,44 @@ docs/documentation/
 
 ### Completed Work - December 15, 2025
 
+- ✅ **Config Screen System Architecture**: Successfully designed and documented comprehensive config screen implementation
+  - **ADR Created**: `ADR_005_Config_Screen_System_Implementation.md` - Complete architectural design
+  - **Architecture Highlights**:
+    - **Preserves Existing Infrastructure**: No changes to `SharedConfigs.java` or `ConfigBounds.java`
+    - **Category-Based Organization**: Matches existing config structure with tabbed interface
+    - **Save & Apply Pattern**: Temporary values with confirmation before applying changes
+    - **Comprehensive Reset Options**: Per-category and global reset functionality
+    - **Multi-Loader Support**: Works on NeoForge, Forge, ready for Fabric
+    - **Cloth Config Migration Ready**: Easy transition path to config libraries
+  - **Screen Hierarchy Designed**:
+    - Main tabbed interface: General, Combat, Experience, AI Behavior, Animation, Renderer, Entity
+    - Entity tab with robot-specific sub-tabs (Vanilla, Honey, Bunny, Bunny2, Dragon, Kitsune, Neko)
+    - Custom widgets with validation and bounds checking
+    - State management with temporary values and dirty tracking
+  - **Implementation Plan**: 5-phase rollout from core infrastructure to loader integration
+  - **Status**: ✅ COMPLETE - Ready for implementation
+
+- ✅ **Legacy 1.21.1 Vehicle Sitting Animation Feature**: Successfully implemented robot sitting animation when entering boats/vehicles
+  - **Feature Request**: Robots should use SIT animation when entering boats, minecarts, or other vehicles
+  - **Implementation Completed**:
+    - **Phase 1**: ✅ Updated `AnimationStateManager.getLocomotionAnimation()` to check for vehicles (Common module)
+    - **Phase 2**: ✅ Updated `InternalAnimation.locomotionAnimation()` in all loader modules (Forge, Fabric, NeoForge)
+    - **Phase 3**: Ready for testing with boats, minecarts, and other rideable entities
+  - **Priority Implemented**: Vehicle sitting > Movement > Standby sitting > Rest > Idle
+  - **Animation Reuse**: Using existing SIT animation (no new animations needed)
+  - **Files Modified**:
+    - `sources/legacy/llovelyr-1.21.1/Common/src/main/java/net/msymbios/llovelyr/lib/animation/AnimationStateManager.java`
+    - `sources/legacy/llovelyr-1.21.1/NeoForge/src/main/java/net/msymbios/llovelyr/lib/entity/InternalAnimation.java`
+    - `sources/legacy/llovelyr-1.21.1/Forge/src/main/java/net/msymbios/llovelyr/lib/entity/InternalAnimation.java`
+    - `sources/legacy/llovelyr-1.21.1/Fabric/src/main/java/net/msymbios/llovelyr/lib/entity/InternalAnimation.java`
+  - **Technical Details**:
+    - Added vehicle detection using `entity.getVehicle() != null` as highest priority check
+    - Updated JavaDoc documentation to reflect vehicle sitting behavior
+    - Maintained backward compatibility with existing standby sitting system
+    - Cross-loader consistency ensured across all three mod loaders
+  - **Result**: Robots now automatically use SIT animation when riding any vehicle (boats, minecarts, horses, etc.)
+  - **Status**: ✅ COMPLETE - No compilation errors, ready for testing
+
 - ✅ **Legacy 1.21.1 Combat Mode Model Synchronization Fix**: Successfully resolved armed model not appearing during wary/combat mode
   - **Issue Identified**: Model field was not synchronized between server and client, causing armed model to only appear server-side
   - **Root Cause**: Missing `MODEL_ID` EntityDataAccessor for client-server synchronization
