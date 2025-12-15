@@ -1,32 +1,34 @@
 {
   "schemaVersion": 1,
-  "id": "templatelib",
-  "version": "1.0.0",
-  "name": "Template Library",
-  "description": "Template library for quick project setup.",
+  "id": "${lib_id}",
+  "version": "${lib_version}",
+  "name": "${lib_name}",
+  "description": "${lib_description}",
   "authors": [
-    "MSymbios"
+    "${lib_authors}"
   ],
   "contact": {
-    "homepage": "https://github.com/msymbios/templatelib",
-    "sources": "https://github.com/msymbios/templatelib",
-    "issues": "https://github.com/msymbios/templatelib/issues"
+    "homepage": "${lib_homepage}",
+    "sources": "${lib_source}",
+    "issues": "${lib_issues}"
   },
-  "license": "MIT License",
-  "icon": "assets/templatelib/icon.png",
+  "license": "${lib_license}",
+  "icon": "assets/${lib_id}/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.heriazone.templatelib.fabric.TemplateLibFabric"
+      "${lib_group}.TemplateLib"
     ]
   },
+  "mixins": [
+    "${lib_id}.mixins.json"
+  ],
   "depends": {
-    "fabricloader": ">=0.16.9",
+    "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
-    "minecraft": "~1.21.1",
-    "java": ">=21"
+    "minecraft": "${minecraft_version_range}",
+    "java": ">=${java_version}"
   },
   "suggests": {
-    "another-lib": "*"
   }
 }

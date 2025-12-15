@@ -1,80 +1,109 @@
 plugins {
-    id 'net.minecraftforge.gradle' version '6.0.24'
-    id 'multiloader-common'
+    id 'multiloader-loader'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
 }
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    
-    // GeckoLib for Forge (if needed)
-    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
-        implementation "${forge_geckolib}"
+version = lib_version
+group = lib_group
+
+base {
+    archivesName = "${lib_id}-forge-${minecraft_version}"
+}
+
+repositories {
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
     }
-    
-    // HZ Lib dependency (Forge version, if needed)
-    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        implementation "net.heriazone.hzlib:hzlib-forge:${minecraft_version}-${hzlib_version}"
-    }
-    
-    // Common module dependency
-    implementation project(':Common')
 }
 
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
-    
+
+    // Official mappings at runtime - no reobf needed
+    reobf = false
+
+    copyIdeResources = true
+
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformer = at
+    }
+
     runs {
-        client {
-            workingDirectory project.file('run')
+        configureEach {
+            workingDirectory project.file('runs')
+
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            mods {
-                "${lib_id}" {
-                    source sourceSets.main
-                }
-            }
         }
-        
+
+        client {
+            property 'forge.enabledGameTestNamespaces', lib_id
+            workingDirectory project.file('runs/client')
+        }
+
         server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                "${lib_id}" {
-                    source sourceSets.main
-                }
-            }
+            property 'forge.enabledGameTestNamespaces', lib_id
+            workingDirectory project.file('runs/server')
+            args '--nogui'
+        }
+
+        data {
+            workingDirectory project.file('runs/data')
+            args '--mod', lib_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-            
-            pom {
-                name = "${lib_name} Forge"
-                description = "${lib_description} - Forge implementation"
-                url = "${lib_homepage}"
-                
-                licenses {
-                    license {
-                        name = "${lib_license}"
-                        url = "https://opensource.org/licenses/MIT"
-                    }
-                }
-                
-                developers {
-                    developer {
-                        name = "${lib_authors}"
-                    }
-                }
-                
-                scm {
-                    url = "${lib_source}"
-                }
-            }
-        }
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // GeckoLib dependency (conditional)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
     }
+}
+
+processResources {
+    var replaceProperties = [
+            minecraft_version: minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version: forge_version,
+            forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            lib_id: lib_id,
+            lib_name: lib_name,
+            lib_license: lib_license,
+            lib_version: lib_version,
+            lib_authors: lib_authors,
+            lib_description: lib_description,
+            lib_homepage: lib_homepage,
+            lib_source: lib_source,
+            lib_issues: lib_issues
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+
+    filesMatching("${lib_id}.mixins.json") {
+        expand([lib_id: lib_id])
+    }
+}
+
+jar {
+    from("../common/LICENSE") {
+        rename { "${it}_${project.base.archivesName}"}
+    }
+}
+
+// Merge resources and classes into same directory for Java modules
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }

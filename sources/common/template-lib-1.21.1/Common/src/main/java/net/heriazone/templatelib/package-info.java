@@ -1,16 +1,23 @@
 /**
- * <p>Template Library - Template library for quick project setup.</p>
+ * <p>Template Library - Quick project setup for Minecraft libraries.</p>
  * <p>
- * <b>Architecture:</b> Provides a complete multi-loader library template with proper structure,
- * build configuration, and entry points for Fabric, Forge, and NeoForge. Designed for
- * rapid library development with minimal configuration changes required.
+ * <b>Purpose:</b> This package contains the main library classes that provide template functionality
+ * across all supported mod loaders (Fabric, Forge, NeoForge). It serves as a foundation for
+ * creating new Minecraft libraries with multiloader support.
  * <p>
- * <b>Usage:</b> Copy this template and update "templatelib/TemplateLib" references to your
- * library's name and identifier. All build configurations and loader integrations are
- * pre-configured and ready for development.
+ * <b>Key Components:</b>
+ * <ul>
+ * <li>{@link net.heriazone.templatelib.Template} - Main library initialization and management</li>
+ * <li>Library utility systems</li>
+ * <li>Cross-loader compatibility layer</li>
+ * </ul>
+ * <p>
+ * <b>Usage:</b> Initialize the library during your mod's initialization phase by calling
+ * {@link net.heriazone.templatelib.Template#initialize()}. Customize gradle.properties
+ * to configure your library details.
  * 
- * @version 1.0.0
+ * @author Your Name
+ * @version 1.0.0-dev
  * @since 1.21.1
- * @author MSymbios
  */
 package net.heriazone.templatelib;
