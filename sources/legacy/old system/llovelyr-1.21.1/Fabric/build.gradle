@@ -1,0 +1,128 @@
+plugins {
+    id 'multiloader-loader'
+    id 'fabric-loom'
+}
+
+version = mod_version
+group = mod_group
+
+base {
+    archivesName = "${mod_id}-fabric-${minecraft_version}"
+}
+
+repositories {
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    
+    // GeckoLib dependency
+    modImplementation "software.bernie.geckolib:${fabric_geckolib}"
+}
+
+sourceSets.main.resources.srcDirs += "src/generated/resources"
+
+fabricApi {
+    configureDataGeneration {
+        outputDirectory.set(file("src/generated/resources"))
+    }
+}
+
+loom {
+    def aw = file("../common/src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
+    
+    mixin {
+        defaultRefmapName.set("${mod_id}.refmap.json")
+    }
+    
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("runs/client")
+            programArgs("--username=Dev")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("runs/server")
+        }
+        datagen {
+            server()
+            setConfigName("Fabric Data Generation")
+            ideConfigGenerated(true)
+            runDir("runs/datagen")
+            
+            programArgs("--server", "--mod", mod_id, "--all", "--output", file("src/generated/resources/").getAbsolutePath(), "--existing", file("src/main/resources/").getAbsolutePath())
+        }
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mod_id", mod_id
+    inputs.property "mod_name", mod_name
+    inputs.property "mod_version", mod_version
+    inputs.property "mod_description", mod_description
+    inputs.property "mod_authors", mod_authors
+    inputs.property "mod_license", mod_license
+    inputs.property "mod_group", mod_group
+    inputs.property "mod_homepage", mod_homepage
+    inputs.property "mod_source", mod_source
+    inputs.property "mod_issues", mod_issues
+    inputs.property "fabric_loader_version", fabric_loader_version
+    inputs.property "fabric_api_version", fabric_api_version
+    inputs.property "minecraft_version", minecraft_version
+
+    filesMatching("fabric.mod.json") {
+        expand(
+            "version": inputs.properties.version,
+            "mod_id": inputs.properties.mod_id,
+            "mod_name": inputs.properties.mod_name,
+            "mod_version": inputs.properties.mod_version,
+            "mod_description": inputs.properties.mod_description,
+            "mod_authors": inputs.properties.mod_authors,
+            "mod_license": inputs.properties.mod_license,
+            "mod_group": inputs.properties.mod_group,
+            "mod_homepage": inputs.properties.mod_homepage,
+            "mod_source": inputs.properties.mod_source,
+            "mod_issues": inputs.properties.mod_issues,
+            "fabric_loader_version": inputs.properties.fabric_loader_version,
+            "fabric_api_version": inputs.properties.fabric_api_version,
+            "minecraft_version": inputs.properties.minecraft_version
+        )
+    }
+
+    filesMatching("${mod_id}.fabric.mixins.json") {
+        expand(
+                "version": inputs.properties.version,
+                "mod_id": inputs.properties.mod_id,
+                "mod_name": inputs.properties.mod_name,
+                "mod_version": inputs.properties.mod_version,
+                "mod_description": inputs.properties.mod_description,
+                "mod_authors": inputs.properties.mod_authors,
+                "mod_license": inputs.properties.mod_license,
+                "mod_group": inputs.properties.mod_group,
+                "mod_source": inputs.properties.mod_source,
+                "mod_issues": inputs.properties.mod_issues
+        )
+    }
+}
+
+jar {
+    from("../common/LICENSE") {
+        rename { "${it}_${project.base.archivesName}"}
+    }
+}

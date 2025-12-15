@@ -1,0 +1,158 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${mod_id}-${project.name}"
+}
+
+version = "${minecraft_version}-${mod_version}"
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+    
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Sponge'
+                url = 'https://repo.spongepowered.org/repository/maven-public'
+            }
+        }
+        filter { 
+            includeGroupAndSubgroups("org.spongepowered") 
+        }
+    }
+    
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+}
+
+configurations {
+    library
+    implementation.extendsFrom library
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:24.1.0'
+}
+
+// Declare capabilities on the outgoing configurations.
+// Read more about capabilities here: https://docs.gradle.org/current/userguide/component_capabilities.html#sec:declaring-additional-capabilities-for-a-local-component
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations."$variant".outgoing {
+        capability("$group:$mod_id-${project.name}:$version")
+        capability("$group:$mod_id:$version")
+    }
+    publishing.publications.configureEach {
+        suppressPomMetadataWarningsFor(variant)
+    }
+}
+
+sourcesJar {
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${mod_id}" }
+    }
+}
+
+jar {
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${mod_id}" }
+    }
+
+    manifest {
+        attributes([
+            'Specification-Title'   : mod_name,
+            'Specification-Vendor'  : mod_authors,
+            'Specification-Version' : project.jar.archiveVersion,
+            'Implementation-Title'  : project.name,
+            'Implementation-Version': project.jar.archiveVersion,
+            'Implementation-Vendor' : mod_authors,
+            'Built-On-Minecraft'    : minecraft_version
+        ])
+    }
+}
+
+processResources {
+    def expandProps = [
+            "group"                        : project.group,
+            "version"                      : project.version,
+            "minecraft_version"            : minecraft_version,
+            "minecraft_version_range"      : minecraft_version_range,
+            "fabric_api_version"           : fabric_api_version,
+            "fabric_loader_version"        : fabric_loader_version,
+            "neoforge_version"             : neoforge_version,
+            "neoforge_version_range"       : neoforge_version_range,
+            "neoforge_loader_version_range": neoforge_loader_version_range,
+            "forge_version"                : forge_version,
+            "forge_version_range"          : forge_version_range,
+            "loader_version_range"         : loader_version_range,
+            "mod_name"                     : mod_name,
+            "mod_version"                  : mod_version,
+            "mod_authors"                  : mod_authors,
+            "mod_id"                       : mod_id,
+            "mod_group"                    : mod_group,
+            "mod_license"                  : mod_license,
+            "mod_description"              : mod_description,
+            "mod_homepage"                 : mod_homepage,
+            "mod_source"                   : mod_source,
+            "mod_issues"                   : mod_issues,
+            "java_version"                 : java_version,
+            mod_update: mod_update
+    ]
+    
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
+        expand expandProps
+    }
+    
+    inputs.properties(expandProps)
+}
+
+// Mute javadoc warnings
+tasks.withType(Javadoc).configureEach {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+// Use the UTF-8 charset for Java compilation
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId base.archivesName.get()
+            from components.java
+
+            // Exclude these from the published pom since it causes errors
+            def excludedGroups = [
+                "net.minecraftforge",
+                "net.neoforged",
+                "net.sf.jopt-simple"
+            ]
+            pom.withXml {
+                asNode().dependencies.'*'.findAll() {
+                    excludedGroups.contains(it.groupId.text())
+                }.each() {
+                    it.parent().remove(it)
+                }
+            }
+        }
+    }
+    
+    repositories {
+        // Add your publishing repositories here
+        // Example for local maven:
+        // maven {
+        //     url "file://${project.projectDir}/mcmodsrepo"
+        // }
+    }
+}

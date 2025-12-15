@@ -36,6 +36,18 @@ subprojects {
                 includeGroup "curse.maven"
             }
         }
+        
+        // Local library dependencies
+        flatDir {
+            dirs 'libs'  // Local JARs directory
+        }
+        
+        // Development: LovelyLib build output (fallback)
+        if (project.hasProperty('lovelylib_project_path')) {
+            flatDir {
+                dirs "${lovelylib_project_path}/build/libs"
+            }
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -50,5 +62,72 @@ subprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+// Task to refresh dependencies from LovelyLib
+task refreshDependencies {
+    description = 'Copy latest LovelyLib JARs from build output to local libs directory'
+    group = 'dependencies'
+    
+    doLast {
+        def lovelyLibProject = file(lovelylib_project_path)
+        def libsDir = file('libs')
+        
+        if (!lovelyLibProject.exists()) {
+            throw new GradleException("LovelyLib project not found at: ${lovelylib_project_path}")
+        }
+        
+        // Create libs directory if it doesn't exist
+        libsDir.mkdirs()
+        
+        // Execute LovelyLib build and copy
+        println "Building LovelyLib..."
+        exec {
+            workingDir lovelyLibProject
+            commandLine './gradlew', 'build'
+        }
+        
+        // Copy JARs from LovelyLib build output
+        def lovelyLibBuildDir = file("${lovelylib_project_path}/build/libs")
+        if (lovelyLibBuildDir.exists()) {
+            copy {
+                from lovelyLibBuildDir
+                into libsDir
+                include '*.jar'
+                exclude '*-sources.jar'
+                exclude '*-javadoc.jar'
+            }
+            println "Copied LovelyLib JARs to libs directory"
+        } else {
+            throw new GradleException("LovelyLib build directory not found: ${lovelyLibBuildDir}")
+        }
+    }
+}
+
+// Task to build with refreshed dependencies
+task buildWithDeps {
+    description = 'Refresh dependencies and build the project'
+    group = 'build'
+    dependsOn 'refreshDependencies', 'build'
+}
+
+// Task to run client with refreshed dependencies
+task runClientWithDeps {
+    description = 'Refresh dependencies and run client'
+    group = 'application'
+    dependsOn 'refreshDependencies'
+    
+    doLast {
+        // Run the appropriate client task based on available subprojects
+        if (project.findProject(':Fabric')) {
+            project(':Fabric').tasks.runClient.execute()
+        } else if (project.findProject(':Forge')) {
+            project(':Forge').tasks.runClient.execute()
+        } else if (project.findProject(':NeoForge')) {
+            project(':NeoForge').tasks.runClient.execute()
+        } else {
+            throw new GradleException("No loader subproject found to run client")
+        }
     }
 }

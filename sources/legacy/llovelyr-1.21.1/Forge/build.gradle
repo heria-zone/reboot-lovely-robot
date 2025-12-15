@@ -3,17 +3,27 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
 }
 
-version = mod_version
-group = mod_group
-
-base {
-    archivesName = "${mod_id}-forge-${minecraft_version}"
-}
-
-repositories {
-    maven {
-        name = 'GeckoLib'
-        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    
+    // GeckoLib for Forge (if needed)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
+    }
+    
+    // Local library dependencies (Forge versions) - only if JARs exist
+    if (project.hasProperty('depends_on_lovelylib') && depends_on_lovelylib.toBoolean()) {
+        def lovelyLibJar = rootProject.file("libs/lovelylib-forge-${minecraft_version}-${lovelylib_version}.jar")
+        if (lovelyLibJar.exists()) {
+            implementation name: "lovelylib-forge-${minecraft_version}-${lovelylib_version}", version: ''
+        } else {
+            logger.warn("LovelyLib Forge JAR not found: ${lovelyLibJar.path}. Run 'gradle refreshDependencies' first.")
+        }
+    } else if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibJar = rootProject.file("libs/hzlib-forge-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            implementation name: "hzlib-forge-${minecraft_version}-${hzlib_version}", version: ''
+        }
     }
 }
 
@@ -58,13 +68,6 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-    // GeckoLib dependency
-    implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
-}
-
 processResources {
     var replaceProperties = [
             minecraft_version: minecraft_version,
@@ -80,7 +83,9 @@ processResources {
             mod_description: mod_description,
             mod_homepage: mod_homepage,
             mod_source: mod_source,
-            mod_issues: mod_issues
+            mod_issues: mod_issues,
+            mod_group: mod_group,
+            lovelylib_version: lovelylib_version
     ]
     inputs.properties replaceProperties
 
@@ -89,7 +94,7 @@ processResources {
     }
 
     filesMatching("${mod_id}.mixins.json") {
-        expand([mod_id: mod_id])
+        expand replaceProperties
     }
 }
 
@@ -104,4 +109,35 @@ sourceSets.each {
     def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
     it.output.resourcesDir = dir
     it.java.destinationDirectory = dir
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${mod_name} Forge"
+                description = "${mod_description} - Forge implementation"
+                url = "${mod_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${mod_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${mod_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${mod_source}"
+                }
+            }
+        }
+    }
 }

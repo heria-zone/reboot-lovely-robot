@@ -41,4 +41,5 @@ tasks.named("sourcesJar", Jar) {
     from(configurations.commonJava)
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

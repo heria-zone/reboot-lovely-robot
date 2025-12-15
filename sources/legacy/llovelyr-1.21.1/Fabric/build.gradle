@@ -3,48 +3,36 @@ plugins {
     id 'fabric-loom'
 }
 
-version = mod_version
-group = mod_group
-
-base {
-    archivesName = "${mod_id}-fabric-${minecraft_version}"
-}
-
-repositories {
-    maven {
-        name = 'GeckoLib'
-        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-    }
-}
-
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.officialMojangMappings()
+    mappings "net.fabricmc:yarn:${fabric_yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
     
-    // GeckoLib dependency
-    modImplementation "software.bernie.geckolib:${fabric_geckolib}"
-}
-
-sourceSets.main.resources.srcDirs += "src/generated/resources"
-
-fabricApi {
-    configureDataGeneration {
-        outputDirectory.set(file("src/generated/resources"))
+    // GeckoLib for Fabric (if needed)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        modImplementation "software.bernie.geckolib:${fabric_geckolib}"
     }
+    
+    // Local library dependencies (Fabric versions) - only if JARs exist
+    if (project.hasProperty('depends_on_lovelylib') && depends_on_lovelylib.toBoolean()) {
+        def lovelyLibJar = rootProject.file("libs/lovelylib-fabric-${minecraft_version}-${lovelylib_version}.jar")
+        if (lovelyLibJar.exists()) {
+            modApi name: "lovelylib-fabric-${minecraft_version}-${lovelylib_version}", version: ''
+        } else {
+            logger.warn("LovelyLib Fabric JAR not found: ${lovelyLibJar.path}. Run 'gradle refreshDependencies' first.")
+        }
+    } else if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibJar = rootProject.file("libs/hzlib-fabric-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            modApi name: "hzlib-fabric-${minecraft_version}-${hzlib_version}", version: ''
+        }
+    }
+    
+
 }
 
 loom {
-    def aw = file("../common/src/main/resources/${mod_id}.accesswidener")
-    if (aw.exists()) {
-        accessWidenerPath.set(aw)
-    }
-    
-    mixin {
-        defaultRefmapName.set("${mod_id}.refmap.json")
-    }
-    
     runs {
         client {
             client()
@@ -58,14 +46,6 @@ loom {
             setConfigName("Fabric Server")
             ideConfigGenerated(true)
             runDir("runs/server")
-        }
-        datagen {
-            server()
-            setConfigName("Fabric Data Generation")
-            ideConfigGenerated(true)
-            runDir("runs/datagen")
-            
-            programArgs("--server", "--mod", mod_id, "--all", "--output", file("src/generated/resources/").getAbsolutePath(), "--existing", file("src/main/resources/").getAbsolutePath())
         }
     }
 }
@@ -83,8 +63,9 @@ processResources {
     inputs.property "mod_source", mod_source
     inputs.property "mod_issues", mod_issues
     inputs.property "fabric_loader_version", fabric_loader_version
-    inputs.property "fabric_api_version", fabric_api_version
     inputs.property "minecraft_version", minecraft_version
+    inputs.property "minecraft_version_range", minecraft_version_range
+    inputs.property "java_version", java_version
 
     filesMatching("fabric.mod.json") {
         expand(
@@ -100,29 +81,47 @@ processResources {
             "mod_source": inputs.properties.mod_source,
             "mod_issues": inputs.properties.mod_issues,
             "fabric_loader_version": inputs.properties.fabric_loader_version,
-            "fabric_api_version": inputs.properties.fabric_api_version,
-            "minecraft_version": inputs.properties.minecraft_version
+            "minecraft_version": inputs.properties.minecraft_version,
+            "minecraft_version_range": inputs.properties.minecraft_version_range,
+            "java_version": inputs.properties.java_version
         )
     }
 
-    filesMatching("${mod_id}.fabric.mixins.json") {
+    filesMatching("${mod_id}.mixins.json") {
         expand(
-                "version": inputs.properties.version,
-                "mod_id": inputs.properties.mod_id,
-                "mod_name": inputs.properties.mod_name,
-                "mod_version": inputs.properties.mod_version,
-                "mod_description": inputs.properties.mod_description,
-                "mod_authors": inputs.properties.mod_authors,
-                "mod_license": inputs.properties.mod_license,
-                "mod_group": inputs.properties.mod_group,
-                "mod_source": inputs.properties.mod_source,
-                "mod_issues": inputs.properties.mod_issues
+            "mod_id": inputs.properties.mod_id,
+            "mod_group": inputs.properties.mod_group
         )
     }
 }
 
-jar {
-    from("../common/LICENSE") {
-        rename { "${it}_${project.base.archivesName}"}
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${mod_name} Fabric"
+                description = "${mod_description} - Fabric implementation"
+                url = "${mod_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${mod_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${mod_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${mod_source}"
+                }
+            }
+        }
     }
 }
