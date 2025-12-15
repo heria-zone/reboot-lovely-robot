@@ -61,6 +61,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     protected static final EntityDataAccessor<Integer> TEXTURE_ID = SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Boolean> NOTIFICATION = SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.BOOLEAN);
+    protected static final EntityDataAccessor<Integer> MODEL_ID = SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.INT);
 
     protected int waryTimer = 0, autoHealTimer = 0;
     protected boolean combatMode = false, autoHeal = false, canWander = false;
@@ -166,9 +167,44 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
     // MODEL
 
+    /**
+     * Retrieves the current model state with client-server synchronization.
+     * <p>
+     * <b>Architecture:</b> Uses EntityDataAccessor for automatic client-server sync,
+     * ensuring model changes are immediately visible on all clients.
+     * <p>
+     * <b>Fallback:</b> Returns Default model if synchronization fails or data is corrupted.
+     *
+     * @return current EntityModel (Default or Armed)
+     */
+    public EntityModel getModel() {
+        try {
+            return EntityModel.byId(this.entityData.get(MODEL_ID));
+        } catch (Exception ignored) {
+            return EntityModel.Default;
+        }
+    } // getModel ()
+
+    /**
+     * Updates model state with automatic client-server synchronization.
+     * <p>
+     * <b>Architecture:</b> Sets both EntityDataAccessor (for network sync) and local
+     * field (for server-side logic). This ensures immediate server-side availability
+     * while triggering client updates.
+     * <p>
+     * <b>Network Impact:</b> Only syncs when model actually changes, minimizing
+     * network traffic during combat mode transitions.
+     *
+     * @param model new EntityModel to apply
+     */
+    public void setModel(EntityModel model) {
+        this.entityData.set(MODEL_ID, model.getId());
+        this.model = model; // Keep local field in sync for server-side logic
+    } // setModel ()
+
     public ResourceLocation getCurrentModel() {
-        // Map EntityModel to EntityVariantModel
-        EntityVariantModel variant = (model == EntityModel.Armed) ? EntityVariantModel.ARMED : EntityVariantModel.DEFAULT;
+        // Map EntityModel to EntityVariantModel using synchronized getter
+        EntityVariantModel variant = (getModel() == EntityModel.Armed) ? EntityVariantModel.ARMED : EntityVariantModel.DEFAULT;
         return nativeEntity.getModels().get(variant);
     } // getCurrentModel ()
 
@@ -915,6 +951,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         builder.define(TEXTURE_ID, EntityTexture.RANDOM.getId());
         builder.define(STATE, EntityState.Follow.getId());
         builder.define(NOTIFICATION, true);
+        builder.define(MODEL_ID, EntityModel.Default.getId());
     } // defineSynchedData ()
 
     @Override
@@ -924,6 +961,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         dataNBT.putInt("TextureID", this.getTextureID());
         dataNBT.putInt("State", this.getCurrentStateID());
         dataNBT.putBoolean("Notification", this.getNotification());
+        dataNBT.putInt("Model", this.getModel().getId());
 
         // Use new EntityData system for consolidated stat storage
         EntityData entityData = new EntityData(combatStats, protectionStats, enchantmentStats);
@@ -965,6 +1003,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
             this.setTexture(dataNBT.getInt("TextureID"));
             this.setCurrentState(dataNBT.getInt("State"));
             this.setNotification(dataNBT.getBoolean("Notification"));
+            this.setModel(EntityModel.byId(dataNBT.getInt("Model")));
         }
 
         // Recalculate attributes after loading to ensure consistency
@@ -976,6 +1015,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         dataNBT.putInt("TextureID", this.getTextureID());
         dataNBT.putInt("State", this.getCurrentStateID());
         dataNBT.putBoolean("Notification", this.getNotification());
+        dataNBT.putInt("Model", this.getModel().getId());
         return dataNBT;
     } // writeToNBT
 
@@ -984,6 +1024,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         this.setTexture(dataNBT.getInt("TextureID"));
         this.setCurrentState(dataNBT.getInt("State"));
         this.setNotification(dataNBT.getBoolean("Notification"));
+        this.setModel(EntityModel.byId(dataNBT.getInt("Model")));
     } // readFromNBT ()
 
     // -- Custom Methods --
@@ -1044,10 +1085,10 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         if(this.level().isClientSide && !combatMode) return;
 
         if(waryTimer != 0) {
-            if(this.model != EntityModel.Armed) this.model = EntityModel.Armed;
+            if(this.getModel() != EntityModel.Armed) this.setModel(EntityModel.Armed);
             waryTimer--;
         } else {
-            if(this.model != EntityModel.Default) this.model = EntityModel.Default;
+            if(this.getModel() != EntityModel.Default) this.setModel(EntityModel.Default);
             combatMode = false;
         }
     } // handleCombatMode ()
