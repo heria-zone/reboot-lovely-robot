@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "templatelib",
+  "version": "1.0.0",
+  "name": "Template Library",
+  "description": "Template library for quick project setup.",
+  "authors": [
+    "MSymbios"
+  ],
+  "contact": {
+    "homepage": "https://github.com/msymbios/templatelib",
+    "sources": "https://github.com/msymbios/templatelib",
+    "issues": "https://github.com/msymbios/templatelib/issues"
+  },
+  "license": "MIT License",
+  "icon": "assets/templatelib/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.heriazone.templatelib.fabric.TemplateLibFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "fabric-api": "*",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+  },
+  "suggests": {
+    "another-lib": "*"
+  }
+}

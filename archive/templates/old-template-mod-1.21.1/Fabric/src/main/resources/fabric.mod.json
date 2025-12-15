@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "template",
+  "version": "1.0.0",
+  "name": "Template",
+  "description": "Template mod for quick project setup.",
+  "authors": [
+    "MSymbios"
+  ],
+  "contact": {
+    "homepage": "https://github.com/msymbios/template",
+    "sources": "https://github.com/msymbios/template",
+    "issues": "https://github.com/msymbios/template/issues"
+  },
+  "license": "MIT License",
+  "icon": "assets/template/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.heriazone.template.Template"
+    ]
+  },
+  "mixins": [
+    "template.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "fabric-api": "*",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

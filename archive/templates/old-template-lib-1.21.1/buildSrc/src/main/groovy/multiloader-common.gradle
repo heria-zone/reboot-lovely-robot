@@ -1,0 +1,74 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${lib_id}-${project.name}"
+}
+
+version = "${minecraft_version}-${lib_version}"
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(java_version))
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+    
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Sponge'
+                url = uri('https://repo.spongepowered.org/repository/maven-public')
+            }
+        }
+        filter {
+            includeGroupAndSubgroups("org.spongepowered")
+        }
+    }
+    
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+    
+    // HZ Lib dependency (if needed)
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        flatDir {
+            dirs '../hzlib-1.21.1/build/libs'
+        }
+    }
+}
+
+dependencies {
+    // HZ Lib dependency (conditional)
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        api "net.heriazone.hzlib:hzlib-common:${minecraft_version}-${hzlib_version}"
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = java_version as Integer
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "${lib_id}",
+            "Specification-Vendor": "${lib_authors}",
+            "Specification-Version": "1",
+            "Implementation-Title": "${lib_name}",
+            "Implementation-Version": "${lib_version}",
+            "Implementation-Vendor": "${lib_authors}",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}

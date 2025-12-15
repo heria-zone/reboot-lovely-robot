@@ -1,0 +1,74 @@
+plugins {
+    id 'fabric-loom'
+    id 'multiloader-common'
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings "net.fabricmc:yarn:${fabric_yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    
+    // GeckoLib for Fabric (if needed)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        modImplementation "${fabric_geckolib}"
+    }
+    
+    // Library dependencies (Fabric versions)
+    if (project.hasProperty('use_lovelylib') && use_lovelylib.toBoolean()) {
+        modApi "net.msymbios.lovelylib:lovelylib-fabric:${minecraft_version}-${lovelylib_version}"
+    } else if (project.hasProperty('use_hzlib') && use_hzlib.toBoolean()) {
+        modApi "net.heriazone.hzlib:hzlib-fabric:${minecraft_version}-${hzlib_version}"
+    }
+    
+    // Common module dependency
+    implementation project(':Common')
+}
+
+loom {
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${mod_name} Fabric"
+                description = "${mod_description} - Fabric implementation"
+                url = "${mod_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${mod_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${mod_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${mod_source}"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,82 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${mod_id}-${project.name}"
+}
+
+version = "${minecraft_version}-${mod_version}"
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(java_version))
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+    
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Sponge'
+                url = uri('https://repo.spongepowered.org/repository/maven-public')
+            }
+        }
+        filter {
+            includeGroupAndSubgroups("org.spongepowered")
+        }
+    }
+    
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+    
+    // Library dependencies (conditional based on gradle.properties)
+    if (project.hasProperty('use_hzlib') && use_hzlib.toBoolean()) {
+        flatDir {
+            dirs '../hzlib-1.21.1/build/libs'
+        }
+    }
+    
+    if (project.hasProperty('use_lovelylib') && use_lovelylib.toBoolean()) {
+        flatDir {
+            dirs '../lovelylib-1.21.1/build/libs'
+        }
+    }
+}
+
+dependencies {
+    // Conditional library dependencies
+    if (project.hasProperty('use_lovelylib') && use_lovelylib.toBoolean()) {
+        api "net.msymbios.lovelylib:lovelylib-common:${minecraft_version}-${lovelylib_version}"
+    } else if (project.hasProperty('use_hzlib') && use_hzlib.toBoolean()) {
+        api "net.heriazone.hzlib:hzlib-common:${minecraft_version}-${hzlib_version}"
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = Integer.parseInt(java_version)
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "${mod_id}",
+            "Specification-Vendor": "${mod_authors}",
+            "Specification-Version": "1",
+            "Implementation-Title": "${mod_name}",
+            "Implementation-Version": "${mod_version}",
+            "Implementation-Vendor": "${mod_authors}",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
