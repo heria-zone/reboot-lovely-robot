@@ -319,6 +319,27 @@ docs/documentation/
 
 ## Progress Update - December 14, 2025
 
+### Completed Work - December 15, 2025
+
+- ✅ **Legacy 1.21.1 Combat Mode Model Synchronization Fix**: Successfully resolved armed model not appearing during wary/combat mode
+  - **Issue Identified**: Model field was not synchronized between server and client, causing armed model to only appear server-side
+  - **Root Cause**: Missing `MODEL_ID` EntityDataAccessor for client-server synchronization
+  - **Solution Implemented**:
+    - **Added EntityDataAccessor**: `MODEL_ID` for automatic client-server model synchronization
+    - **Added Synchronized Methods**: `getModel()` and `setModel()` with proper EntityData handling
+    - **Updated Combat Logic**: `handleCombatMode()` now uses synchronized methods instead of direct field access
+    - **Updated Model Retrieval**: `getCurrentModel()` uses synchronized getter for consistent state
+    - **Added NBT Persistence**: Model state saved/loaded in all NBT methods for world persistence
+  - **Files Modified**:
+    - `sources/legacy/llovelyr-1.21.1/Common/src/main/java/net/msymbios/llovelyr/common/entity/internal/InternalEntity.java`
+  - **Technical Details**:
+    - Added `MODEL_ID` EntityDataAccessor with EntityDataSerializers.INT
+    - Updated `defineSynchedData()` to include model synchronization
+    - Added comprehensive JavaDoc documentation for new methods
+    - Updated `addAdditionalSaveData()`, `readAdditionalSaveData()`, `writeToNBT()`, and `readFromNBT()` for persistence
+  - **Result**: Armed model now immediately appears on all clients when robot enters wary/combat mode
+  - **Status**: ✅ COMPLETE - No compilation errors, ready for testing
+
 ### Completed Work - December 14, 2025
 
 - ✅ **Legacy 1.21.1 Random Texture and Health Bug Fixes**: Successfully resolved critical spawn issues
