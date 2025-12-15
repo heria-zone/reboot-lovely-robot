@@ -25,26 +25,10 @@ versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
 
-# Uncomment if using GeckoLib
-#[[dependencies.${mod_id}]]
-#modId="geckolib"
-#type="required"
-#versionRange="[4.7.3,)"
-#ordering="NONE"
-#side="BOTH"
-
-# Uncomment if using Lovely Lib
-#[[dependencies.${mod_id}]]
-#modId="lovelylib"
-#type="required"
-#versionRange="[1.0.0,)"
-#ordering="NONE"
-#side="BOTH"
-
-# Uncomment if using HZ Lib
-#[[dependencies.${mod_id}]]
-#modId="hzlib"
-#type="required"
-#versionRange="[1.0.0,)"
-#ordering="NONE"
-#side="BOTH"
+# Template dependencies - customize as needed
+# [[dependencies.${mod_id}]]
+# modId="your_dependency"
+# type="required"
+# versionRange="[1.0.0,)"
+# ordering="NONE"
+# side="BOTH"

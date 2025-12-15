@@ -1,35 +1,37 @@
 {
   "schemaVersion": 1,
-  "id": "template",
-  "version": "1.0.0",
-  "name": "Template",
-  "description": "Template mod for quick project setup.",
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
   "authors": [
-    "MSymbios"
+    "${mod_authors}"
   ],
   "contact": {
-    "homepage": "https://github.com/msymbios/template",
-    "sources": "https://github.com/msymbios/template",
-    "issues": "https://github.com/msymbios/template/issues"
+    "homepage": "${mod_homepage}",
+    "sources": "${mod_source}",
+    "issues": "${mod_issues}"
   },
-  "license": "MIT License",
-  "icon": "assets/template/icon.png",
+  "license": "${mod_license}",
+  "icon": "assets/${mod_id}/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.heriazone.template.Template"
+      "${mod_group}.TemplateMod"
+    ],
+    "client": [
+      "${mod_group}.TemplateMod"
     ]
   },
   "mixins": [
-    "template.mixins.json"
+    "${mod_id}.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.16.9",
+    "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
-    "minecraft": "~1.21.1",
-    "java": ">=21"
+    "minecraft": "~${minecraft_version}",
+    "java": ">=${java_version}"
   },
   "suggests": {
-    "another-mod": "*"
   }
 }
