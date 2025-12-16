@@ -1,5 +1,6 @@
 package net.heriazone.lovelylib;
 
+import net.heriazone.lovelylib.hzlib.framework.utils.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +27,13 @@ public class Lovely {
      * Library version for runtime identification and compatibility checks.
      */
     public static final String VERSION = "1.0.0";
+
+    public static final Version DATA_VERSION = new Version("1.0.0");
     
     /**
      * Library identifier used across all loaders and configurations.
      */
-    public static final String LIBRARY_ID = "lovelylib";
+    public static final String MODID = "lovelylib";
     
     /**
      * Shared logger instance for consistent logging across all loaders.
@@ -71,7 +74,7 @@ public class Lovely {
 
         initialized = true;
         LOGGER.info("Lovely Lib initialization complete");
-    }
+    } // initialize ()
 
     /**
      * Get the current library version for runtime checks and logging.
@@ -98,8 +101,8 @@ public class Lovely {
      * 
      * @return library identifier string
      */
-    public static String getLibraryId() {
-        return LIBRARY_ID;
+    public static String getModid() {
+        return MODID;
     }
 
 } // Class: Lovely

@@ -2,55 +2,80 @@ package net.heriazone.llovelyr;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
+import net.heriazone.llovelyr.source.*;
+import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
+import net.heriazone.lovelylib.common.entity.common.LovelyRobotType;
+import net.heriazone.lovelylib.hzlib.api.services.FabricServices;
+import net.heriazone.lovelylib.hzlib.api.services.Services;
 
 /**
- * <p>Fabric-specific initialization for the Lovely Legacy mod.</p>
+ * Main mod class for Legacy variant (Fabric loader).
  * <p>
- * <b>Loader Integration:</b> Implements Fabric's ModInitializer interface
- * to bootstrap the mod within the Fabric ecosystem while delegating
- * core functionality to the common module.
+ * <b>Architecture:</b> Implements Fabric's ModInitializer for mod entry point,
+ * coordinating registration of all mod content (items, entities, creative tabs,
+ * events) through direct registry calls and event system.
  * <p>
- * <b>LovelyLib Coordination:</b> Ensures proper initialization order
- * with LovelyLib Fabric components.
+ * <b>Registration Flow:</b> Single onInitialize method handles all registration
+ * in explicit order: GeckoLib → creative tabs → items → events → entities.
+ * Simpler than Forge's multiphase lifecycle.
+ * <p>
+ * <b>Mod ID:</b> "llovelyr" - Must match fabric.mod.json entry for Fabric
+ * to recognize and load the mod.
  */
 public class LovelyLegacy implements ModInitializer, ClientModInitializer {
 
     /**
-     * Fabric mod initialization entry point.
+     * Mod initialization invoked by Fabric during mod loading phase.
      * <p>
-     * <b>Initialization Order:</b> Called by Fabric loader during mod loading phase.
-     * Delegates to common initialization while handling Fabric-specific setup.
+     * <b>Registration Order:</b>
+     * 1. GeckoLib animation library initialization
+     * 2. Creative tabs (must precede items for tab population)
+     * 3. Items (registers with Fabric registry)
+     * 4. Event handlers (crafting callbacks, mixins)
+     * 5. Entities (robot entity types and attributes)
+     * <p>
+     * <b>Design Decision:</b> Explicit ordering ensures dependencies are
+     * satisfied (e.g., tabs exist before items reference them). Fabric's
+     * single-phase initialization requires careful sequencing.
+     * <p>
+     * <b>GeckoLib:</b> Must initialize before any GeckoLib-dependent classes
+     * (animated entities, models) are loaded to prevent animation system errors.
      */
     @Override
     public void onInitialize() {
-        Legacy.LOGGER.info("Initializing Lovely Legacy for Fabric");
+        // Initialize platform services first
+        Services.setInstance(new FabricServices());
+        //Legacy.LOGGER.info("Initializing Lovely Legacy for Fabric");
         
         // Initialize common functionality
         Legacy.init();
-        
-        // TODO: Fabric-specific initialization
-        // Register Fabric-specific features here
 
-        Legacy.LOGGER.info("Lovely Legacy Fabric initialization complete");
+        // Register Fabric-specific features here
+        LovelyConfigs.register();
+        LovelyRobotType.reloadFromConfig();
+        LovelyGroups.register();
+        LovelyItems.register();
+        LovelyEvents.register();
+        LovelyEntities.register();
+        LovelyRecipes.register();
+        LovelyCommandArguments.register();
+
+        //Legacy.LOGGER.info("Lovely Legacy Fabric initialization complete");
     } // onInitialize ()
 
     /**
-     * Fabric client-side initialization entry point.
+     * Registers client-side rendering systems.
      * <p>
-     * <b>Client Setup:</b> Handles client-only initialization such as
-     * rendering registration and input handling setup.
+     * <b>Order:</b> Item models → Entity renderers (ensures item properties exist
+     * before entity renderers query them).
      */
     @Override
     public void onInitializeClient() {
-        Legacy.LOGGER.info("Initializing Lovely Legacy client for Fabric");
-        
         // Initialize client-side functionality
         Legacy.initClient();
-        
-        // TODO: Fabric-specific client initialization
-        // Register client-side features here
 
-        Legacy.LOGGER.info("Lovely Legacy Fabric client initialization complete");
+        LovelyItems.registerModel();
+        LovelyEntities.registerRender();
     } // onInitializeClient ()
 
 } // Class: LovelyLegacy

@@ -21,7 +21,7 @@ public class Legacy {
     /**
      * Mod identifier used across all loaders and configurations.
      */
-    public static final String MOD_ID = "llovelyr";
+    public static final String MODID = "llovelyr";
     
     /**
      * Mod display name for user-facing contexts.

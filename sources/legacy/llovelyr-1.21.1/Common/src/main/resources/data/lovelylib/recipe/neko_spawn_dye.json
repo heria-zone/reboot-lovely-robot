@@ -1,0 +1,16 @@
+{
+  "type": "lovelylib:lovely_spawn_dye",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "lovelylib:neko_spawn"
+    },
+    {
+      "tag": "lovelylib:dyes"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "lovelylib:neko_spawn"
+  }
+}

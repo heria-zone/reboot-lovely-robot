@@ -1,0 +1,21 @@
+{
+  "type": "llovelyr:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "GGG",
+    "GCG",
+    "GGG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "C": {
+      "item": "llovelyr:robot_core"
+    }
+  },
+  "result": {
+    "id": "llovelyr:kitsune_spawn",
+    "count": 1
+  }
+}

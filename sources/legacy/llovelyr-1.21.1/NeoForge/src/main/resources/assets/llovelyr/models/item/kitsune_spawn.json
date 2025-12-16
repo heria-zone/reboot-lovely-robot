@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "llovelyr:item/kitsune_spawn"
+  },
+  "overrides": [
+    { "predicate": {"llovelyr:variant": 0}, "model": "llovelyr:item/kitsune/kitsune00" },
+    { "predicate": {"llovelyr:variant": 1}, "model": "llovelyr:item/kitsune/kitsune01" },
+    { "predicate": {"llovelyr:variant": 2}, "model": "llovelyr:item/kitsune/kitsune02" },
+    { "predicate": {"llovelyr:variant": 3}, "model": "llovelyr:item/kitsune/kitsune03" },
+    { "predicate": {"llovelyr:variant": 4}, "model": "llovelyr:item/kitsune/kitsune04" },
+    { "predicate": {"llovelyr:variant": 5}, "model": "llovelyr:item/kitsune/kitsune05" },
+    { "predicate": {"llovelyr:variant": 6}, "model": "llovelyr:item/kitsune/kitsune06" },
+    { "predicate": {"llovelyr:variant": 7}, "model": "llovelyr:item/kitsune/kitsune07" },
+    { "predicate": {"llovelyr:variant": 8}, "model": "llovelyr:item/kitsune/kitsune08" },
+    { "predicate": {"llovelyr:variant": 9}, "model": "llovelyr:item/kitsune/kitsune09" },
+    { "predicate": {"llovelyr:variant": 10}, "model": "llovelyr:item/kitsune/kitsune10" },
+    { "predicate": {"llovelyr:variant": 11}, "model": "llovelyr:item/kitsune/kitsune11" },
+    { "predicate": {"llovelyr:variant": 12}, "model": "llovelyr:item/kitsune/kitsune12" },
+    { "predicate": {"llovelyr:variant": 13}, "model": "llovelyr:item/kitsune/kitsune13" },
+    { "predicate": {"llovelyr:variant": 14}, "model": "llovelyr:item/kitsune/kitsune14" },
+    { "predicate": {"llovelyr:variant": 15}, "model": "llovelyr:item/kitsune/kitsune15" },
+    { "predicate": {"llovelyr:variant": 16}, "model": "llovelyr:item/kitsune/kitsune16" }
+  ]
+}

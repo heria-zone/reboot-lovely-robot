@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lovelylib:item/bunny2/bunny2_16"
+  },
+  "overrides": [
+    { "predicate": {"lovelylib:variant": 0}, "model": "lovelylib:item/bunny2/bunny2_00" },
+    { "predicate": {"lovelylib:variant": 1}, "model": "lovelylib:item/bunny2/bunny2_01" },
+    { "predicate": {"lovelylib:variant": 2}, "model": "lovelylib:item/bunny2/bunny2_02" },
+    { "predicate": {"lovelylib:variant": 3}, "model": "lovelylib:item/bunny2/bunny2_03" },
+    { "predicate": {"lovelylib:variant": 4}, "model": "lovelylib:item/bunny2/bunny2_04" },
+    { "predicate": {"lovelylib:variant": 5}, "model": "lovelylib:item/bunny2/bunny2_05" },
+    { "predicate": {"lovelylib:variant": 6}, "model": "lovelylib:item/bunny2/bunny2_06" },
+    { "predicate": {"lovelylib:variant": 7}, "model": "lovelylib:item/bunny2/bunny2_07" },
+    { "predicate": {"lovelylib:variant": 8}, "model": "lovelylib:item/bunny2/bunny2_08" },
+    { "predicate": {"lovelylib:variant": 9}, "model": "lovelylib:item/bunny2/bunny2_09" },
+    { "predicate": {"lovelylib:variant": 10}, "model": "lovelylib:item/bunny2/bunny2_10" },
+    { "predicate": {"lovelylib:variant": 11}, "model": "lovelylib:item/bunny2/bunny2_11" },
+    { "predicate": {"lovelylib:variant": 12}, "model": "lovelylib:item/bunny2/bunny2_12" },
+    { "predicate": {"lovelylib:variant": 13}, "model": "lovelylib:item/bunny2/bunny2_13" },
+    { "predicate": {"lovelylib:variant": 14}, "model": "lovelylib:item/bunny2/bunny2_14" },
+    { "predicate": {"lovelylib:variant": 15}, "model": "lovelylib:item/bunny2/bunny2_15" },
+    { "predicate": {"lovelylib:variant": 16}, "model": "lovelylib:item/bunny2/bunny2_16" }
+  ]
+}

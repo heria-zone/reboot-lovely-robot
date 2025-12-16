@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "llovelyr:item/honey_spawn"
+  },
+  "overrides": [
+    { "predicate": {"llovelyr:variant": 0}, "model": "llovelyr:item/honey/honey00" },
+    { "predicate": {"llovelyr:variant": 1}, "model": "llovelyr:item/honey/honey01" },
+    { "predicate": {"llovelyr:variant": 2}, "model": "llovelyr:item/honey/honey02" },
+    { "predicate": {"llovelyr:variant": 3}, "model": "llovelyr:item/honey/honey03" },
+    { "predicate": {"llovelyr:variant": 4}, "model": "llovelyr:item/honey/honey04" },
+    { "predicate": {"llovelyr:variant": 5}, "model": "llovelyr:item/honey/honey05" },
+    { "predicate": {"llovelyr:variant": 6}, "model": "llovelyr:item/honey/honey06" },
+    { "predicate": {"llovelyr:variant": 7}, "model": "llovelyr:item/honey/honey07" },
+    { "predicate": {"llovelyr:variant": 8}, "model": "llovelyr:item/honey/honey08" },
+    { "predicate": {"llovelyr:variant": 9}, "model": "llovelyr:item/honey/honey09" },
+    { "predicate": {"llovelyr:variant": 10}, "model": "llovelyr:item/honey/honey10" },
+    { "predicate": {"llovelyr:variant": 11}, "model": "llovelyr:item/honey/honey11" },
+    { "predicate": {"llovelyr:variant": 12}, "model": "llovelyr:item/honey/honey12" },
+    { "predicate": {"llovelyr:variant": 13}, "model": "llovelyr:item/honey/honey13" },
+    { "predicate": {"llovelyr:variant": 14}, "model": "llovelyr:item/honey/honey14" },
+    { "predicate": {"llovelyr:variant": 15}, "model": "llovelyr:item/honey/honey15" },
+    { "predicate": {"llovelyr:variant": 16}, "model": "llovelyr:item/honey/honey16" }
+  ]
+}

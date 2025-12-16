@@ -1,0 +1,21 @@
+{
+  "type": "lovelylib:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "NNN",
+    "NCN",
+    "NNN"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "C": {
+      "item": "lovelylib:robot_core"
+    }
+  },
+  "result": {
+    "id": "lovelylib:honey_spawn",
+    "count": 1
+  }
+}

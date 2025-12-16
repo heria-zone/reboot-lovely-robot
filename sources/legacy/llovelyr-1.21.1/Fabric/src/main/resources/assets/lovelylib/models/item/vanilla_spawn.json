@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lovelylib:item/vanilla_spawn"
+  },
+  "overrides": [
+    { "predicate": {"lovelylib:variant": 0.00}, "model": "lovelylib:item/vanilla/vanilla00" },
+    { "predicate": {"lovelylib:variant": 0.03}, "model": "lovelylib:item/vanilla/vanilla01" },
+    { "predicate": {"lovelylib:variant": 0.09}, "model": "lovelylib:item/vanilla/vanilla02" },
+    { "predicate": {"lovelylib:variant": 0.15}, "model": "lovelylib:item/vanilla/vanilla03" },
+    { "predicate": {"lovelylib:variant": 0.21}, "model": "lovelylib:item/vanilla/vanilla04" },
+    { "predicate": {"lovelylib:variant": 0.27}, "model": "lovelylib:item/vanilla/vanilla05" },
+    { "predicate": {"lovelylib:variant": 0.33}, "model": "lovelylib:item/vanilla/vanilla06" },
+    { "predicate": {"lovelylib:variant": 0.39}, "model": "lovelylib:item/vanilla/vanilla07" },
+    { "predicate": {"lovelylib:variant": 0.45}, "model": "lovelylib:item/vanilla/vanilla08" },
+    { "predicate": {"lovelylib:variant": 0.51}, "model": "lovelylib:item/vanilla/vanilla09" },
+    { "predicate": {"lovelylib:variant": 0.57}, "model": "lovelylib:item/vanilla/vanilla10" },
+    { "predicate": {"lovelylib:variant": 0.63}, "model": "lovelylib:item/vanilla/vanilla11" },
+    { "predicate": {"lovelylib:variant": 0.69}, "model": "lovelylib:item/vanilla/vanilla12" },
+    { "predicate": {"lovelylib:variant": 0.75}, "model": "lovelylib:item/vanilla/vanilla13" },
+    { "predicate": {"lovelylib:variant": 0.81}, "model": "lovelylib:item/vanilla/vanilla14" },
+    { "predicate": {"lovelylib:variant": 0.87}, "model": "lovelylib:item/vanilla/vanilla15" },
+    { "predicate": {"lovelylib:variant": 0.93}, "model": "lovelylib:item/vanilla/vanilla16" }
+  ]
+}

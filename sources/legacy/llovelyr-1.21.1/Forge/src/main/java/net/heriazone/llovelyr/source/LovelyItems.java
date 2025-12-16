@@ -1,0 +1,119 @@
+package net.heriazone.llovelyr.source;
+
+import net.heriazone.llovelyr.Legacy;
+import net.heriazone.llovelyr.LegacyIdentifier;
+import net.heriazone.lovelylib.common.items.LovelyCoreItem;
+import net.heriazone.lovelylib.common.items.LovelySpawnItem;
+import net.heriazone.lovelylib.hzlib.api.items.InternalItems;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+
+import java.util.function.Supplier;
+
+/**
+ * Centralizes item registration for Legacy variant robots.
+ * <p>
+ * <b>Architecture:</b> Uses Forge's DeferredRegister pattern to safely register
+ * items during mod initialization. Separates robot cores from spawn items while
+ * maintaining consistent registration flow.
+ * <p>
+ * <b>Item Categories:</b> Robot cores (crafting materials) and spawn eggs
+ * (entity summoning) with NBT-based customization support.
+ */
+public class LovelyItems extends InternalItems {
+
+    // -- Variables --
+
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Legacy.MODID);
+
+    // MISCELLANEOUS
+    public static final RegistryObject<Item> ROBOT_CORE = registerItem(LegacyIdentifier.ROBOT_CORE, Rarity.UNCOMMON, 1);
+
+    // SPAWNS
+    public static final RegistryObject<Item> BUNNY_SPAWN = registerItem(LegacyIdentifier.BUNNY_SPAWN, LovelyEntities.BUNNY::get, Rarity.RARE, 1);
+    public static final RegistryObject<Item> BUNNY2_SPAWN = registerItem(LegacyIdentifier.BUNNY2_SPAWN, LovelyEntities.BUNNY2::get, Rarity.RARE, 1);
+    public static final RegistryObject<Item> DRAGON_SPAWN = registerItem(LegacyIdentifier.DRAGON_SPAWN, LovelyEntities.DRAGON::get, Rarity.RARE, 1);
+    public static final RegistryObject<Item> HONEY_SPAWN = registerItem(LegacyIdentifier.HONEY_SPAWN, LovelyEntities.HONEY::get, Rarity.RARE, 1);
+    public static final RegistryObject<Item> KITSUNE_SPAWN = registerItem(LegacyIdentifier.KITSUNE_SPAWN, LovelyEntities.KITSUNE::get, Rarity.RARE, 1);
+    public static final RegistryObject<Item> NEKO_SPAWN = registerItem(LegacyIdentifier.NEKO_SPAWN, LovelyEntities.NEKO::get, Rarity.RARE, 1);
+    public static final RegistryObject<Item> VANILLA_SPAWN = registerItem(LegacyIdentifier.VANILLA_SPAWN, LovelyEntities.VANILLA::get, Rarity.RARE, 1);
+
+    // -- Methods --
+
+    /**
+     * Registers robot core item with specified properties.
+     * <p>
+     * <b>Usage:</b> For crafting materials and robot storage items.
+     *
+     * @param name the registry name
+     * @param rarity the item rarity level
+     * @param stack the maximum stack size
+     * @return registry object wrapping the item
+     */
+    private static RegistryObject<Item> registerItem(String name, Rarity rarity, int stack) {
+        return ITEMS.register(name, () -> new LovelyCoreItem(new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
+    } // registerItem()
+
+    /**
+     * Registers spawn egg item for robot entity.
+     * <p>
+     * <b>NBT Support:</b> Spawn eggs can store robot customization data (color,
+     * level, name) which transfers to spawned entity.
+     *
+     * @param name the registry name
+     * @param entity the entity type supplier
+     * @param rarity the item rarity level
+     * @param stack the maximum stack size
+     * @return registry object wrapping the spawn egg
+     */
+    private static RegistryObject<Item> registerItem(String name, Supplier<EntityType<? extends Mob>> entity, Rarity rarity, int stack) {
+        return ITEMS.register(name, () -> new LovelySpawnItem(entity, new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
+    } // registerItem()
+
+    /**
+     * Registers all items with Forge event bus.
+     * <p>
+     * <b>Timing:</b> Must be called during mod construction before registry events fire.
+     *
+     * @param eventBus the mod event bus
+     */
+    public static void register(IEventBus eventBus) {
+        ITEMS.register(eventBus);
+        Legacy.LOGGER.info("Registering Items: " + Legacy.MODID);
+    } // register()
+
+    /**
+     * Registers client-side model predicates for dynamic item appearance.
+     * <p>
+     * <b>Architecture:</b> Enables NBT-based model switching for robot color
+     * variants. Each spawn egg can display different textures based on stored
+     * color value in item NBT.
+     * <p>
+     * <b>Thread Safety:</b> Uses enqueueWork to ensure model registration occurs
+     * on main thread during client setup phase, preventing concurrent modification.
+     * <p>
+     * <b>Timing:</b> Must be called during FMLClientSetupEvent after items are
+     * registered but before client rendering begins.
+     *
+     * @param event the client setup event providing thread-safe work queue
+     */
+    public static void registerModel(final FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            registerModel(LovelyItems.BUNNY_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.BUNNY2_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.DRAGON_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.HONEY_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.KITSUNE_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.NEKO_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.VANILLA_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
+        });
+    } // registerModel()
+
+} // Class: LovelyItems
