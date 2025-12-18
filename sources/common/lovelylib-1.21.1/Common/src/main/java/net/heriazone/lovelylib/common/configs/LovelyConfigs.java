@@ -1,2 +1,7 @@
-package net.heriazone.lovelylib.common.configs;public class LovelyConfigs {
-}
+package net.heriazone.lovelylib.common.configs;
+
+public class LovelyConfigs {
+
+
+
+} // Class: LovelyConfigs
