@@ -1,7 +1,7 @@
 package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
-import net.heriazone.llovelyr.LegacyIdentifier;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.items.LovelyCoreItem;
 import net.heriazone.lovelylib.common.items.LovelySpawnItem;
 import net.heriazone.lovelylib.hzlib.api.items.InternalItems;
@@ -33,16 +33,16 @@ public class LovelyItems extends InternalItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Legacy.MODID);
 
     // MISCELLANEOUS
-    public static final DeferredItem<Item> ROBOT_CORE = registerItem(LegacyIdentifier.ROBOT_CORE, Rarity.UNCOMMON, 1);
+    public static final DeferredItem<Item> ROBOT_CORE = registerItem(LovelyConstant.ROBOT_CORE, Rarity.UNCOMMON, 1);
 
     // SPAWNS
-    public static final DeferredItem<Item> BUNNY_SPAWN = registerItem(LegacyIdentifier.BUNNY_SPAWN, LovelyEntities.BUNNY::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> BUNNY2_SPAWN = registerItem(LegacyIdentifier.BUNNY2_SPAWN, LovelyEntities.BUNNY2::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> DRAGON_SPAWN = registerItem(LegacyIdentifier.DRAGON_SPAWN, LovelyEntities.DRAGON::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> HONEY_SPAWN = registerItem(LegacyIdentifier.HONEY_SPAWN, LovelyEntities.HONEY::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> KITSUNE_SPAWN = registerItem(LegacyIdentifier.KITSUNE_SPAWN, LovelyEntities.KITSUNE::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> NEKO_SPAWN = registerItem(LegacyIdentifier.NEKO_SPAWN, LovelyEntities.NEKO::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> VANILLA_SPAWN = registerItem(LegacyIdentifier.VANILLA_SPAWN, LovelyEntities.VANILLA::get, Rarity.RARE, 1);
+    public static final DeferredItem<Item> BUNNY_SPAWN = registerItem(LovelyConstant.BUNNY_SPAWN, LovelyEntities.BUNNY::get, Rarity.RARE, 1);
+    public static final DeferredItem<Item> BUNNY2_SPAWN = registerItem(LovelyConstant.BUNNY2_SPAWN, LovelyEntities.BUNNY2::get, Rarity.RARE, 1);
+    public static final DeferredItem<Item> DRAGON_SPAWN = registerItem(LovelyConstant.DRAGON_SPAWN, LovelyEntities.DRAGON::get, Rarity.RARE, 1);
+    public static final DeferredItem<Item> HONEY_SPAWN = registerItem(LovelyConstant.HONEY_SPAWN, LovelyEntities.HONEY::get, Rarity.RARE, 1);
+    public static final DeferredItem<Item> KITSUNE_SPAWN = registerItem(LovelyConstant.KITSUNE_SPAWN, LovelyEntities.KITSUNE::get, Rarity.RARE, 1);
+    public static final DeferredItem<Item> NEKO_SPAWN = registerItem(LovelyConstant.NEKO_SPAWN, LovelyEntities.NEKO::get, Rarity.RARE, 1);
+    public static final DeferredItem<Item> VANILLA_SPAWN = registerItem(LovelyConstant.VANILLA_SPAWN, LovelyEntities.VANILLA::get, Rarity.RARE, 1);
 
     // -- Methods --
 
@@ -105,13 +105,13 @@ public class LovelyItems extends InternalItems {
      */
     public static void registerModel(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            registerModel(LovelyItems.BUNNY_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
-            registerModel(LovelyItems.BUNNY2_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
-            registerModel(LovelyItems.DRAGON_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
-            registerModel(LovelyItems.HONEY_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
-            registerModel(LovelyItems.KITSUNE_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
-            registerModel(LovelyItems.NEKO_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
-            registerModel(LovelyItems.VANILLA_SPAWN.get(), LegacyIdentifier.getId(LegacyIdentifier.ITEM_TAG_VARIANT), LegacyIdentifier.STAT_COLOR);
+            registerModel(LovelyItems.BUNNY_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+            registerModel(LovelyItems.BUNNY2_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+            registerModel(LovelyItems.DRAGON_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+            registerModel(LovelyItems.HONEY_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+            registerModel(LovelyItems.KITSUNE_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+            registerModel(LovelyItems.NEKO_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+            registerModel(LovelyItems.VANILLA_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         });
     } // registerModel()
 

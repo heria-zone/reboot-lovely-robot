@@ -1,7 +1,8 @@
 package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
-import net.heriazone.llovelyr.LegacyIdentifier;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.llovelyr.entity.*;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
@@ -33,13 +34,13 @@ public class LovelyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<RobotEntity>> BUNNY = registerRobot(LegacyIdentifier.VARIANT_BUNNY, LovelyRobotType.BUNNY);
-    public static final RegistryObject<EntityType<RobotEntity>> BUNNY2 = registerRobot(LegacyIdentifier.VARIANT_BUNNY2, LovelyRobotType.BUNNY2);
-    public static final RegistryObject<EntityType<RobotEntity>> DRAGON = registerRobot(LegacyIdentifier.VARIANT_DRAGON, LovelyRobotType.DRAGON);
-    public static final RegistryObject<EntityType<RobotEntity>> HONEY = registerRobot(LegacyIdentifier.VARIANT_HONEY, LovelyRobotType.HONEY);
-    public static final RegistryObject<EntityType<RobotEntity>> KITSUNE = registerRobot(LegacyIdentifier.VARIANT_KITSUNE, LovelyRobotType.KITSUNE);
-    public static final RegistryObject<EntityType<RobotEntity>> NEKO = registerRobot(LegacyIdentifier.VARIANT_NEKO, LovelyRobotType.NEKO);
-    public static final RegistryObject<EntityType<RobotEntity>> VANILLA = registerRobot(LegacyIdentifier.VARIANT_VANILLA, LovelyRobotType.VANILLA);
+    public static final RegistryObject<EntityType<RobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotType.BUNNY);
+    public static final RegistryObject<EntityType<RobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotType.BUNNY2);
+    public static final RegistryObject<EntityType<RobotEntity>> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotType.DRAGON);
+    public static final RegistryObject<EntityType<RobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotType.HONEY);
+    public static final RegistryObject<EntityType<RobotEntity>> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotType.KITSUNE);
+    public static final RegistryObject<EntityType<RobotEntity>> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, LegacyRobotType.NEKO);
+    public static final RegistryObject<EntityType<RobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, LegacyRobotType.VANILLA);
 
     // -- Registration Methods --
 
@@ -60,7 +61,7 @@ public class LovelyEntities {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
                         (EntityType<RobotEntity> type, Level level) -> new RobotEntity(type, level, robotType), MobCategory.CREATURE)
                 .sized(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT)
-                .build(LegacyIdentifier.getId(name).toString()));
+                .build(LovelyIdentifier.getId(name).toString()));
     } // registerRobot()
 
     /**
@@ -81,13 +82,13 @@ public class LovelyEntities {
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
-        event.put(BUNNY.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.BUNNY));
-        event.put(BUNNY2.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.BUNNY2));
-        event.put(DRAGON.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.DRAGON));
-        event.put(HONEY.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.HONEY));
-        event.put(KITSUNE.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.KITSUNE));
-        event.put(NEKO.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.NEKO));
-        event.put(VANILLA.get(), LovelyRobotEntity.createAttributes(LovelyRobotType.VANILLA));
+        event.put(BUNNY.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.BUNNY));
+        event.put(BUNNY2.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.BUNNY2));
+        event.put(DRAGON.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.DRAGON));
+        event.put(HONEY.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.HONEY));
+        event.put(KITSUNE.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.KITSUNE));
+        event.put(NEKO.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.NEKO));
+        event.put(VANILLA.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.VANILLA));
     } // registerAttribute()
 
     /**

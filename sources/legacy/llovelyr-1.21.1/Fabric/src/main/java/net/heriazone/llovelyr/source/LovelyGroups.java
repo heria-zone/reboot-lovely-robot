@@ -3,7 +3,8 @@ package net.heriazone.llovelyr.source;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.heriazone.llovelyr.Legacy;
-import net.heriazone.llovelyr.LegacyIdentifier;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.groups.InternalGroups;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
@@ -28,14 +29,14 @@ public class LovelyGroups extends InternalGroups {
      * <b>Contents:</b> Robot cores, spawn eggs, and related items.
      */
     public static final CreativeModeTab DEFAULT_TAB = register(
-            LegacyIdentifier.getId(LegacyIdentifier.DEFAULT_TAB),
-            registerGroup(LegacyIdentifier.getTabTranslation(LegacyIdentifier.DEFAULT_TAB), LovelyItems.ROBOT_CORE)
+            LovelyIdentifier.getId(LovelyConstant.DEFAULT_TAB),
+            registerGroup(LovelyConstant.DEFAULT_TAB, LovelyItems.ROBOT_CORE)
     );
 
     /**
      * Registry key for default tab, used for item group event registration.
      */
-    public static final ResourceKey<CreativeModeTab> DEFAULT_KEY = registerKey(LegacyIdentifier.getId(LegacyIdentifier.DEFAULT_TAB));
+    public static final ResourceKey<CreativeModeTab> DEFAULT_KEY = registerKey(LovelyIdentifier.getId(LovelyConstant.DEFAULT_TAB));
 
     // -- Methods --
 

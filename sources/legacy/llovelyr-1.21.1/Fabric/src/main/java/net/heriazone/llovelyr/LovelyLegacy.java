@@ -4,9 +4,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.llovelyr.source.*;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotType;
-import net.heriazone.lovelylib.hzlib.api.services.FabricServices;
-import net.heriazone.lovelylib.hzlib.api.services.Services;
+import net.heriazone.lovelylib.common.entity.common.LegacyRobotType;
+import net.heriazone.lovelylib.hzlib.api.services.*;
 
 /**
  * Main mod class for Legacy variant (Fabric loader).
@@ -52,7 +51,7 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
 
         // Register Fabric-specific features here
         LovelyConfigs.register();
-        LovelyRobotType.reloadFromConfig();
+        LegacyRobotType.reloadFromConfig();
         LovelyGroups.register();
         LovelyItems.register();
         LovelyEvents.register();

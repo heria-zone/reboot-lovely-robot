@@ -2,7 +2,10 @@ package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
 import net.heriazone.lovelylib.common.configs.*;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.hzlib.api.configs.*;
+
+import java.util.HashMap;
 
 /**
  * Configuration management for Legacy LovelyRobotEntity mod.
@@ -234,166 +237,30 @@ public class LovelyConfigs {
 
         provider.push("Entity");
 
-        provider.push("Bunny");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("bunny-max-level", SharedConfigs.Common.BunnyMaxLevel);
+        for (String variant : LovelyConstant.ALL_VARIANTS) {
+            provider.push(variant);
+            provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
+                    .define(variant + "-" + LovelyConstant.CONFIG_MAX_LEVEL, getDefaultMaxLevel(variant));
 
-        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.6]")
-                .define("bunny-attack-speed", SharedConfigs.Common.BunnyAttackSpeed);
+            provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.6]")
+                    .define(variant + "-" + LovelyConstant.CONFIG_ATTACK_SPEED, getDefaultAttackSpeed(variant));
 
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("bunny-movement-speed", SharedConfigs.Common.BunnyMovementSpeed);
+            provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
+                    .define(variant + "-" + LovelyConstant.CONFIG_MOVEMENT_SPEED, getDefaultMovementSpeed(variant));
 
-        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
-                .define("bunny-base-toughness", SharedConfigs.Common.BunnyBaseToughness);
+            provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
+                    .define(variant + "-" + LovelyConstant.CONFIG_BASE_TOUGHNESS, getDefaultBaseToughness(variant));
 
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [16]")
-                .define("bunny-base-hp", SharedConfigs.Common.BunnyBaseHp);
+            provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [16]")
+                    .define(variant + "-" + LovelyConstant.CONFIG_BASE_HP, getDefaultBaseHp(variant));
 
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("bunny-base-attack", SharedConfigs.Common.BunnyBaseAttack);
+            provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
+                    .define(variant + "-" + LovelyConstant.CONFIG_BASE_ATTACK, getDefaultBaseAttack(variant));
 
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [3]")
-                .define("bunny-base-defense", SharedConfigs.Common.BunnyBaseDefense);
-        provider.pop();
-
-        provider.push("Bunny2");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("bunny2-max-level", SharedConfigs.Common.Bunny2MaxLevel);
-
-        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.8]")
-                .define("bunny2-attack-speed", SharedConfigs.Common.Bunny2AttackSpeed);
-
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("bunny2-movement-speed", SharedConfigs.Common.Bunny2MovementSpeed);
-
-        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
-                .define("bunny2-base-toughness", SharedConfigs.Common.Bunny2BaseToughness);
-
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [24]")
-                .define("bunny2-base-hp", SharedConfigs.Common.Bunny2BaseHp);
-
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [4]")
-                .define("bunny2-base-attack", SharedConfigs.Common.Bunny2BaseAttack);
-
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [6]")
-                .define("bunny2-base-defense", SharedConfigs.Common.Bunny2BaseDefense);
-        provider.pop();
-
-        provider.push("Dragon");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [300]")
-                .define("dragon-max-level", SharedConfigs.Common.DragonMaxLevel);
-
-        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [0.8]")
-                .define("dragon-attack-speed", SharedConfigs.Common.DragonAttackSpeed);
-
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.22]")
-                .define("dragon-movement-speed", SharedConfigs.Common.DragonMovementSpeed);
-
-        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [2.0]")
-                .define("dragon-base-toughness", SharedConfigs.Common.DragonBaseToughness);
-
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [30]")
-                .define("dragon-base-hp", SharedConfigs.Common.DragonBaseHp);
-
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [8]")
-                .define("dragon-base-attack", SharedConfigs.Common.DragonBaseAttack);
-
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [4]")
-                .define("dragon-base-defense", SharedConfigs.Common.DragonBaseDefense);
-        provider.pop();
-
-        provider.push("Honey");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("honey-max-level", SharedConfigs.Common.HoneyMaxLevel);
-
-        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.0]")
-                .define("honey-attack-speed", SharedConfigs.Common.HoneyAttackSpeed);
-
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("honey-movement-speed", SharedConfigs.Common.HoneyMovementSpeed);
-
-        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
-                .define("honey-base-toughness", SharedConfigs.Common.HoneyBaseToughness);
-
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [14]")
-                .define("honey-base-hp", SharedConfigs.Common.HoneyBaseHp);
-
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [1]")
-                .define("honey-base-attack", SharedConfigs.Common.HoneyBaseAttack);
-
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("honey-base-defense", SharedConfigs.Common.HoneyBaseDefense);
-        provider.pop();
-
-        provider.push("Kitsune");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("kitsune-max-level", SharedConfigs.Common.KitsuneMaxLevel);
-
-        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.1]")
-                .define("kitsune-attack-speed", SharedConfigs.Common.KitsuneAttackSpeed);
-
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("kitsune-movement-speed", SharedConfigs.Common.KitsuneMovementSpeed);
-
-        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
-                .define("kitsune-base-toughness", SharedConfigs.Common.KitsuneBaseToughness);
-
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [16]")
-                .define("kitsune-base-hp", SharedConfigs.Common.KitsuneBaseHp);
-
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("kitsune-base-attack", SharedConfigs.Common.KitsuneBaseAttack);
-
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [1]")
-                .define("kitsune-base-defense", SharedConfigs.Common.KitsuneBaseDefense);
-        provider.pop();
-
-        provider.push("Neko");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("neko-max-level", SharedConfigs.Common.NekoMaxLevel);
-
-        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [1.1]")
-                .define("neko-attack-speed", SharedConfigs.Common.NekoAttackSpeed);
-
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.40]")
-                .define("neko-movement-speed", SharedConfigs.Common.NekoMovementSpeed);
-
-        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [1.0]")
-                .define("neko-base-toughness", SharedConfigs.Common.NekoBaseToughness);
-
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [22]")
-                .define("neko-base-hp", SharedConfigs.Common.NekoBaseHp);
-
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [6]")
-                .define("neko-base-attack", SharedConfigs.Common.NekoBaseAttack);
-
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("neko-base-defense", SharedConfigs.Common.NekoBaseDefense);
-        provider.pop();
-
-        provider.push("Vanilla");
-        provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
-                .define("vanilla-max-level", SharedConfigs.Common.VanillaMaxLevel);
-
-        provider.comment("How fast this robot type attacks (attacks per second).", "Higher values mean faster attacks. Minecraft default is 1.0.", "Range: 0.1 to no upper limit (does not accept negative values or zero)", "Example: [2.0]")
-                .define("vanilla-attack-speed", SharedConfigs.Common.VanillaAttackSpeed);
-
-        provider.comment("Base movement speed for this robot type.", "Higher values make robots move faster. Player walk speed is 0.1.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.37]")
-                .define("vanilla-movement-speed", SharedConfigs.Common.VanillaMovementSpeed);
-
-        provider.comment("Base toughness for this robot type.", "Reduces damage from strong attacks. Diamond armor has 2.0 toughness per piece.", "Range: 0.0 to no upper limit (does not accept negative values)", "Example: [0.0]")
-                .define("vanilla-base-toughness", SharedConfigs.Common.VanillaBaseToughness);
-
-        provider.comment("Base HP value for combat level calculations.", "Used by CombatLevelFeature to calculate HP at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [14]")
-                .define("vanilla-base-hp", SharedConfigs.Common.VanillaBaseHp);
-
-        provider.comment("Base attack value for combat level calculations.", "Used by CombatLevelFeature to calculate attack damage at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [4]")
-                .define("vanilla-base-attack", SharedConfigs.Common.VanillaBaseAttack);
-
-        provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [2]")
-                .define("vanilla-base-defense", SharedConfigs.Common.VanillaBaseDefense);
-        provider.pop();
+            provider.comment("Base defense value for combat level calculations.", "Used by CombatLevelFeature to calculate armor and toughness at each level.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [3]")
+                    .define(variant + "-" + LovelyConstant.CONFIG_BASE_DEFENSE, getDefaultBaseDefense(variant));
+            provider.pop();
+        }
 
         provider.pop();
     } // buildConfigProvider()
@@ -474,69 +341,154 @@ public class LovelyConfigs {
         SharedConfigs.Common.StandbyToSitDelayMax = config.getOrDefault("standby-to-sit-delay-max", SharedConfigs.Common.StandbyToSitDelayMax);
 
         // Entity settings - Bunny
-        SharedConfigs.Common.BunnyMaxLevel = config.getOrDefault("bunny-max-level", SharedConfigs.Common.BunnyMaxLevel);
-        SharedConfigs.Common.BunnyAttackSpeed = config.getOrDefault("bunny-attack-speed", SharedConfigs.Common.BunnyAttackSpeed);
-        SharedConfigs.Common.BunnyMovementSpeed = config.getOrDefault("bunny-movement-speed", SharedConfigs.Common.BunnyMovementSpeed);
-        SharedConfigs.Common.BunnyBaseToughness = config.getOrDefault("bunny-base-toughness", SharedConfigs.Common.BunnyBaseToughness);
-        SharedConfigs.Common.BunnyBaseHp = config.getOrDefault("bunny-base-hp", SharedConfigs.Common.BunnyBaseHp);
-        SharedConfigs.Common.BunnyBaseAttack = config.getOrDefault("bunny-base-attack", SharedConfigs.Common.BunnyBaseAttack);
-        SharedConfigs.Common.BunnyBaseDefense = config.getOrDefault("bunny-base-defense", SharedConfigs.Common.BunnyBaseDefense);
+        //SharedConfigs.Common.BunnyMaxLevel = config.getOrDefault("bunny-max-level", SharedConfigs.Common.BunnyMaxLevel);
+        //SharedConfigs.Common.BunnyAttackSpeed = config.getOrDefault("bunny-attack-speed", SharedConfigs.Common.BunnyAttackSpeed);
+        //SharedConfigs.Common.BunnyMovementSpeed = config.getOrDefault("bunny-movement-speed", SharedConfigs.Common.BunnyMovementSpeed);
+        //SharedConfigs.Common.BunnyBaseToughness = config.getOrDefault("bunny-base-toughness", SharedConfigs.Common.BunnyBaseToughness);
+        //SharedConfigs.Common.BunnyBaseHp = config.getOrDefault("bunny-base-hp", SharedConfigs.Common.BunnyBaseHp);
+        //SharedConfigs.Common.BunnyBaseAttack = config.getOrDefault("bunny-base-attack", SharedConfigs.Common.BunnyBaseAttack);
+        //SharedConfigs.Common.BunnyBaseDefense = config.getOrDefault("bunny-base-defense", SharedConfigs.Common.BunnyBaseDefense);
 
         // Entity settings - Bunny2
-        SharedConfigs.Common.Bunny2MaxLevel = config.getOrDefault("bunny2-max-level", SharedConfigs.Common.Bunny2MaxLevel);
-        SharedConfigs.Common.Bunny2AttackSpeed = config.getOrDefault("bunny2-attack-speed", SharedConfigs.Common.Bunny2AttackSpeed);
-        SharedConfigs.Common.Bunny2MovementSpeed = config.getOrDefault("bunny2-movement-speed", SharedConfigs.Common.Bunny2MovementSpeed);
-        SharedConfigs.Common.Bunny2BaseToughness = config.getOrDefault("bunny2-base-toughness", SharedConfigs.Common.Bunny2BaseToughness);
-        SharedConfigs.Common.Bunny2BaseHp = config.getOrDefault("bunny2-base-hp", SharedConfigs.Common.Bunny2BaseHp);
-        SharedConfigs.Common.Bunny2BaseAttack = config.getOrDefault("bunny2-base-attack", SharedConfigs.Common.Bunny2BaseAttack);
-        SharedConfigs.Common.Bunny2BaseDefense = config.getOrDefault("bunny2-base-defense", SharedConfigs.Common.Bunny2BaseDefense);
+        //SharedConfigs.Common.Bunny2MaxLevel = config.getOrDefault("bunny2-max-level", SharedConfigs.Common.Bunny2MaxLevel);
+        //SharedConfigs.Common.Bunny2AttackSpeed = config.getOrDefault("bunny2-attack-speed", SharedConfigs.Common.Bunny2AttackSpeed);
+        //SharedConfigs.Common.Bunny2MovementSpeed = config.getOrDefault("bunny2-movement-speed", SharedConfigs.Common.Bunny2MovementSpeed);
+        //SharedConfigs.Common.Bunny2BaseToughness = config.getOrDefault("bunny2-base-toughness", SharedConfigs.Common.Bunny2BaseToughness);
+        //SharedConfigs.Common.Bunny2BaseHp = config.getOrDefault("bunny2-base-hp", SharedConfigs.Common.Bunny2BaseHp);
+        //SharedConfigs.Common.Bunny2BaseAttack = config.getOrDefault("bunny2-base-attack", SharedConfigs.Common.Bunny2BaseAttack);
+        //SharedConfigs.Common.Bunny2BaseDefense = config.getOrDefault("bunny2-base-defense", SharedConfigs.Common.Bunny2BaseDefense);
 
         // Entity settings - Dragon
-        SharedConfigs.Common.DragonMaxLevel = config.getOrDefault("dragon-max-level", SharedConfigs.Common.DragonMaxLevel);
-        SharedConfigs.Common.DragonAttackSpeed = config.getOrDefault("dragon-attack-speed", SharedConfigs.Common.DragonAttackSpeed);
-        SharedConfigs.Common.DragonMovementSpeed = config.getOrDefault("dragon-movement-speed", SharedConfigs.Common.DragonMovementSpeed);
-        SharedConfigs.Common.DragonBaseToughness = config.getOrDefault("dragon-base-toughness", SharedConfigs.Common.DragonBaseToughness);
-        SharedConfigs.Common.DragonBaseHp = config.getOrDefault("dragon-base-hp", SharedConfigs.Common.DragonBaseHp);
-        SharedConfigs.Common.DragonBaseAttack = config.getOrDefault("dragon-base-attack", SharedConfigs.Common.DragonBaseAttack);
-        SharedConfigs.Common.DragonBaseDefense = config.getOrDefault("dragon-base-defense", SharedConfigs.Common.DragonBaseDefense);
+        //SharedConfigs.Common.DragonMaxLevel = config.getOrDefault("dragon-max-level", SharedConfigs.Common.DragonMaxLevel);
+        //SharedConfigs.Common.DragonAttackSpeed = config.getOrDefault("dragon-attack-speed", SharedConfigs.Common.DragonAttackSpeed);
+        //SharedConfigs.Common.DragonMovementSpeed = config.getOrDefault("dragon-movement-speed", SharedConfigs.Common.DragonMovementSpeed);
+        //SharedConfigs.Common.DragonBaseToughness = config.getOrDefault("dragon-base-toughness", SharedConfigs.Common.DragonBaseToughness);
+        //SharedConfigs.Common.DragonBaseHp = config.getOrDefault("dragon-base-hp", SharedConfigs.Common.DragonBaseHp);
+        //SharedConfigs.Common.DragonBaseAttack = config.getOrDefault("dragon-base-attack", SharedConfigs.Common.DragonBaseAttack);
+        //SharedConfigs.Common.DragonBaseDefense = config.getOrDefault("dragon-base-defense", SharedConfigs.Common.DragonBaseDefense);
 
         // Entity settings - Honey
-        SharedConfigs.Common.HoneyMaxLevel = config.getOrDefault("honey-max-level", SharedConfigs.Common.HoneyMaxLevel);
-        SharedConfigs.Common.HoneyAttackSpeed = config.getOrDefault("honey-attack-speed", SharedConfigs.Common.HoneyAttackSpeed);
-        SharedConfigs.Common.HoneyMovementSpeed = config.getOrDefault("honey-movement-speed", SharedConfigs.Common.HoneyMovementSpeed);
-        SharedConfigs.Common.HoneyBaseToughness = config.getOrDefault("honey-base-toughness", SharedConfigs.Common.HoneyBaseToughness);
-        SharedConfigs.Common.HoneyBaseHp = config.getOrDefault("honey-base-hp", SharedConfigs.Common.HoneyBaseHp);
-        SharedConfigs.Common.HoneyBaseAttack = config.getOrDefault("honey-base-attack", SharedConfigs.Common.HoneyBaseAttack);
-        SharedConfigs.Common.HoneyBaseDefense = config.getOrDefault("honey-base-defense", SharedConfigs.Common.HoneyBaseDefense);
+        //SharedConfigs.Common.HoneyMaxLevel = config.getOrDefault("honey-max-level", SharedConfigs.Common.HoneyMaxLevel);
+        //SharedConfigs.Common.HoneyAttackSpeed = config.getOrDefault("honey-attack-speed", SharedConfigs.Common.HoneyAttackSpeed);
+        //SharedConfigs.Common.HoneyMovementSpeed = config.getOrDefault("honey-movement-speed", SharedConfigs.Common.HoneyMovementSpeed);
+        //SharedConfigs.Common.HoneyBaseToughness = config.getOrDefault("honey-base-toughness", SharedConfigs.Common.HoneyBaseToughness);
+        //SharedConfigs.Common.HoneyBaseHp = config.getOrDefault("honey-base-hp", SharedConfigs.Common.HoneyBaseHp);
+        //SharedConfigs.Common.HoneyBaseAttack = config.getOrDefault("honey-base-attack", SharedConfigs.Common.HoneyBaseAttack);
+        //SharedConfigs.Common.HoneyBaseDefense = config.getOrDefault("honey-base-defense", SharedConfigs.Common.HoneyBaseDefense);
 
         // Entity settings - Kitsune
-        SharedConfigs.Common.KitsuneMaxLevel = config.getOrDefault("kitsune-max-level", SharedConfigs.Common.KitsuneMaxLevel);
-        SharedConfigs.Common.KitsuneAttackSpeed = config.getOrDefault("kitsune-attack-speed", SharedConfigs.Common.KitsuneAttackSpeed);
-        SharedConfigs.Common.KitsuneMovementSpeed = config.getOrDefault("kitsune-movement-speed", SharedConfigs.Common.KitsuneMovementSpeed);
-        SharedConfigs.Common.KitsuneBaseToughness = config.getOrDefault("kitsune-base-toughness", SharedConfigs.Common.KitsuneBaseToughness);
-        SharedConfigs.Common.KitsuneBaseHp = config.getOrDefault("kitsune-base-hp", SharedConfigs.Common.KitsuneBaseHp);
-        SharedConfigs.Common.KitsuneBaseAttack = config.getOrDefault("kitsune-base-attack", SharedConfigs.Common.KitsuneBaseAttack);
-        SharedConfigs.Common.KitsuneBaseDefense = config.getOrDefault("kitsune-base-defense", SharedConfigs.Common.KitsuneBaseDefense);
+        //SharedConfigs.Common.KitsuneMaxLevel = config.getOrDefault("kitsune-max-level", SharedConfigs.Common.KitsuneMaxLevel);
+        //SharedConfigs.Common.KitsuneAttackSpeed = config.getOrDefault("kitsune-attack-speed", SharedConfigs.Common.KitsuneAttackSpeed);
+        //SharedConfigs.Common.KitsuneMovementSpeed = config.getOrDefault("kitsune-movement-speed", SharedConfigs.Common.KitsuneMovementSpeed);
+        //SharedConfigs.Common.KitsuneBaseToughness = config.getOrDefault("kitsune-base-toughness", SharedConfigs.Common.KitsuneBaseToughness);
+        //SharedConfigs.Common.KitsuneBaseHp = config.getOrDefault("kitsune-base-hp", SharedConfigs.Common.KitsuneBaseHp);
+        //SharedConfigs.Common.KitsuneBaseAttack = config.getOrDefault("kitsune-base-attack", SharedConfigs.Common.KitsuneBaseAttack);
+        //SharedConfigs.Common.KitsuneBaseDefense = config.getOrDefault("kitsune-base-defense", SharedConfigs.Common.KitsuneBaseDefense);
 
         // Entity settings - Neko
-        SharedConfigs.Common.NekoMaxLevel = config.getOrDefault("neko-max-level", SharedConfigs.Common.NekoMaxLevel);
-        SharedConfigs.Common.NekoAttackSpeed = config.getOrDefault("neko-attack-speed", SharedConfigs.Common.NekoAttackSpeed);
-        SharedConfigs.Common.NekoMovementSpeed = config.getOrDefault("neko-movement-speed", SharedConfigs.Common.NekoMovementSpeed);
-        SharedConfigs.Common.NekoBaseToughness = config.getOrDefault("neko-base-toughness", SharedConfigs.Common.NekoBaseToughness);
-        SharedConfigs.Common.NekoBaseHp = config.getOrDefault("neko-base-hp", SharedConfigs.Common.NekoBaseHp);
-        SharedConfigs.Common.NekoBaseAttack = config.getOrDefault("neko-base-attack", SharedConfigs.Common.NekoBaseAttack);
-        SharedConfigs.Common.NekoBaseDefense = config.getOrDefault("neko-base-defense", SharedConfigs.Common.NekoBaseDefense);
+        //SharedConfigs.Common.NekoMaxLevel = config.getOrDefault("neko-max-level", SharedConfigs.Common.NekoMaxLevel);
+        //SharedConfigs.Common.NekoAttackSpeed = config.getOrDefault("neko-attack-speed", SharedConfigs.Common.NekoAttackSpeed);
+        //SharedConfigs.Common.NekoMovementSpeed = config.getOrDefault("neko-movement-speed", SharedConfigs.Common.NekoMovementSpeed);
+        //SharedConfigs.Common.NekoBaseToughness = config.getOrDefault("neko-base-toughness", SharedConfigs.Common.NekoBaseToughness);
+        //SharedConfigs.Common.NekoBaseHp = config.getOrDefault("neko-base-hp", SharedConfigs.Common.NekoBaseHp);
+        //SharedConfigs.Common.NekoBaseAttack = config.getOrDefault("neko-base-attack", SharedConfigs.Common.NekoBaseAttack);
+        //SharedConfigs.Common.NekoBaseDefense = config.getOrDefault("neko-base-defense", SharedConfigs.Common.NekoBaseDefense);
 
         // Entity settings - Vanilla
-        SharedConfigs.Common.VanillaMaxLevel = config.getOrDefault("vanilla-max-level", SharedConfigs.Common.VanillaMaxLevel);
-        SharedConfigs.Common.VanillaAttackSpeed = config.getOrDefault("vanilla-attack-speed", SharedConfigs.Common.VanillaAttackSpeed);
-        SharedConfigs.Common.VanillaMovementSpeed = config.getOrDefault("vanilla-movement-speed", SharedConfigs.Common.VanillaMovementSpeed);
-        SharedConfigs.Common.VanillaBaseToughness = config.getOrDefault("vanilla-base-toughness", SharedConfigs.Common.VanillaBaseToughness);
-        SharedConfigs.Common.VanillaBaseHp = config.getOrDefault("vanilla-base-hp", SharedConfigs.Common.VanillaBaseHp);
-        SharedConfigs.Common.VanillaBaseAttack = config.getOrDefault("vanilla-base-attack", SharedConfigs.Common.VanillaBaseAttack);
-        SharedConfigs.Common.VanillaBaseDefense = config.getOrDefault("vanilla-base-defense", SharedConfigs.Common.VanillaBaseDefense);
+        //SharedConfigs.Common.VanillaMaxLevel = config.getOrDefault("vanilla-max-level", SharedConfigs.Common.VanillaMaxLevel);
+        //SharedConfigs.Common.VanillaAttackSpeed = config.getOrDefault("vanilla-attack-speed", SharedConfigs.Common.VanillaAttackSpeed);
+        //SharedConfigs.Common.VanillaMovementSpeed = config.getOrDefault("vanilla-movement-speed", SharedConfigs.Common.VanillaMovementSpeed);
+        //SharedConfigs.Common.VanillaBaseToughness = config.getOrDefault("vanilla-base-toughness", SharedConfigs.Common.VanillaBaseToughness);
+        //SharedConfigs.Common.VanillaBaseHp = config.getOrDefault("vanilla-base-hp", SharedConfigs.Common.VanillaBaseHp);
+        //SharedConfigs.Common.VanillaBaseAttack = config.getOrDefault("vanilla-base-attack", SharedConfigs.Common.VanillaBaseAttack);
+        //SharedConfigs.Common.VanillaBaseDefense = config.getOrDefault("vanilla-base-defense", SharedConfigs.Common.VanillaBaseDefense);
 
+        // Load dynamic entity configurations
+        loadDynamicEntityConfigs();
     } // loadConfigValues()
+
+    /**
+     * Loads dynamic entity configurations from config file into LegacyConfigs HashMap.
+     * <p>
+     * <b>Dynamic Loading:</b> Iterates through all robot variants and loads their
+     * configuration from the config file. Creates EntityConfigData instances with
+     * validation and fallback to defaults.
+     * <p>
+     * <b>Error Handling:</b> Invalid configurations fall back to defaults with
+     * warning logs. Missing configurations use SharedConfigs defaults.
+     * <p>
+     * <b>Runtime Updates:</b> Called during config reload to update entity stats
+     * immediately without requiring restart.
+     */
+    private static void loadDynamicEntityConfigs() {
+        LegacyConfigs.Common.Entities = new HashMap<>();
+        //LegacyConfigs.Common.Entities.clear();
+
+        for (String variant : LovelyConstant.ALL_VARIANTS) {
+            try {
+                // Create and validate EntityConfigData
+                SharedConfigs.EntityConfigData entityConfig = new SharedConfigs.EntityConfigData.Builder()
+                        .maxLevel(config.getOrDefault(variant + "-" + LovelyConstant.CONFIG_MAX_LEVEL, getDefaultMaxLevel(variant)))
+                        .attackSpeed(config.getOrDefault(variant + "-" + LovelyConstant.CONFIG_ATTACK_SPEED, getDefaultAttackSpeed(variant)))
+                        .movementSpeed(config.getOrDefault(variant + "-" + LovelyConstant.CONFIG_MOVEMENT_SPEED, getDefaultMovementSpeed(variant)))
+                        .baseToughness(config.getOrDefault(variant + "-" + LovelyConstant.CONFIG_BASE_TOUGHNESS, getDefaultBaseToughness(variant)))
+                        .baseHp(config.getOrDefault(variant + "-" + LovelyConstant.CONFIG_BASE_HP, getDefaultBaseHp(variant)))
+                        .baseAttack(config.getOrDefault(variant + "-" + LovelyConstant.CONFIG_BASE_ATTACK, getDefaultBaseAttack(variant)))
+                        .baseDefense(config.getOrDefault(variant + "-" + LovelyConstant.CONFIG_BASE_DEFENSE, getDefaultBaseDefense(variant)))
+                        .build();
+                // Validate and store
+                LegacyConfigs.Common.Entities.put(variant, entityConfig.validateOrDefault());
+            } catch (Exception e) {
+                Legacy.LOGGER.warn("Failed to load config for variant '{}', using defaults: {}", variant, e.getMessage());
+                LegacyConfigs.Common.Entities.put(variant, getDefaultEntityConfig(variant));
+            }
+        }
+        
+        Legacy.LOGGER.info("Loaded dynamic entity configurations for {} variants", LegacyConfigs.Common.Entities.size());
+    } // loadDynamicEntityConfigs()
+
+    /**
+     * Gets default configuration for a specific robot variant.
+     * <p>
+     * <b>Fallback System:</b> Provides default EntityConfigData when config loading
+     * fails or variant is not found. Uses SharedConfigs individual values as source.
+     * 
+     * @param variant the robot variant identifier
+     * @return default EntityConfigData for the variant
+     */
+    private static SharedConfigs.EntityConfigData getDefaultEntityConfig(String variant) {
+        return LegacyConfigs.Common.getDefaultConfig(variant);
+    } // getDefaultEntityConfig()
+
+    // -- Default Value Getters --
+
+    private static int getDefaultMaxLevel(String variant) {
+        return LegacyConfigs.Common.getDefaultConfig(variant).maxLevel;
+    } // getDefaultMaxLevel()
+
+    private static float getDefaultAttackSpeed(String variant) {
+        return LegacyConfigs.Common.getDefaultConfig(variant).attackSpeed;
+    } // getDefaultAttackSpeed()
+
+    private static float getDefaultMovementSpeed(String variant) {
+        return LegacyConfigs.Common.getDefaultConfig(variant).movementSpeed;
+    } // getDefaultMovementSpeed()
+
+    private static float getDefaultBaseToughness(String variant) {
+        return LegacyConfigs.Common.getDefaultConfig(variant).baseToughness;
+    } // getDefaultBaseToughness()
+
+    private static int getDefaultBaseHp(String variant) {
+        return LegacyConfigs.Common.getDefaultConfig(variant).baseHp;
+    } // getDefaultBaseHp()
+
+    private static int getDefaultBaseAttack(String variant) {
+        return LegacyConfigs.Common.getDefaultConfig(variant).baseAttack;
+    } // getDefaultBaseAttack()
+
+    private static int getDefaultBaseDefense(String variant) {
+        return LegacyConfigs.Common.getDefaultConfig(variant).baseDefense;
+    } // getDefaultBaseDefense()
 
     /**
      * Reloads configuration from file, validating new values before applying.

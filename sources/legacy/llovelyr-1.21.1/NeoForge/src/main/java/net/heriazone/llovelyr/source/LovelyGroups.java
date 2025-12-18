@@ -1,6 +1,7 @@
 package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.groups.InternalGroups;
 import net.minecraft.world.item.CreativeModeTab;
@@ -34,9 +35,9 @@ public class LovelyGroups extends InternalGroups {
      * <b>Contents:</b> Robot cores, spawn eggs, and related items.
      */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> DEFAULT_TAB = CREATIVE_MODE_TABS.register(
-            LovelyIdentifier.DEFAULT_TAB,
+            LovelyConstant.DEFAULT_TAB,
             () -> createTabBuilder(
-                    LovelyIdentifier.getTabTranslation(LovelyIdentifier.DEFAULT_TAB),
+                    LovelyIdentifier.getTabTranslation(LovelyConstant.DEFAULT_TAB),
                     () -> new ItemStack(LovelyItems.ROBOT_CORE.get())
             )
                     .displayItems((parameters, output) -> {
