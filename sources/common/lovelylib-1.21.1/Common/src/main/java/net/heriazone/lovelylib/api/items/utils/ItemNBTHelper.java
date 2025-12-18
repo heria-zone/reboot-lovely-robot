@@ -1,5 +1,6 @@
 package net.heriazone.lovelylib.api.items.utils;
 
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.minecraft.core.component.DataComponents;
@@ -72,7 +73,7 @@ public class ItemNBTHelper {
      */
     public static int getRobotColor(ItemStack itemStack) {
         CompoundTag data = getCustomDataSafe(itemStack);
-        return data.getInt(LovelyIdentifier.STAT_COLOR);
+        return data.getInt(LovelyConstant.STAT_COLOR);
     } // getRobotColor()
 
     /**
@@ -88,9 +89,9 @@ public class ItemNBTHelper {
 
         // Validate color ID range
         if (colorId >= 0 && colorId < EntityTexture.values().length) {
-            data.putInt(LovelyIdentifier.STAT_COLOR, colorId);
+            data.putInt(LovelyConstant.STAT_COLOR, colorId);
         } else {
-            data.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.RANDOM.getId());
+            data.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
         }
 
         setCustomData(itemStack, data);
@@ -107,7 +108,7 @@ public class ItemNBTHelper {
      */
     public static int getRobotLevel(ItemStack itemStack) {
         CompoundTag data = getCustomDataSafe(itemStack);
-        return data.getInt(LovelyIdentifier.STAT_LEVEL);
+        return data.getInt(LovelyConstant.STAT_LEVEL);
     } // getRobotLevel()
 
     /**
@@ -124,7 +125,7 @@ public class ItemNBTHelper {
 
         // Clamp level to reasonable range
         int clampedLevel = Math.max(0, Math.min(100, level));
-        data.putInt(LovelyIdentifier.STAT_LEVEL, clampedLevel);
+        data.putInt(LovelyConstant.STAT_LEVEL, clampedLevel);
 
         setCustomData(itemStack, data);
     } // setRobotLevel()
@@ -139,7 +140,7 @@ public class ItemNBTHelper {
      */
     public static int getRobotExperience(ItemStack itemStack) {
         CompoundTag data = getCustomDataSafe(itemStack);
-        return data.getInt(LovelyIdentifier.STAT_EXP);
+        return data.getInt(LovelyConstant.STAT_EXP);
     } // getRobotExperience()
 
     /**
@@ -155,7 +156,7 @@ public class ItemNBTHelper {
 
         // Ensure non-negative experience
         int clampedExp = Math.max(0, experience);
-        data.putInt(LovelyIdentifier.STAT_EXP, clampedExp);
+        data.putInt(LovelyConstant.STAT_EXP, clampedExp);
 
         setCustomData(itemStack, data);
     } // setRobotExperience()
@@ -170,7 +171,7 @@ public class ItemNBTHelper {
      */
     public static String getRobotCustomName(ItemStack itemStack) {
         CompoundTag data = getCustomDataSafe(itemStack);
-        return data.getString(LovelyIdentifier.STAT_CUSTOM_NAME);
+        return data.getString(LovelyConstant.STAT_CUSTOM_NAME);
     } // getRobotCustomName()
 
     /**
@@ -191,7 +192,7 @@ public class ItemNBTHelper {
             validatedName = validatedName.substring(0, 50);
         }
 
-        data.putString(LovelyIdentifier.STAT_CUSTOM_NAME, validatedName);
+        data.putString(LovelyConstant.STAT_CUSTOM_NAME, validatedName);
         setCustomData(itemStack, data);
     } // setRobotCustomName()
 

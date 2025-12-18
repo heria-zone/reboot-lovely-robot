@@ -1,6 +1,7 @@
 package net.heriazone.lovelylib.common.items;
 
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -54,8 +55,8 @@ public class LovelyCoreItem extends Item {
         } else {
             // Initialize default data if not present
             CompoundTag compound = new CompoundTag();
-            compound.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.RANDOM.getId());
-            compound.putInt(LovelyIdentifier.STAT_LEVEL, 0);
+            compound.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
+            compound.putInt(LovelyConstant.STAT_LEVEL, 0);
             stack.set(DataComponents.CUSTOM_DATA, CustomData.of(compound));
         }
     } // appendHoverText()

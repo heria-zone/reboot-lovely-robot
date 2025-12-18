@@ -1,5 +1,6 @@
 package net.heriazone.lovelylib.api.items.utils;
 
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.minecraft.ChatFormatting;
@@ -60,8 +61,8 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addNameTooltip(List<Component> tooltip, CompoundTag nbt) {
-        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyIdentifier.STAT_COLOR));
-        String customName = nbt.getString(LovelyIdentifier.STAT_CUSTOM_NAME);
+        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyConstant.STAT_COLOR));
+        String customName = nbt.getString(LovelyConstant.STAT_CUSTOM_NAME);
         ChatFormatting textFormatting = getFormattingColor(texture);
 
         if (!customName.isEmpty()) {
@@ -77,7 +78,7 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addOwnerTooltip(List<Component> tooltip, CompoundTag nbt) {
-        String ownerName = nbt.getString(LovelyIdentifier.STAT_OWNER);
+        String ownerName = nbt.getString(LovelyConstant.STAT_OWNER);
 
         if (!ownerName.isEmpty()) {
             tooltip.add(Component.literal("Owner: ").withStyle(defaultFormatting)
@@ -92,10 +93,10 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addTypeTooltip(List<Component> tooltip, CompoundTag nbt) {
-        String type = nbt.getString(LovelyIdentifier.STAT_TYPE);
+        String type = nbt.getString(LovelyConstant.STAT_TYPE);
 
         if (!type.isEmpty()) {
-            tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_TYPE)
+            tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_TYPE)
                     .append(": ").withStyle(defaultFormatting)
                     .append(LovelyIdentifier.getVariantTranslation(type)).withStyle(ChatFormatting.WHITE));
         }
@@ -108,10 +109,10 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addColorTooltip(List<Component> tooltip, CompoundTag nbt) {
-        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyIdentifier.STAT_COLOR));
+        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyConstant.STAT_COLOR));
         ChatFormatting textFormatting = getFormattingColor(texture);
 
-        tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_DESIGN)
+        tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_DESIGN)
                 .append(": ").withStyle(defaultFormatting)
                 .append(LovelyIdentifier.getTranslation(texture)).withStyle(textFormatting));
     } // addColorTooltip()
@@ -123,10 +124,10 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addLevelTooltip(List<Component> tooltip, CompoundTag nbt) {
-        int level = nbt.getInt(LovelyIdentifier.STAT_LEVEL);
+        int level = nbt.getInt(LovelyConstant.STAT_LEVEL);
 
         if (level > 0) {
-            tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_LEVEL)
+            tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LEVEL)
                     .append(": ").withStyle(defaultFormatting)
                     .append(Component.literal(String.valueOf(level)).withStyle(ChatFormatting.GOLD)));
         }

@@ -3,6 +3,7 @@ package net.heriazone.lovelylib.api.items.utils;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.utils.EntityDataHelper;
 import net.heriazone.lovelylib.utils.EntitySpawnHelper;
@@ -136,28 +137,28 @@ public class ItemSpawnHelper {
         CompoundTag validatedData = EntityDataHelper.validateEntityData(dataNBT);
 
         // Apply custom name if present
-        if (!validatedData.getString(LovelyIdentifier.STAT_CUSTOM_NAME).isEmpty()) {
-            entity.setCustomName(Component.literal(validatedData.getString(LovelyIdentifier.STAT_CUSTOM_NAME)));
+        if (!validatedData.getString(LovelyConstant.STAT_CUSTOM_NAME).isEmpty()) {
+            entity.setCustomName(Component.literal(validatedData.getString(LovelyConstant.STAT_CUSTOM_NAME)));
         }
 
         // Apply texture if not random
-        int textureId = validatedData.getInt(LovelyIdentifier.STAT_COLOR);
+        int textureId = validatedData.getInt(LovelyConstant.STAT_COLOR);
         if (textureId != EntityTexture.RANDOM.getId()) {
             entity.setTexture(textureId);
         }
         // If texture is RANDOM, keep the entity's already-selected random texture
 
         // Apply level and experience if greater than 0
-        if (validatedData.getInt(LovelyIdentifier.STAT_LEVEL) > 0) {
-            entity.setCurrentLevel(validatedData.getInt(LovelyIdentifier.STAT_LEVEL));
+        if (validatedData.getInt(LovelyConstant.STAT_LEVEL) > 0) {
+            entity.setCurrentLevel(validatedData.getInt(LovelyConstant.STAT_LEVEL));
         }
-        if (validatedData.getInt(LovelyIdentifier.STAT_EXP) > 0) {
-            entity.setExp(validatedData.getInt(LovelyIdentifier.STAT_EXP));
+        if (validatedData.getInt(LovelyConstant.STAT_EXP) > 0) {
+            entity.setExp(validatedData.getInt(LovelyConstant.STAT_EXP));
         }
 
         // Apply health if specified AND it's not the default 1.0F
-        if (validatedData.contains(LovelyIdentifier.STAT_HP)) {
-            float healthValue = validatedData.getFloat(LovelyIdentifier.STAT_HP);
+        if (validatedData.contains(LovelyConstant.STAT_HP)) {
+            float healthValue = validatedData.getFloat(LovelyConstant.STAT_HP);
             // Only apply health if it's not the default 1.0F value
             // This allows entities to keep their natural max health for "default" spawn items
             if (Math.abs(healthValue - 1.0F) > 0.01F) {
@@ -168,17 +169,17 @@ public class ItemSpawnHelper {
         // If no health in NBT, keep the entity's natural max health
 
         // Apply protection enchantments if greater than 0
-        if (validatedData.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION) > 0) {
-            entity.setFireProtection(validatedData.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION));
+        if (validatedData.getInt(LovelyConstant.STAT_FIRE_PROTECTION) > 0) {
+            entity.setFireProtection(validatedData.getInt(LovelyConstant.STAT_FIRE_PROTECTION));
         }
-        if (validatedData.getInt(LovelyIdentifier.STAT_FALL_PROTECTION) > 0) {
-            entity.setFallProtection(validatedData.getInt(LovelyIdentifier.STAT_FALL_PROTECTION));
+        if (validatedData.getInt(LovelyConstant.STAT_FALL_PROTECTION) > 0) {
+            entity.setFallProtection(validatedData.getInt(LovelyConstant.STAT_FALL_PROTECTION));
         }
-        if (validatedData.getInt(LovelyIdentifier.STAT_BLAST_PROTECTION) > 0) {
-            entity.setBlastProtection(validatedData.getInt(LovelyIdentifier.STAT_BLAST_PROTECTION));
+        if (validatedData.getInt(LovelyConstant.STAT_BLAST_PROTECTION) > 0) {
+            entity.setBlastProtection(validatedData.getInt(LovelyConstant.STAT_BLAST_PROTECTION));
         }
-        if (validatedData.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION) > 0) {
-            entity.setProjectileProtection(validatedData.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION));
+        if (validatedData.getInt(LovelyConstant.STAT_PROJECTILE_PROTECTION) > 0) {
+            entity.setProjectileProtection(validatedData.getInt(LovelyConstant.STAT_PROJECTILE_PROTECTION));
         }
 
         // Validate final entity state

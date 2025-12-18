@@ -1,5 +1,6 @@
 package net.heriazone.lovelylib.api.items.utils;
 
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.minecraft.core.component.DataComponents;
@@ -89,10 +90,10 @@ public class ItemValidationHelper {
      */
     public static void initializeDefaultItemData(ItemStack itemStack) {
         CompoundTag defaultData = new CompoundTag();
-        defaultData.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.RANDOM.getId());
-        defaultData.putInt(LovelyIdentifier.STAT_LEVEL, 0);
-        defaultData.putInt(LovelyIdentifier.STAT_EXP, 0);
-        defaultData.putString(LovelyIdentifier.STAT_CUSTOM_NAME, "");
+        defaultData.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
+        defaultData.putInt(LovelyConstant.STAT_LEVEL, 0);
+        defaultData.putInt(LovelyConstant.STAT_EXP, 0);
+        defaultData.putString(LovelyConstant.STAT_CUSTOM_NAME, "");
 
         itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(defaultData));
     } // initializeDefaultItemData()
@@ -115,47 +116,47 @@ public class ItemValidationHelper {
         CompoundTag sanitized = nbtData.copy();
 
         // Validate and clamp color/texture ID
-        int colorId = sanitized.getInt(LovelyIdentifier.STAT_COLOR);
+        int colorId = sanitized.getInt(LovelyConstant.STAT_COLOR);
         if (colorId < 0 || colorId > EntityTexture.values().length - 1) {
-            sanitized.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.RANDOM.getId());
+            sanitized.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
         }
 
         // Validate and clamp level (0-100 reasonable range)
-        int level = sanitized.getInt(LovelyIdentifier.STAT_LEVEL);
+        int level = sanitized.getInt(LovelyConstant.STAT_LEVEL);
         if (level < 0) {
-            sanitized.putInt(LovelyIdentifier.STAT_LEVEL, 0);
+            sanitized.putInt(LovelyConstant.STAT_LEVEL, 0);
         } else if (level > 100) {
-            sanitized.putInt(LovelyIdentifier.STAT_LEVEL, 100);
+            sanitized.putInt(LovelyConstant.STAT_LEVEL, 100);
         }
 
         // Validate and clamp experience (0-1000000 reasonable range)
-        int exp = sanitized.getInt(LovelyIdentifier.STAT_EXP);
+        int exp = sanitized.getInt(LovelyConstant.STAT_EXP);
         if (exp < 0) {
-            sanitized.putInt(LovelyIdentifier.STAT_EXP, 0);
+            sanitized.putInt(LovelyConstant.STAT_EXP, 0);
         } else if (exp > 1000000) {
-            sanitized.putInt(LovelyIdentifier.STAT_EXP, 1000000);
+            sanitized.putInt(LovelyConstant.STAT_EXP, 1000000);
         }
 
         // Validate health (1.0-1000.0 reasonable range)
-        if (sanitized.contains(LovelyIdentifier.STAT_HP)) {
-            float health = sanitized.getFloat(LovelyIdentifier.STAT_HP);
+        if (sanitized.contains(LovelyConstant.STAT_HP)) {
+            float health = sanitized.getFloat(LovelyConstant.STAT_HP);
             if (health <= 0.0f) {
-                sanitized.putFloat(LovelyIdentifier.STAT_HP, 1.0f);
+                sanitized.putFloat(LovelyConstant.STAT_HP, 1.0f);
             } else if (health > 1000.0f) {
-                sanitized.putFloat(LovelyIdentifier.STAT_HP, 1000.0f);
+                sanitized.putFloat(LovelyConstant.STAT_HP, 1000.0f);
             }
         }
 
         // Validate protection levels (0-10 reasonable range for each)
-        validateAndClampProtection(sanitized, LovelyIdentifier.STAT_FIRE_PROTECTION);
-        validateAndClampProtection(sanitized, LovelyIdentifier.STAT_FALL_PROTECTION);
-        validateAndClampProtection(sanitized, LovelyIdentifier.STAT_BLAST_PROTECTION);
-        validateAndClampProtection(sanitized, LovelyIdentifier.STAT_PROJECTILE_PROTECTION);
+        validateAndClampProtection(sanitized, LovelyConstant.STAT_FIRE_PROTECTION);
+        validateAndClampProtection(sanitized, LovelyConstant.STAT_FALL_PROTECTION);
+        validateAndClampProtection(sanitized, LovelyConstant.STAT_BLAST_PROTECTION);
+        validateAndClampProtection(sanitized, LovelyConstant.STAT_PROJECTILE_PROTECTION);
 
         // Validate custom name (limit length to prevent issues)
-        String customName = sanitized.getString(LovelyIdentifier.STAT_CUSTOM_NAME);
+        String customName = sanitized.getString(LovelyConstant.STAT_CUSTOM_NAME);
         if (customName.length() > 50) {
-            sanitized.putString(LovelyIdentifier.STAT_CUSTOM_NAME, customName.substring(0, 50));
+            sanitized.putString(LovelyConstant.STAT_CUSTOM_NAME, customName.substring(0, 50));
         }
 
         return sanitized;
@@ -203,8 +204,8 @@ public class ItemValidationHelper {
         }
 
         // Check for required fields
-        return customData.contains(LovelyIdentifier.STAT_COLOR) &&
-                customData.contains(LovelyIdentifier.STAT_LEVEL);
+        return customData.contains(LovelyConstant.STAT_COLOR) &&
+                customData.contains(LovelyConstant.STAT_LEVEL);
     } // isValidSpawnItem()
 
     /**

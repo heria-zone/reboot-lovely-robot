@@ -1,5 +1,6 @@
 package net.heriazone.lovelylib.api.recipes;
 
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.recipes.interfaces.INbtTransferStrategy;
 import net.heriazone.lovelylib.api.recipes.modifiers.DyeColorModifier;
@@ -40,7 +41,7 @@ public abstract class BaseLovelySpawnDyeRecipe extends ShapelessRecipe {
     public BaseLovelySpawnDyeRecipe(String group, CraftingBookCategory category, ItemStack result,
                                     net.minecraft.core.NonNullList<Ingredient> ingredients) {
         super(group, category, result, ingredients);
-        this.strategy = new AdditiveNbtMergeStrategy(result.getItem(), List.of(new DyeColorModifier(LovelyIdentifier.STAT_COLOR)));
+        this.strategy = new AdditiveNbtMergeStrategy(result.getItem(), List.of(new DyeColorModifier(LovelyConstant.STAT_COLOR)));
     } // Constructor: BaseLovelySpawnDyeRecipe()
 
     // -- Inherited Methods --
