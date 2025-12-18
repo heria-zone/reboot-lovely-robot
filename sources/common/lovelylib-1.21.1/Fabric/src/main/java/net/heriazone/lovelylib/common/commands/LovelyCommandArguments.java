@@ -2,6 +2,7 @@ package net.heriazone.lovelylib.common.commands;
 
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.heriazone.lovelylib.api.commands.ColorArgumentType;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 
@@ -28,7 +29,7 @@ public class LovelyCommandArguments {
      */
     public static void register() {
         ArgumentTypeRegistry.registerArgumentType(
-                LovelyIdentifier.getId(LovelyIdentifier.STAT_COLOR),
+                LovelyIdentifier.getId(LovelyConstant.STAT_COLOR),
                 ColorArgumentType.class,
                 SingletonArgumentInfo.contextFree(ColorArgumentType::color)
         );

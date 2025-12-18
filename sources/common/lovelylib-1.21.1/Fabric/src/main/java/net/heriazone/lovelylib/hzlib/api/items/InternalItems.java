@@ -3,6 +3,7 @@ package net.heriazone.lovelylib.hzlib.api.items;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -33,7 +34,7 @@ public class InternalItems {
      * @return the registered item instance
      */
     protected static Item register(ResourceLocation name, Item item) {
-        return Registry.register(net.minecraft.core.registries.BuiltInRegistries.ITEM, name, item);
+        return Registry.register(BuiltInRegistries.ITEM, name, item);
     } // register()
 
     /**
@@ -46,7 +47,7 @@ public class InternalItems {
      * @return the registered block item instance
      */
     protected static Item register(ResourceLocation name, Block block) {
-        return Registry.register(net.minecraft.core.registries.BuiltInRegistries.ITEM, name, new BlockItem(block, new Item.Properties()));
+        return Registry.register(BuiltInRegistries.ITEM, name, new BlockItem(block, new Item.Properties()));
     } // register()
 
     /**
