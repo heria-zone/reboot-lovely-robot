@@ -1,16 +1,15 @@
 package net.heriazone.lovelylib.common.entity.common;
 
 import net.heriazone.lovelylib.api.entity.features.*;
+import net.heriazone.lovelylib.common.configs.LegacyConfigs;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
 import net.heriazone.lovelylib.common.entity.enums.*;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.lovelylib.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
 import net.heriazone.lovelylib.hzlib.framework.entity.protection.LevelBasedProtectionStrategy;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>Registry of native robot types with config-driven values.<p>
@@ -27,17 +26,7 @@ import java.util.List;
  * exponential progression for harder leveling. KITSUNE uses custom formula with tail-unlock
  * progression (harder every 30 levels).
  */
-public class LovelyRobotType {
-
-    // -- Registry --
-
-    /**
-     * List of all robot types for iteration.
-     * <p>
-     * <b>Usage:</b> Enables iteration over all robot types for registration,
-     * rendering setup, or bulk operations.
-     */
-    public static final List<NativeEntityType> TYPES = new ArrayList<>();
+public class LegacyRobotType extends LovelyRobotType {
 
     // -- Robot Types --
 
@@ -99,81 +88,6 @@ public class LovelyRobotType {
      */
     public static final NativeEntityType VANILLA = create(EntityVariant.Vanilla);
 
-    // -- Helper Methods --
-
-    /**
-     * Creates robot type with specified variant and combat stats.
-     * <p>
-     * <b>Implementation:</b> Creates NativeEntityType, configures combat stats,
-     * applies color palette, and adds to registry.
-     * <p>
-     * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
-     *
-     * @param variant entity variant determining resource paths
-     * @param maxLevel maximum level for this robot type
-     * @param maxHealth maximum health points
-     * @param baseAttack attack damage value
-     * @param attackSpeed attack speed multiplier
-     * @param baseDefense armour points
-     * @param baseToughness amour toughness value
-     * @param knockbackResistance knockback resistance (0.0 to 1.0)
-     * @param moveSpeed movement speed multiplier
-     * @return configured NativeEntityType instance
-     */
-    private static NativeEntityType create(EntityVariant variant,
-                                           int maxLevel,
-                                           float maxHealth,
-                                           float baseAttack,
-                                           float attackSpeed,
-                                           float baseDefense,
-                                           float baseToughness,
-                                           float knockbackResistance,
-                                           float moveSpeed) {
-        // Create robot type
-        NativeEntityType robotType = new NativeEntityType(variant.getName(), variant);
-
-        // Configure combat stats
-        robotType.withCombatStats(maxHealth, baseAttack, attackSpeed,
-                baseDefense, baseToughness, knockbackResistance, moveSpeed);
-
-        // Configure max level
-        robotType.getFeature(LevelFeature.class).ifPresent(feature ->
-                feature.setMaxLevel(maxLevel)
-        );
-
-        // Apply color palette
-        robotType.withColorPalette(variant);
-
-        // Add to registry
-        TYPES.add(robotType);
-
-        return robotType;
-    } // create ()
-
-    /**
-     * Creates robot type with specified variant and combat stats.
-     * <p>
-     * <b>Implementation:</b> Creates NativeEntityType, configures combat stats,
-     * applies color palette, and adds to registry.
-     * <p>
-     * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
-     *
-     * @param variant entity variant determining resource paths
-     * @return configured NativeEntityType instance
-     */
-    private static NativeEntityType create(EntityVariant variant) {
-        // Create robot type
-        NativeEntityType robotType = new NativeEntityType(variant.getName(), variant);
-
-        // Apply color palette
-        robotType.withColorPalette(variant);
-
-        // Add to registry
-        TYPES.add(robotType);
-
-        return robotType;
-    } // create ()
-
     // -- Config Reload --
 
     /**
@@ -200,133 +114,140 @@ public class LovelyRobotType {
                         SharedConfigs.Common.LootEnchantmentLevel);
 
         // Configure BUNNY
-        BUNNY.withCombatStats(SharedConfigs.Common.BunnyBaseHp,
-                        SharedConfigs.Common.BunnyBaseAttack,
-                        SharedConfigs.Common.BunnyAttackSpeed,
-                        SharedConfigs.Common.BunnyBaseDefense,
-                        SharedConfigs.Common.BunnyBaseToughness,
+        SharedConfigs.EntityConfigData bunny = LegacyConfigs.Common.getEntityConfig(LovelyConstant.VARIANT_BUNNY);
+        BUNNY.withCombatStats(bunny.baseHp,
+                        bunny.baseAttack,
+                        bunny.attackSpeed,
+                        bunny.baseDefense,
+                        bunny.baseToughness,
                         0F,
-                        SharedConfigs.Common.BunnyMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.BunnyMaxLevel, defaultExpStrategy))
+                        bunny.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(bunny.maxLevel, defaultExpStrategy))
                 .withFeature(CombatLevelFeature.class,
                         new CombatLevelFeature(
-                                SharedConfigs.Common.BunnyBaseHp,
-                                SharedConfigs.Common.BunnyBaseAttack,
-                                SharedConfigs.Common.BunnyBaseDefense,
+                                bunny.baseHp,
+                                bunny.baseAttack,
+                                bunny.baseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure BUNNY2
-        BUNNY2.withCombatStats(SharedConfigs.Common.Bunny2BaseHp,
-                        SharedConfigs.Common.Bunny2BaseAttack,
-                        SharedConfigs.Common.Bunny2AttackSpeed,
-                        SharedConfigs.Common.Bunny2BaseDefense,
-                        SharedConfigs.Common.Bunny2BaseToughness,
+        SharedConfigs.EntityConfigData bunny2 = LegacyConfigs.Common.getEntityConfig(LovelyConstant.VARIANT_BUNNY2);
+        BUNNY2.withCombatStats(bunny2.baseHp,
+                        bunny2.baseAttack,
+                        bunny2.attackSpeed,
+                        bunny2.baseDefense,
+                        bunny2.baseToughness,
                         0F,
-                        SharedConfigs.Common.Bunny2MovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.Bunny2MaxLevel, defaultExpStrategy))
+                        bunny2.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(bunny2.maxLevel, defaultExpStrategy))
                 .withFeature(CombatLevelFeature.class,
                         new CombatLevelFeature(
-                                SharedConfigs.Common.Bunny2BaseHp,
-                                SharedConfigs.Common.Bunny2BaseAttack,
-                                SharedConfigs.Common.Bunny2BaseDefense,
+                                bunny2.baseHp,
+                                bunny2.baseAttack,
+                                bunny2.baseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure DRAGON
-        DRAGON.withCombatStats(SharedConfigs.Common.DragonBaseHp,
-                        SharedConfigs.Common.DragonBaseAttack,
-                        SharedConfigs.Common.DragonAttackSpeed,
-                        SharedConfigs.Common.DragonBaseDefense,
-                        SharedConfigs.Common.DragonBaseToughness,
+        SharedConfigs.EntityConfigData dragon = LegacyConfigs.Common.getEntityConfig(LovelyConstant.VARIANT_DRAGON);
+        DRAGON.withCombatStats(dragon.baseHp,
+                        dragon.baseAttack,
+                        dragon.attackSpeed,
+                        dragon.baseDefense,
+                        dragon.baseToughness,
                         0F,
-                        SharedConfigs.Common.DragonMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.DragonMaxLevel, defaultExpStrategy))
+                        dragon.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(dragon.maxLevel, defaultExpStrategy))
                 .withFeature(CombatLevelFeature.class,
                         new CombatLevelFeature(
-                                SharedConfigs.Common.DragonBaseHp,
-                                SharedConfigs.Common.DragonBaseAttack,
-                                SharedConfigs.Common.DragonBaseDefense,
+                                dragon.baseHp,
+                                dragon.baseAttack,
+                                dragon.baseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure HONEY
-        HONEY.withCombatStats(SharedConfigs.Common.HoneyBaseHp,
-                        SharedConfigs.Common.HoneyBaseAttack,
-                        SharedConfigs.Common.HoneyAttackSpeed,
-                        SharedConfigs.Common.HoneyBaseDefense,
-                        SharedConfigs.Common.HoneyBaseToughness,
+        SharedConfigs.EntityConfigData honey = LegacyConfigs.Common.getEntityConfig(LovelyConstant.VARIANT_HONEY);
+        HONEY.withCombatStats(honey.baseHp,
+                        honey.baseAttack,
+                        honey.attackSpeed,
+                        honey.baseDefense,
+                        honey.baseToughness,
                         0F,
-                        SharedConfigs.Common.HoneyMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.HoneyMaxLevel, defaultExpStrategy))
+                        honey.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(honey.maxLevel, defaultExpStrategy))
                 .withFeature(CombatLevelFeature.class,
                         new CombatLevelFeature(
-                                SharedConfigs.Common.HoneyBaseHp,
-                                SharedConfigs.Common.HoneyBaseAttack,
-                                SharedConfigs.Common.HoneyBaseDefense,
+                                honey.baseHp,
+                                honey.baseAttack,
+                                honey.baseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure KITSUNE
-        KITSUNE.withCombatStats(SharedConfigs.Common.KitsuneBaseHp,
-                        SharedConfigs.Common.KitsuneBaseAttack,
-                        SharedConfigs.Common.KitsuneAttackSpeed,
-                        SharedConfigs.Common.KitsuneBaseDefense,
-                        SharedConfigs.Common.KitsuneBaseToughness,
+        SharedConfigs.EntityConfigData kitsune = LegacyConfigs.Common.getEntityConfig(LovelyConstant.VARIANT_KITSUNE);
+        KITSUNE.withCombatStats(kitsune.baseHp,
+                        kitsune.baseAttack,
+                        kitsune.attackSpeed,
+                        kitsune.baseDefense,
+                        kitsune.baseToughness,
                         0F,
-                        SharedConfigs.Common.KitsuneMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.KitsuneMaxLevel, defaultExpStrategy))
+                        kitsune.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(kitsune.maxLevel, defaultExpStrategy))
                 .withFeature(CombatLevelFeature.class,
                         new CombatLevelFeature(
-                                SharedConfigs.Common.KitsuneBaseHp,
-                                SharedConfigs.Common.KitsuneBaseAttack,
-                                SharedConfigs.Common.KitsuneBaseDefense,
+                                kitsune.baseHp,
+                                kitsune.baseAttack,
+                                kitsune.baseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure NEKO
-        NEKO.withCombatStats(SharedConfigs.Common.NekoBaseHp,
-                        SharedConfigs.Common.NekoBaseAttack,
-                        SharedConfigs.Common.NekoAttackSpeed,
-                        SharedConfigs.Common.NekoBaseDefense,
-                        SharedConfigs.Common.NekoBaseToughness,
+        SharedConfigs.EntityConfigData neko = LegacyConfigs.Common.getEntityConfig(LovelyConstant.VARIANT_NEKO);
+        NEKO.withCombatStats(neko.baseHp,
+                        neko.baseAttack,
+                        neko.attackSpeed,
+                        neko.baseDefense,
+                        neko.baseToughness,
                         0F,
-                        SharedConfigs.Common.NekoMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.NekoMaxLevel, defaultExpStrategy))
+                        neko.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(neko.maxLevel, defaultExpStrategy))
                 .withFeature(CombatLevelFeature.class,
                         new CombatLevelFeature(
-                                SharedConfigs.Common.NekoBaseHp,
-                                SharedConfigs.Common.NekoBaseAttack,
-                                SharedConfigs.Common.NekoBaseDefense,
+                                neko.baseHp,
+                                neko.baseAttack,
+                                neko.baseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure VANILLA
-        VANILLA.withCombatStats(SharedConfigs.Common.VanillaBaseHp,
-                        SharedConfigs.Common.VanillaBaseAttack,
-                        SharedConfigs.Common.VanillaAttackSpeed,
-                        SharedConfigs.Common.VanillaBaseDefense,
-                        SharedConfigs.Common.VanillaBaseToughness,
-                        0F, // No knockback resistance
-                        SharedConfigs.Common.VanillaMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.VanillaMaxLevel, defaultExpStrategy))
+        SharedConfigs.EntityConfigData vanilla = LegacyConfigs.Common.getEntityConfig(LovelyConstant.VARIANT_VANILLA);
+        VANILLA.withCombatStats(vanilla.baseHp,
+                        vanilla.baseAttack,
+                        vanilla.attackSpeed,
+                        vanilla.baseDefense,
+                        vanilla.baseToughness,
+                        0F,
+                        vanilla.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(vanilla.maxLevel, defaultExpStrategy))
                 .withFeature(CombatLevelFeature.class,
                         new CombatLevelFeature(
-                                SharedConfigs.Common.VanillaBaseHp,
-                                SharedConfigs.Common.VanillaBaseAttack,
-                                SharedConfigs.Common.VanillaBaseDefense,
+                                vanilla.baseHp,
+                                vanilla.baseAttack,
+                                vanilla.baseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
@@ -335,4 +256,4 @@ public class LovelyRobotType {
         //LovelyConstant.LOGGER.info("Robot type configurations reloaded from config");
     } // reloadFromConfig ()
 
-} // Class: LovelyRobotType
+} // Class: LegacyRobotType

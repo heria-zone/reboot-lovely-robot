@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity.enums;
 
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -22,25 +22,25 @@ public enum EntityVariant {
     // -- Original Variants (Base Functionality) --
 
     /** Original bunny design with balanced stats. */
-    Bunny(0, LovelyIdentifier.VARIANT_BUNNY),
+    Bunny(0, LovelyConstant.VARIANT_BUNNY),
 
     /** Alternative bunny design with different aesthetic. */
-    Bunny2(1, LovelyIdentifier.VARIANT_BUNNY2),
+    Bunny2(1, LovelyConstant.VARIANT_BUNNY2),
 
     /** Dragon variant with enhanced combat capabilities and knockback resistance. */
-    Dragon(2, LovelyIdentifier.VARIANT_DRAGON),
+    Dragon(2, LovelyConstant.VARIANT_DRAGON),
 
     /** Honey variant with support-oriented capabilities. */
-    Honey(3, LovelyIdentifier.VARIANT_HONEY),
+    Honey(3, LovelyConstant.VARIANT_HONEY),
 
     /** Kitsune variant with tail-unlock progression system. */
-    Kitsune(4, LovelyIdentifier.VARIANT_KITSUNE),
+    Kitsune(4, LovelyConstant.VARIANT_KITSUNE),
 
     /** Neko variant with agile combat specialization. */
-    Neko(5, LovelyIdentifier.VARIANT_NEKO),
+    Neko(5, LovelyConstant.VARIANT_NEKO),
 
     /** General-purpose companion with belt pouch and patrol abilities. */
-    Vanilla(6, LovelyIdentifier.VARIANT_VANILLA);
+    Vanilla(6, LovelyConstant.VARIANT_VANILLA);
 
     // -- Deserialization Cache --
 

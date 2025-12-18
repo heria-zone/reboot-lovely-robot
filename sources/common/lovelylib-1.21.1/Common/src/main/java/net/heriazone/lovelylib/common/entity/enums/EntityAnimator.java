@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity.enums;
 
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,7 +19,7 @@ public enum EntityAnimator {
     // -- Animator Configurations --
 
     /** Standard animation controller used by all basic robot types. */
-    Default(0, LovelyIdentifier.ANIM_DEFAULT);
+    Default(0, LovelyConstant.ANIM_DEFAULT);
 
     // -- Deserialization Cache --
 

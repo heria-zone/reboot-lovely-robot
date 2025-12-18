@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity.enums;
 
-import net.heriazone.lovelylib.hzlib.framework.common.InternalIdentifier;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,25 +19,25 @@ public enum EntityTexture {
 
     // -- Standard Colors (Minecraft Dye Palette) --
 
-    WHITE(0, InternalIdentifier.TEX_WHITE),
-    ORANGE(1, InternalIdentifier.TEX_ORANGE),
-    MAGENTA(2, InternalIdentifier.TEX_MAGENTA),
-    LIGHT_BLUE(3, InternalIdentifier.TEX_LIGHT_BLUE),
-    YELLOW(4, InternalIdentifier.TEX_YELLOW),
-    LIME(5, InternalIdentifier.TEX_LIME),
-    PINK(6, InternalIdentifier.TEX_PINK),
-    GRAY(7, InternalIdentifier.TEX_GRAY),
-    LIGHT_GRAY(8, InternalIdentifier.TEX_LIGHT_GRAY),
-    CYAN(9, InternalIdentifier.TEX_CYAN),
-    PURPLE(10, InternalIdentifier.TEX_PURPLE),
-    BLUE(11, InternalIdentifier.TEX_BLUE),
-    BROWN(12, InternalIdentifier.TEX_BROWN),
-    GREEN(13, InternalIdentifier.TEX_GREEN),
-    RED(14, InternalIdentifier.TEX_RED),
-    BLACK(15, InternalIdentifier.TEX_BLACK),
+    WHITE(0, LovelyConstant.TEX_WHITE),
+    ORANGE(1, LovelyConstant.TEX_ORANGE),
+    MAGENTA(2, LovelyConstant.TEX_MAGENTA),
+    LIGHT_BLUE(3, LovelyConstant.TEX_LIGHT_BLUE),
+    YELLOW(4, LovelyConstant.TEX_YELLOW),
+    LIME(5, LovelyConstant.TEX_LIME),
+    PINK(6, LovelyConstant.TEX_PINK),
+    GRAY(7, LovelyConstant.TEX_GRAY),
+    LIGHT_GRAY(8, LovelyConstant.TEX_LIGHT_GRAY),
+    CYAN(9, LovelyConstant.TEX_CYAN),
+    PURPLE(10, LovelyConstant.TEX_PURPLE),
+    BLUE(11, LovelyConstant.TEX_BLUE),
+    BROWN(12, LovelyConstant.TEX_BROWN),
+    GREEN(13, LovelyConstant.TEX_GREEN),
+    RED(14, LovelyConstant.TEX_RED),
+    BLACK(15, LovelyConstant.TEX_BLACK),
 
     /** Randomizes texture on spawn. Excludes special textures from random pool. */
-    RANDOM(16, InternalIdentifier.TEX_RANDOM);
+    RANDOM(16, LovelyConstant.TEX_RANDOM);
 
     // -- Deserialization Cache --
 

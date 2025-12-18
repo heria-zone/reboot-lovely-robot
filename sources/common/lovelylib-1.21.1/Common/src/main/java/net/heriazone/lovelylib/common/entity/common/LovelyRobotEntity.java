@@ -6,6 +6,7 @@ import net.heriazone.lovelylib.common.entity.NativeEntityType;
 import net.heriazone.lovelylib.common.entity.enums.*;
 import net.heriazone.lovelylib.common.entity.goal.*;
 import net.heriazone.lovelylib.common.entity.utils.EnchantmentProtectionCalculator;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalEntity;
 import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
@@ -681,24 +682,24 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         CompoundTag nbt = new CompoundTag();
 
         String customName = Utils.getEntityCustomName(this);
-        if (!customName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_CUSTOM_NAME, customName);
+        if (!customName.isEmpty()) nbt.putString(LovelyConstant.STAT_CUSTOM_NAME, customName);
 
         String ownerName = Utils.getEntityOwnerName(this);
-        if (!ownerName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
+        if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
-        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putInt(LovelyIdentifier.STAT_COLOR, this.getTextureID());
+        nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
+        nbt.putInt(LovelyConstant.STAT_COLOR, this.getTextureID());
 
-        nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
-        nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
-        nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
+        nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
+        nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
+        nbt.putInt(LovelyConstant.STAT_EXP, this.getExp());
 
         // Note: Current health is intentionally NOT included so crafted robots spawn at max health
 
-        nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
-        nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());
-        nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
-        nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
+        nbt.putInt(LovelyConstant.STAT_FIRE_PROTECTION, this.getFireProtection());
+        nbt.putInt(LovelyConstant.STAT_FALL_PROTECTION, this.getFallProtection());
+        nbt.putInt(LovelyConstant.STAT_BLAST_PROTECTION, this.getBlastProtection());
+        nbt.putInt(LovelyConstant.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
 
         // Store custom data in DataComponents.CUSTOM_DATA
         dropItem.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(nbt));
@@ -1265,8 +1266,8 @@ public abstract class LovelyRobotEntity extends InternalEntity {
     protected boolean handleDisplayInteraction (ItemStack stack) {
         if(stack.getItem() == (Items.OAK_BUTTON)) {
             this.setNotification(invertBoolean(getNotification()));
-            if(getNotification()) displayNotification(LovelyIdentifier.MSG_NOTIFICATION, LovelyIdentifier.MSG_ON, getNotification());
-            else displayNotification(LovelyIdentifier.MSG_NOTIFICATION, LovelyIdentifier.MSG_OFF, true);
+            if(getNotification()) displayNotification(LovelyConstant.MSG_NOTIFICATION, LovelyConstant.MSG_ON, getNotification());
+            else displayNotification(LovelyConstant.MSG_NOTIFICATION, LovelyConstant.MSG_OFF, true);
         }
 
         if(stack.getItem() == (Items.BOOK)) displayGeneralMessage(true, false);
@@ -1279,8 +1280,8 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         if (getCurrentState() == EntityState.Defense) return;
         setAutoAttack(invertBoolean(getAutoAttack()));
 
-        if(getAutoAttack()) displayNotification(LovelyIdentifier.MSG_AUTO_ATTACK, LovelyIdentifier.MSG_ON, getNotification());
-        else displayNotification(LovelyIdentifier.MSG_AUTO_ATTACK, LovelyIdentifier.MSG_OFF, getNotification());
+        if(getAutoAttack()) displayNotification(LovelyConstant.MSG_AUTO_ATTACK, LovelyConstant.MSG_ON, getNotification());
+        else displayNotification(LovelyConstant.MSG_AUTO_ATTACK, LovelyConstant.MSG_OFF, getNotification());
     } // handleAutoAttack ()
 
     protected boolean handleBaseDefenseState(ItemStack stack){
@@ -1291,7 +1292,7 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         this.setBaseX((float)this.getBlockX());
         this.setBaseY((float)this.getBlockY());
         this.setBaseZ((float)this.getBlockZ());
-        displayNotification(LovelyIdentifier.MSG_BASE_DEFENCE, getNotification());
+        displayNotification(LovelyConstant.MSG_BASE_DEFENCE, getNotification());
         return true;
     } // handleBaseDefenseState ()
 
@@ -1347,25 +1348,25 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
     public void displayGeneralMessage(boolean canShow, boolean showLevelUp) {
         if(!canShow) return;
-        InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BAR)), false);
-        if(showLevelUp) InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_LEVEL_UP)), false);
+        InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR)), false);
+        if(showLevelUp) InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LEVEL_UP)), false);
         if(this.getCustomName() != null) InternalLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.getKey()).append(": " + this.getCustomName().getString()), false);
         else InternalLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.getKey()), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_LEVEL).append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
-        getLevelSystem().ifPresent(feature -> InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_EXPERIENCE).append(": " + this.getExp()                 + "/" + feature.getExpForLevel(this.getCurrentLevel())), false));
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_HEALTH).append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_ATTACK).append(": " + this.getAttackDamage()), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_DEFENCE).append(": " + this.getArmorLevel()), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LEVEL).append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
+        getLevelSystem().ifPresent(feature -> InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_EXPERIENCE).append(": " + this.getExp()                 + "/" + feature.getExpForLevel(this.getCurrentLevel())), false));
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_HEALTH).append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_ATTACK).append(": " + this.getAttackDamage()), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_DEFENCE).append(": " + this.getArmorLevel()), false);
     } // displayGeneralMessage ()
 
     public void displayEnchantmentMessage() {
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BAR), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_ENCHANTMENT), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_LOOTING).append(": " + this.getLooting()                            + "/" + SharedConfigs.Common.MaxLootEnchantment), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_FIRE_PROTECTION).append(": " + this.getFireProtection()             + "/" + SharedConfigs.Common.ProtectionLimitFire), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_FALL_PROTECTION).append(": " + this.getFallProtection()             + "/" + SharedConfigs.Common.ProtectionLimitFall), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BLAST_PROTECTION).append(": " + this.getBlastProtection()           + "/" + SharedConfigs.Common.ProtectionLimitBlast), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_PROJECTILE_PROTECTION).append(": " + this.getProjectileProtection() + "/" + SharedConfigs.Common.ProtectionLimitProjectile), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_ENCHANTMENT), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LOOTING).append(": " + this.getLooting()                            + "/" + SharedConfigs.Common.MaxLootEnchantment), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_FIRE_PROTECTION).append(": " + this.getFireProtection()             + "/" + SharedConfigs.Common.ProtectionLimitFire), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_FALL_PROTECTION).append(": " + this.getFallProtection()             + "/" + SharedConfigs.Common.ProtectionLimitFall), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BLAST_PROTECTION).append(": " + this.getBlastProtection()           + "/" + SharedConfigs.Common.ProtectionLimitBlast), false);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_PROJECTILE_PROTECTION).append(": " + this.getProjectileProtection() + "/" + SharedConfigs.Common.ProtectionLimitProjectile), false);
     } // displayEnchantmentMessage ()
 
     /**
@@ -1479,24 +1480,24 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         CompoundTag nbt = new CompoundTag();
 
         String customName = Utils.getEntityCustomName(this);
-        if (!customName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_CUSTOM_NAME, customName);
+        if (!customName.isEmpty()) nbt.putString(LovelyConstant.STAT_CUSTOM_NAME, customName);
 
         String ownerName = Utils.getEntityOwnerName(this);
-        if (!ownerName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
+        if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
-        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putInt(LovelyIdentifier.STAT_COLOR, this.getTextureID());
+        nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
+        nbt.putInt(LovelyConstant.STAT_COLOR, this.getTextureID());
 
-        nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
-        nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
-        nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
+        nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
+        nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
+        nbt.putInt(LovelyConstant.STAT_EXP, this.getExp());
 
         // Note: Current health is intentionally NOT included so crafted robots spawn at max health
 
-        nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
-        nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());
-        nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
-        nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
+        nbt.putInt(LovelyConstant.STAT_FIRE_PROTECTION, this.getFireProtection());
+        nbt.putInt(LovelyConstant.STAT_FALL_PROTECTION, this.getFallProtection());
+        nbt.putInt(LovelyConstant.STAT_BLAST_PROTECTION, this.getBlastProtection());
+        nbt.putInt(LovelyConstant.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
 
         // Store custom data in DataComponents.CUSTOM_DATA
         spawnItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
@@ -1546,23 +1547,23 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
         // Populate NBT (same as handleItemDrop)
         String customName = Utils.getEntityCustomName(this);
-        if (!customName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_CUSTOM_NAME, customName);
+        if (!customName.isEmpty()) nbt.putString(LovelyConstant.STAT_CUSTOM_NAME, customName);
 
         String ownerName = Utils.getEntityOwnerName(this);
-        if (!ownerName.isEmpty()) nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
+        if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
-        nbt.putString(LovelyIdentifier.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putInt(LovelyIdentifier.STAT_COLOR, this.getTextureID());
-        nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, this.getMaxLevel());
-        nbt.putInt(LovelyIdentifier.STAT_LEVEL, this.getCurrentLevel());
-        nbt.putInt(LovelyIdentifier.STAT_EXP, this.getExp());
+        nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
+        nbt.putInt(LovelyConstant.STAT_COLOR, this.getTextureID());
+        nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
+        nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
+        nbt.putInt(LovelyConstant.STAT_EXP, this.getExp());
 
         // Note: Current health is intentionally NOT included so crafted robots spawn at max health
 
-        nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, this.getFireProtection());
-        nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, this.getFallProtection());
-        nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, this.getBlastProtection());
-        nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
+        nbt.putInt(LovelyConstant.STAT_FIRE_PROTECTION, this.getFireProtection());
+        nbt.putInt(LovelyConstant.STAT_FALL_PROTECTION, this.getFallProtection());
+        nbt.putInt(LovelyConstant.STAT_BLAST_PROTECTION, this.getBlastProtection());
+        nbt.putInt(LovelyConstant.STAT_PROJECTILE_PROTECTION, this.getProjectileProtection());
 
         // Store custom data in DataComponents.CUSTOM_DATA
         coreStack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(nbt));

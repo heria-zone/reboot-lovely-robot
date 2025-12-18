@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity.enums;
 
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -20,10 +20,10 @@ public enum EntityModel {
     // -- Model Variants --
 
     /** Standard unarmed model. Used when robot has no weapon equipped. */
-    Default(0, LovelyIdentifier.MOD_DEFAULT),
+    Default(0, LovelyConstant.MOD_DEFAULT),
 
     /** Combat-ready model with weapon attachment points. Used when robot is armed. */
-    Armed(1, LovelyIdentifier.MOD_ARMED);
+    Armed(1, LovelyConstant.MOD_ARMED);
 
     // -- Deserialization Cache --
 
