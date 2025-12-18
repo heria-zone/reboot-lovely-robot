@@ -1,10 +1,12 @@
 package net.heriazone.lovelylib.common.entity.common;
 
-import net.heriazone.lovelylib.api.entity.features.*;
+import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
+import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
+import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
-import net.heriazone.lovelylib.common.entity.enums.*;
+import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.lovelylib.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
 import net.heriazone.lovelylib.hzlib.framework.entity.protection.LevelBasedProtectionStrategy;
@@ -24,7 +26,7 @@ import net.heriazone.lovelylib.hzlib.framework.entity.protection.LevelBasedProte
  * exponential progression for harder leveling. KITSUNE uses custom formula with tail-unlock
  * progression (harder every 30 levels).
  */
-public class LegacyRobotType extends LovelyRobotType {
+public class TributeRobotType extends LovelyRobotType {
 
     // -- Robot Types --
 
@@ -45,38 +47,12 @@ public class LegacyRobotType extends LovelyRobotType {
     public static final NativeEntityType BUNNY2 = create(EntityVariant.Bunny2);
 
     /**
-     * DRAGON robot type - enhanced combat capabilities.
-     * <p>
-     * <b>Characteristics:</b> High health and damage, knockback resistance 0.5F,
-     * exponential XP progression (base 1.1). Configured via DragonMaxLevel,
-     * DragonBaseHp, etc.
-     */
-    public static final NativeEntityType DRAGON = create(EntityVariant.Dragon);
-
-    /**
      * HONEY robot type - support-oriented companion.
      * <p>
      * <b>Characteristics:</b> Lower combat stats, default XP progression.
      * Configured via HoneyMaxLevel, HoneyBaseHp, etc.
      */
     public static final NativeEntityType HONEY = create(EntityVariant.Honey);
-
-    /**
-     * KITSUNE robot type - tail-unlock progression.
-     * <p>
-     * <b>Characteristics:</b> Moderate stats, custom XP formula with tail-unlock
-     * progression (harder every 30 levels). Configured via KitsuneMaxLevel,
-     * KitsuneBaseHp, etc.
-     */
-    public static final NativeEntityType KITSUNE = create(EntityVariant.Kitsune);
-
-    /**
-     * NEKO robot type - agile combat specialist.
-     * <p>
-     * <b>Characteristics:</b> High attack and speed, default XP progression.
-     * Configured via NekoMaxLevel, NekoBaseHp, etc.
-     */
-    public static final NativeEntityType NEKO = create(EntityVariant.Neko);
 
     /**
      * VANILLA robot type - general-purpose companion.
@@ -149,25 +125,6 @@ public class LegacyRobotType extends LovelyRobotType {
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
-        // Configure DRAGON
-        DRAGON.withCombatStats(SharedConfigs.Common.DragonBaseHp,
-                        SharedConfigs.Common.DragonBaseAttack,
-                        SharedConfigs.Common.DragonAttackSpeed,
-                        SharedConfigs.Common.DragonBaseDefense,
-                        SharedConfigs.Common.DragonBaseToughness,
-                        0F,
-                        SharedConfigs.Common.DragonMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.DragonMaxLevel, defaultExpStrategy))
-                .withFeature(CombatLevelFeature.class,
-                        new CombatLevelFeature(
-                                SharedConfigs.Common.DragonBaseHp,
-                                SharedConfigs.Common.DragonBaseAttack,
-                                SharedConfigs.Common.DragonBaseDefense,
-                                new LinearAttributeStrategy()
-                        ))
-                .withFeature(EnchantmentFeature.class, defaultEnchantment)
-                .withFeature(ProtectionFeature.class, defaultProtection);
-
         // Configure HONEY
         HONEY.withCombatStats(SharedConfigs.Common.HoneyBaseHp,
                         SharedConfigs.Common.HoneyBaseAttack,
@@ -182,44 +139,6 @@ public class LegacyRobotType extends LovelyRobotType {
                                 SharedConfigs.Common.HoneyBaseHp,
                                 SharedConfigs.Common.HoneyBaseAttack,
                                 SharedConfigs.Common.HoneyBaseDefense,
-                                new LinearAttributeStrategy()
-                        ))
-                .withFeature(EnchantmentFeature.class, defaultEnchantment)
-                .withFeature(ProtectionFeature.class, defaultProtection);
-
-        // Configure KITSUNE
-        KITSUNE.withCombatStats(SharedConfigs.Common.KitsuneBaseHp,
-                        SharedConfigs.Common.KitsuneBaseAttack,
-                        SharedConfigs.Common.KitsuneAttackSpeed,
-                        SharedConfigs.Common.KitsuneBaseDefense,
-                        SharedConfigs.Common.KitsuneBaseToughness,
-                        0F,
-                        SharedConfigs.Common.KitsuneMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.KitsuneMaxLevel, defaultExpStrategy))
-                .withFeature(CombatLevelFeature.class,
-                        new CombatLevelFeature(
-                                SharedConfigs.Common.KitsuneBaseHp,
-                                SharedConfigs.Common.KitsuneBaseAttack,
-                                SharedConfigs.Common.KitsuneBaseDefense,
-                                new LinearAttributeStrategy()
-                        ))
-                .withFeature(EnchantmentFeature.class, defaultEnchantment)
-                .withFeature(ProtectionFeature.class, defaultProtection);
-
-        // Configure NEKO
-        NEKO.withCombatStats(SharedConfigs.Common.NekoBaseHp,
-                        SharedConfigs.Common.NekoBaseAttack,
-                        SharedConfigs.Common.NekoAttackSpeed,
-                        SharedConfigs.Common.NekoBaseDefense,
-                        SharedConfigs.Common.NekoBaseToughness,
-                        0F,
-                        SharedConfigs.Common.NekoMovementSpeed)
-                .withFeature(LevelFeature.class, new LevelFeature(SharedConfigs.Common.NekoMaxLevel, defaultExpStrategy))
-                .withFeature(CombatLevelFeature.class,
-                        new CombatLevelFeature(
-                                SharedConfigs.Common.NekoBaseHp,
-                                SharedConfigs.Common.NekoBaseAttack,
-                                SharedConfigs.Common.NekoBaseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)

@@ -1,6 +1,7 @@
 package net.heriazone.lovelylib.common.entity;
 
 import net.heriazone.lovelylib.common.entity.enums.*;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalEntityType;
 import net.heriazone.lovelylib.hzlib.api.entity.features.*;
@@ -68,7 +69,7 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
      */
     @Override
     protected void populateTextures(ResourceMap<EntityVariantTexture, ResourceLocation> textures) {
-        String basePath = LovelyIdentifier.TEXTURE_ENTITY_PATH + key + "/";
+        String basePath = LovelyConstant.TEXTURE_ENTITY_PATH + key + "/";
         textures.put(EntityVariantTexture.DEFAULT, LovelyIdentifier.getId(basePath + "default.png"));
     } // populateTextures ()
 
@@ -81,8 +82,8 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
      */
     @Override
     protected void populateModels(ResourceMap<EntityVariantModel, ResourceLocation> models) {
-        models.put(EntityVariantModel.DEFAULT, LovelyIdentifier.getId("geo/" + key + "." + LovelyIdentifier.MOD_DEFAULT + ".geo.json"));
-        models.put(EntityVariantModel.ARMED, LovelyIdentifier.getId("geo/" + key + "." + LovelyIdentifier.MOD_ARMED + ".geo.json"));
+        models.put(EntityVariantModel.DEFAULT, LovelyIdentifier.getId("geo/" + key + "." + LovelyConstant.MOD_DEFAULT + ".geo.json"));
+        models.put(EntityVariantModel.ARMED, LovelyIdentifier.getId("geo/" + key + "." + LovelyConstant.MOD_ARMED + ".geo.json"));
     } // populateModels ()
 
     /**
@@ -94,7 +95,7 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
      */
     @Override
     protected void populateAnimators(ResourceMap<EntityVariantAnimator, ResourceLocation> animators) {
-        animators.put(EntityVariantAnimator.DEFAULT, LovelyIdentifier.getId("animations/" + LovelyIdentifier.ANIM_DEFAULT + ".animation.json"));
+        animators.put(EntityVariantAnimator.DEFAULT, LovelyIdentifier.getId("animations/" + LovelyConstant.ANIM_DEFAULT + ".animation.json"));
     } // populateAnimators ()
 
     /**
@@ -126,7 +127,7 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
      * @return this instance for method chaining
      */
     public NativeEntityType withColorPalette(EntityVariant variant) {
-        String basePath = LovelyIdentifier.TEXTURE_ENTITY_PATH + variant.getName() + "/";
+        String basePath = LovelyConstant.TEXTURE_ENTITY_PATH + variant.getName() + "/";
 
         // Populate all 16 colors using variant_ID naming pattern
         for (EntityTexture color : EntityTexture.values()) {

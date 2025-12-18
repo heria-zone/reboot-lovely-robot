@@ -1,10 +1,12 @@
 package net.heriazone.lovelylib.common.entity.common;
 
-import net.heriazone.lovelylib.api.entity.features.*;
+import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
+import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
+import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
-import net.heriazone.lovelylib.common.entity.enums.*;
+import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.lovelylib.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
 import net.heriazone.lovelylib.hzlib.framework.entity.protection.LevelBasedProtectionStrategy;
@@ -24,7 +26,7 @@ import net.heriazone.lovelylib.hzlib.framework.entity.protection.LevelBasedProte
  * exponential progression for harder leveling. KITSUNE uses custom formula with tail-unlock
  * progression (harder every 30 levels).
  */
-public class LegacyRobotType extends LovelyRobotType {
+public class RebootRobotType extends LovelyRobotType {
 
     // -- Robot Types --
 
