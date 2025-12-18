@@ -1,5 +1,6 @@
 package net.heriazone.lovelylib.utils;
 
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.minecraft.core.component.DataComponents;
@@ -81,34 +82,34 @@ public class NbtProcessingUtils {
         boolean wasValid = true;
 
         // Validate and correct level
-        int level = nbt.getInt(LovelyIdentifier.STAT_LEVEL);
+        int level = nbt.getInt(LovelyConstant.STAT_LEVEL);
         if (level < 0) {
-            nbt.putInt(LovelyIdentifier.STAT_LEVEL, 0);
+            nbt.putInt(LovelyConstant.STAT_LEVEL, 0);
             wasValid = false;
         }
 
         // Validate and correct experience
-        int exp = nbt.getInt(LovelyIdentifier.STAT_EXP);
+        int exp = nbt.getInt(LovelyConstant.STAT_EXP);
         if (exp < 0) {
-            nbt.putInt(LovelyIdentifier.STAT_EXP, 0);
+            nbt.putInt(LovelyConstant.STAT_EXP, 0);
             wasValid = false;
         }
 
         // Validate and correct health
-        if (nbt.contains(LovelyIdentifier.STAT_HP)) {
-            float hp = nbt.getFloat(LovelyIdentifier.STAT_HP);
+        if (nbt.contains(LovelyConstant.STAT_HP)) {
+            float hp = nbt.getFloat(LovelyConstant.STAT_HP);
             if (hp <= 0) {
-                nbt.remove(LovelyIdentifier.STAT_HP); // Remove invalid health, let entity use default
+                nbt.remove(LovelyConstant.STAT_HP); // Remove invalid health, let entity use default
                 wasValid = false;
             }
         }
 
         // Validate and correct protection values
         String[] protectionKeys = {
-                LovelyIdentifier.STAT_FIRE_PROTECTION,
-                LovelyIdentifier.STAT_FALL_PROTECTION,
-                LovelyIdentifier.STAT_BLAST_PROTECTION,
-                LovelyIdentifier.STAT_PROJECTILE_PROTECTION
+                LovelyConstant.STAT_FIRE_PROTECTION,
+                LovelyConstant.STAT_FALL_PROTECTION,
+                LovelyConstant.STAT_BLAST_PROTECTION,
+                LovelyConstant.STAT_PROJECTILE_PROTECTION
         };
 
         for (String key : protectionKeys) {
@@ -120,10 +121,10 @@ public class NbtProcessingUtils {
         }
 
         // Validate and correct color/texture
-        int colorId = nbt.getInt(LovelyIdentifier.STAT_COLOR);
+        int colorId = nbt.getInt(LovelyConstant.STAT_COLOR);
         EntityTexture texture = EntityTexture.byId(colorId);
         if (texture == null) {
-            nbt.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.RANDOM.getId());
+            nbt.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
             wasValid = false;
         }
 

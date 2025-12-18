@@ -6,6 +6,7 @@ import net.heriazone.lovelylib.api.registry.*;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
 import net.heriazone.lovelylib.common.entity.enums.*;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.entity.data.*;
 import net.heriazone.lovelylib.hzlib.api.entity.internal.*;
@@ -1103,7 +1104,7 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
                 1.2F
         );
 
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_OWNER).append(Component.literal(": " + player.getName().getString())), true);
+        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_OWNER).append(Component.literal(": " + player.getName().getString())), true);
 
         // Register robot in owner's registry
         registerRobot();
@@ -1124,19 +1125,19 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
     protected void handleState(ItemStack stack) {
         if (handleFollowState(stack)) return;
         if (handleStandbyState(stack)) return;
-    } // handleState
+    } // handleState ()
 
     protected boolean handleStandbyState(ItemStack stack){
         if(!canInteractWithItems(stack) || getCurrentState() == EntityState.Standby) return false;
         setCurrentState(EntityState.Standby);
-        displayNotification(LovelyIdentifier.MSG_STANDBY, getNotification());
+        displayNotification(LovelyConstant.MSG_STANDBY, getNotification());
         return true;
     } // handleStandbyState ()
 
     protected boolean handleFollowState(ItemStack stack){
         if(!canInteractWithItems(stack) || getCurrentState() == EntityState.Follow) return false;
         setCurrentState(EntityState.Follow);
-        displayNotification(LovelyIdentifier.MSG_FOLLOW, getNotification());
+        displayNotification(LovelyConstant.MSG_FOLLOW, getNotification());
         return true;
     } // handleFollowState ()
 
@@ -1160,14 +1161,14 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
         Component debug = null;
         MutableComponent entityName = !Utils.getEntityCustomName(this).isEmpty() ? Component.literal(Utils.getEntityCustomName(this)) : LovelyIdentifier.getTranslation(Objects.requireNonNull(EntityVariant.byName(nativeEntity.getKey())));
         if(combatMode && getNotification()) {
-            debug = entityName.append(Component.nullToEmpty(": ").copy().append(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_WARY)));
+            debug = entityName.append(Component.nullToEmpty(": ").copy().append(LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_WARY)));
             if(waryTimer < 10) debug = debug.copy().append(": 0" + waryTimer + " ");
             else debug = debug.copy().append(": " + waryTimer + " ");
         }
 
         if(autoHeal && getNotification()) {
-            if(debug != null) debug = debug.copy().append(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_HEAL));
-            else debug = entityName.append(Component.nullToEmpty(": ").copy().append(LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_HEAL)));
+            if(debug != null) debug = debug.copy().append(LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_HEAL));
+            else debug = entityName.append(Component.nullToEmpty(": ").copy().append(LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_HEAL)));
 
             if(autoHealTimer < 10) debug = debug.copy().append(": 0" + autoHealTimer + " ");
             else debug = debug.copy().append(": " + autoHealTimer + " ");

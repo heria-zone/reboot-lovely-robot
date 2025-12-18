@@ -9,6 +9,7 @@ import net.heriazone.lovelylib.api.entity.features.*;
 import net.heriazone.lovelylib.api.registry.*;
 import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.*;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalEntity;
 import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
@@ -1962,7 +1963,7 @@ public abstract class NativeCommands {
         }
 
         // Header with separator
-        ctx.getSource().sendSuccess(() -> LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BAR).withStyle(ChatFormatting.WHITE), false);
+        ctx.getSource().sendSuccess(() -> LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR).withStyle(ChatFormatting.WHITE), false);
 
         // Player name in brackets
         ctx.getSource().sendSuccess(() -> Component.literal("Your Robots:").withStyle(ChatFormatting.WHITE), false);
@@ -2029,7 +2030,7 @@ public abstract class NativeCommands {
             return 0;
         }
 
-        ctx.getSource().sendSuccess(() -> LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BAR).withStyle(ChatFormatting.WHITE), false);
+        ctx.getSource().sendSuccess(() -> LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR).withStyle(ChatFormatting.WHITE), false);
 
         ownerMap.forEach((ownerUuid, robots) -> {
             String ownerName = world.getPlayerByUUID(ownerUuid) != null
@@ -2068,7 +2069,7 @@ public abstract class NativeCommands {
         }
 
         // Header with separator
-        ctx.getSource().sendSuccess(() -> LovelyIdentifier.getMessageTranslation(LovelyIdentifier.MSG_BAR).withStyle(ChatFormatting.WHITE), false);
+        ctx.getSource().sendSuccess(() -> LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR).withStyle(ChatFormatting.WHITE), false);
 
         // Player name in brackets
         ctx.getSource().sendSuccess(() -> Component.literal("Player: (" + player.getName().getString() + ")").withStyle(ChatFormatting.WHITE), false);

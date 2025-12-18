@@ -17,23 +17,23 @@ public class LovelyResource {
     // -- Layer Textures --
 
     /** Overlay texture indicating auto-attack mode is enabled. */
-    public static final ResourceLocation GENERAL_LAYER_AUTO_ATTACK = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "general_auto_attack.png");
+    public static final ResourceLocation GENERAL_LAYER_AUTO_ATTACK = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "general_auto_attack.png");
 
     /** Overlay texture indicating base defense mode is active. */
-    public static final ResourceLocation GENERAL_LAYER_BASE_DEFENSE = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "general_base_defence.png");
+    public static final ResourceLocation GENERAL_LAYER_BASE_DEFENSE = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "general_base_defence.png");
 
     /** Empty/transparent layer texture for conditional rendering. */
-    public static final ResourceLocation GENERAL_LAYER_EMPTY = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "general_empty.png");
+    public static final ResourceLocation GENERAL_LAYER_EMPTY = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "general_empty.png");
 
-    public static final ResourceLocation KITSUNE_LAYER_AUTO_ATTACK = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "kitsune_auto_attack.png");
-    public static final ResourceLocation KITSUNE_LAYER_BASE_DEFENSE = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "kitsune_base_defence.png");
+    public static final ResourceLocation KITSUNE_LAYER_AUTO_ATTACK = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "kitsune_auto_attack.png");
+    public static final ResourceLocation KITSUNE_LAYER_BASE_DEFENSE = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "kitsune_base_defence.png");
 
-    public static final ResourceLocation BUNNY_LAYER_AUTO_ATTACK = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "bunny_auto_attack.png");
-    public static final ResourceLocation BUNNY_LAYER_BASE_DEFENSE = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "bunny_base_defence.png");
-    public static final ResourceLocation BUNNY_LAYER_EMPTY = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "bunny_empty.png");
+    public static final ResourceLocation BUNNY_LAYER_AUTO_ATTACK = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "bunny_auto_attack.png");
+    public static final ResourceLocation BUNNY_LAYER_BASE_DEFENSE = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "bunny_base_defence.png");
+    public static final ResourceLocation BUNNY_LAYER_EMPTY = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "bunny_empty.png");
 
-    public static final ResourceLocation GENERAL_LAYER_COLLAR_DYE = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "general_collar_dye.png");
-    public static final ResourceLocation BUNNY_LAYER_COLLAR_DYE = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "bunny_collar_dye.png");
-    public static final ResourceLocation KITSUNE_LAYER_COLLAR_DYE = LovelyIdentifier.getId(LovelyIdentifier.TEXTURE_LAYER_PATH + "kitsune_collar_dye.png");
+    public static final ResourceLocation GENERAL_LAYER_COLLAR_DYE = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "general_collar_dye.png");
+    public static final ResourceLocation BUNNY_LAYER_COLLAR_DYE = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "bunny_collar_dye.png");
+    public static final ResourceLocation KITSUNE_LAYER_COLLAR_DYE = LovelyIdentifier.getId(LovelyConstant.TEXTURE_LAYER_PATH + "kitsune_collar_dye.png");
 
 } // Class: LovelyResource

@@ -1,6 +1,7 @@
 package net.heriazone.lovelylib.utils;
 
 import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.lovelylib.hzlib.utils.Utils;
@@ -39,31 +40,31 @@ public class EntityDataHelper {
         // Basic entity information
         String customName = Utils.getEntityCustomName(entity);
         if (!customName.isEmpty()) {
-            nbt.putString(LovelyIdentifier.STAT_CUSTOM_NAME, customName);
+            nbt.putString(LovelyConstant.STAT_CUSTOM_NAME, customName);
         }
 
         String ownerName = Utils.getEntityOwnerName(entity);
         if (!ownerName.isEmpty()) {
-            nbt.putString(LovelyIdentifier.STAT_OWNER, ownerName);
+            nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
         }
 
         // Entity type and appearance
-        nbt.putString(LovelyIdentifier.STAT_TYPE, entity.nativeEntity.getKey());
-        nbt.putInt(LovelyIdentifier.STAT_COLOR, entity.getTextureID());
+        nbt.putString(LovelyConstant.STAT_TYPE, entity.nativeEntity.getKey());
+        nbt.putInt(LovelyConstant.STAT_COLOR, entity.getTextureID());
 
         // Level and experience
-        nbt.putInt(LovelyIdentifier.STAT_MAX_LEVEL, entity.getMaxLevel());
-        nbt.putInt(LovelyIdentifier.STAT_LEVEL, entity.getCurrentLevel());
-        nbt.putInt(LovelyIdentifier.STAT_EXP, entity.getExp());
+        nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, entity.getMaxLevel());
+        nbt.putInt(LovelyConstant.STAT_LEVEL, entity.getCurrentLevel());
+        nbt.putInt(LovelyConstant.STAT_EXP, entity.getExp());
 
         // Health information
-        nbt.putFloat(LovelyIdentifier.STAT_HP, entity.getHealth());
+        nbt.putFloat(LovelyConstant.STAT_HP, entity.getHealth());
 
         // Protection enchantments
-        nbt.putInt(LovelyIdentifier.STAT_FIRE_PROTECTION, entity.getFireProtection());
-        nbt.putInt(LovelyIdentifier.STAT_FALL_PROTECTION, entity.getFallProtection());
-        nbt.putInt(LovelyIdentifier.STAT_BLAST_PROTECTION, entity.getBlastProtection());
-        nbt.putInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION, entity.getProjectileProtection());
+        nbt.putInt(LovelyConstant.STAT_FIRE_PROTECTION, entity.getFireProtection());
+        nbt.putInt(LovelyConstant.STAT_FALL_PROTECTION, entity.getFallProtection());
+        nbt.putInt(LovelyConstant.STAT_BLAST_PROTECTION, entity.getBlastProtection());
+        nbt.putInt(LovelyConstant.STAT_PROJECTILE_PROTECTION, entity.getProjectileProtection());
 
         return nbt;
     } // extractEntityData()
@@ -86,38 +87,38 @@ public class EntityDataHelper {
         CompoundTag validatedNbt = nbt.copy();
 
         // Validate texture ID
-        int textureId = validatedNbt.getInt(LovelyIdentifier.STAT_COLOR);
+        int textureId = validatedNbt.getInt(LovelyConstant.STAT_COLOR);
         // Allow RANDOM (16) as a valid texture ID, only fix invalid values
         if (textureId < 0 || (textureId > 15 && textureId != EntityTexture.RANDOM.getId())) {
-            validatedNbt.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.WHITE.getId());
+            validatedNbt.putInt(LovelyConstant.STAT_COLOR, EntityTexture.WHITE.getId());
         }
 
         // Validate level (non-negative)
-        int level = validatedNbt.getInt(LovelyIdentifier.STAT_LEVEL);
+        int level = validatedNbt.getInt(LovelyConstant.STAT_LEVEL);
         if (level < 0) {
-            validatedNbt.putInt(LovelyIdentifier.STAT_LEVEL, 0);
+            validatedNbt.putInt(LovelyConstant.STAT_LEVEL, 0);
         }
 
         // Validate experience (non-negative)
-        int exp = validatedNbt.getInt(LovelyIdentifier.STAT_EXP);
+        int exp = validatedNbt.getInt(LovelyConstant.STAT_EXP);
         if (exp < 0) {
-            validatedNbt.putInt(LovelyIdentifier.STAT_EXP, 0);
+            validatedNbt.putInt(LovelyConstant.STAT_EXP, 0);
         }
 
         // Validate health (positive) - only if health was explicitly set
-        if (validatedNbt.contains(LovelyIdentifier.STAT_HP)) {
-            float health = validatedNbt.getFloat(LovelyIdentifier.STAT_HP);
+        if (validatedNbt.contains(LovelyConstant.STAT_HP)) {
+            float health = validatedNbt.getFloat(LovelyConstant.STAT_HP);
             if (health <= 0) {
-                validatedNbt.putFloat(LovelyIdentifier.STAT_HP, 1.0F);
+                validatedNbt.putFloat(LovelyConstant.STAT_HP, 1.0F);
             }
         }
         // Don't add default health if it wasn't there originally
 
         // Validate protection values (non-negative)
-        validateProtectionValue(validatedNbt, LovelyIdentifier.STAT_FIRE_PROTECTION);
-        validateProtectionValue(validatedNbt, LovelyIdentifier.STAT_FALL_PROTECTION);
-        validateProtectionValue(validatedNbt, LovelyIdentifier.STAT_BLAST_PROTECTION);
-        validateProtectionValue(validatedNbt, LovelyIdentifier.STAT_PROJECTILE_PROTECTION);
+        validateProtectionValue(validatedNbt, LovelyConstant.STAT_FIRE_PROTECTION);
+        validateProtectionValue(validatedNbt, LovelyConstant.STAT_FALL_PROTECTION);
+        validateProtectionValue(validatedNbt, LovelyConstant.STAT_BLAST_PROTECTION);
+        validateProtectionValue(validatedNbt, LovelyConstant.STAT_PROJECTILE_PROTECTION);
 
         return validatedNbt;
     } // validateEntityData()
@@ -158,16 +159,16 @@ public class EntityDataHelper {
         if (nbt1 == null || nbt2 == null) return false;
 
         // Compare significant fields
-        return nbt1.getString(LovelyIdentifier.STAT_CUSTOM_NAME).equals(nbt2.getString(LovelyIdentifier.STAT_CUSTOM_NAME)) &&
-                nbt1.getString(LovelyIdentifier.STAT_TYPE).equals(nbt2.getString(LovelyIdentifier.STAT_TYPE)) &&
-                nbt1.getInt(LovelyIdentifier.STAT_COLOR) == nbt2.getInt(LovelyIdentifier.STAT_COLOR) &&
-                nbt1.getInt(LovelyIdentifier.STAT_LEVEL) == nbt2.getInt(LovelyIdentifier.STAT_LEVEL) &&
-                nbt1.getInt(LovelyIdentifier.STAT_EXP) == nbt2.getInt(LovelyIdentifier.STAT_EXP) &&
-                Math.abs(nbt1.getFloat(LovelyIdentifier.STAT_HP) - nbt2.getFloat(LovelyIdentifier.STAT_HP)) < 0.01F &&
-                nbt1.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION) == nbt2.getInt(LovelyIdentifier.STAT_FIRE_PROTECTION) &&
-                nbt1.getInt(LovelyIdentifier.STAT_FALL_PROTECTION) == nbt2.getInt(LovelyIdentifier.STAT_FALL_PROTECTION) &&
-                nbt1.getInt(LovelyIdentifier.STAT_BLAST_PROTECTION) == nbt2.getInt(LovelyIdentifier.STAT_BLAST_PROTECTION) &&
-                nbt1.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION) == nbt2.getInt(LovelyIdentifier.STAT_PROJECTILE_PROTECTION);
+        return nbt1.getString(LovelyConstant.STAT_CUSTOM_NAME).equals(nbt2.getString(LovelyConstant.STAT_CUSTOM_NAME)) &&
+                nbt1.getString(LovelyConstant.STAT_TYPE).equals(nbt2.getString(LovelyConstant.STAT_TYPE)) &&
+                nbt1.getInt(LovelyConstant.STAT_COLOR) == nbt2.getInt(LovelyConstant.STAT_COLOR) &&
+                nbt1.getInt(LovelyConstant.STAT_LEVEL) == nbt2.getInt(LovelyConstant.STAT_LEVEL) &&
+                nbt1.getInt(LovelyConstant.STAT_EXP) == nbt2.getInt(LovelyConstant.STAT_EXP) &&
+                Math.abs(nbt1.getFloat(LovelyConstant.STAT_HP) - nbt2.getFloat(LovelyConstant.STAT_HP)) < 0.01F &&
+                nbt1.getInt(LovelyConstant.STAT_FIRE_PROTECTION) == nbt2.getInt(LovelyConstant.STAT_FIRE_PROTECTION) &&
+                nbt1.getInt(LovelyConstant.STAT_FALL_PROTECTION) == nbt2.getInt(LovelyConstant.STAT_FALL_PROTECTION) &&
+                nbt1.getInt(LovelyConstant.STAT_BLAST_PROTECTION) == nbt2.getInt(LovelyConstant.STAT_BLAST_PROTECTION) &&
+                nbt1.getInt(LovelyConstant.STAT_PROJECTILE_PROTECTION) == nbt2.getInt(LovelyConstant.STAT_PROJECTILE_PROTECTION);
     } // compareEntityData()
 
     // -- Display Helpers --

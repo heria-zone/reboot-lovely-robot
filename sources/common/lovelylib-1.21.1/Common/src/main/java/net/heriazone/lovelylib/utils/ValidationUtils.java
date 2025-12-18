@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.utils;
 
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.lovelylib.hzlib.framework.utils.*;
 import net.minecraft.nbt.CompoundTag;
@@ -57,32 +57,32 @@ public class ValidationUtils {
         StringBuilder issues = new StringBuilder();
 
         // Validate level
-        int level = nbt.getInt(LovelyIdentifier.STAT_LEVEL);
+        int level = nbt.getInt(LovelyConstant.STAT_LEVEL);
         if (level < 0 || level > MAX_ROBOT_LEVEL) {
             int correctedLevel = MathUtils.clamp(level, 0, MAX_ROBOT_LEVEL);
-            nbt.putInt(LovelyIdentifier.STAT_LEVEL, correctedLevel);
+            nbt.putInt(LovelyConstant.STAT_LEVEL, correctedLevel);
             issues.append("Level corrected from ").append(level).append(" to ").append(correctedLevel).append("; ");
             result.setValid(false);
         }
 
         // Validate experience
-        int exp = nbt.getInt(LovelyIdentifier.STAT_EXP);
+        int exp = nbt.getInt(LovelyConstant.STAT_EXP);
         if (exp < 0 || exp > MAX_EXPERIENCE_VALUE) {
             int correctedExp = MathUtils.clamp(exp, 0, MAX_EXPERIENCE_VALUE);
-            nbt.putInt(LovelyIdentifier.STAT_EXP, correctedExp);
+            nbt.putInt(LovelyConstant.STAT_EXP, correctedExp);
             issues.append("Experience corrected from ").append(exp).append(" to ").append(correctedExp).append("; ");
             result.setValid(false);
         }
 
         // Validate health
-        if (nbt.contains(LovelyIdentifier.STAT_HP)) {
-            float hp = nbt.getFloat(LovelyIdentifier.STAT_HP);
+        if (nbt.contains(LovelyConstant.STAT_HP)) {
+            float hp = nbt.getFloat(LovelyConstant.STAT_HP);
             if (hp <= 0 || hp > MAX_HEALTH_VALUE) {
                 if (hp <= 0) {
-                    nbt.remove(LovelyIdentifier.STAT_HP);
+                    nbt.remove(LovelyConstant.STAT_HP);
                     issues.append("Invalid health removed; ");
                 } else {
-                    nbt.putFloat(LovelyIdentifier.STAT_HP, MAX_HEALTH_VALUE);
+                    nbt.putFloat(LovelyConstant.STAT_HP, MAX_HEALTH_VALUE);
                     issues.append("Health clamped to maximum; ");
                 }
                 result.setValid(false);
@@ -91,10 +91,10 @@ public class ValidationUtils {
 
         // Validate protection values
         String[] protectionKeys = {
-                LovelyIdentifier.STAT_FIRE_PROTECTION,
-                LovelyIdentifier.STAT_FALL_PROTECTION,
-                LovelyIdentifier.STAT_BLAST_PROTECTION,
-                LovelyIdentifier.STAT_PROJECTILE_PROTECTION
+                LovelyConstant.STAT_FIRE_PROTECTION,
+                LovelyConstant.STAT_FALL_PROTECTION,
+                LovelyConstant.STAT_BLAST_PROTECTION,
+                LovelyConstant.STAT_PROJECTILE_PROTECTION
         };
 
         for (String key : protectionKeys) {
@@ -108,32 +108,32 @@ public class ValidationUtils {
         }
 
         // Validate color/texture
-        int colorId = nbt.getInt(LovelyIdentifier.STAT_COLOR);
+        int colorId = nbt.getInt(LovelyConstant.STAT_COLOR);
         EntityTexture texture = EntityTexture.byId(colorId);
         if (texture == null) {
-            nbt.putInt(LovelyIdentifier.STAT_COLOR, EntityTexture.RANDOM.getId());
+            nbt.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
             issues.append("Invalid color ID ").append(colorId).append(" replaced with RANDOM; ");
             result.setValid(false);
         }
 
         // Validate custom name
-        String customName = nbt.getString(LovelyIdentifier.STAT_CUSTOM_NAME);
+        String customName = nbt.getString(LovelyConstant.STAT_CUSTOM_NAME);
         if (!customName.isEmpty() && !StringUtils.isValidRobotName(customName)) {
             String sanitized = StringUtils.sanitize(customName);
             if (StringUtils.isValidRobotName(sanitized)) {
-                nbt.putString(LovelyIdentifier.STAT_CUSTOM_NAME, sanitized);
+                nbt.putString(LovelyConstant.STAT_CUSTOM_NAME, sanitized);
                 issues.append("Custom name sanitized; ");
             } else {
-                nbt.putString(LovelyIdentifier.STAT_CUSTOM_NAME, "");
+                nbt.putString(LovelyConstant.STAT_CUSTOM_NAME, "");
                 issues.append("Invalid custom name removed; ");
             }
             result.setValid(false);
         }
 
         // Validate owner name
-        String ownerName = nbt.getString(LovelyIdentifier.STAT_OWNER);
+        String ownerName = nbt.getString(LovelyConstant.STAT_OWNER);
         if (!ownerName.isEmpty() && !StringUtils.isValidOwnerName(ownerName)) {
-            nbt.putString(LovelyIdentifier.STAT_OWNER, "");
+            nbt.putString(LovelyConstant.STAT_OWNER, "");
             issues.append("Invalid owner name removed; ");
             result.setValid(false);
         }
