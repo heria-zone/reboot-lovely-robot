@@ -1020,9 +1020,6 @@ public abstract class InternalEntity extends TamableAnimal implements IReadWrite
 
     // -- Custom Methods --
 
-    public abstract ItemStack getDropItem();
-    public abstract Item getPickupItem();
-
     protected abstract void handleItemDrop();
 
     protected abstract void handleAttackTarget(@NotNull Entity target);
