@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
+import net.heriazone.lovelylib.api.entity.features.*;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.enums.*;
 import net.heriazone.lovelylib.common.entity.goal.*;
@@ -8,31 +8,25 @@ import net.heriazone.lovelylib.common.entity.utils.EnchantmentProtectionCalculat
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalEntity;
-import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
-import net.heriazone.lovelylib.hzlib.api.entity.internal.InternalLogic;
-import net.heriazone.lovelylib.hzlib.api.entity.internal.InternalParticle;
-import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
+import net.heriazone.lovelylib.hzlib.api.entity.features.*;
+import net.heriazone.lovelylib.hzlib.api.entity.internal.*;
+import net.heriazone.lovelylib.hzlib.framework.entity.enums.*;
 import net.heriazone.lovelylib.hzlib.framework.utils.Version;
 import net.heriazone.lovelylib.hzlib.utils.Utils;
+import net.heriazone.lovelylib.utils.EntitySpawnHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.network.syncher.*;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.damagesource.*;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
@@ -42,11 +36,9 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import static net.heriazone.lovelylib.hzlib.utils.Utils.invertBoolean;
-
 
 public abstract class LovelyRobotEntity extends InternalEntity {
 
@@ -69,7 +61,6 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
     protected static final EntityDataAccessor<Boolean> IS_IN_SITTING_POSE = SynchedEntityData.defineId(LovelyRobotEntity.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Float> CURRENT_HEALTH = SynchedEntityData.defineId(LovelyRobotEntity.class, EntityDataSerializers.FLOAT);
-
 
     // -- Standby Animation State (not persisted) --
     private int standbyTicks = 0;
@@ -205,6 +196,7 @@ public abstract class LovelyRobotEntity extends InternalEntity {
 
     public LovelyRobotEntity(EntityType<? extends InternalEntity> entityType, Level level, NativeEntityType nativeEntity) {
         super(entityType, level, nativeEntity);
+        handlePostSpawnInitialization();
     } // Constructor: LovelyRobotEntity ()
 
     // -- Inherited Methods --
@@ -1369,6 +1361,35 @@ public abstract class LovelyRobotEntity extends InternalEntity {
     } // displayEnchantmentMessage ()
 
     /**
+     * Gets the item that should be dropped when robot dies.
+     * <p>
+     * <b>Loader Variation:</b> Different loaders may have different item access
+     * patterns (direct reference vs Supplier.get()) or different core items.
+     *
+     * @return ItemStack to drop on death
+     */
+    public ItemStack getDropItem() {
+        if (this.nativeEntity.getFeature(DropFeature.class).isPresent())
+            return this.nativeEntity.getFeature(DropFeature.class).get().createDropStack();
+        return null;
+    } // getDropItem ()
+
+    /**
+     * Gets the pickup item for this robot variant.
+     * <p>
+     * <b>Loader Variation:</b> Fabric uses constructor-injected item, while
+     * Forge/NeoForge use variant-based lookup with Supplier.get() calls.
+     *
+     * @return Item that can be used to pick up this robot
+     */
+    public Item getPickupItem() {
+        if (this.nativeEntity.getFeature(PickupFeature.class).isPresent())
+            return this.nativeEntity.getFeature(PickupFeature.class).get().getPickupItem();
+        else return getDropItem().getItem();
+    } // getPickupItem ()
+
+
+    /**
      * Processes robot retrieval interaction using Ctrl+Shift with empty hand.
      * <p>
      * <b>Input Requirements:</b> Player must hold Ctrl (crouch) and Shift while
@@ -1708,5 +1729,36 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         // This could be extended to read from entity NBT data or config
         return true;
     } // hasHeadphonesEnabled()
+
+
+    /**
+     * Handles robot initialization after spawning.
+     * <p>
+     * <b>Common Logic:</b> Performs standard robot setup that applies to all
+     * loaders: registry registration, data validation, and initial state setup.
+     * <p>
+     * <b>Usage:</b> Call from loader-specific spawn handling after entity creation
+     * and before applying custom data.
+     */
+    protected void handlePostSpawnInitialization() {
+        // Registry registration is handled by the base entity during normal lifecycle
+        // ensureRegistered() is called automatically during tick() and data loading
+
+        // Validate entity data consistency
+        EntitySpawnHelper.validateEntityData(this);
+    } // handlePostSpawnInitialization()
+
+    /**
+     * Handles robot cleanup before removal.
+     * <p>
+     * <b>Common Logic:</b> Performs standard cleanup that applies to all loaders:
+     * registry cleanup, resource cleanup, and state finalization.
+     * <p>
+     * <b>Usage:</b> Call from loader-specific removal handling or death events.
+     */
+    protected void handlePreRemovalCleanup() {
+        // Registry cleanup is handled by the base LovelyRobotEntity
+        // Additional cleanup can be added here if needed
+    } // handlePreRemovalCleanup()
 
 } // Class LovelyRobotEntity

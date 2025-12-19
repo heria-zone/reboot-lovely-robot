@@ -13,7 +13,6 @@ import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 
 /**
@@ -30,13 +29,13 @@ public class LegacyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final EntityType<RobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotType.BUNNY, () -> LegacyItems.BUNNY_SPAWN);
-    public static final EntityType<RobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotType.BUNNY2, () -> LegacyItems.BUNNY2_SPAWN);
-    public static final EntityType<RobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotType.DRAGON, () -> LegacyItems.DRAGON_SPAWN);
-    public static final EntityType<RobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotType.HONEY, () -> LegacyItems.HONEY_SPAWN);
-    public static final EntityType<RobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotType.KITSUNE, () -> LegacyItems.KITSUNE_SPAWN);
-    public static final EntityType<RobotEntity> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, LegacyRobotType.NEKO, () -> LegacyItems.NEKO_SPAWN);
-    public static final EntityType<RobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, LegacyRobotType.VANILLA, () -> LegacyItems.VANILLA_SPAWN);
+    public static final EntityType<RobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotType.BUNNY);
+    public static final EntityType<RobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotType.BUNNY2);
+    public static final EntityType<RobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotType.DRAGON);
+    public static final EntityType<RobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotType.HONEY);
+    public static final EntityType<RobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotType.KITSUNE);
+    public static final EntityType<RobotEntity> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, LegacyRobotType.NEKO);
+    public static final EntityType<RobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, LegacyRobotType.VANILLA);
 
     // -- Registration Methods --
 
@@ -48,17 +47,13 @@ public class LegacyEntities {
      *
      * @param name entity variant name
      * @param robotType robot configuration data
-     * @param spawnItemSupplier supplier for the spawn item (lazy evaluation)
      * @return registered entity type
      */
-    private static EntityType<RobotEntity> registerRobot(String name, NativeEntityType robotType, java.util.function.Supplier<Item> spawnItemSupplier) {
+    private static EntityType<RobotEntity> registerRobot(String name, NativeEntityType robotType) {
         return Registry.register(
                 BuiltInRegistries.ENTITY_TYPE,
                 LovelyIdentifier.getId(name),
-                FabricEntityTypeBuilder.create(
-                                MobCategory.CREATURE,
-                                (EntityType<RobotEntity> type, Level world) -> new RobotEntity(type, world, robotType, spawnItemSupplier.get())
-                        )
+                FabricEntityTypeBuilder.create(MobCategory.CREATURE, (EntityType<RobotEntity> type, Level world) -> new RobotEntity(type, world, robotType))
                         .dimensions(EntityDimensions.fixed(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT))
                         .build()
         );
