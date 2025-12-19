@@ -3,7 +3,7 @@ package net.heriazone.lovelylib.utils;
 import net.heriazone.lovelylib.api.registry.OwnerRobotRegistry;
 import net.heriazone.lovelylib.api.registry.RobotRegistryManager;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;

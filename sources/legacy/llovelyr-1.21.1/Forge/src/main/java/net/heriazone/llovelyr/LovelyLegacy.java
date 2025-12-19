@@ -1,8 +1,7 @@
 package net.heriazone.llovelyr;
 
 import net.heriazone.llovelyr.source.*;
-import net.heriazone.lovelylib.common.entity.common.LegacyRobotType;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotType;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
 import net.heriazone.lovelylib.hzlib.api.services.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -44,19 +43,19 @@ public class LovelyLegacy {
         Legacy.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
         Legacy.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
 
-        LovelyConfigs.register(context);
-        LovelyConfigs.onLoadCallback(LegacyRobotType::reloadFromConfig);
+        LegacyConfigs.register(context);
+        LegacyConfigs.onLoadCallback(LegacyRobotType::reloadFromConfig);
 
         //LovelyBlocks.register(events);
-        LovelyItems.register(events);
-        LovelyGroups.register(events);
-        LovelyEntities.register(events);
-        LovelyRecipes.register(events);
-        LovelyCommandArguments.register(events);
+        LegacyItems.register(events);
+        LegacyGroups.register(events);
+        LegacyEntities.register(events);
+        LegacyRecipes.register(events);
+        LegacyCommandArguments.register(events);
 
         events.addListener(this::commonSetup);
         events.addListener(this::clientSetup);
-        LovelyGroups.registerItems(events);
+        LegacyGroups.registerItems(events);
 
         MinecraftForge.EVENT_BUS.register(this);
     } // Constructor: LovelyLegacy ()
@@ -75,7 +74,7 @@ public class LovelyLegacy {
      * @param event the common setup event
      */
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LovelyCommandArguments.register(event);
+        LegacyCommandArguments.register(event);
     } // commonSetup()
 
     /**

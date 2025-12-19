@@ -1,5 +1,7 @@
 package net.heriazone.lovelylib.common.configs;
 
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +27,14 @@ public class EntityConfigSerializer {
      * Format: {maxLevel:200,baseHp:16,baseAttack:2,attackSpeed:1.6,baseDefense:3,baseToughness:0.0,movementSpeed:0.37}
      */
     private static final Pattern SIMPLE_FORMAT_PATTERN = Pattern.compile(
-        "\\{maxLevel:(\\d+),baseHp:(\\d+),baseAttack:(\\d+),attackSpeed:([\\d.]+),baseDefense:(\\d+),baseToughness:([\\d.]+),movementSpeed:([\\d.]+)\\}"
+        "\\{" +
+                LovelyConstant.CONFIG_MAX_LEVEL + ":(\\d+)," +
+                LovelyConstant.CONFIG_BASE_HP + ":(\\d+)," +
+                LovelyConstant.CONFIG_BASE_ATTACK + ":(\\d+)," +
+                LovelyConstant.CONFIG_ATTACK_SPEED + ":([\\d.]+)," +
+                LovelyConstant.CONFIG_BASE_DEFENSE + ":(\\d+)," +
+                LovelyConstant.CONFIG_BASE_TOUGHNESS + ":([\\d.]+)," +
+                LovelyConstant.CONFIG_MOVEMENT_SPEED + ":([\\d.]+)\\}"
     );
 
     // -- Serialization Methods --
@@ -45,7 +54,13 @@ public class EntityConfigSerializer {
         }
         
         return String.format(
-            "{maxLevel:%d,baseHp:%d,baseAttack:%d,attackSpeed:%.2f,baseDefense:%d,baseToughness:%.2f,movementSpeed:%.3f}",
+            "{" + LovelyConstant.CONFIG_MAX_LEVEL + ":%d," +
+                    LovelyConstant.CONFIG_BASE_HP + ":%d," +
+                    LovelyConstant.CONFIG_BASE_ATTACK + ":%d," +
+                    LovelyConstant.CONFIG_ATTACK_SPEED + ":%.2f," +
+                    LovelyConstant.CONFIG_BASE_DEFENSE + ":%d," +
+                    LovelyConstant.CONFIG_BASE_TOUGHNESS + ":%.2f," +
+                    LovelyConstant.CONFIG_MOVEMENT_SPEED + ":%.3f}",
             config.maxLevel, config.baseHp, config.baseAttack, 
             config.attackSpeed, config.baseDefense, config.baseToughness, config.movementSpeed
         );
@@ -61,13 +76,17 @@ public class EntityConfigSerializer {
      * @return JSON string representation
      */
     public static String serializeJson(SharedConfigs.EntityConfigData config) {
-        if (config == null) {
-            return "{}";
-        }
+        if (config == null) return "{}";
         
         // Future implementation for JSON format
         return String.format(
-            "{\"maxLevel\":%d,\"baseHp\":%d,\"baseAttack\":%d,\"attackSpeed\":%.2f,\"baseDefense\":%d,\"baseToughness\":%.2f,\"movementSpeed\":%.3f}",
+            "{\"" + LovelyConstant.CONFIG_MAX_LEVEL + "\":%d,\"" +
+                    LovelyConstant.CONFIG_BASE_HP + "\":%d,\"" +
+                    LovelyConstant.CONFIG_BASE_ATTACK + "\":%d,\"" +
+                    LovelyConstant.CONFIG_ATTACK_SPEED + "\":%.2f,\"" +
+                    LovelyConstant.CONFIG_BASE_DEFENSE + "\":%d,\"" +
+                    LovelyConstant.CONFIG_BASE_TOUGHNESS + "\":%.2f,\"" +
+                    LovelyConstant.CONFIG_MOVEMENT_SPEED + "\":%.3f}",
             config.maxLevel, config.baseHp, config.baseAttack, 
             config.attackSpeed, config.baseDefense, config.baseToughness, config.movementSpeed
         );

@@ -1,7 +1,7 @@
 package net.heriazone.llovelyr;
 
 import net.heriazone.llovelyr.source.*;
-import net.heriazone.lovelylib.common.entity.common.LegacyRobotType;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
 import net.heriazone.lovelylib.hzlib.api.services.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -56,22 +56,22 @@ public class LovelyLegacy {
         Legacy.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
 
         // Register configuration system
-        LovelyConfigs.register(modContainer);
-        LovelyConfigs.onLoadCallback(LegacyRobotType::reloadFromConfig);
+        LegacyConfigs.register(modContainer);
+        LegacyConfigs.onLoadCallback(LegacyRobotType::reloadFromConfig);
 
         // Register deferred registers
-        LovelyItems.register(modEventBus);
-        LovelyGroups.register(modEventBus);
-        LovelyEntities.register(modEventBus);
-        LovelyRecipes.register(modEventBus);
-        LovelyCommandArguments.register(modEventBus);
+        LegacyItems.register(modEventBus);
+        LegacyGroups.register(modEventBus);
+        LegacyEntities.register(modEventBus);
+        LegacyRecipes.register(modEventBus);
+        LegacyCommandArguments.register(modEventBus);
 
         // Register lifecycle event listeners
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
 
         // Register creative tab item population
-        LovelyGroups.registerItems(modEventBus);
+        LegacyGroups.registerItems(modEventBus);
 
         Legacy.LOGGER.info("LovelyLegacy (NeoForge) initialized");
     } // LovelyLegacy()
@@ -91,7 +91,7 @@ public class LovelyLegacy {
      * @param event the common setup event
      */
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LovelyCommandArguments.register(event);
+        LegacyCommandArguments.register(event);
         Legacy.LOGGER.info("Common setup complete");
     } // commonSetup()
 

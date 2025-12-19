@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.hzlib.api.rendering;
 
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 
 /**
  * Composable render layer interface for robot visual effects.

@@ -28,8 +28,8 @@ public class LegacyClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-        LovelyItems.registerModel();
-        LovelyEntities.registerRender();
+        LegacyItems.registerModel();
+        LegacyEntities.registerRender();
     } // onInitializeClient()
 
 } // Class: LegacyClient

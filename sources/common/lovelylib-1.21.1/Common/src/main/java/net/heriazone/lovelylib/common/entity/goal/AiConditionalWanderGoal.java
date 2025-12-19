@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.LivingEntity;

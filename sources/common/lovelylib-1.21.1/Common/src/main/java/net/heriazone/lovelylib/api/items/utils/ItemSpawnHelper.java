@@ -1,10 +1,9 @@
 package net.heriazone.lovelylib.api.items.utils;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.utils.EntityDataHelper;
 import net.heriazone.lovelylib.utils.EntitySpawnHelper;
 import net.minecraft.nbt.CompoundTag;

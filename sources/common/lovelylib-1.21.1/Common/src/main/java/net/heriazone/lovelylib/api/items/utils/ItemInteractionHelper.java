@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.api.items.utils;
 
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;

@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.hzlib.api.entity;
 
 import net.heriazone.lovelylib.api.animation.*;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.cache.object.GeoBone;

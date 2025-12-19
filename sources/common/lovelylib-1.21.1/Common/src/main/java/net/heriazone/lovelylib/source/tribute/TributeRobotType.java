@@ -1,0 +1,175 @@
+package net.heriazone.lovelylib.source.tribute;
+
+import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
+import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
+import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
+import net.heriazone.lovelylib.common.configs.SharedConfigs;
+import net.heriazone.lovelylib.common.entity.LovelyRobotType;
+import net.heriazone.lovelylib.common.entity.NativeEntityType;
+import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
+import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
+import net.heriazone.lovelylib.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
+import net.heriazone.lovelylib.hzlib.framework.entity.protection.LevelBasedProtectionStrategy;
+
+/**
+ * <p>Registry of native robot types with config-driven values.<p>
+ * <p>
+ * <b>Architecture:</b> Provides static registry of robot types initialized from config.
+ * Each robot type is configured with variant-specific stats, max levels, and XP strategies.
+ * Supports runtime config reload for server administration.
+ * <p>
+ * <b>Design Decision:</b> Static initialization ensures robot types are available before
+ * entity registration. Config values are loaded during static initialization and can be
+ * reloaded at runtime via reloadFromConfig().
+ * <p>
+ * <b>XP Strategies:</b> VANILLA and BUNNY2 use default linear progression. DRAGON uses
+ * exponential progression for harder leveling. KITSUNE uses custom formula with tail-unlock
+ * progression (harder every 30 levels).
+ */
+public class TributeRobotType extends LovelyRobotType {
+
+    // -- Robot Types --
+
+    /**
+     * BUNNY robot type - original bunny design.
+     * <p>
+     * <b>Characteristics:</b> Balanced stats, default XP progression.
+     * Configured via BunnyMaxLevel, BunnyBaseHp, etc.
+     */
+    public static final NativeEntityType BUNNY = create(EntityVariant.Bunny);
+
+    /**
+     * BUNNY2 robot type - alternative bunny design.
+     * <p>
+     * <b>Characteristics:</b> Balanced stats, default XP progression.
+     * Configured via Bunny2MaxLevel, Bunny2BaseHp, etc.
+     */
+    public static final NativeEntityType BUNNY2 = create(EntityVariant.Bunny2);
+
+    /**
+     * HONEY robot type - support-oriented companion.
+     * <p>
+     * <b>Characteristics:</b> Lower combat stats, default XP progression.
+     * Configured via HoneyMaxLevel, HoneyBaseHp, etc.
+     */
+    public static final NativeEntityType HONEY = create(EntityVariant.Honey);
+
+    /**
+     * VANILLA robot type - general-purpose companion.
+     * <p>
+     * <b>Characteristics:</b> Balanced stats, default XP progression.
+     * Configured via VanillaMaxLevel, VanillaBaseHp, etc.
+     */
+    public static final NativeEntityType VANILLA = create(EntityVariant.Vanilla);
+
+    // -- Config Reload --
+
+    /**
+     * Reloads robot type configurations from current config values.
+     * <p>
+     * <b>Runtime Reload:</b> Updates maxLevels and combat stats from config without
+     * resetting XP strategies. Allows server admins to adjust balance without restart.
+     * <p>
+     * <b>State Preservation:</b> XP strategies are maintained during reload to preserve
+     * progression curves (exponential for DRAGON, custom formula for KITSUNE).
+     */
+    public static void reloadFromConfig() {
+        var defaultExpStrategy = new LevelFeature.FormulaExpStrategy(level -> SharedConfigs.Common.ExperienceBase + level * SharedConfigs.Common.ExperienceMultiplier);
+        var defaultProtection = new ProtectionFeature(new LevelBasedProtectionStrategy())
+                .withMax(
+                        SharedConfigs.Common.ProtectionLimitFire,
+                        SharedConfigs.Common.ProtectionLimitFall,
+                        SharedConfigs.Common.ProtectionLimitBlast,
+                        SharedConfigs.Common.ProtectionLimitProjectile);
+        var defaultEnchantment = new EnchantmentFeature(new DefaultEnchantmentStrategy())
+                .withLooting(
+                        SharedConfigs.Common.LootEnchantment,
+                        SharedConfigs.Common.MaxLootEnchantment,
+                        SharedConfigs.Common.LootEnchantmentLevel);
+
+        // Configure BUNNY
+        SharedConfigs.EntityConfigData bunny = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY);
+        BUNNY.withCombatStats(bunny.baseHp,
+                        bunny.baseAttack,
+                        bunny.attackSpeed,
+                        bunny.baseDefense,
+                        bunny.baseToughness,
+                        0F,
+                        bunny.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(bunny.maxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                bunny.baseHp,
+                                bunny.baseAttack,
+                                bunny.baseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
+        // Configure BUNNY2
+        SharedConfigs.EntityConfigData bunny2 = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY2);
+        BUNNY2.withCombatStats(bunny2.baseHp,
+                        bunny2.baseAttack,
+                        bunny2.attackSpeed,
+                        bunny2.baseDefense,
+                        bunny2.baseToughness,
+                        0F,
+                        bunny2.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(bunny2.maxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                bunny2.baseHp,
+                                bunny2.baseAttack,
+                                bunny2.baseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
+        // Configure HONEY
+        SharedConfigs.EntityConfigData honey = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_HONEY);
+        HONEY.withCombatStats(honey.baseHp,
+                        honey.baseAttack,
+                        honey.attackSpeed,
+                        honey.baseDefense,
+                        honey.baseToughness,
+                        0F,
+                        honey.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(honey.maxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                honey.baseHp,
+                                honey.baseAttack,
+                                honey.baseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
+        // Configure VANILLA
+        SharedConfigs.EntityConfigData vanilla = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_VANILLA);
+        VANILLA.withCombatStats(vanilla.baseHp,
+                        vanilla.baseAttack,
+                        vanilla.attackSpeed,
+                        vanilla.baseDefense,
+                        vanilla.baseToughness,
+                        0F,
+                        vanilla.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(vanilla.maxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                vanilla.baseHp,
+                                vanilla.baseAttack,
+                                vanilla.baseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
+        //LovelyConstant.LOGGER.info("Robot type configurations reloaded from config");
+    } // reloadFromConfig ()
+
+} // Class: LegacyRobotType

@@ -74,17 +74,21 @@ public class ConfigKeyGenerator {
      * 
      * @return map of configuration keys to their formatted strings
      */
-    public static Map<String, String> generateAllKeys() {
+    public static Map<String, String> generateAllKeys(String[] variants) {
         Map<String, String> keys = new HashMap<>();
-        
-        for (String variant : LovelyConstant.ALL_VARIANTS) {
+
+        for (String variant : variants) {
             for (String configType : ALL_CONFIG_TYPES) {
                 String key = generateKey(variant, configType);
                 keys.put(key, key);
             }
         }
-        
+
         return keys;
+    } // generateAllKeys()
+
+    public static Map<String, String> generateAllKeys() {
+        return generateAllKeys(LovelyConstant.ALL_VARIANTS);
     } // generateAllKeys()
 
     /**
@@ -158,14 +162,10 @@ public class ConfigKeyGenerator {
      * @return true if key format is valid, false otherwise
      */
     public static boolean isValidKey(String key) {
-        if (key == null || key.isEmpty()) {
-            return false;
-        }
+        if (key == null || key.isEmpty()) return false;
         
         String[] parts = key.split("-", 2);
-        if (parts.length != 2) {
-            return false;
-        }
+        if (parts.length != 2) return false;
         
         String variant = parts[0];
         String configType = parts[1];
@@ -179,15 +179,11 @@ public class ConfigKeyGenerator {
             }
         }
         
-        if (!validVariant) {
-            return false;
-        }
+        if (!validVariant) return false;
         
         // Check if config type exists
         for (String validType : ALL_CONFIG_TYPES) {
-            if (validType.equals(configType)) {
-                return true;
-            }
+            if (validType.equals(configType)) return true;
         }
         
         return false;
@@ -200,10 +196,7 @@ public class ConfigKeyGenerator {
      * @return variant name or null if invalid key
      */
     public static String extractVariant(String key) {
-        if (!isValidKey(key)) {
-            return null;
-        }
-        
+        if (!isValidKey(key)) return null;
         return key.split("-", 2)[0];
     } // extractVariant()
 
@@ -214,10 +207,7 @@ public class ConfigKeyGenerator {
      * @return configuration type or null if invalid key
      */
     public static String extractConfigType(String key) {
-        if (!isValidKey(key)) {
-            return null;
-        }
-        
+        if (!isValidKey(key)) return null;
         return key.split("-", 2)[1];
     } // extractConfigType()
 

@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.api.entity.base;
 
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.utils.*;
 import net.minecraft.world.entity.EntityType;

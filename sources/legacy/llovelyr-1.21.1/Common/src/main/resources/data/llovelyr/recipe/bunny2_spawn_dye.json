@@ -1,0 +1,16 @@
+{
+  "type": "lovelylib:lovely_spawn_dye",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "llovelyr:bunny2_spawn"
+    },
+    {
+      "tag": "lovelylib:dyes"
+    }
+  ],
+  "result": {
+    "id": "llovelyr:bunny2_spawn",
+    "count": 1
+  }
+}

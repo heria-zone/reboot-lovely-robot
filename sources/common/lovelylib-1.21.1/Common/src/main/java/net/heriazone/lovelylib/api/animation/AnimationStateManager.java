@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.api.animation;
 
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
 
 /**

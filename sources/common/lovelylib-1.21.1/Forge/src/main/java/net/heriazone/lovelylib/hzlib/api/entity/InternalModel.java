@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.hzlib.api.entity;
 
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animation.AnimationState;

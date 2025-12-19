@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.hzlib.api.rendering;
 
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 
 import java.util.function.Predicate;
 

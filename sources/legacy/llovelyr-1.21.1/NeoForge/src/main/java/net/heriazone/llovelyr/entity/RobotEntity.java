@@ -1,9 +1,9 @@
 package net.heriazone.llovelyr.entity;
 
-import net.heriazone.llovelyr.source.LovelyItems;
+import net.heriazone.llovelyr.source.LegacyItems;
 import net.heriazone.lovelylib.api.entity.base.BaseRobotEntity;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalAnimation;
 import net.minecraft.world.entity.EntityType;
@@ -54,7 +54,7 @@ public class RobotEntity extends BaseRobotEntity implements GeoEntity {
 
     @Override
     public ItemStack getDropItem() {
-        return new ItemStack(LovelyItems.ROBOT_CORE.get(), 1);
+        return new ItemStack(LegacyItems.ROBOT_CORE.get(), 1);
     } // getDropItem ()
 
     @Override
@@ -68,13 +68,13 @@ public class RobotEntity extends BaseRobotEntity implements GeoEntity {
         if (variant == null) return null;
 
         return switch (variant) {
-            case Bunny -> LovelyItems.BUNNY_SPAWN.get();
-            case Bunny2 -> LovelyItems.BUNNY2_SPAWN.get();
-            case Dragon -> LovelyItems.DRAGON_SPAWN.get();
-            case Honey -> LovelyItems.HONEY_SPAWN.get();
-            case Kitsune -> LovelyItems.KITSUNE_SPAWN.get();
-            case Neko -> LovelyItems.NEKO_SPAWN.get();
-            case Vanilla -> LovelyItems.VANILLA_SPAWN.get();
+            case Bunny -> LegacyItems.BUNNY_SPAWN.get();
+            case Bunny2 -> LegacyItems.BUNNY2_SPAWN.get();
+            case Dragon -> LegacyItems.DRAGON_SPAWN.get();
+            case Honey -> LegacyItems.HONEY_SPAWN.get();
+            case Kitsune -> LegacyItems.KITSUNE_SPAWN.get();
+            case Neko -> LegacyItems.NEKO_SPAWN.get();
+            case Vanilla -> LegacyItems.VANILLA_SPAWN.get();
             default -> null;
         };
     } // getPickupItemForVariant()

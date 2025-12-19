@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.api.animation;
 
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 
 /**
  * Provides bone transformation calculations for robot entity animations.

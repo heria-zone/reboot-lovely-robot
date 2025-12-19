@@ -1,7 +1,7 @@
 package net.heriazone.llovelyr.entity;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.shared.LovelyResource;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalLayerRenderer;
 import net.heriazone.lovelylib.hzlib.api.layer.*;

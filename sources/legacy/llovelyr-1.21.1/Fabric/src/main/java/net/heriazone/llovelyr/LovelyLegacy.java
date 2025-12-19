@@ -4,8 +4,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.llovelyr.source.*;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.lovelylib.common.entity.common.LegacyRobotType;
 import net.heriazone.lovelylib.hzlib.api.services.*;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
 
 /**
  * Main mod class for Legacy variant (Fabric loader).
@@ -50,13 +50,13 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
         Legacy.init();
 
         // Register Fabric-specific features here
-        LovelyConfigs.register();
+        LegacyConfigs.register();
         LegacyRobotType.reloadFromConfig();
-        LovelyGroups.register();
-        LovelyItems.register();
-        LovelyEvents.register();
-        LovelyEntities.register();
-        LovelyRecipes.register();
+        LegacyGroups.register();
+        LegacyItems.register();
+        LegacyEvents.register();
+        LegacyEntities.register();
+        LegacyRecipes.register();
         LovelyCommandArguments.register();
 
         //Legacy.LOGGER.info("Lovely Legacy Fabric initialization complete");
@@ -73,8 +73,8 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
         // Initialize client-side functionality
         Legacy.initClient();
 
-        LovelyItems.registerModel();
-        LovelyEntities.registerRender();
+        LegacyItems.registerModel();
+        LegacyEntities.registerRender();
     } // onInitializeClient ()
 
 } // Class: LovelyLegacy

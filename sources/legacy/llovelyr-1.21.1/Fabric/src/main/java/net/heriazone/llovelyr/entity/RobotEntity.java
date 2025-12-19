@@ -1,9 +1,9 @@
 package net.heriazone.llovelyr.entity;
 
-import net.heriazone.llovelyr.source.LovelyItems;
+import net.heriazone.llovelyr.source.LegacyItems;
 import net.heriazone.lovelylib.api.entity.base.BaseRobotEntity;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalAnimation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -56,7 +56,7 @@ public class RobotEntity extends BaseRobotEntity implements GeoEntity {
 
     @Override
     public ItemStack getDropItem() {
-        return new ItemStack(LovelyItems.ROBOT_CORE, 1);
+        return new ItemStack(LegacyItems.ROBOT_CORE, 1);
     } // getDropItem ()
 
     @Override

@@ -7,7 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.heriazone.lovelylib.api.entity.features.*;
 import net.heriazone.lovelylib.api.registry.*;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;

@@ -1,0 +1,16 @@
+{
+  "type": "lovelylib:lovely_spawn_dye",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "llovelyr:dragon_spawn"
+    },
+    {
+      "tag": "lovelylib:dyes"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "llovelyr:dragon_spawn"
+  }
+}

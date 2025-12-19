@@ -1,10 +1,9 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.common.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.LevelReader;
