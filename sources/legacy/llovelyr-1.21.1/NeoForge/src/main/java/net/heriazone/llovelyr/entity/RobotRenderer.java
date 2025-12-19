@@ -26,9 +26,7 @@ public class RobotRenderer extends InternalLayerRenderer<RobotEntity> {
 
     public RobotRenderer(EntityRendererProvider.Context context) {
         super(context, new RobotModel(), SharedConfigs.Client.ShadowRadius);
-
         // Layer stack: Base texture → Health collar → Mode indicators
-        addLayer(new BaseTextureLayer<>(this));
 
         // Health indicator collar (green → yellow → red based on health)
         addLayer(new DynamicColorLayer<>(

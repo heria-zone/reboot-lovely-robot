@@ -1,17 +1,11 @@
 package net.heriazone.llovelyr.entity;
 
-import net.heriazone.llovelyr.source.LegacyItems;
-import net.heriazone.lovelylib.api.entity.base.BaseRobotEntity;
-import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalAnimation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animatable.instance.SingletonAnimatableInstanceCache;
+import software.bernie.geckolib.animatable.*;
+import software.bernie.geckolib.animatable.instance.*;
 import software.bernie.geckolib.animation.AnimatableManager;
 
 /**
@@ -27,21 +21,18 @@ import software.bernie.geckolib.animation.AnimatableManager;
  * <b>Fabric Specifics:</b> Uses constructor-injected pickup item for flexibility
  * and direct item references without Supplier wrappers.
  */
-public class RobotEntity extends BaseRobotEntity implements GeoEntity {
+public class RobotEntity extends LovelyRobotEntity implements GeoEntity {
 
     // -- Variables --
-
-    private final Item pickupItem;
 
     private final AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
     // -- Constructor --
 
-    public RobotEntity(EntityType<? extends LovelyRobotEntity> entityType, Level level, NativeEntityType nativeEntity, Item item) {
+    public RobotEntity(EntityType<? extends LovelyRobotEntity> entityType, Level level, NativeEntityType nativeEntity) {
         super(entityType, level, nativeEntity);
-        pickupItem = item;
         handlePostSpawnInitialization();
-    } // Constructor: RobotEntity()
+    } // Constructor: RobotEntity ()
 
     // -- Inherited Methods --
 
@@ -53,16 +44,5 @@ public class RobotEntity extends BaseRobotEntity implements GeoEntity {
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() { return cache; } // getAnimatableInstanceCache ()
-
-    @Override
-    public ItemStack getDropItem() {
-        return new ItemStack(LegacyItems.ROBOT_CORE, 1);
-    } // getDropItem ()
-
-    @Override
-    public Item getPickupItem() {
-        // Fabric uses constructor-injected pickup item for flexibility
-        return pickupItem != null ? pickupItem : getDropItem().getItem();
-    } // getPickupItem ()
 
 } // Class: RobotEntity

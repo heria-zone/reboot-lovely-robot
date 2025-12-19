@@ -1,6 +1,7 @@
 package net.heriazone.llovelyr.entity;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
+import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.shared.LovelyResource;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalLayerRenderer;
 import net.heriazone.lovelylib.hzlib.api.layer.BaseTextureLayer;
@@ -21,9 +22,7 @@ public class BunnyRenderer extends InternalLayerRenderer<RobotEntity> {
 
     public BunnyRenderer(EntityRendererProvider.Context context) {
         super(context, new RobotModel(), SharedConfigs.Client.ShadowRadius);
-
         // Layer stack: Base texture → Health collar → Bunny-specific mode indicators
-        addLayer(new BaseTextureLayer<>(this));
 
         // Health indicator collar (green → yellow → red based on health)
         addLayer(new DynamicColorLayer<>(
@@ -39,7 +38,7 @@ public class BunnyRenderer extends InternalLayerRenderer<RobotEntity> {
                         LovelyResource.BUNNY_LAYER_BASE_DEFENSE
                 )
                 .addConditionalTexture(
-                        entity -> entity.getAutoAttack(),
+                        LovelyRobotEntity::getAutoAttack,
                         LovelyResource.BUNNY_LAYER_AUTO_ATTACK
                 )
         );

@@ -3,7 +3,9 @@ package net.heriazone.llovelyr;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.llovelyr.source.*;
+import net.heriazone.lovelylib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
+import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.hzlib.api.services.*;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
 
@@ -52,6 +54,7 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
         // Register Fabric-specific features here
         LegacyConfigs.register();
         LegacyRobotType.reloadFromConfig();
+        UpdateNativeRobot();
         LegacyGroups.register();
         LegacyItems.register();
         LegacyEvents.register();
@@ -76,5 +79,44 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
         LegacyItems.registerModel();
         LegacyEntities.registerRender();
     } // onInitializeClient ()
+
+    // TEMP
+
+    public static void UpdateNativeRobot () {
+        // BUNNY
+        LegacyRobotType.BUNNY
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.BUNNY_SPAWN));
+
+        // BUNNY2
+        LegacyRobotType.BUNNY2
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY2_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.BUNNY2_SPAWN));
+
+        // DRAGON
+        LegacyRobotType.DRAGON
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.DRAGON_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.DRAGON_SPAWN));
+
+        // HONEY
+        LegacyRobotType.HONEY
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.HONEY_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.HONEY_SPAWN));
+
+        // KITSUNE
+        LegacyRobotType.KITSUNE
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.KITSUNE_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.KITSUNE_SPAWN));
+
+        // NEKO
+        LegacyRobotType.NEKO
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.NEKO_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.NEKO_SPAWN));
+
+        // VANILLA
+        LegacyRobotType.VANILLA
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.VANILLA_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.VANILLA_SPAWN));
+    } // UpdateNativeRobot ()
 
 } // Class: LovelyLegacy
