@@ -114,14 +114,10 @@ public class HeadphoneOverlayLayer<T extends LovelyRobotEntity> implements IInte
      */
     private static boolean shouldShowHeadphones(LovelyRobotEntity entity) {
         // Check if entity supports headphones
-        if (!entity.supportsHeadphones()) {
-            return false;
-        }
+        if (!entity.supportsHeadphones()) return false;
 
         // Check entity-specific headphone setting
-        if (!entity.hasHeadphonesEnabled()) {
-            return false;
-        }
+        if (!entity.hasHeadphonesEnabled()) return false;
 
         return true;
     } // shouldShowHeadphones()
