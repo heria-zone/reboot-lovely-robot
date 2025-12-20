@@ -1,8 +1,8 @@
 package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
+import net.heriazone.llovelyr.LegacyIdentifier;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.common.items.LovelyCoreItem;
 import net.heriazone.lovelylib.common.items.LovelySpawnItem;
 import net.heriazone.lovelylib.hzlib.api.items.InternalItems;
@@ -50,7 +50,7 @@ public class LegacyItems extends InternalItems {
      * @return the registered item instance
      */
     private static Item registerItem(String name, Rarity rarity, int stack) {
-        return register(LovelyIdentifier.getId(name), new LovelyCoreItem(new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
+        return register(LegacyIdentifier.getId(name), new LovelyCoreItem(new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
     } // registerItem()
 
     /**
@@ -66,7 +66,7 @@ public class LegacyItems extends InternalItems {
      * @return the registered spawn egg instance
      */
     private static Item registerItem(String name, EntityType<? extends Mob> mob, Rarity rarity, int stack) {
-        return register(LovelyIdentifier.getId(name), new LovelySpawnItem(mob, new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
+        return register(LegacyIdentifier.getId(name), new LovelySpawnItem(mob, new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
     } // registerItem()
 
     /**

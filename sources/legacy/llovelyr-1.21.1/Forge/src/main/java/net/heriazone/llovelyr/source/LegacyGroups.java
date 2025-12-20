@@ -1,8 +1,8 @@
 package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
+import net.heriazone.llovelyr.LegacyIdentifier;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.hzlib.api.groups.InternalGroups;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -37,7 +37,7 @@ public class LegacyGroups extends InternalGroups {
     public static final RegistryObject<CreativeModeTab> DEFAULT_TAB = CREATIVE_MODE_TABS.register(
             LovelyConstant.DEFAULT_TAB,
             () -> createTabBuilder(
-                    LovelyIdentifier.getTabTranslation(LovelyConstant.DEFAULT_TAB),
+                    LegacyIdentifier.getTabTranslation(LovelyConstant.DEFAULT_TAB),
                     () -> new ItemStack(LegacyItems.ROBOT_CORE.get())
             )
                     .displayItems((parameters, output) -> {

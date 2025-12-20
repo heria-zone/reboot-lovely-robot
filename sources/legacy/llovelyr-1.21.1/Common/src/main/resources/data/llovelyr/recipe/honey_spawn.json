@@ -1,5 +1,5 @@
 {
-  "type": "lovelylib:lovely_spawn",
+  "type": "llovelyr:lovely_spawn",
   "category": "misc",
   "pattern": [
     "NNN",

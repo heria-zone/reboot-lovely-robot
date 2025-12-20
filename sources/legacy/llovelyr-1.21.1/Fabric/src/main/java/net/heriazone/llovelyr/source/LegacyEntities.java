@@ -3,12 +3,14 @@ package net.heriazone.llovelyr.source;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.heriazone.llovelyr.LegacyIdentifier;
+import net.heriazone.lovelylib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.llovelyr.entity.*;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
+import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -52,7 +54,7 @@ public class LegacyEntities {
     private static EntityType<RobotEntity> registerRobot(String name, NativeEntityType robotType) {
         return Registry.register(
                 BuiltInRegistries.ENTITY_TYPE,
-                LovelyIdentifier.getId(name),
+                LegacyIdentifier.getId(name),
                 FabricEntityTypeBuilder.create(MobCategory.CREATURE, (EntityType<RobotEntity> type, Level world) -> new RobotEntity(type, world, robotType))
                         .dimensions(EntityDimensions.fixed(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT))
                         .build()
@@ -84,5 +86,66 @@ public class LegacyEntities {
         EntityRendererRegistry.register(NEKO, RobotRenderer::new);
         EntityRendererRegistry.register(VANILLA, RobotRenderer::new);
     } // registerRender ()
+
+    /**
+     * Configures robot entity features for all Legacy robot variants.
+     * <p>
+     * <b>Architecture:</b> Attaches behavioral features to each robot type using the
+     * feature composition system. Features are registered after entity types but before
+     * world loading to ensure proper initialization order.
+     * <p>
+     * <b>Feature Configuration:</b> Each robot receives standardized feature set:
+     * - PickupFeature: Enables robot to pick up its corresponding spawn item
+     * - DropFeature: Configures robot to drop robot core on death
+     * <p>
+     * <b>Design Decision:</b> Uniform feature application across all variants maintains
+     * consistent behavior while allowing individual customization through feature parameters.
+     * Spawn items are variant-specific, but drop items are standardized.
+     * <p>
+     * <b>Timing:</b> Must be called after LegacyItems registration completes to ensure
+     * item references are available. Typically invoked during mod initialization phase.
+     * <p>
+     * <b>Fabric Specifics:</b> Uses direct item references rather than deferred registry
+     * objects, as Fabric registration is immediate rather than deferred.
+     * <p>
+     * <b>Thread Safety:</b> Not thread-safe. Should only be called from main thread
+     * during mod initialization.
+     */
+    public static void registerNativeRobotFeature() {
+        // BUNNY
+        LegacyRobotType.BUNNY
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
+
+        // BUNNY2
+        LegacyRobotType.BUNNY2
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY2_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
+
+        // DRAGON
+        LegacyRobotType.DRAGON
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.DRAGON_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
+
+        // HONEY
+        LegacyRobotType.HONEY
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.HONEY_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
+
+        // KITSUNE
+        LegacyRobotType.KITSUNE
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.KITSUNE_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
+
+        // NEKO
+        LegacyRobotType.NEKO
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.NEKO_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
+
+        // VANILLA
+        LegacyRobotType.VANILLA
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.VANILLA_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
+    } // registerNativeRobotFeature ()
 
 } // Class: LegacyEntities

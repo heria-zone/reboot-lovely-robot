@@ -1,12 +1,12 @@
 {
-  "type": "lovelylib:lovely_spawn_dye",
+  "type": "llovelyr:lovely_spawn_dye",
   "category": "misc",
   "ingredients": [
     {
       "item": "llovelyr:bunny_spawn"
     },
     {
-      "tag": "lovelylib:dyes"
+      "tag": "minecraft:dyes"
     }
   ],
   "result": {

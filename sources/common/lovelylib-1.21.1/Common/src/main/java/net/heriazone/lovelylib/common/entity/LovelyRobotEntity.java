@@ -215,10 +215,7 @@ public abstract class LovelyRobotEntity extends InternalEntity {
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, SharedConfigs.Common.AttackChance, true, false,
-                entity -> entity instanceof Monster &&
-                        !(entity instanceof Creeper) &&
-                        !(entity instanceof InternalEntity)));
+        this.targetSelector.addGoal(4, new AiAutoAttackGoal<>(this, Mob.class, SharedConfigs.Common.AttackChance, true, false, entity -> entity instanceof Monster && !(entity instanceof Creeper)));
     } // registerGoals ()
 
     @Override

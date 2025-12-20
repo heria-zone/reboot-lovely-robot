@@ -21,7 +21,7 @@ public class LovelyIdentifier extends InternalIdentifier {
 
     // -- Singleton Instance --
 
-    protected static final LovelyIdentifier INSTANCE = new LovelyIdentifier();
+    protected static LovelyIdentifier INSTANCE = new LovelyIdentifier();
     
     // -- Abstract Method Implementation --
 

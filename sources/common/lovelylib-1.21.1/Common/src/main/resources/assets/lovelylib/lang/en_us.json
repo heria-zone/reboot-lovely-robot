@@ -1,15 +1,4 @@
 {
-  "item.lovelylib.robot_core": "Robot Core",
-  "item.lovelylib.bunny_spawn": "Spawn Bunny",
-  "item.lovelylib.bunny2_spawn": "Spawn Bunny 2.0",
-  "item.lovelylib.dragon_spawn": "Spawn Dragon",
-  "item.lovelylib.honey_spawn": "Spawn Honey",
-  "item.lovelylib.kitsune_spawn": "Spawn Kitsune",
-  "item.lovelylib.neko_spawn": "Spawn Neko",
-  "item.lovelylib.vanilla_spawn": "Spawn Vanilla",
-
-  "tab.lovelylib.lovely_robot": "Lovely Legacy",
-
   "variant.lovelylib.bunny": "Bunny",
   "variant.lovelylib.bunny2": "Bunny 2.0",
   "variant.lovelylib.dragon": "Dragon",
@@ -17,14 +6,6 @@
   "variant.lovelylib.kitsune": "Kitsune",
   "variant.lovelylib.neko": "Neko",
   "variant.lovelylib.vanilla": "Vanilla",
-
-  "entity.lovelylib.bunny": "Bunny",
-  "entity.lovelylib.bunny2": "Bunny 2.0",
-  "entity.lovelylib.dragon": "Dragon",
-  "entity.lovelylib.honey": "Honey",
-  "entity.lovelylib.kitsune": "Kitsune",
-  "entity.lovelylib.neko": "Neko",
-  "entity.lovelylib.vanilla": "Vanilla",
 
   "msg.lovelylib.heal": "Heal",
   "msg.lovelylib.wary": "Wary",

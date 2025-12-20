@@ -78,7 +78,7 @@ public class LovelyLegacy {
     private void commonSetup(final FMLCommonSetupEvent event) {
         LegacyCommandArguments.register(event);
         // Now items are registered and .get() works
-        event.enqueueWork(LovelyLegacy::UpdateNativeRobot);
+        event.enqueueWork(LegacyEntities::registerNativeRobotFeature);
     } // commonSetup()
 
     /**
@@ -92,44 +92,5 @@ public class LovelyLegacy {
      * @param event the client setup event
      */
     private void clientSetup(final FMLClientSetupEvent event) {} // clientSetup()
-
-    // TEMP
-
-    public static void UpdateNativeRobot () {
-        // BUNNY
-        LegacyRobotType.BUNNY
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY_SPAWN.get()))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.BUNNY_SPAWN.get()));
-
-        // BUNNY2
-        LegacyRobotType.BUNNY2
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY2_SPAWN.get()))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.BUNNY2_SPAWN.get()));
-
-        // DRAGON
-        LegacyRobotType.DRAGON
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.DRAGON_SPAWN.get()))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.DRAGON_SPAWN.get()));
-
-        // HONEY
-        LegacyRobotType.HONEY
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.HONEY_SPAWN.get()))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.HONEY_SPAWN.get()));
-
-        // KITSUNE
-        LegacyRobotType.KITSUNE
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.KITSUNE_SPAWN.get()))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.KITSUNE_SPAWN.get()));
-
-        // NEKO
-        LegacyRobotType.NEKO
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.NEKO_SPAWN.get()))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.NEKO_SPAWN.get()));
-
-        // VANILLA
-        LegacyRobotType.VANILLA
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.VANILLA_SPAWN.get()))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.VANILLA_SPAWN.get()));
-    } // UpdateNativeRobot ()
 
 } // Class: LovelyLegacy

@@ -22,7 +22,9 @@ public class BunnyRenderer extends InternalLayerRenderer<RobotEntity> {
 
     public BunnyRenderer(EntityRendererProvider.Context context) {
         super(context, new RobotModel(), SharedConfigs.Client.ShadowRadius);
-        // Layer stack: Base texture → Health collar → Bunny-specific mode indicators
+
+        // Layer stack: Base texture → Health collar → Kitsune-specific headphone overlay
+        addLayer(new BaseTextureLayer<>(this));
 
         // Health indicator collar (green → yellow → red based on health)
         addLayer(new DynamicColorLayer<>(

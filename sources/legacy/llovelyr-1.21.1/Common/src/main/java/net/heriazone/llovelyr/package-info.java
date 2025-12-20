@@ -1,9 +1,9 @@
-/**
+ /**
  * <p>Lovely Legacy - Enhanced reboot with expanded features and 7 robot types.</p>
  * <p>
  * <b>Architecture:</b> Provides an enhanced version of the LovelyRobot mod
  * with modern multiloader support for Fabric, Forge, and NeoForge. Expands beyond
- * the original with 7 robot types (Vanilla, Honey, Bunny, Bunny2, Dragon, Neko, Kitsune)
+ * the original with 7 robot types (Bunny, Bunny2, Dragon, Honey, Kitsune, Neko, Vanilla)
  * and a 16x color palette system.
  * <p>
  * <b>Design Philosophy:</b> Build upon the original mod's foundation while adding
