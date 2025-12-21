@@ -1,7 +1,5 @@
 package net.heriazone.lovelylib.common.configs;
 
-import net.heriazone.lovelylib.common.shared.LovelyConstant;
-
 public class SharedConfigs {
 
     /**

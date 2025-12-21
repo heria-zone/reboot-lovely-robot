@@ -1,24 +1,18 @@
 package net.heriazone.llovelyr.source;
 
-import net.heriazone.llovelyr.Legacy;
-import net.heriazone.llovelyr.LegacyIdentifier;
-import net.heriazone.lovelylib.api.entity.features.PickupFeature;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.llovelyr.entity.*;
-import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.NativeEntityType;
-
-import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
-import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.*;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.heriazone.lovelylib.api.entity.features.PickupFeature;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.lovelylib.common.configs.SharedConfigs;
+import net.heriazone.lovelylib.common.entity.*;
+import net.heriazone.llovelyr.LegacyIdentifier;
+import net.heriazone.llovelyr.Legacy;
+import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
+import net.minecraftforge.registries.*;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.*;
 
 /**
  * Registry for LovelyRobotEntity Legacy entity types (Forge).

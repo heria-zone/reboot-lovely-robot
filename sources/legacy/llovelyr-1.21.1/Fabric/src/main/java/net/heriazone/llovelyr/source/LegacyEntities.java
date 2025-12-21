@@ -1,21 +1,18 @@
 package net.heriazone.llovelyr.source;
 
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.heriazone.llovelyr.LegacyIdentifier;
+import net.fabricmc.fabric.api.object.builder.v1.entity.*;
 import net.heriazone.lovelylib.api.entity.features.PickupFeature;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.llovelyr.entity.*;
-import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
-import net.minecraft.core.Registry;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.lovelylib.common.configs.SharedConfigs;
+import net.heriazone.lovelylib.common.entity.*;
+import net.heriazone.llovelyr.LegacyIdentifier;
+import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.entity.*;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.*;
 
 /**
  * Registry for LovelyRobotEntity Legacy entity types (Fabric).

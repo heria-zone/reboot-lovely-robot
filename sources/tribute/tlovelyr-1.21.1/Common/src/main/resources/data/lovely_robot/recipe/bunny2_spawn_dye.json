@@ -1,0 +1,16 @@
+{
+  "type": "lovely_robot:lovely_spawn_dye",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "lovely_robot:bunny2_spawn"
+    },
+    {
+      "tag": "minecraft:dyes"
+    }
+  ],
+  "result": {
+    "id": "lovely_robot:bunny2_spawn",
+    "count": 1
+  }
+}

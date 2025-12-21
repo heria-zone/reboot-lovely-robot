@@ -2,10 +2,9 @@ package net.heriazone.llovelyr.source;
 
 import com.electronwill.nightconfig.core.Config;
 import net.heriazone.llovelyr.Legacy;
+import net.heriazone.lovelylib.api.configs.*;
 import net.heriazone.lovelylib.common.configs.ConfigBounds;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.configs.ConfigKeyGenerator;
-import net.heriazone.lovelylib.common.configs.ConfigAccessLayer;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -320,6 +319,8 @@ public class LegacyConfigs {
                 .defineInRange("combat-radius-particle-spread", SharedConfigs.Common.CombatRadiusParticleSpread, ConfigBounds.COMBAT_RADIUS_PARTICLE_SPREAD_MIN, ConfigBounds.COMBAT_RADIUS_PARTICLE_SPREAD_MAX);
         BUILDER.pop();
 
+        BUILDER.pop();
+
         BUILDER.push("Animation");
         STANDBY_TO_SIT_DELAY_MIN = BUILDER
                 .comment("Minimum time (in ticks) before idle robots sit down.", "20 ticks = 1 second. In Standby mode, robots eventually sit if nothing is happening.", "Range: 100 to 12000", "Example: [600] (30 seconds)")
@@ -330,14 +331,12 @@ public class LegacyConfigs {
                 .defineInRange("standby-to-sit-delay-max", SharedConfigs.Common.StandbyToSitDelayMax, ConfigBounds.STANDBY_TO_SIT_DELAY_MIN, ConfigBounds.STANDBY_TO_SIT_DELAY_MAX);
         BUILDER.pop();
 
-        BUILDER.pop();
-
         // -- DYNAMIC ENTITY CONFIGURATION GENERATION --
         
         BUILDER.push("Entity");
 
         // Generate configuration entries for all variants dynamically
-        for (String variant : LovelyConstant.ALL_VARIANTS) {
+        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
             BUILDER.push(variant);
 
             // Generate integer configuration entries
@@ -595,7 +594,7 @@ public class LegacyConfigs {
         ConfigAccessLayer.clearCaches();
         
         // Load dynamic entity configurations from Forge config
-        for (String variant : LovelyConstant.ALL_VARIANTS) {
+        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
             // Load integer configurations
             for (String configType : ConfigKeyGenerator.INT_CONFIG_TYPES) {
                 String key = ConfigKeyGenerator.generateKey(variant, configType);
@@ -624,7 +623,7 @@ public class LegacyConfigs {
         
         // Populate LegacyConfigs.Entities HashMap using ConfigAccessLayer
         net.heriazone.lovelylib.source.legacy.LegacyConfigs.Entities.clear();
-        for (String variant : LovelyConstant.ALL_VARIANTS) {
+        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
             SharedConfigs.EntityConfigData entityConfig = ConfigAccessLayer.getEntityConfig(variant);
             net.heriazone.lovelylib.source.legacy.LegacyConfigs.Entities.put(variant, entityConfig);
         }

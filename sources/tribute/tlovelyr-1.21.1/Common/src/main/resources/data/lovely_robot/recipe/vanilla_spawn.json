@@ -1,0 +1,21 @@
+{
+  "type": "lovely_robot:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "III",
+    "ICI",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
+      "item": "lovely_robot:robot_core"
+    }
+  },
+  "result": {
+    "id": "lovely_robot:vanilla_spawn",
+    "count": 1
+  }
+}

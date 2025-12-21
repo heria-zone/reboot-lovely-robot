@@ -1,8 +1,6 @@
 package net.heriazone.llovelyr;
 
 import net.heriazone.llovelyr.source.*;
-import net.heriazone.lovelylib.api.entity.features.PickupFeature;
-import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
 import net.heriazone.lovelylib.hzlib.api.services.*;
 import net.minecraftforge.common.MinecraftForge;

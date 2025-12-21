@@ -1,0 +1,19 @@
+{
+  "item.lovely_robot.robot_core": "Robot Core",
+  "item.lovely_robot.bunny_spawn": "Bunny",
+  "item.lovely_robot.bunny2_spawn": "Bunny2",
+  "item.lovely_robot.honey_spawn": "Honey",
+  "item.lovely_robot.vanilla_spawn": "Vanilla",
+
+  "tab.lovely_robot.lovely_robot": "Lovely Tribute",
+
+  "variant.lovely_robot.bunny": "Bunny",
+  "variant.lovely_robot.bunny2": "Bunny2",
+  "variant.lovely_robot.honey": "Honey",
+  "variant.lovely_robot.vanilla": "Vanilla",
+
+  "entity.lovely_robot.bunny": "Bunny",
+  "entity.lovely_robot.bunny2": "Bunny2",
+  "entity.lovely_robot.honey": "Honey",
+  "entity.lovely_robot.vanilla": "Vanilla"
+}

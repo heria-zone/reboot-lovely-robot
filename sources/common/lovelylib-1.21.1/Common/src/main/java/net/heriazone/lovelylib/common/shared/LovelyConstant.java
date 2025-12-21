@@ -141,9 +141,24 @@ public class LovelyConstant {
 
     // -- Robot Variant Arrays --
 
-    public static final String[] ALL_VARIANTS = {
-        VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_DRAGON,
-        VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
+    public static final String[] ALL_VARIANTS = { // TODO: Remove
+            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_DRAGON,
+            VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
+    };
+
+    public static final String[] TRIBUTE_VARIANTS = {
+            VARIANT_BUNNY, VARIANT_BUNNY2,
+            VARIANT_HONEY, VARIANT_VANILLA
+    };
+
+    public static final String[] LEGACY_VARIANTS = {
+            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_DRAGON,
+            VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
+    };
+
+    public static final String[] REBOOT_VARIANTS = {
+            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_DRAGON,
+            VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
     };
 
 } // Class: LovelyConstant

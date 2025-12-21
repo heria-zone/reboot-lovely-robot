@@ -237,7 +237,7 @@ public class LegacyConfigs {
 
         provider.push("Entity");
 
-        for (String variant : LovelyConstant.ALL_VARIANTS) {
+        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
             provider.push(variant);
             provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
                     .define(variant + "-" + LovelyConstant.CONFIG_MAX_LEVEL, getDefaultMaxLevel(variant));
@@ -340,69 +340,6 @@ public class LegacyConfigs {
         SharedConfigs.Common.StandbyToSitDelayMin = config.getOrDefault("standby-to-sit-delay-min", SharedConfigs.Common.StandbyToSitDelayMin);
         SharedConfigs.Common.StandbyToSitDelayMax = config.getOrDefault("standby-to-sit-delay-max", SharedConfigs.Common.StandbyToSitDelayMax);
 
-        // Entity settings - Bunny
-        //SharedConfigs.Common.BunnyMaxLevel = config.getOrDefault("bunny-max-level", SharedConfigs.Common.BunnyMaxLevel);
-        //SharedConfigs.Common.BunnyAttackSpeed = config.getOrDefault("bunny-attack-speed", SharedConfigs.Common.BunnyAttackSpeed);
-        //SharedConfigs.Common.BunnyMovementSpeed = config.getOrDefault("bunny-movement-speed", SharedConfigs.Common.BunnyMovementSpeed);
-        //SharedConfigs.Common.BunnyBaseToughness = config.getOrDefault("bunny-base-toughness", SharedConfigs.Common.BunnyBaseToughness);
-        //SharedConfigs.Common.BunnyBaseHp = config.getOrDefault("bunny-base-hp", SharedConfigs.Common.BunnyBaseHp);
-        //SharedConfigs.Common.BunnyBaseAttack = config.getOrDefault("bunny-base-attack", SharedConfigs.Common.BunnyBaseAttack);
-        //SharedConfigs.Common.BunnyBaseDefense = config.getOrDefault("bunny-base-defense", SharedConfigs.Common.BunnyBaseDefense);
-
-        // Entity settings - Bunny2
-        //SharedConfigs.Common.Bunny2MaxLevel = config.getOrDefault("bunny2-max-level", SharedConfigs.Common.Bunny2MaxLevel);
-        //SharedConfigs.Common.Bunny2AttackSpeed = config.getOrDefault("bunny2-attack-speed", SharedConfigs.Common.Bunny2AttackSpeed);
-        //SharedConfigs.Common.Bunny2MovementSpeed = config.getOrDefault("bunny2-movement-speed", SharedConfigs.Common.Bunny2MovementSpeed);
-        //SharedConfigs.Common.Bunny2BaseToughness = config.getOrDefault("bunny2-base-toughness", SharedConfigs.Common.Bunny2BaseToughness);
-        //SharedConfigs.Common.Bunny2BaseHp = config.getOrDefault("bunny2-base-hp", SharedConfigs.Common.Bunny2BaseHp);
-        //SharedConfigs.Common.Bunny2BaseAttack = config.getOrDefault("bunny2-base-attack", SharedConfigs.Common.Bunny2BaseAttack);
-        //SharedConfigs.Common.Bunny2BaseDefense = config.getOrDefault("bunny2-base-defense", SharedConfigs.Common.Bunny2BaseDefense);
-
-        // Entity settings - Dragon
-        //SharedConfigs.Common.DragonMaxLevel = config.getOrDefault("dragon-max-level", SharedConfigs.Common.DragonMaxLevel);
-        //SharedConfigs.Common.DragonAttackSpeed = config.getOrDefault("dragon-attack-speed", SharedConfigs.Common.DragonAttackSpeed);
-        //SharedConfigs.Common.DragonMovementSpeed = config.getOrDefault("dragon-movement-speed", SharedConfigs.Common.DragonMovementSpeed);
-        //SharedConfigs.Common.DragonBaseToughness = config.getOrDefault("dragon-base-toughness", SharedConfigs.Common.DragonBaseToughness);
-        //SharedConfigs.Common.DragonBaseHp = config.getOrDefault("dragon-base-hp", SharedConfigs.Common.DragonBaseHp);
-        //SharedConfigs.Common.DragonBaseAttack = config.getOrDefault("dragon-base-attack", SharedConfigs.Common.DragonBaseAttack);
-        //SharedConfigs.Common.DragonBaseDefense = config.getOrDefault("dragon-base-defense", SharedConfigs.Common.DragonBaseDefense);
-
-        // Entity settings - Honey
-        //SharedConfigs.Common.HoneyMaxLevel = config.getOrDefault("honey-max-level", SharedConfigs.Common.HoneyMaxLevel);
-        //SharedConfigs.Common.HoneyAttackSpeed = config.getOrDefault("honey-attack-speed", SharedConfigs.Common.HoneyAttackSpeed);
-        //SharedConfigs.Common.HoneyMovementSpeed = config.getOrDefault("honey-movement-speed", SharedConfigs.Common.HoneyMovementSpeed);
-        //SharedConfigs.Common.HoneyBaseToughness = config.getOrDefault("honey-base-toughness", SharedConfigs.Common.HoneyBaseToughness);
-        //SharedConfigs.Common.HoneyBaseHp = config.getOrDefault("honey-base-hp", SharedConfigs.Common.HoneyBaseHp);
-        //SharedConfigs.Common.HoneyBaseAttack = config.getOrDefault("honey-base-attack", SharedConfigs.Common.HoneyBaseAttack);
-        //SharedConfigs.Common.HoneyBaseDefense = config.getOrDefault("honey-base-defense", SharedConfigs.Common.HoneyBaseDefense);
-
-        // Entity settings - Kitsune
-        //SharedConfigs.Common.KitsuneMaxLevel = config.getOrDefault("kitsune-max-level", SharedConfigs.Common.KitsuneMaxLevel);
-        //SharedConfigs.Common.KitsuneAttackSpeed = config.getOrDefault("kitsune-attack-speed", SharedConfigs.Common.KitsuneAttackSpeed);
-        //SharedConfigs.Common.KitsuneMovementSpeed = config.getOrDefault("kitsune-movement-speed", SharedConfigs.Common.KitsuneMovementSpeed);
-        //SharedConfigs.Common.KitsuneBaseToughness = config.getOrDefault("kitsune-base-toughness", SharedConfigs.Common.KitsuneBaseToughness);
-        //SharedConfigs.Common.KitsuneBaseHp = config.getOrDefault("kitsune-base-hp", SharedConfigs.Common.KitsuneBaseHp);
-        //SharedConfigs.Common.KitsuneBaseAttack = config.getOrDefault("kitsune-base-attack", SharedConfigs.Common.KitsuneBaseAttack);
-        //SharedConfigs.Common.KitsuneBaseDefense = config.getOrDefault("kitsune-base-defense", SharedConfigs.Common.KitsuneBaseDefense);
-
-        // Entity settings - Neko
-        //SharedConfigs.Common.NekoMaxLevel = config.getOrDefault("neko-max-level", SharedConfigs.Common.NekoMaxLevel);
-        //SharedConfigs.Common.NekoAttackSpeed = config.getOrDefault("neko-attack-speed", SharedConfigs.Common.NekoAttackSpeed);
-        //SharedConfigs.Common.NekoMovementSpeed = config.getOrDefault("neko-movement-speed", SharedConfigs.Common.NekoMovementSpeed);
-        //SharedConfigs.Common.NekoBaseToughness = config.getOrDefault("neko-base-toughness", SharedConfigs.Common.NekoBaseToughness);
-        //SharedConfigs.Common.NekoBaseHp = config.getOrDefault("neko-base-hp", SharedConfigs.Common.NekoBaseHp);
-        //SharedConfigs.Common.NekoBaseAttack = config.getOrDefault("neko-base-attack", SharedConfigs.Common.NekoBaseAttack);
-        //SharedConfigs.Common.NekoBaseDefense = config.getOrDefault("neko-base-defense", SharedConfigs.Common.NekoBaseDefense);
-
-        // Entity settings - Vanilla
-        //SharedConfigs.Common.VanillaMaxLevel = config.getOrDefault("vanilla-max-level", SharedConfigs.Common.VanillaMaxLevel);
-        //SharedConfigs.Common.VanillaAttackSpeed = config.getOrDefault("vanilla-attack-speed", SharedConfigs.Common.VanillaAttackSpeed);
-        //SharedConfigs.Common.VanillaMovementSpeed = config.getOrDefault("vanilla-movement-speed", SharedConfigs.Common.VanillaMovementSpeed);
-        //SharedConfigs.Common.VanillaBaseToughness = config.getOrDefault("vanilla-base-toughness", SharedConfigs.Common.VanillaBaseToughness);
-        //SharedConfigs.Common.VanillaBaseHp = config.getOrDefault("vanilla-base-hp", SharedConfigs.Common.VanillaBaseHp);
-        //SharedConfigs.Common.VanillaBaseAttack = config.getOrDefault("vanilla-base-attack", SharedConfigs.Common.VanillaBaseAttack);
-        //SharedConfigs.Common.VanillaBaseDefense = config.getOrDefault("vanilla-base-defense", SharedConfigs.Common.VanillaBaseDefense);
-
         // Load dynamic entity configurations
         loadDynamicEntityConfigs();
     } // loadConfigValues()
@@ -424,7 +361,10 @@ public class LegacyConfigs {
         net.heriazone.lovelylib.source.legacy.LegacyConfigs.Entities = new HashMap<>();
         //LegacyConfigs.Entities.clear();
 
-        for (String variant : LovelyConstant.ALL_VARIANTS) {
+        //Legacy.LOGGER.warn("Loading variants '{}'", (long) LegacyRobotType.TYPES.stream().map(InternalEntityType::getKey).toList().size());
+        //for (String variant : LegacyRobotType.TYPES.stream().map(InternalEntityType::getKey).toList())
+        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
+
             try {
                 // Create and validate EntityConfigData
                 SharedConfigs.EntityConfigData entityConfig = new SharedConfigs.EntityConfigData.Builder()

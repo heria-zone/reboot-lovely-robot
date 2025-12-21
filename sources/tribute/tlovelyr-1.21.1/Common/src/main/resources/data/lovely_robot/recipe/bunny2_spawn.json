@@ -1,0 +1,24 @@
+{
+  "type": "lovely_robot:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "INI",
+    "NCN",
+    "INI"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
+      "item": "lovely_robot:robot_core"
+    }
+  },
+  "result": {
+    "id": "lovely_robot:bunny2_spawn",
+    "count": 1
+  }
+}
