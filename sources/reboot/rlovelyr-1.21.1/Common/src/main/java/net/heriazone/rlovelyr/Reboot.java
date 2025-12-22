@@ -21,7 +21,7 @@ public class Reboot {
     /**
      * Mod identifier used across all loaders and configurations.
      */
-    public static final String MOD_ID = "rlovelyr";
+    public static final String MODID = "rlovelyr";
     
     /**
      * Mod display name for user-facing contexts.

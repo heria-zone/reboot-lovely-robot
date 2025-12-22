@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lovelylib:item/honey/honey00"
+  },
+  "overrides": [
+    { "predicate": {"variant": 0}, "model": "lovelylib:item/honey/honey00" },
+    { "predicate": {"variant": 1}, "model": "lovelylib:item/honey/honey01" },
+    { "predicate": {"variant": 2}, "model": "lovelylib:item/honey/honey02" },
+    { "predicate": {"variant": 3}, "model": "lovelylib:item/honey/honey03" },
+    { "predicate": {"variant": 4}, "model": "lovelylib:item/honey/honey04" },
+    { "predicate": {"variant": 5}, "model": "lovelylib:item/honey/honey05" },
+    { "predicate": {"variant": 6}, "model": "lovelylib:item/honey/honey06" },
+    { "predicate": {"variant": 7}, "model": "lovelylib:item/honey/honey07" },
+    { "predicate": {"variant": 8}, "model": "lovelylib:item/honey/honey08" },
+    { "predicate": {"variant": 9}, "model": "lovelylib:item/honey/honey09" },
+    { "predicate": {"variant": 10}, "model": "lovelylib:item/honey/honey10" },
+    { "predicate": {"variant": 11}, "model": "lovelylib:item/honey/honey11" },
+    { "predicate": {"variant": 12}, "model": "lovelylib:item/honey/honey12" },
+    { "predicate": {"variant": 13}, "model": "lovelylib:item/honey/honey13" },
+    { "predicate": {"variant": 14}, "model": "lovelylib:item/honey/honey14" },
+    { "predicate": {"variant": 15}, "model": "lovelylib:item/honey/honey15" },
+    { "predicate": {"variant": 16}, "model": "lovelylib:item/honey/honey16" }
+  ]
+}

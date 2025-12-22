@@ -1,0 +1,28 @@
+{
+  "item.rlovelyr.robot_core": "Robot Core",
+  "item.rlovelyr.bunny_spawn": "Spawn Bunny",
+  "item.rlovelyr.bunny2_spawn": "Spawn Bunny 2.0",
+  "item.rlovelyr.dragon_spawn": "Spawn Dragon",
+  "item.rlovelyr.honey_spawn": "Spawn Honey",
+  "item.rlovelyr.kitsune_spawn": "Spawn Kitsune",
+  "item.rlovelyr.neko_spawn": "Spawn Neko",
+  "item.rlovelyr.vanilla_spawn": "Spawn Vanilla",
+
+  "tab.rlovelyr.lovely_robot": "Lovely Reboot",
+
+  "variant.rlovelyr.bunny": "Bunny",
+  "variant.rlovelyr.bunny2": "Bunny 2.0",
+  "variant.rlovelyr.dragon": "Dragon",
+  "variant.rlovelyr.honey": "Honey",
+  "variant.rlovelyr.kitsune": "Kitsune",
+  "variant.rlovelyr.neko": "Neko",
+  "variant.rlovelyr.vanilla": "Vanilla",
+
+  "entity.rlovelyr.bunny": "Bunny",
+  "entity.rlovelyr.bunny2": "Bunny 2.0",
+  "entity.rlovelyr.dragon": "Dragon",
+  "entity.rlovelyr.honey": "Honey",
+  "entity.rlovelyr.kitsune": "Kitsune",
+  "entity.rlovelyr.neko": "Neko",
+  "entity.rlovelyr.vanilla": "Vanilla"
+}

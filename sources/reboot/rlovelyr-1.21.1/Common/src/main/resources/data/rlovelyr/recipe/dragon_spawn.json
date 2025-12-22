@@ -1,0 +1,21 @@
+{
+  "type": "rlovelyr:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "III",
+    "ICI",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:diamond"
+    },
+    "C": {
+      "item": "rlovelyr:robot_core"
+    }
+  },
+  "result": {
+    "id": "rlovelyr:dragon_spawn",
+    "count": 1
+  }
+}

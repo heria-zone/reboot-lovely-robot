@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lovelylib:item/bunny/bunny00"
+  },
+  "overrides": [
+    { "predicate": {"variant": 0}, "model": "lovelylib:item/bunny/bunny00" },
+    { "predicate": {"variant": 1}, "model": "lovelylib:item/bunny/bunny01" },
+    { "predicate": {"variant": 2}, "model": "lovelylib:item/bunny/bunny02" },
+    { "predicate": {"variant": 3}, "model": "lovelylib:item/bunny/bunny03" },
+    { "predicate": {"variant": 4}, "model": "lovelylib:item/bunny/bunny04" },
+    { "predicate": {"variant": 5}, "model": "lovelylib:item/bunny/bunny05" },
+    { "predicate": {"variant": 6}, "model": "lovelylib:item/bunny/bunny06" },
+    { "predicate": {"variant": 7}, "model": "lovelylib:item/bunny/bunny07" },
+    { "predicate": {"variant": 8}, "model": "lovelylib:item/bunny/bunny08" },
+    { "predicate": {"variant": 9}, "model": "lovelylib:item/bunny/bunny09" },
+    { "predicate": {"variant": 10}, "model": "lovelylib:item/bunny/bunny10" },
+    { "predicate": {"variant": 11}, "model": "lovelylib:item/bunny/bunny11" },
+    { "predicate": {"variant": 12}, "model": "lovelylib:item/bunny/bunny12" },
+    { "predicate": {"variant": 13}, "model": "lovelylib:item/bunny/bunny13" },
+    { "predicate": {"variant": 14}, "model": "lovelylib:item/bunny/bunny14" },
+    { "predicate": {"variant": 15}, "model": "lovelylib:item/bunny/bunny15" },
+    { "predicate": {"variant": 16}, "model": "lovelylib:item/bunny/bunny16" }
+  ]
+}

@@ -1,25 +1,30 @@
 package net.heriazone.rlovelyr;
 
-import net.minecraftforge.api.distmarker.Dist;
+import net.heriazone.lovelylib.hzlib.api.services.ForgeServices;
+import net.heriazone.lovelylib.hzlib.api.services.Services;
+import net.heriazone.lovelylib.source.reboot.RebootRobotType;
+import net.heriazone.rlovelyr.source.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.*;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
 /**
- * <p>Forge-specific initialization and event handling for the Lovely Reboot mod.</p>
+ * Main mod class for Reboot variant (Forge loader).
  * <p>
- * <b>Forge Integration:</b> Implements Forge's mod loading lifecycle through
- * the @Mod annotation and FML event system. Coordinates with common module
- * while handling Forge-specific registration and event management.
+ * <b>Architecture:</b> Serves as entry point for Forge mod initialization,
+ * coordinating registration of all mod content (blocks, items, entities,
+ * creative tabs) through Forge's event-driven lifecycle.
  * <p>
- * <b>Event Coordination:</b> Manages Forge event bus registration and
- * delegates lifecycle events to appropriate handlers.
+ * <b>Registration Flow:</b> Constructor registers deferred registers with MOD
+ * bus, then lifecycle events (commonSetup, clientSetup) fire for side-specific
+ * initialization. Automatic event subscriber classes handle additional events.
+ * <p>
+ * <b>Mod ID:</b> "rlovelyr" - Must match META-INF/mods.toml entry for Forge
+ * to recognize and load the mod.
  */
-@Mod(Reboot.MOD_ID)
+@Mod(Reboot.MODID)
 public class LovelyReboot {
 
     /**
@@ -28,63 +33,63 @@ public class LovelyReboot {
      * <b>Initialization Strategy:</b> Sets up event listeners and delegates
      * actual initialization to lifecycle events for proper timing.
      */
-    public LovelyReboot() {
-        Reboot.LOGGER.info("Constructing Lovely Reboot for Forge");
-        
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        
-        // Register lifecycle event handlers
-        modEventBus.addListener(this::onCommonSetup);
-        
-        // Register client setup only on client side
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            modEventBus.addListener(this::onClientSetup);
-        }
-        
-        // Register with Forge event bus for game events
+    public LovelyReboot(FMLJavaModLoadingContext context) {
+        IEventBus events = context.getModEventBus();
+
+        // Initialize platform services first
+        Services.setInstance(new ForgeServices());
+
+        // Test platform services functionality
+        Reboot.LOGGER.info("Platform: {}", Services.get().getPlatformName());
+        Reboot.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
+        Reboot.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
+
+        RebootConfigs.register(context);
+        RebootConfigs.onLoadCallback(RebootRobotType::reloadFromConfig);
+
+        //LovelyBlocks.register(events);
+        RebootItems.register(events);
+        RebootGroups.register(events);
+        RebootEntities.register(events);
+        RebootRecipes.register(events);
+        RebootCommandArguments.register(events);
+
+        events.addListener(this::commonSetup);
+        events.addListener(this::clientSetup);
+        RebootGroups.registerItems(events);
+
         MinecraftForge.EVENT_BUS.register(this);
+    } // Constructor: LovelyReboot ()
 
-        Reboot.LOGGER.info("Lovely Reboot Forge constructor complete");
-    }
-
-    /**
-     * Handles Forge common setup lifecycle event.
-     * <p>
-     * <b>Setup Phase:</b> Called during FMLCommonSetupEvent to initialize
-     * mod functionality that's available on both client and server.
-     * 
-     * @param event FML common setup event
-     */
-    private void onCommonSetup(final FMLCommonSetupEvent event) {
-        Reboot.LOGGER.info("Lovely Reboot Forge common setup starting");
-        
-        // Initialize common functionality
-        Reboot.init();
-        
-        // TODO: Forge-specific common setup
-        // Register Forge-specific features here
-
-        Reboot.LOGGER.info("Lovely Reboot Forge common setup complete");
-    }
+    // -- Custom Methods --
 
     /**
-     * Handles Forge client setup lifecycle event.
+     * Common setup phase for both client and server.
      * <p>
-     * <b>Client Setup:</b> Called during FMLClientSetupEvent to initialize
-     * client-only functionality such as rendering and input handling.
-     * 
-     * @param event FML client setup event
+     * <b>Timing:</b> Fires after registry events complete but before world
+     * loading. Suitable for cross-side initialization (network handlers,
+     * data registration).
+     * <p>
+     * <i>Note:</i> Currently placeholder for future common initialization.
+     *
+     * @param event the common setup event
      */
-    private void onClientSetup(final FMLClientSetupEvent event) {
-        Reboot.LOGGER.info("Lovely Reboot Forge client setup starting");
-        
-        // TODO: Initialize client-side functionality
-        // Common.initClient();
-        
-        // TODO: Forge-specific client setup
-        // Register client-side features here
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        RebootCommandArguments.register(event);
+        // Now items are registered and .get() works
+        event.enqueueWork(RebootEntities::registerNativeRobotFeature);
+    } // commonSetup()
 
-        Reboot.LOGGER.info("Lovely Reboot Forge client setup complete");
-    }
+    /**
+     * Client-only setup phase for rendering and client-side systems.
+     * <p>
+     * <b>Timing:</b> Fires after common setup on physical clients only.
+     * Suitable for renderer registration, keybind setup, client-only handlers.
+     * <p>
+     * <i>Note:</i> Currently placeholder for future client initialization.
+     *
+     * @param event the client setup event
+     */
+    private void clientSetup(final FMLClientSetupEvent event) {} // clientSetup()
 
 } // Class: LovelyReboot

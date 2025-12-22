@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lovelylib:item/dragon/dragon00"
+  },
+  "overrides": [
+    { "predicate": {"variant": 0.00}, "model": "lovelylib:item/dragon/dragon00" },
+    { "predicate": {"variant": 0.03}, "model": "lovelylib:item/dragon/dragon01" },
+    { "predicate": {"variant": 0.09}, "model": "lovelylib:item/dragon/dragon02" },
+    { "predicate": {"variant": 0.15}, "model": "lovelylib:item/dragon/dragon03" },
+    { "predicate": {"variant": 0.21}, "model": "lovelylib:item/dragon/dragon04" },
+    { "predicate": {"variant": 0.27}, "model": "lovelylib:item/dragon/dragon05" },
+    { "predicate": {"variant": 0.33}, "model": "lovelylib:item/dragon/dragon06" },
+    { "predicate": {"variant": 0.39}, "model": "lovelylib:item/dragon/dragon07" },
+    { "predicate": {"variant": 0.45}, "model": "lovelylib:item/dragon/dragon08" },
+    { "predicate": {"variant": 0.51}, "model": "lovelylib:item/dragon/dragon09" },
+    { "predicate": {"variant": 0.57}, "model": "lovelylib:item/dragon/dragon10" },
+    { "predicate": {"variant": 0.63}, "model": "lovelylib:item/dragon/dragon11" },
+    { "predicate": {"variant": 0.69}, "model": "lovelylib:item/dragon/dragon12" },
+    { "predicate": {"variant": 0.75}, "model": "lovelylib:item/dragon/dragon13" },
+    { "predicate": {"variant": 0.81}, "model": "lovelylib:item/dragon/dragon14" },
+    { "predicate": {"variant": 0.87}, "model": "lovelylib:item/dragon/dragon15" },
+    { "predicate": {"variant": 0.93}, "model": "lovelylib:item/dragon/dragon16" }
+  ]
+}

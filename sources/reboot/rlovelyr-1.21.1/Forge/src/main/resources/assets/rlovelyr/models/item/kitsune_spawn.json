@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lovelylib:item/kitsune/kitsune00"
+  },
+  "overrides": [
+    { "predicate": {"variant": 0}, "model": "lovelylib:item/kitsune/kitsune00" },
+    { "predicate": {"variant": 1}, "model": "lovelylib:item/kitsune/kitsune01" },
+    { "predicate": {"variant": 2}, "model": "lovelylib:item/kitsune/kitsune02" },
+    { "predicate": {"variant": 3}, "model": "lovelylib:item/kitsune/kitsune03" },
+    { "predicate": {"variant": 4}, "model": "lovelylib:item/kitsune/kitsune04" },
+    { "predicate": {"variant": 5}, "model": "lovelylib:item/kitsune/kitsune05" },
+    { "predicate": {"variant": 6}, "model": "lovelylib:item/kitsune/kitsune06" },
+    { "predicate": {"variant": 7}, "model": "lovelylib:item/kitsune/kitsune07" },
+    { "predicate": {"variant": 8}, "model": "lovelylib:item/kitsune/kitsune08" },
+    { "predicate": {"variant": 9}, "model": "lovelylib:item/kitsune/kitsune09" },
+    { "predicate": {"variant": 10}, "model": "lovelylib:item/kitsune/kitsune10" },
+    { "predicate": {"variant": 11}, "model": "lovelylib:item/kitsune/kitsune11" },
+    { "predicate": {"variant": 12}, "model": "lovelylib:item/kitsune/kitsune12" },
+    { "predicate": {"variant": 13}, "model": "lovelylib:item/kitsune/kitsune13" },
+    { "predicate": {"variant": 14}, "model": "lovelylib:item/kitsune/kitsune14" },
+    { "predicate": {"variant": 15}, "model": "lovelylib:item/kitsune/kitsune15" },
+    { "predicate": {"variant": 16}, "model": "lovelylib:item/kitsune/kitsune16" }
+  ]
+}

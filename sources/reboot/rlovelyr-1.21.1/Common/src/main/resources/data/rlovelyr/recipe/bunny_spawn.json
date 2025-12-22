@@ -1,0 +1,24 @@
+{
+  "type": "rlovelyr:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "NIN",
+    "ICI",
+    "NIN"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
+      "item": "rlovelyr:robot_core"
+    }
+  },
+  "result": {
+    "id": "rlovelyr:bunny_spawn",
+    "count": 1
+  }
+}

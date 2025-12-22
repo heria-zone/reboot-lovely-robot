@@ -1,0 +1,25 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lovelylib:item/neko/neko00"
+  },
+  "overrides": [
+    { "predicate": {"variant": 0}, "model": "lovelylib:item/neko/neko00" },
+    { "predicate": {"variant": 1}, "model": "lovelylib:item/neko/neko01" },
+    { "predicate": {"variant": 2}, "model": "lovelylib:item/neko/neko02" },
+    { "predicate": {"variant": 3}, "model": "lovelylib:item/neko/neko03" },
+    { "predicate": {"variant": 4}, "model": "lovelylib:item/neko/neko04" },
+    { "predicate": {"variant": 5}, "model": "lovelylib:item/neko/neko05" },
+    { "predicate": {"variant": 6}, "model": "lovelylib:item/neko/neko06" },
+    { "predicate": {"variant": 7}, "model": "lovelylib:item/neko/neko07" },
+    { "predicate": {"variant": 8}, "model": "lovelylib:item/neko/neko08" },
+    { "predicate": {"variant": 9}, "model": "lovelylib:item/neko/neko09" },
+    { "predicate": {"variant": 10}, "model": "lovelylib:item/neko/neko10" },
+    { "predicate": {"variant": 11}, "model": "lovelylib:item/neko/neko11" },
+    { "predicate": {"variant": 12}, "model": "lovelylib:item/neko/neko12" },
+    { "predicate": {"variant": 13}, "model": "lovelylib:item/neko/neko13" },
+    { "predicate": {"variant": 14}, "model": "lovelylib:item/neko/neko14" },
+    { "predicate": {"variant": 15}, "model": "lovelylib:item/neko/neko15" },
+    { "predicate": {"variant": 16}, "model": "lovelylib:item/neko/neko16" }
+  ]
+}

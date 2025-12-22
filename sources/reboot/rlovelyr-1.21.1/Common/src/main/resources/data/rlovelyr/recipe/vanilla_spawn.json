@@ -1,0 +1,21 @@
+{
+  "type": "rlovelyr:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "III",
+    "ICI",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
+      "item": "rlovelyr:robot_core"
+    }
+  },
+  "result": {
+    "id": "rlovelyr:vanilla_spawn",
+    "count": 1
+  }
+}

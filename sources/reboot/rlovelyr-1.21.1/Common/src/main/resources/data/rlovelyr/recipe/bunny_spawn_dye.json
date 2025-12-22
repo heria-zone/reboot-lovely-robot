@@ -1,0 +1,16 @@
+{
+  "type": "rlovelyr:lovely_spawn_dye",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "rlovelyr:bunny_spawn"
+    },
+    {
+      "tag": "minecraft:dyes"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "rlovelyr:bunny_spawn"
+  }
+}
