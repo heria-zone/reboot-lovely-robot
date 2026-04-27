@@ -92,3 +92,38 @@ jar {
         ])
     }
 }
+
+processResources {
+    def expandProps = [
+            "group"                        : project.group,
+            "version"                      : project.version,
+            "minecraft_version"            : minecraft_version,
+            "minecraft_version_range"      : minecraft_version_range,
+            "fabric_api_version"           : fabric_api_version,
+            "fabric_loader_version"        : fabric_loader_version,
+            "neoforge_version"             : neoforge_version,
+            "neoforge_version_range"       : neoforge_version_range,
+            "neoforge_loader_version_range": neoforge_loader_version_range,
+            "forge_version"                : forge_version,
+            "forge_version_range"          : forge_version_range,
+            "loader_version_range"         : loader_version_range,
+            "mod_name"                     : mod_name,
+            "mod_version"                  : mod_version,
+            "mod_authors"                  : mod_authors,
+            "mod_id"                       : mod_id,
+            "mod_group"                    : mod_group,
+            "mod_license"                  : mod_license,
+            "mod_description"              : mod_description,
+            "mod_homepage"                 : mod_homepage,
+            "mod_source"                   : mod_source,
+            "mod_issues"                   : mod_issues,
+            "java_version"                 : java_version,
+            "java_level"                   : java_level
+    ]
+
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
+        expand expandProps
+    }
+
+    inputs.properties(expandProps)
+}

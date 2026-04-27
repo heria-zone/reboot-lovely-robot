@@ -121,7 +121,8 @@ processResources {
             "lib_homepage"                 : lib_homepage,
             "lib_source"                   : lib_source,
             "lib_issues"                   : lib_issues,
-            "java_version"                 : java_version
+            "java_version"                 : java_version,
+            "java_level"                   : java_level
     ]
     
     filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
