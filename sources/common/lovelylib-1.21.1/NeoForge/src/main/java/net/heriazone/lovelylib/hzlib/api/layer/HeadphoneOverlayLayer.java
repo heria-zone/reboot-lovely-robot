@@ -29,7 +29,7 @@ public class HeadphoneOverlayLayer<T extends LovelyRobotEntity & GeoEntity> impl
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
-    private final net.heriazone.lovelylib.hzlib.api.rendering.HeadphoneOverlayLayer<T> commonLayer;
+    private final net.heriazone.lovelylib.api.rendering.HeadphoneOverlayLayer<T> commonLayer;
 
     // -- Constructor --
 
@@ -41,7 +41,7 @@ public class HeadphoneOverlayLayer<T extends LovelyRobotEntity & GeoEntity> impl
      */
     public HeadphoneOverlayLayer(GeoRenderer<T> renderer, ResourceLocation defaultTexture) {
         this.renderer = renderer;
-        this.commonLayer = new net.heriazone.lovelylib.hzlib.api.rendering.HeadphoneOverlayLayer<>(defaultTexture.toString());
+        this.commonLayer = new net.heriazone.lovelylib.api.rendering.HeadphoneOverlayLayer<>(defaultTexture.toString());
     } // Constructor: HeadphoneOverlayLayer()
 
     // -- Configuration --

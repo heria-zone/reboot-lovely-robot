@@ -145,7 +145,7 @@ public class InternalAnimation {
      * @param <T> entity type extending LovelyRobotEntity and GeoAnimatable
      */
     public static <T extends LovelyRobotEntity & GeoAnimatable> void tailConfigAnimation(LovelyRobotEntity entity, GeoModel renderer, AnimationState<T> event) {
-        BoneTransformations.TailVisibilityConfig config = BoneTransformations.calculateTailVisibility(entity);
+        TailAnimationUtils.TailVisibilityConfig config = TailAnimationUtils.calculateTailVisibility(entity);
 
         // Apply visibility to base tail
         GeoBone baseTail = renderer.getAnimationProcessor().getBone("tail0");

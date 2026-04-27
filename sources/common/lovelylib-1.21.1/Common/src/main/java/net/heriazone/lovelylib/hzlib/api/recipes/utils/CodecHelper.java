@@ -304,37 +304,6 @@ public class CodecHelper {
     // -- Validation Helpers --
 
     /**
-     * Validates codec-decoded recipe data for consistency.
-     * <p>
-     * <b>Usage:</b> Called after codec deserialization to ensure recipe data
-     * is valid and can be safely used for crafting operations.
-     * <p>
-     * <b>Integration:</b> Uses existing RecipeValidationUtils for consistency
-     * with other recipe validation throughout the system.
-     *
-     * @param group recipe group identifier
-     * @param result recipe result ItemStack
-     * @param ingredients recipe ingredients (can be null for shaped recipes)
-     * @return true if recipe data is valid
-     */
-    public static boolean validateRecipeData(String group, ItemStack result,
-                                             NonNullList<Ingredient> ingredients) {
-        // Validate group
-        if (group == null) return false;
-
-        // Validate result
-        if (!RecipeValidationUtils.isValidRecipeResult(result)) return false;
-
-        // Validate ingredients if provided
-        if (ingredients != null) {
-            var validationResult = RecipeValidationUtils.validateIngredientPattern(ingredients, ingredients.size());
-            if (!validationResult.isValid()) return false;
-        }
-
-        return true;
-    } // validateRecipeData()
-
-    /**
      * Creates error message for codec validation failures.
      * <p>
      * <b>Usage:</b> Provides consistent error messaging for codec-related
