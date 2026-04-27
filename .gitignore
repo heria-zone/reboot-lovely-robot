@@ -45,6 +45,11 @@ forge*changelog.txt
 # Assessment files (local development only)
 /scripts/assessment/
 /docs/assessment/
+/temp/
+/sources/monsters/
+/sources/common/backup/
+
 
 # Archive outsource folder
 /archive/outsource/
+/.docs/
