@@ -1,4 +1,4 @@
-package net.heriazone.lovelylib.hzlib.api.items;
+package net.heriazone.hzlib.api.items;
 
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.component.DataComponents;

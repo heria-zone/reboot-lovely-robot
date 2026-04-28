@@ -1,9 +1,8 @@
-package net.heriazone.lovelylib.hzlib.api.entity;
+package net.heriazone.hzlib.api.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.api.layer.IInternalRenderLayer;
+import net.heriazone.hzlib.api.layer.IInternalRenderLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -41,7 +40,7 @@ import java.util.List;
  *     .addLayer(new DynamicColorLayer<>(this, COLLAR_MASK, DynamicColorLayer::healthGradientColor));
  * }</pre>
  */
-public class InternalLayerRenderer<T extends LovelyRobotEntity & GeoEntity> extends GeoEntityRenderer<T> {
+public class InternalLayerRenderer<T extends InternalEntity & GeoEntity> extends GeoEntityRenderer<T> {
 
     // -- Fields --
 
@@ -150,7 +149,7 @@ public class InternalLayerRenderer<T extends LovelyRobotEntity & GeoEntity> exte
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(T entity) {
-        return entity.getTexture();
+        return entity.getCurrentTexture();
     } // getTextureLocation()
 
 } // Class: InternalLayerRenderer

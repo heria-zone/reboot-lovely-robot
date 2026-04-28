@@ -1,8 +1,8 @@
-package net.heriazone.lovelylib.hzlib.api.layer;
+package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -18,12 +18,12 @@ import software.bernie.geckolib.renderer.GeoRenderer;
  * <b>Design Decision:</b> Preserves GeckoLib integration patterns while extracting
  * layer rendering logic to shared Common implementation.
  */
-public class BaseTextureLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class BaseTextureLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
-    private final net.heriazone.lovelylib.hzlib.api.rendering.BaseTextureLayer commonLayer;
+    private final net.heriazone.hzlib.api.rendering.BaseTextureLayer commonLayer;
 
     // -- Constructor --
 
@@ -34,7 +34,7 @@ public class BaseTextureLayer<T extends LovelyRobotEntity & GeoEntity> implement
      */
     public BaseTextureLayer(GeoRenderer<T> renderer) {
         this.renderer = renderer;
-        this.commonLayer = new net.heriazone.lovelylib.hzlib.api.rendering.BaseTextureLayer<>();
+        this.commonLayer = new net.heriazone.hzlib.api.rendering.BaseTextureLayer<>();
     } // Constructor: BaseTextureLayer()
 
     // -- IInternalRenderLayer Implementation --

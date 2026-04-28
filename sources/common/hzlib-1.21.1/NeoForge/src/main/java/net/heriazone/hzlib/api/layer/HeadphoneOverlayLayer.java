@@ -1,9 +1,9 @@
-package net.heriazone.lovelylib.hzlib.api.layer;
+package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.api.rendering.LayerRenderContext;
+import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.rendering.LayerRenderContext;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -24,12 +24,12 @@ import java.util.function.Predicate;
  * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
  * extracting reusable conditional overlay logic to Common module.
  */
-public class HeadphoneOverlayLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class HeadphoneOverlayLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
-    private final net.heriazone.lovelylib.api.rendering.HeadphoneOverlayLayer<T> commonLayer;
+    private final net.heriazone.hzlib.api.rendering.ConditionalOverlayLayer<T> commonLayer;
 
     // -- Constructor --
 
@@ -41,7 +41,7 @@ public class HeadphoneOverlayLayer<T extends LovelyRobotEntity & GeoEntity> impl
      */
     public HeadphoneOverlayLayer(GeoRenderer<T> renderer, ResourceLocation defaultTexture) {
         this.renderer = renderer;
-        this.commonLayer = new net.heriazone.lovelylib.api.rendering.HeadphoneOverlayLayer<>(defaultTexture.toString());
+        this.commonLayer = new net.heriazone.hzlib.api.rendering.ConditionalOverlayLayer<>(defaultTexture.toString());
     } // Constructor: HeadphoneOverlayLayer()
 
     // -- Configuration --

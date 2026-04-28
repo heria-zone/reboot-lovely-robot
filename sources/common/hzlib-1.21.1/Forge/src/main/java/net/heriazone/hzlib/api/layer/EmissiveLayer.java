@@ -1,8 +1,8 @@
-package net.heriazone.lovelylib.hzlib.api.layer;
+package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -21,12 +21,12 @@ import software.bernie.geckolib.renderer.GeoRenderer;
  * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
  * extracting reusable emissive rendering logic to Common module.
  */
-public class EmissiveLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class EmissiveLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
-    private final net.heriazone.lovelylib.hzlib.api.rendering.EmissiveLayer<T> commonLayer;
+    private final net.heriazone.hzlib.api.rendering.EmissiveLayer<T> commonLayer;
 
     // -- Constructor --
 
@@ -38,7 +38,7 @@ public class EmissiveLayer<T extends LovelyRobotEntity & GeoEntity> implements I
      */
     public EmissiveLayer(GeoRenderer<T> renderer, ResourceLocation emissiveTexture) {
         this.renderer = renderer;
-        this.commonLayer = new net.heriazone.lovelylib.hzlib.api.rendering.EmissiveLayer<>(emissiveTexture);
+        this.commonLayer = new net.heriazone.hzlib.api.rendering.EmissiveLayer<>(emissiveTexture);
     } // Constructor: EmissiveLayer()
 
     // -- IInternalRenderLayer Implementation --

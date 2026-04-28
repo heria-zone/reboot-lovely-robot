@@ -1,4 +1,4 @@
-package net.heriazone.lovelylib.hzlib.api.services;
+package net.heriazone.hzlib.api.services;
 
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;

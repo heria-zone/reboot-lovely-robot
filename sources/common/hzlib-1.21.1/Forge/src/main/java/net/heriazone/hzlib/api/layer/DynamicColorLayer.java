@@ -1,13 +1,13 @@
-package net.heriazone.lovelylib.hzlib.api.layer;
+package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.heriazone.lovelylib.hzlib.api.rendering.LayerRenderContext;
+import net.heriazone.hzlib.api.rendering.LayerRenderContext;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  * <b>Design Decision:</b> Preserves GeckoLib integration patterns while extracting
  * color calculation and rendering logic to shared Common implementation.
  */
-public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class DynamicColorLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
@@ -32,7 +32,7 @@ public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implemen
     private final ResourceLocation maskTexture;
     private final Function<T, Integer> colorProvider;
     private final Predicate<T> renderCondition;
-    private final net.heriazone.lovelylib.hzlib.api.rendering.DynamicColorLayer commonLayer;
+    private final net.heriazone.hzlib.api.rendering.DynamicColorLayer commonLayer;
 
     // -- Constructors --
 
@@ -61,7 +61,7 @@ public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implemen
         this.maskTexture = maskTexture;
         this.colorProvider = colorProvider;
         this.renderCondition = renderCondition;
-        this.commonLayer = new net.heriazone.lovelylib.hzlib.api.rendering.DynamicColorLayer(
+        this.commonLayer = new net.heriazone.hzlib.api.rendering.DynamicColorLayer(
                 maskTexture.toString(),
                 entity -> colorProvider.apply((T) entity),
                 entity -> renderCondition.test((T) entity)
@@ -110,22 +110,22 @@ public class DynamicColorLayer<T extends LovelyRobotEntity & GeoEntity> implemen
     /**
      * Creates health-based color gradient (delegated to Common layer).
      */
-    public static int healthGradientColor(LovelyRobotEntity entity) {
-        return net.heriazone.lovelylib.hzlib.api.rendering.DynamicColorLayer.healthGradientColor(entity);
+    public static int healthGradientColor(InternalEntity entity) {
+        return net.heriazone.hzlib.api.rendering.DynamicColorLayer.healthGradientColor(entity);
     } // healthGradientColor()
 
     /**
      * Creates solid color from RGB values (delegated to Common layer).
      */
     public static int solidColor(int red, int green, int blue) {
-        return net.heriazone.lovelylib.hzlib.api.rendering.DynamicColorLayer.solidColor(red, green, blue);
+        return net.heriazone.hzlib.api.rendering.DynamicColorLayer.solidColor(red, green, blue);
     } // solidColor()
 
     /**
      * Creates color with specified opacity (delegated to Common layer).
      */
     public static int colorWithAlpha(int red, int green, int blue, int alpha) {
-        return net.heriazone.lovelylib.hzlib.api.rendering.DynamicColorLayer.colorWithAlpha(red, green, blue, alpha);
+        return net.heriazone.hzlib.api.rendering.DynamicColorLayer.colorWithAlpha(red, green, blue, alpha);
     } // colorWithAlpha()
 
 } // Class: DynamicColorLayer

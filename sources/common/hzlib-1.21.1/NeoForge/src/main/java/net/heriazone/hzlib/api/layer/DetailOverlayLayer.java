@@ -1,9 +1,9 @@
-package net.heriazone.lovelylib.hzlib.api.layer;
+package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.api.rendering.LayerRenderContext;
+import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.rendering.LayerRenderContext;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -24,12 +24,12 @@ import java.util.function.Predicate;
  * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
  * extracting reusable overlay rendering logic to Common module.
  */
-public class DetailOverlayLayer<T extends LovelyRobotEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class DetailOverlayLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final GeoRenderer<T> renderer;
-    private final net.heriazone.lovelylib.hzlib.api.rendering.BaseTextureLayer<T> commonLayer;
+    private final net.heriazone.hzlib.api.rendering.BaseTextureLayer<T> commonLayer;
 
     // -- Constructors --
 
@@ -41,7 +41,7 @@ public class DetailOverlayLayer<T extends LovelyRobotEntity & GeoEntity> impleme
      */
     public DetailOverlayLayer(GeoRenderer<T> renderer, ResourceLocation overlayTexture) {
         this.renderer = renderer;
-        this.commonLayer = new net.heriazone.lovelylib.hzlib.api.rendering.BaseTextureLayer<>(overlayTexture.toString());
+        this.commonLayer = new net.heriazone.hzlib.api.rendering.BaseTextureLayer<>(overlayTexture.toString());
     } // Constructor: DetailOverlayLayer()
 
     /**
@@ -53,7 +53,7 @@ public class DetailOverlayLayer<T extends LovelyRobotEntity & GeoEntity> impleme
      */
     public DetailOverlayLayer(GeoRenderer<T> renderer, ResourceLocation overlayTexture, Predicate<T> renderCondition) {
         this.renderer = renderer;
-        this.commonLayer = new net.heriazone.lovelylib.hzlib.api.rendering.BaseTextureLayer<>(overlayTexture.toString(), renderCondition);
+        this.commonLayer = new net.heriazone.hzlib.api.rendering.BaseTextureLayer<>(overlayTexture.toString(), renderCondition);
     } // Constructor: DetailOverlayLayer()
 
     // -- IInternalRenderLayer Implementation --

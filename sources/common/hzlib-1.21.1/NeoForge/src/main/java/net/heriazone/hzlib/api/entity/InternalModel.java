@@ -1,6 +1,5 @@
-package net.heriazone.lovelylib.hzlib.api.entity;
+package net.heriazone.hzlib.api.entity;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animation.AnimationState;
@@ -17,7 +16,7 @@ import software.bernie.geckolib.model.GeoModel;
  * hardcoded, allowing dynamic model/texture switching based on entity state (armed
  * vs unarmed, different color variants).
  */
-public abstract class InternalModel<T extends LovelyRobotEntity & GeoEntity> extends GeoModel<T> {
+public abstract class InternalModel<T extends InternalEntity & GeoEntity> extends GeoModel<T> {
 
     // -- Resource Resolution --
 
@@ -46,7 +45,7 @@ public abstract class InternalModel<T extends LovelyRobotEntity & GeoEntity> ext
      */
     @Override
     public ResourceLocation getTextureResource(T animatable) {
-        return animatable.getTexture();
+        return animatable.getCurrentTexture();
     } // getTextureResource()
 
     /**
@@ -61,7 +60,7 @@ public abstract class InternalModel<T extends LovelyRobotEntity & GeoEntity> ext
      */
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
-        return animatable.getAnimator();
+        return animatable.getCurrentAnimator();
     } // getAnimationResource()
 
     // -- Custom Animations --
@@ -82,7 +81,7 @@ public abstract class InternalModel<T extends LovelyRobotEntity & GeoEntity> ext
      */
     @Override
     public void setCustomAnimations(T animatable, long instanceId, AnimationState<T> event) {
-        InternalAnimation.headAnimation(this, event);
+        InternalAnimation.headAnimation(this, event, "head");
     } // setCustomAnimations()
 
 } // Class: InternalModel

@@ -1,4 +1,4 @@
-package net.heriazone.lovelylib.hzlib.api.groups;
+package net.heriazone.hzlib.api.groups;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.MutableComponent;
