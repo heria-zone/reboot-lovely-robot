@@ -38,15 +38,20 @@ repositories {
     // HZ Lib dependency (if needed)
     if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
         flatDir {
-            dirs '../hzlib-1.21.1/build/libs'
+            dirs rootProject.file('libs')
         }
     }
 }
 
 dependencies {
-    // HZ Lib dependency (conditional)
-    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        api "net.heriazone.hzlib:hzlib-common:${minecraft_version}-${hzlib_version}"
+    // HZ Lib dependency (conditional) — uses local JARs from libs/ folder
+    if (project.name == 'Common' && project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibJar = rootProject.file("libs/hzlib-common-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            api name: "hzlib-common-${minecraft_version}-${hzlib_version}", version: ''
+        } else {
+            logger.warn("HZLib Common JAR not found: ${hzLibJar.path}. Add the JAR to the libs/ folder.")
+        }
     }
 }
 

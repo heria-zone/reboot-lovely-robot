@@ -3,6 +3,13 @@ plugins {
     id 'net.neoforged.moddev'
 }
 
+version = lib_version
+group = lib_group
+
+base {
+    archivesName = "${lib_id}-neoforge-${minecraft_version}"
+}
+
 dependencies {
     implementation "net.neoforged:neoforge:${neoforge_version}"
     
@@ -13,7 +20,12 @@ dependencies {
     
     // HZ Lib dependency (NeoForge version, if needed)
     if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        implementation "net.heriazone.hzlib:hzlib-neoforge:${minecraft_version}-${hzlib_version}"
+        def hzLibJar = rootProject.file("libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            implementation name: "hzlib-neoforge-${minecraft_version}-${hzlib_version}", version: ''
+        } else {
+            logger.warn("HZLib NeoForge JAR not found: ${hzLibJar.path}. Add the JAR to the libs/ folder.")
+        }
     }
     
 

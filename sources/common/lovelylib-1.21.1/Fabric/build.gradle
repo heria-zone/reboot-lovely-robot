@@ -3,6 +3,13 @@ plugins {
     id 'fabric-loom'
 }
 
+version = lib_version
+group = lib_group
+
+base {
+    archivesName = "${lib_id}-fabric-${minecraft_version}"
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     mappings loom.officialMojangMappings()
@@ -16,7 +23,12 @@ dependencies {
     
     // HZ Lib dependency (Fabric version, if needed)
     if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        modApi "net.heriazone.hzlib:hzlib-fabric:${minecraft_version}-${hzlib_version}"
+        def hzLibJar = rootProject.file("libs/hzlib-fabric-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            modApi name: "hzlib-fabric-${minecraft_version}-${hzlib_version}", version: ''
+        } else {
+            logger.warn("HZLib Fabric JAR not found: ${hzLibJar.path}. Add the JAR to the libs/ folder.")
+        }
     }
 }
 

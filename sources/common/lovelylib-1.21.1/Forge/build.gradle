@@ -15,6 +15,13 @@ repositories {
         name = 'GeckoLib'
         url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
     }
+
+    // Local library JARs
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        flatDir {
+            dirs rootProject.file('libs')
+        }
+    }
 }
 
 minecraft {
@@ -64,6 +71,16 @@ dependencies {
     // GeckoLib dependency (conditional)
     if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
         implementation fg.deobf("software.bernie.geckolib:${forge_geckolib}")
+    }
+
+    // HZ Lib dependency (Forge version, if needed)
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibJar = rootProject.file("libs/hzlib-forge-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            implementation name: "hzlib-forge-${minecraft_version}-${hzlib_version}", version: ''
+        } else {
+            logger.warn("HZLib Forge JAR not found: ${hzLibJar.path}. Add the JAR to the libs/ folder.")
+        }
     }
 }
 
