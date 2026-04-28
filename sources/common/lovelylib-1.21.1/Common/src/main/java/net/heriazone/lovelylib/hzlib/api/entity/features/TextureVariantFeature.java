@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.hzlib.api.entity.features;
 
-import net.heriazone.lovelylib.hzlib.framework.entity.data.ResourceMap;
+import net.heriazone.hzlib.framework.entity.data.ResourceMap;
 import net.minecraft.resources.ResourceLocation;
 
 /**

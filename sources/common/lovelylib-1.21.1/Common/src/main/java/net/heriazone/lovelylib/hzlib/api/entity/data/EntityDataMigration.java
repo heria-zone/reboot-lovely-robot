@@ -1,7 +1,8 @@
 package net.heriazone.lovelylib.hzlib.api.entity.data;
 
-import net.heriazone.lovelylib.hzlib.framework.entity.data.*;
-import net.heriazone.lovelylib.hzlib.framework.utils.Version;
+import net.heriazone.hzlib.api.entity.data.*;
+import net.heriazone.hzlib.framework.entity.data.*;
+import net.heriazone.hzlib.framework.utils.*;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,12 +32,12 @@ public class EntityDataMigration { // TODO: This needs to migrate the current pu
 
     // -- Legacy Field Names --
 
-    // Combat Stats (from LovelyRobotEntity)
+    // Combat Stats (from RobotEntity)
     private static final String LEGACY_LEVEL = "Level";
     private static final String LEGACY_EXP = "Exp";
     private static final String LEGACY_MAX_LEVEL = "MaxLevel";
 
-    // Protection Stats (from LovelyRobotEntity)
+    // Protection Stats (from RobotEntity)
     private static final String LEGACY_FIRE_PROTECTION = "FireProtection";
     private static final String LEGACY_FALL_PROTECTION = "FallProtection";
     private static final String LEGACY_BLAST_PROTECTION = "BlastProtection";
@@ -118,7 +119,7 @@ public class EntityDataMigration { // TODO: This needs to migrate the current pu
      */
     private static EntityData migrateFromLegacy(@NotNull CompoundTag nbt, @NotNull Version version) {
         // Migrate combat stats
-        CombatStats combatStats = migrateCombatStats(nbt);
+        CombatLevelStats combatStats = migrateCombatStats(nbt);
 
         // Migrate protection stats
         ProtectionStats protectionStats = migrateProtectionStats(nbt);
@@ -128,7 +129,7 @@ public class EntityDataMigration { // TODO: This needs to migrate the current pu
         EnchantmentStats enchantmentStats = new EnchantmentStats();
 
         // Construct EntityData
-        EntityData entityData = new EntityData(combatStats, protectionStats, enchantmentStats);
+        EntityData entityData = new EntityData(combatStats, protectionStats, enchantmentStats, version);
 
         // Validate migrated data
         if (!entityData.validate()) {
@@ -153,8 +154,8 @@ public class EntityDataMigration { // TODO: This needs to migrate the current pu
      * @param nbt legacy NBT compound
      * @return CombatStats with migrated values
      */
-    private static CombatStats migrateCombatStats(@NotNull CompoundTag nbt) {
-        CombatStats stats = new CombatStats();
+    private static CombatLevelStats migrateCombatStats(@NotNull CompoundTag nbt) {
+        CombatLevelStats stats = new CombatLevelStats();
 
         // Migrate level
         if (nbt.contains(LEGACY_LEVEL)) {
