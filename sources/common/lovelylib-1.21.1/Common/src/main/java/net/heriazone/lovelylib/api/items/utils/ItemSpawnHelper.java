@@ -140,16 +140,18 @@ public class ItemSpawnHelper {
             entity.setCustomName(Component.literal(validatedData.getString(LovelyConstant.STAT_CUSTOM_NAME)));
         }
 
-        // Apply texture if not random — supports both new string keys and legacy int IDs
-        String colorKey = validatedData.getString(LovelyConstant.STAT_COLOR);
-        if (!colorKey.isEmpty()) {
-            // New string-keyed system (ADR_012)
-            entity.setTextureVariant(colorKey);
+        // Apply texture — read STAT_COLOR_VARIANT (string, new system) first,
+        // then fall back to STAT_COLOR (int, legacy/item-model system)
+        String colorVariant = validatedData.getString(LovelyConstant.STAT_COLOR_VARIANT);
+        if (!colorVariant.isEmpty()) {
+            entity.setTextureVariant(colorVariant);
         } else {
-            // Legacy int-based fallback — migrate on load
+            // Legacy int-based fallback — build entity-specific key
             int textureId = validatedData.getInt(LovelyConstant.STAT_COLOR);
             if (textureId != EntityTexture.RANDOM.getId()) {
-                entity.setTextureVariant(EntityTexture.byId(textureId).Name());
+                String colorName = EntityTexture.byId(textureId).Name();
+                String entityKey = entity.nativeEntity != null ? entity.nativeEntity.getKey() : "";
+                entity.setTextureVariant(entityKey.isEmpty() ? colorName : entityKey + "_" + colorName);
             }
         }
         // If neither is set, keep the entity's already-selected random texture

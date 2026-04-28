@@ -3,6 +3,7 @@ package net.heriazone.lovelylib.api.items.utils;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
+import net.heriazone.lovelylib.utils.EntityDataHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -61,7 +62,7 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addNameTooltip(List<Component> tooltip, CompoundTag nbt) {
-        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyConstant.STAT_COLOR));
+        EntityTexture texture = EntityTexture.byId(EntityDataHelper.getTextureId(nbt));
         String customName = nbt.getString(LovelyConstant.STAT_CUSTOM_NAME);
         ChatFormatting textFormatting = getFormattingColor(texture);
 
@@ -109,7 +110,7 @@ public class TooltipUtils {
      * @param nbt the NBT compound containing robot data
      */
     public static void addColorTooltip(List<Component> tooltip, CompoundTag nbt) {
-        EntityTexture texture = EntityTexture.byId(nbt.getInt(LovelyConstant.STAT_COLOR));
+        EntityTexture texture = EntityTexture.byId(EntityDataHelper.getTextureId(nbt));
         ChatFormatting textFormatting = getFormattingColor(texture);
 
         tooltip.add(LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_DESIGN)

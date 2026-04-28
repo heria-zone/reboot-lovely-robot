@@ -115,11 +115,16 @@ public class ItemValidationHelper {
     public static CompoundTag sanitizeNBTData(CompoundTag nbtData) {
         CompoundTag sanitized = nbtData.copy();
 
-        // Validate and clamp color/texture ID
-        int colorId = sanitized.getInt(LovelyConstant.STAT_COLOR);
-        if (colorId < 0 || colorId > EntityTexture.values().length - 1) {
-            sanitized.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
+        // Validate color — skip if already stored as a valid string key (new system, ADR_012)
+        String colorKey = sanitized.getString(LovelyConstant.STAT_COLOR);
+        if (colorKey.isEmpty()) {
+            // Legacy int path — validate the int value
+            int colorId = sanitized.getInt(LovelyConstant.STAT_COLOR);
+            if (colorId < 0 || colorId > EntityTexture.values().length - 1) {
+                sanitized.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
+            }
         }
+        // If colorKey is non-empty, it's a valid string tag — leave it untouched
 
         // Validate and clamp level (0-100 reasonable range)
         int level = sanitized.getInt(LovelyConstant.STAT_LEVEL);

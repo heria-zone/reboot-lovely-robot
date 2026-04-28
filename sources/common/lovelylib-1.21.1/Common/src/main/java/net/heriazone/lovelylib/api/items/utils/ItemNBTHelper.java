@@ -3,6 +3,7 @@ package net.heriazone.lovelylib.api.items.utils;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
+import net.heriazone.lovelylib.utils.EntityDataHelper;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
@@ -65,15 +66,15 @@ public class ItemNBTHelper {
     /**
      * Gets robot color/texture ID from item data.
      * <p>
-     * <b>Default Handling:</b> Returns RANDOM texture ID if not specified,
-     * ensuring valid texture selection for entity spawning.
+     * <b>Dual format:</b> Reads STAT_COLOR as string key first (new system, ADR_012),
+     * falls back to int ID (legacy system). Returns RANDOM texture ID if not specified.
      *
      * @param itemStack the ItemStack to read from
-     * @return texture ID, or RANDOM if not specified
+     * @return texture ID (0–15), or RANDOM if not specified
      */
     public static int getRobotColor(ItemStack itemStack) {
         CompoundTag data = getCustomDataSafe(itemStack);
-        return data.getInt(LovelyConstant.STAT_COLOR);
+        return EntityDataHelper.getTextureId(data);
     } // getRobotColor()
 
     /**
