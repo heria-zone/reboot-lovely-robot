@@ -8,116 +8,153 @@ import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.model.data.EntityModelData;
 
+import java.util.Random;
+
 /**
- * Manages GeckoLib animation controllers and bone transformations for robot entities.
+ * Manages GeckoLib animation controllers and bone transformations for HZLib entities.
  * <p>
- * <b>Architecture:</b> Thin wrapper around common animation system that handles
- * GeckoLib-specific integration. Delegates business logic to common animation
- * classes while maintaining GeckoLib boundary.
+ * <b>Architecture:</b> Profile-aware animation system. Reads {@link AnimationProfile}
+ * from the entity's current animator variant via {@link AnimationStateManager}, resolves
+ * animation names via pool selection, then constructs GeckoLib {@code RawAnimation} objects.
  * <p>
- * <b>Design Decision:</b> Wrapper pattern preserves existing API while enabling
- * code reuse through common animation system. Animation logic is shared across
- * all loaders.
+ * <b>GeckoLib boundary:</b> This class is the only place in HZLib where GeckoLib types
+ * are constructed. {@link AnimationProfile} and {@link AnimationPool} return plain
+ * {@code String} names only — no GeckoLib dependency in Common.
+ * <p>
+ * <b>Fallback behavior:</b> If no profile is attached to the entity type, the controller
+ * falls back to the standard animation name constants in {@link AnimationStateManager}.
  */
 public class InternalAnimation {
 
-    // -- Animation Definitions (GeckoLib-specific) --
+    // -- Shared Random --
 
-    /** Neutral standing animation, loops indefinitely. */
-    public static final RawAnimation IDLE = RawAnimation.begin().thenLoop(AnimationDefinitions.IDLE);
-
-    /** Walking animation, loops while entity is moving. */
-    public static final RawAnimation WALK = RawAnimation.begin().thenLoop(AnimationDefinitions.WALK);
-
-    /** Standing idle animation in standby mode, loops indefinitely. */
-    public static final RawAnimation REST = RawAnimation.begin().thenLoop(AnimationDefinitions.REST);
-
-    /** Sitting/resting animation in standby mode after delay, loops indefinitely. */
-    public static final RawAnimation SIT = RawAnimation.begin().thenLoop(AnimationDefinitions.SIT);
-
-    /** Attack swing animation, plays once per attack. */
-    public static final RawAnimation ATTACK_SWING = RawAnimation.begin().then(AnimationDefinitions.ATTACK, Animation.LoopType.PLAY_ONCE);
+    private static final Random RANDOM = new Random();
 
     // -- Animation Controllers --
 
     /**
-     * Creates attack animation controller for combat actions.
+     * Creates the attack animation controller for combat actions.
      * <p>
-     * <b>Architecture:</b> Delegates logic to common AnimationStateManager while
-     * handling GeckoLib-specific animation creation and playback.
+     * <b>Profile integration:</b> Reads the attack pool from the entity's
+     * {@link AnimationProfile}. {@link LoopBehavior#INTERRUPT} maps to
+     * {@link Animation.LoopType#PLAY_ONCE} (overrides other controllers).
      *
-     * @param animatable robot entity to animate
-     * @param <T> entity type extending LovelyRobotEntity and GeoAnimatable
+     * @param animatable entity to animate
+     * @param <T>        entity type extending InternalEntity and GeoAnimatable
      * @return configured attack animation controller
      */
     public static <T extends InternalEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
-        return new AnimationController<>(animatable, AnimationDefinitions.ControllerType.ATTACK.getName(),
-                AnimationDefinitions.Config.ATTACK_TRANSITION_TICKS, state -> {
-            if (AnimationStateManager.shouldPlayAttackAnimation(animatable)) {
-                return state.setAndContinue(ATTACK_SWING);
+        return new AnimationController<>(animatable,
+                AnimationStateManager.ControllerType.ATTACK.getName(),
+                AnimationStateManager.ATTACK_TRANSITION_TICKS, state -> {
+            if (!AnimationStateManager.shouldPlayAttackAnimation(animatable)) {
+                state.getController().forceAnimationReset();
+                return PlayState.STOP;
             }
-            state.getController().forceAnimationReset();
-            return PlayState.STOP;
+
+            AnimationProfile profile = AnimationStateManager.resolveProfilePublic(animatable);
+            String animName;
+            LoopBehavior loopBehavior;
+
+            if (profile != null && AnimationProfile.isUsable(profile.getAttack())) {
+                animName     = profile.getAttack().selectNext(RANDOM);
+                loopBehavior = profile.getAttack().getLoopBehavior(animName != null ? animName : AnimationStateManager.ATTACK);
+            } else {
+                animName     = AnimationStateManager.ATTACK;
+                loopBehavior = LoopBehavior.INTERRUPT;
+            }
+
+            if (animName == null) animName = AnimationStateManager.ATTACK;
+            return state.setAndContinue(buildRawAnimation(animName, loopBehavior));
         });
-    } // attackAnimation()
+    } // attackAnimation ()
 
     /**
-     * Creates locomotion animation controller for movement and idle states.
+     * Creates the locomotion animation controller for movement and idle states.
      * <p>
-     * <b>Architecture:</b> Delegates logic to common AnimationStateManager while
-     * handling GeckoLib-specific animation creation and playback. Supports vehicle
-     * sitting animation when robot is riding boats, minecarts, or other entities.
+     * <b>Priority chain:</b> vehicle riding → moving → standby sitting → standby resting → idle.
+     * Delegates state resolution to {@link AnimationStateManager#getLocomotionAnimation}.
      *
-     * @param entity robot entity to animate
-     * @param <T> entity type extending InternalEntity and GeoAnimatable
+     * @param entity entity to animate
+     * @param <T>    entity type extending InternalEntity and GeoAnimatable
      * @return configured locomotion animation controller
      */
     public static <T extends InternalEntity & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
-        return new AnimationController<T>(entity, AnimationDefinitions.ControllerType.LOCOMOTION.getName(),
-                AnimationDefinitions.Config.LOCOMOTION_TRANSITION_TICKS, state -> {
-            // Check movement with both animation state and velocity
+        return new AnimationController<>(entity,
+                AnimationStateManager.ControllerType.LOCOMOTION.getName(),
+                AnimationStateManager.LOCOMOTION_TRANSITION_TICKS, state -> {
             boolean isMoving = state.isMoving();
-
-            String animationName = AnimationStateManager.getLocomotionAnimation(entity, isMoving);
-            RawAnimation animation = getAnimationByName(animationName);
-
-            return state.setAndContinue(animation);
+            String animName = AnimationStateManager.getLocomotionAnimation(entity, isMoving);
+            LoopBehavior loop = resolveLoopBehavior(entity, animName);
+            return state.setAndContinue(buildRawAnimation(animName, loop));
         });
-    } // locomotionAnimation()
-
-    // -- Animation Mapping --
+    } // locomotionAnimation ()
 
     /**
-     * Maps animation name to GeckoLib RawAnimation.
+     * Creates an optional base pose animation controller that runs as a parallel layer.
+     * <p>
+     * <b>Usage:</b> Call only for entities whose profile declares a
+     * {@code basePoseAnimation} (e.g., Gourdragora default). Most entities do not need this.
      *
-     * @param animationName animation name from common system
-     * @return corresponding RawAnimation
+     * @param animatable   entity to animate
+     * @param basePoseName animation name for the base pose layer
+     * @param <T>          entity type
+     * @return base pose animation controller
      */
-    private static RawAnimation getAnimationByName(String animationName) {
-        if (animationName.equals(AnimationDefinitions.WALK)) {
-            return WALK;
-        } else if (animationName.equals(AnimationDefinitions.REST)) {
-            return REST;
-        } else if (animationName.equals(AnimationDefinitions.SIT)) {
-            return SIT;
-        } else if (animationName.equals(AnimationDefinitions.ATTACK)) {
-            return ATTACK_SWING;
-        } else {
-            return IDLE;
+    public static <T extends GeoAnimatable> AnimationController<T> basePoseAnimation(T animatable, String basePoseName) {
+        RawAnimation basePose = RawAnimation.begin().thenLoop(basePoseName);
+        return new AnimationController<>(animatable, "BasePose", 0, state ->
+                state.setAndContinue(basePose));
+    } // basePoseAnimation ()
+
+    // -- RawAnimation Construction --
+
+    /**
+     * Constructs a GeckoLib {@link RawAnimation} from an animation name and loop behavior.
+     *
+     * @param animationName animation name
+     * @param loopBehavior  desired loop behavior
+     * @return constructed RawAnimation
+     */
+    private static RawAnimation buildRawAnimation(String animationName, LoopBehavior loopBehavior) {
+        return switch (loopBehavior) {
+            case PLAY_ONCE, INTERRUPT -> RawAnimation.begin().then(animationName, Animation.LoopType.PLAY_ONCE);
+            case HOLD_LAST_FRAME      -> RawAnimation.begin().then(animationName, Animation.LoopType.HOLD_ON_LAST_FRAME);
+            default                   -> RawAnimation.begin().thenLoop(animationName);
+        };
+    } // buildRawAnimation ()
+
+    /**
+     * Resolves the loop behavior for the given animation name from the entity's profile.
+     * Returns {@link LoopBehavior#LOOP} as the default for locomotion animations.
+     */
+    private static LoopBehavior resolveLoopBehavior(InternalEntity entity, String animName) {
+        AnimationProfile profile = AnimationStateManager.resolveProfilePublic(entity);
+        if (profile == null) return LoopBehavior.LOOP;
+
+        AnimationPool[] slots = {
+            profile.getIdle(), profile.getWalk(), profile.getRest(),
+            profile.getSit(), profile.getRide(), profile.getAttack(), profile.getHurt()
+        };
+        for (AnimationPool pool : slots) {
+            if (pool != null && !pool.isEmpty()) {
+                if (pool.getAnimations().stream().anyMatch(a -> a.getName().equals(animName))) {
+                    return pool.getLoopBehavior(animName);
+                }
+            }
         }
-    } // getAnimationByName()
+        return LoopBehavior.LOOP;
+    } // resolveLoopBehavior ()
 
     // -- Bone Transformations --
 
     /**
      * Applies head rotation to follow entity's look direction.
-     * <p>
-     * <b>Architecture:</b> Delegates calculation to common BoneTransformations
-     * while handling GeckoLib-specific bone manipulation.
      *
      * @param renderer GeoModel containing bone hierarchy
-     * @param event animation state with entity data
-     * @param <T> entity type extending InternalEntity and GeoAnimatable
+     * @param event    animation state with entity data
+     * @param headBone name of the head bone in the model
+     * @param <T>      entity type extending InternalEntity and GeoAnimatable
      */
     public static <T extends InternalEntity & GeoAnimatable> void headAnimation(GeoModel renderer, AnimationState<T> event, String headBone) {
         GeoBone head = renderer.getAnimationProcessor().getBone(headBone);
@@ -130,6 +167,6 @@ public class InternalAnimation {
             head.setRotX(rotation[0]);
             head.setRotY(rotation[1]);
         }
-    } // headAnimation()
+    } // headAnimation ()
 
 } // Class: InternalAnimation
