@@ -3,8 +3,8 @@ package net.heriazone.rlovelyr;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.lovelylib.hzlib.api.services.FabricServices;
-import net.heriazone.lovelylib.hzlib.api.services.Services;
+import net.heriazone.hzlib.api.services.FabricServices;
+import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.reboot.RebootRobotType;
 import net.heriazone.rlovelyr.source.*;
 

@@ -4,11 +4,12 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.heriazone.rlovelyr.RebootIdentifier;
-import net.heriazone.lovelylib.api.entity.features.PickupFeature;
+import net.heriazone.hzlib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
+import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.reboot.RebootRobotType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -18,7 +19,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
 
 /**
- * Registry for LovelyRobotEntity Reboot entity types (Fabric).
+ * Registry for Native Robot Reboot entity types (Fabric).
  * <p>
  * <b>Architecture:</b> Manages entity type registration, attribute creation,
  * and renderer binding for all robot variants in the Reboot mod.
@@ -31,31 +32,31 @@ public class RebootEntities {
 
     // -- Entity Type Definitions --
 
-    public static final EntityType<RobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, RebootRobotType.BUNNY);
-    public static final EntityType<RobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, RebootRobotType.BUNNY2);
-    public static final EntityType<RobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, RebootRobotType.DRAGON);
-    public static final EntityType<RobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, RebootRobotType.HONEY);
-    public static final EntityType<RobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, RebootRobotType.KITSUNE);
-    public static final EntityType<RobotEntity> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, RebootRobotType.NEKO);
-    public static final EntityType<RobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, RebootRobotType.VANILLA);
+    public static final EntityType<NativeRobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, RebootRobotType.BUNNY);
+    public static final EntityType<NativeRobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, RebootRobotType.BUNNY2);
+    public static final EntityType<NativeRobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, RebootRobotType.DRAGON);
+    public static final EntityType<NativeRobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, RebootRobotType.HONEY);
+    public static final EntityType<NativeRobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, RebootRobotType.KITSUNE);
+    public static final EntityType<NativeRobotEntity> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, RebootRobotType.NEKO);
+    public static final EntityType<NativeRobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, RebootRobotType.VANILLA);
 
     // -- Registration Methods --
 
     /**
-     * Registers a robot entity type with RobotEntity implementation.
+     * Registers a robot entity type with NativeRobotEntity implementation.
      * <p>
-     * Type-safe registration that ensures RobotEntity is used consistently
+     * Type-safe registration that ensures NativeRobotEntity is used consistently
      * across all robot variants.
      *
      * @param name entity variant name
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static EntityType<RobotEntity> registerRobot(String name, NativeEntityType robotType) {
+    private static EntityType<NativeRobotEntity> registerRobot(String name, NativeEntityType robotType) {
         return Registry.register(
                 BuiltInRegistries.ENTITY_TYPE,
                 RebootIdentifier.getId(name),
-                FabricEntityTypeBuilder.create(MobCategory.CREATURE, (EntityType<RobotEntity> type, Level world) -> new RobotEntity(type, world, robotType))
+                FabricEntityTypeBuilder.create(MobCategory.CREATURE, (EntityType<NativeRobotEntity> type, Level world) -> new NativeRobotEntity(type, world, robotType))
                         .dimensions(EntityDimensions.fixed(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT))
                         .build()
         );
@@ -65,13 +66,13 @@ public class RebootEntities {
      * Registers entity attributes.
      */
     public static void register() {
-        FabricDefaultAttributeRegistry.register(BUNNY, LovelyRobotEntity.createAttributes(RebootRobotType.BUNNY));
-        FabricDefaultAttributeRegistry.register(BUNNY2, LovelyRobotEntity.createAttributes(RebootRobotType.BUNNY2));
-        FabricDefaultAttributeRegistry.register(DRAGON, LovelyRobotEntity.createAttributes(RebootRobotType.DRAGON));
-        FabricDefaultAttributeRegistry.register(HONEY, LovelyRobotEntity.createAttributes(RebootRobotType.HONEY));
-        FabricDefaultAttributeRegistry.register(KITSUNE, LovelyRobotEntity.createAttributes(RebootRobotType.KITSUNE));
-        FabricDefaultAttributeRegistry.register(NEKO, LovelyRobotEntity.createAttributes(RebootRobotType.NEKO));
-        FabricDefaultAttributeRegistry.register(VANILLA, LovelyRobotEntity.createAttributes(RebootRobotType.VANILLA));
+        FabricDefaultAttributeRegistry.register(BUNNY,   InternalEntity.createAttributes(RebootRobotType.BUNNY));
+        FabricDefaultAttributeRegistry.register(BUNNY2,  InternalEntity.createAttributes(RebootRobotType.BUNNY2));
+        FabricDefaultAttributeRegistry.register(DRAGON,  InternalEntity.createAttributes(RebootRobotType.DRAGON));
+        FabricDefaultAttributeRegistry.register(HONEY,   InternalEntity.createAttributes(RebootRobotType.HONEY));
+        FabricDefaultAttributeRegistry.register(KITSUNE, InternalEntity.createAttributes(RebootRobotType.KITSUNE));
+        FabricDefaultAttributeRegistry.register(NEKO,    InternalEntity.createAttributes(RebootRobotType.NEKO));
+        FabricDefaultAttributeRegistry.register(VANILLA, InternalEntity.createAttributes(RebootRobotType.VANILLA));
     } // register ()
 
     /**
@@ -79,12 +80,12 @@ public class RebootEntities {
      */
     public static void registerRender() {
         EntityRendererRegistry.register(BUNNY, BunnyRenderer::new);
-        EntityRendererRegistry.register(BUNNY2, RobotRenderer::new);
-        EntityRendererRegistry.register(DRAGON, RobotRenderer::new);
-        EntityRendererRegistry.register(HONEY, RobotRenderer::new);
+        EntityRendererRegistry.register(BUNNY2, NativeRobotRenderer::new);
+        EntityRendererRegistry.register(DRAGON, NativeRobotRenderer::new);
+        EntityRendererRegistry.register(HONEY, NativeRobotRenderer::new);
         EntityRendererRegistry.register(KITSUNE, KitsuneRenderer::new);
-        EntityRendererRegistry.register(NEKO, RobotRenderer::new);
-        EntityRendererRegistry.register(VANILLA, RobotRenderer::new);
+        EntityRendererRegistry.register(NEKO, NativeRobotRenderer::new);
+        EntityRendererRegistry.register(VANILLA, NativeRobotRenderer::new);
     } // registerRender ()
 
     /**

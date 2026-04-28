@@ -4,13 +4,13 @@ import net.heriazone.rlovelyr.Reboot;
 import net.heriazone.lovelylib.common.configs.ConfigBounds;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.hzlib.api.configs.ConfigProvider;
-import net.heriazone.lovelylib.hzlib.api.configs.SimpleConfig;
+import net.heriazone.hzlib.api.configs.ConfigProvider;
+import net.heriazone.hzlib.api.configs.SimpleConfig;
 
 import java.util.HashMap;
 
 /**
- * Configuration management for Reboot LovelyRobotEntity mod.
+ * Configuration management for Reboot  Robot mod.
  * <p>
  * <b>Architecture:</b> Uses SimpleConfig for file handling and ConfigProvider for
  * structured config generation. Provides static config values with automatic file

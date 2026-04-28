@@ -2,11 +2,12 @@ package net.heriazone.rlovelyr.source;
 
 import net.heriazone.rlovelyr.Reboot;
 import net.heriazone.rlovelyr.RebootIdentifier;
-import net.heriazone.lovelylib.api.entity.features.PickupFeature;
+import net.heriazone.hzlib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
+import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.reboot.RebootRobotType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
@@ -18,7 +19,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * Registry for LovelyRobotEntity Reboot entity types (NeoForge).
+ * Registry for Native Robot Reboot entity types (NeoForge).
  * <p>
  * <b>Architecture:</b> Manages entity type registration, attribute creation,
  * and renderer binding for all robot variants in the Reboot mod.
@@ -33,20 +34,20 @@ public class RebootEntities {
 
     // -- Entity Type Definitions --
 
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, RebootRobotType.BUNNY);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, RebootRobotType.BUNNY2);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, RebootRobotType.DRAGON);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, RebootRobotType.HONEY);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, RebootRobotType.KITSUNE);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, RebootRobotType.NEKO);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, RebootRobotType.VANILLA);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, RebootRobotType.BUNNY);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, RebootRobotType.BUNNY2);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, RebootRobotType.DRAGON);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, RebootRobotType.HONEY);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, RebootRobotType.KITSUNE);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, RebootRobotType.NEKO);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, RebootRobotType.VANILLA);
 
     // -- Registration Methods --
 
     /**
-     * Registers a robot entity type with RobotEntity implementation.
+     * Registers a robot entity type with NativeRobotEntity implementation.
      * <p>
-     * Type-safe registration that ensures RobotEntity is used consistently
+     * Type-safe registration that ensures NativeRobotEntity is used consistently
      * across all robot variants.
      * <p>
      * <b>Spawn Item Handling:</b> Spawn item is resolved lazily during entity
@@ -56,9 +57,9 @@ public class RebootEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static DeferredHolder<EntityType<?>, EntityType<RobotEntity>> registerRobot(String name, NativeEntityType robotType) {
+    private static DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> registerRobot(String name, NativeEntityType robotType) {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
-                        (EntityType<RobotEntity> type, Level level) -> new RobotEntity(type, level, robotType), MobCategory.CREATURE)
+                        (EntityType<NativeRobotEntity> type, Level level) -> new NativeRobotEntity(type, level, robotType), MobCategory.CREATURE)
                 .sized(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT)
                 .build(RebootIdentifier.getId(name).toString()));
     } // registerRobot()
@@ -82,13 +83,13 @@ public class RebootEntities {
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
-        event.put(BUNNY.get(), LovelyRobotEntity.createAttributes(RebootRobotType.BUNNY));
-        event.put(BUNNY2.get(), LovelyRobotEntity.createAttributes(RebootRobotType.BUNNY2));
-        event.put(DRAGON.get(), LovelyRobotEntity.createAttributes(RebootRobotType.DRAGON));
-        event.put(HONEY.get(), LovelyRobotEntity.createAttributes(RebootRobotType.HONEY));
-        event.put(KITSUNE.get(), LovelyRobotEntity.createAttributes(RebootRobotType.KITSUNE));
-        event.put(NEKO.get(), LovelyRobotEntity.createAttributes(RebootRobotType.NEKO));
-        event.put(VANILLA.get(), LovelyRobotEntity.createAttributes(RebootRobotType.VANILLA));
+        event.put(BUNNY.get(),   InternalEntity.createAttributes(RebootRobotType.BUNNY));
+        event.put(BUNNY2.get(),  InternalEntity.createAttributes(RebootRobotType.BUNNY2));
+        event.put(DRAGON.get(),  InternalEntity.createAttributes(RebootRobotType.DRAGON));
+        event.put(HONEY.get(),   InternalEntity.createAttributes(RebootRobotType.HONEY));
+        event.put(KITSUNE.get(), InternalEntity.createAttributes(RebootRobotType.KITSUNE));
+        event.put(NEKO.get(),    InternalEntity.createAttributes(RebootRobotType.NEKO));
+        event.put(VANILLA.get(), InternalEntity.createAttributes(RebootRobotType.VANILLA));
     } // registerAttribute()
 
     /**
@@ -98,12 +99,12 @@ public class RebootEntities {
      */
     public static void registerRender(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(BUNNY.get(), BunnyRenderer::new);
-        event.registerEntityRenderer(BUNNY2.get(), RobotRenderer::new);
-        event.registerEntityRenderer(DRAGON.get(), RobotRenderer::new);
-        event.registerEntityRenderer(HONEY.get(), RobotRenderer::new);
+        event.registerEntityRenderer(BUNNY2.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(DRAGON.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(HONEY.get(), NativeRobotRenderer::new);
         event.registerEntityRenderer(KITSUNE.get(), KitsuneRenderer::new);
-        event.registerEntityRenderer(NEKO.get(), RobotRenderer::new);
-        event.registerEntityRenderer(VANILLA.get(), RobotRenderer::new);
+        event.registerEntityRenderer(NEKO.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(VANILLA.get(), NativeRobotRenderer::new);
     } // registerRender()
 
     /**

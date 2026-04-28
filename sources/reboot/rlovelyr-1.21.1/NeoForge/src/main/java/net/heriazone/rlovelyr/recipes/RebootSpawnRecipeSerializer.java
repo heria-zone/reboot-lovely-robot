@@ -2,8 +2,8 @@ package net.heriazone.rlovelyr.recipes;
 
 import com.mojang.serialization.MapCodec;
 import net.heriazone.lovelylib.api.recipes.BaseLovelySpawnRecipe;
-import net.heriazone.lovelylib.hzlib.api.recipes.serializers.NetworkSerializationHelper;
-import net.heriazone.lovelylib.hzlib.api.recipes.serializers.RecipeCodecHelper;
+import net.heriazone.hzlib.api.recipes.serializers.NetworkSerializationHelper;
+import net.heriazone.hzlib.api.recipes.serializers.RecipeCodecHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;

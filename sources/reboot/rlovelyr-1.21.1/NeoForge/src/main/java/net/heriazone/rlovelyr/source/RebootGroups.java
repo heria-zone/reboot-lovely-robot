@@ -3,7 +3,7 @@ package net.heriazone.rlovelyr.source;
 import net.heriazone.rlovelyr.Reboot;
 import net.heriazone.rlovelyr.RebootIdentifier;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.hzlib.api.groups.InternalGroups;
+import net.heriazone.hzlib.api.groups.InternalGroups;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;

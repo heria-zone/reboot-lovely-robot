@@ -1,7 +1,7 @@
 package net.heriazone.rlovelyr;
 
-import net.heriazone.lovelylib.hzlib.api.services.NeoForgeServices;
-import net.heriazone.lovelylib.hzlib.api.services.Services;
+import net.heriazone.hzlib.api.services.NeoForgeServices;
+import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.reboot.RebootRobotType;
 import net.heriazone.rlovelyr.source.*;
 import net.neoforged.bus.api.IEventBus;
