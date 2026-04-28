@@ -243,6 +243,17 @@ public abstract class InternalEntity extends TamableAnimal {
                         setAnimatorVariant(defaultAnim.getKey());
                     }
                 });
+
+        // Reset TEXTURE_VARIANT to entity-specific default if still at the generic "default"
+        // placeholder set by defineSynchedData(). initializeRandomVariants() will override
+        // this at spawn time, but this ensures a valid key is set for NBT-loaded entities.
+        nativeEntity.getFeature(net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature.class)
+                .ifPresent(f -> {
+                    var defaultTex = f.getDefaultVariant(nativeEntity.getKey());
+                    if (defaultTex != null && "default".equals(getTextureVariant())) {
+                        setTextureVariant(defaultTex.getKey());
+                    }
+                });
     } // applyBaseAttributes ()
 
     /**
