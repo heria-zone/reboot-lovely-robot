@@ -3,19 +3,74 @@ package net.heriazone.hzlib.api.animation;
 import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
 
+import java.util.Random;
+
 /**
- * Manages animation state transitions and condition checking for robot entities.
+ * Manages animation state transitions and condition checking for entities.
  * <p>
  * <b>Architecture:</b> Centralizes animation decision logic that was previously
  * scattered across loader-specific animation controllers. Provides consistent
  * animation behavior across all loaders while keeping GeckoLib integration
  * in loader modules.
  * <p>
+ * <b>Profile-aware:</b> When the entity's current animator variant carries an
+ * {@link AnimationProfile}, the profile's pools are used to select animation names.
+ * When no profile is present, falls back to the standard animation name constants
+ * defined in this class for backward compatibility.
+ * <p>
  * <b>Design Decision:</b> Static methods allow easy reuse without inheritance
  * complexity. Animation state logic is pure business logic that doesn't depend
  * on GeckoLib types or rendering context.
  */
 public class AnimationStateManager {
+
+    // -- Standard Animation Name Constants (fallback when no profile is present) --
+
+    public static final String IDLE   = "idle";
+    public static final String WALK   = "walk";
+    public static final String REST   = "rest";
+    public static final String SIT    = "sit";
+    public static final String RIDE   = "ride";
+    public static final String ATTACK = "attack";
+    public static final String HURT   = "hurt";
+
+    // -- Controller Type --
+
+    /**
+     * Identifies the type of animation controller.
+     * Used by loader-specific animation controllers to determine which animation logic to apply.
+     */
+    public enum ControllerType {
+        ATTACK,
+        LOCOMOTION;
+
+        public String getName() {
+            return name().charAt(0) + name().substring(1).toLowerCase();
+        } // getName ()
+    } // Enum: ControllerType
+
+    // -- Transition Timing Constants --
+
+    public static final int DEFAULT_TRANSITION_TICKS    = 2;
+    public static final int ATTACK_TRANSITION_TICKS     = 0;
+    public static final int LOCOMOTION_TRANSITION_TICKS = 2;
+
+    // -- Loop Constants --
+
+    public static final boolean DEFAULT_LOOP = true;
+    public static final boolean ATTACK_LOOP  = false;
+
+    // -- Shared Random --
+
+    /**
+     * Shared random source for pool selection.
+     * <p>
+     * <b>Design Decision:</b> {@link AnimationPool#selectNext} takes {@code java.util.Random}
+     * to keep the animation package pure Java with no Minecraft dependency. We use a static
+     * instance here rather than pulling {@code entity.getRandom()} (which returns Minecraft's
+     * {@code RandomSource}) to maintain that boundary.
+     */
+    private static final Random RANDOM = new Random();
 
     // -- Attack Animation Logic --
 
@@ -26,94 +81,129 @@ public class AnimationStateManager {
      * This is synchronized with damage application and provides visual feedback
      * for combat actions.
      *
-     * @param entity robot entity to check
+     * @param entity entity to check
      * @return true if attack animation should play
      */
     public static boolean shouldPlayAttackAnimation(InternalEntity entity) {
         return entity.swinging;
-    } // shouldPlayAttackAnimation()
+    } // shouldPlayAttackAnimation ()
 
     // -- Locomotion Animation Logic --
 
     /**
-     * Determines the appropriate locomotion animation for current entity state.
+     * Determines the appropriate locomotion animation name for the current entity state.
      * <p>
-     * <b>Architecture:</b> Handles priority order: vehicle sitting > moving >
-     * sitting (in standby) > resting (in standby) > idle. State checks run every
-     * tick to ensure responsive animation transitions.
+     * <b>Priority chain:</b> vehicle riding → moving → standby sitting → standby resting → idle.
      * <p>
-     * <b>Vehicle Animation:</b> When robot is riding any vehicle (boat, minecart,
-     * horse, etc.), uses SIT animation for natural sitting posture. This takes
-     * highest priority over all other animations.
-     * <p>
-     * <b>Standby Animation Flow:</b> When in standby mode, robot starts with REST
-     * (standing idle). After configurable delay without movement, transitions to
-     * SIT (sitting pose with smaller hitbox). Movement interrupts sitting and
-     * returns to REST after stopping.
+     * <b>Profile-aware:</b> If the entity has an {@link AnimationProfile} on its current
+     * animator variant, the profile's pools are consulted. Falls back to standard name
+     * constants when no profile is present or when a slot is empty.
      *
-     * @param entity robot entity to check
-     * @param isMoving whether the entity is currently moving
+     * @param entity    entity to check
+     * @param isMoving  whether the entity is currently moving
      * @return animation name that should be playing
      */
     public static String getLocomotionAnimation(InternalEntity entity, boolean isMoving) {
-        // Highest priority: Vehicle sitting animation
+        AnimationProfile profile = resolveProfile(entity);
+
+        // Highest priority: vehicle sitting
         if (entity.getVehicle() != null) {
-            return AnimationDefinitions.SIT;
+            return selectFromSlot(profile != null ? profile.getRide() : null,
+                    selectFromSlot(profile != null ? profile.getSit() : null, SIT));
         }
 
         if (isMoving) {
-            return AnimationDefinitions.WALK;
-        } else if (entity.getCurrentState() == EntityState.Standby) {
-            // In standby mode - check if should be sitting or resting
-            if (entity.isInSittingPose()) {
-                return AnimationDefinitions.SIT;
-            } else {
-                return AnimationDefinitions.REST;
-            }
-        } else {
-            return AnimationDefinitions.IDLE;
+            return selectFromSlot(profile != null ? profile.getWalk() : null, WALK);
         }
-    } // getLocomotionAnimation()
 
-    // -- Animation Transition Logic --
+        if (entity.getCurrentState() == EntityState.Standby) {
+            if (entity.isInSittingPose()) {
+                return selectFromSlot(profile != null ? profile.getSit() : null, SIT);
+            } else {
+                return selectFromSlot(profile != null ? profile.getRest() : null, REST);
+            }
+        }
+
+        return selectFromSlot(profile != null ? profile.getIdle() : null, IDLE);
+    } // getLocomotionAnimation ()
+
+    // -- Transition Logic --
 
     /**
      * Calculates appropriate transition time between animations.
-     * <p>
-     * <b>Design Decision:</b> Different animation types use different transition
-     * times. Attack animations need immediate response (0 ticks), while locomotion
-     * animations benefit from smooth blending (2 ticks).
      *
-     * @param fromAnimation current animation name
-     * @param toAnimation target animation name
+     * @param fromAnimation  current animation name (unused, kept for API compatibility)
+     * @param toAnimation    target animation name (unused, kept for API compatibility)
      * @param controllerType type of animation controller
      * @return transition time in ticks
      */
-    public static int getTransitionTime(String fromAnimation, String toAnimation, AnimationDefinitions.ControllerType controllerType) {
-        switch (controllerType) {
-            case ATTACK:
-                return AnimationDefinitions.Config.ATTACK_TRANSITION_TICKS;
-            case LOCOMOTION:
-                return AnimationDefinitions.Config.LOCOMOTION_TRANSITION_TICKS;
-            default:
-                return AnimationDefinitions.Config.DEFAULT_TRANSITION_TICKS;
-        }
-    } // getTransitionTime()
+    public static int getTransitionTime(String fromAnimation, String toAnimation, ControllerType controllerType) {
+        return switch (controllerType) {
+            case ATTACK     -> ATTACK_TRANSITION_TICKS;
+            case LOCOMOTION -> LOCOMOTION_TRANSITION_TICKS;
+        };
+    } // getTransitionTime ()
 
     /**
      * Determines if an animation should loop.
-     * <p>
-     * <b>Logic:</b> Most animations loop continuously (idle, walk, rest, sit).
-     * Attack animations play once per attack action.
      *
      * @param animationName name of the animation
      * @return true if animation should loop
      */
     public static boolean shouldLoop(String animationName) {
-        if (AnimationDefinitions.ATTACK.equals(animationName)) {
-            return AnimationDefinitions.Config.ATTACK_LOOP;
+        return !ATTACK.equals(animationName);
+    } // shouldLoop ()
+
+    // -- Private Helpers --
+
+    /**
+     * Resolves the {@link AnimationProfile} from the entity's current animator variant.
+     * Returns {@code null} if no profile is configured (legacy fallback path).
+     * <p>
+     * <b>Visibility:</b> Public to allow loader-specific {@code InternalAnimation} classes
+     * to retrieve the profile for constructing GeckoLib controllers.
+     */
+    public static AnimationProfile resolveProfilePublic(InternalEntity entity) {
+        return resolveProfile(entity);
+    } // resolveProfilePublic ()
+
+    /**
+     * Resolves the {@link AnimationProfile} from the entity's current animator variant.
+     * Returns {@code null} if no profile is configured (legacy fallback path).
+     */
+    private static AnimationProfile resolveProfile(InternalEntity entity) {
+        if (entity.nativeEntity == null) return null;
+
+        return entity.nativeEntity
+                .getFeature(net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature.class)
+                .map(feature -> {
+                    String variantKey = entity.getAnimatorVariant();
+                    var variant = feature.getAvailableVariants(entity.nativeEntity.getKey())
+                            .stream()
+                            .filter(v -> v.getKey().equals(variantKey))
+                            .findFirst()
+                            .orElse(null);
+                    if (variant instanceof net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant sav) {
+                        return sav.getAnimationProfile();
+                    }
+                    return null;
+                })
+                .orElse(null);
+    } // resolveProfile ()
+
+    /**
+     * Selects an animation name from a pool, falling back to the default name if the pool
+     * is null or empty.
+     * <p>
+     * <b>Note:</b> Uses the shared {@link #RANDOM} instance — {@code java.util.Random} —
+     * to keep this class free of Minecraft's {@code RandomSource} dependency.
+     */
+    private static String selectFromSlot(AnimationPool pool, String fallback) {
+        if (AnimationProfile.isUsable(pool)) {
+            String selected = pool.selectNext(RANDOM);
+            return selected != null ? selected : fallback;
         }
-        return AnimationDefinitions.Config.DEFAULT_LOOP;
-    } // shouldLoop()
+        return fallback;
+    } // selectFromSlot ()
 
 } // Class: AnimationStateManager
