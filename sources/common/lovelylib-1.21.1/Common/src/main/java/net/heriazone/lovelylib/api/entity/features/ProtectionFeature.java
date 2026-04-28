@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.api.entity.features;
 
-import net.heriazone.lovelylib.hzlib.framework.entity.protection.*;
+import net.heriazone.hzlib.framework.entity.protection.*;
 
 import java.util.Objects;
 

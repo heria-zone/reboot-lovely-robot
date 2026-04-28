@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.api.entity.features;
 
 import net.heriazone.lovelylib.Lovely;
-import net.heriazone.lovelylib.hzlib.utils.IReadWriteNBT;
+import net.heriazone.hzlib.utils.IReadWriteNBT;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;

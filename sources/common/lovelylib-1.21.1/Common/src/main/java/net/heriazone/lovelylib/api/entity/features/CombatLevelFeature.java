@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.api.entity.features;
 
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
-import net.heriazone.lovelylib.hzlib.framework.entity.combat.IAttributeCalculationStrategy;
+import net.heriazone.hzlib.framework.entity.combat.IAttributeCalculationStrategy;
 
 import java.util.Objects;
 

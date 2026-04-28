@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib;
 
-import net.heriazone.lovelylib.hzlib.framework.utils.Version;
+import net.heriazone.hzlib.framework.utils.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

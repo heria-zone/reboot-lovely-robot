@@ -1,7 +1,6 @@
 package net.heriazone.lovelylib.api.animation;
 
-import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 
 /**
  * Provides bone transformation calculations for robot entity animations.
@@ -44,9 +43,9 @@ public class BoneTransformations {
      *
      * @param renderer GeoModel containing bone hierarchy
      * @param event animation state with entity data
-     * @param <T> entity type extending LovelyRobotEntity
+     * @param <T> entity type extending RobotEntity
      */
-    public static <T extends LovelyRobotEntity> void applyHeadRotation(Object renderer, Object event) {
+    public static <T extends RobotEntity> void applyHeadRotation(Object renderer, Object event) {
         try {
             // Get head bone using reflection
             Object animationProcessor = renderer.getClass().getMethod("getAnimationProcessor").invoke(renderer);

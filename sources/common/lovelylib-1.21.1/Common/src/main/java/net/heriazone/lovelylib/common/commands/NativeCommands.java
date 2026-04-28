@@ -1,5 +1,7 @@
 package net.heriazone.lovelylib.common.commands;
 
+import net.heriazone.hzlib.utils.Utils;
+import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -7,13 +9,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.heriazone.lovelylib.api.entity.features.*;
 import net.heriazone.lovelylib.api.registry.*;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
-import net.heriazone.lovelylib.hzlib.api.entity.InternalEntity;
-import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
-import net.heriazone.lovelylib.hzlib.utils.Utils;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -49,7 +49,7 @@ public abstract class NativeCommands {
          * @return list of robots to operate on
          * @throws CommandSyntaxException if selection fails
          */
-        List<LovelyRobotEntity> selectRobots(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException;
+        List<RobotEntity> selectRobots(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException;
     } // Interface: RobotSelector
 
     /**
@@ -68,7 +68,7 @@ public abstract class NativeCommands {
          * @return operation result
          * @throws CommandSyntaxException if command execution fails
          */
-        CommandResult execute(LovelyRobotEntity robot, CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException;
+        CommandResult execute(RobotEntity robot, CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException;
     } // Interface: RobotOperation
 
     // -- Robot Selectors --
@@ -78,7 +78,7 @@ public abstract class NativeCommands {
      */
     private static final RobotSelector CROSSHAIR_SELECTOR = ctx -> {
         Player player = ctx.getSource().getPlayerOrException();
-        LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+        RobotEntity robot = (RobotEntity) findEntityInFront(player);
         return robot != null ? List.of(robot) : List.of();
     }; // CROSSHAIR_SELECTOR
 
@@ -88,8 +88,8 @@ public abstract class NativeCommands {
     private static final RobotSelector TARGET_SELECTOR = ctx -> {
         Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
         return entities.stream()
-                .filter(e -> e instanceof LovelyRobotEntity)
-                .map(e -> (LovelyRobotEntity) e)
+                .filter(e -> e instanceof RobotEntity)
+                .map(e -> (RobotEntity) e)
                 .toList();
     }; // TARGET_SELECTOR
 
@@ -99,7 +99,7 @@ public abstract class NativeCommands {
     private static final RobotSelector OWNER_SELECTOR = ctx -> {
         Player player = EntityArgument.getPlayer(ctx, "player");
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        RobotEntity robot = getOwnerRobotByIndex(player, index);
         return robot != null ? List.of(robot) : List.of();
     }; // OWNER_SELECTOR
 
@@ -111,7 +111,7 @@ public abstract class NativeCommands {
     private static final RobotSelector ME_SELECTOR = ctx -> {
         Player player = ctx.getSource().getPlayerOrException();
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
-        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        RobotEntity robot = getOwnerRobotByIndex(player, index);
         return robot != null ? List.of(robot) : List.of();
     }; // ME_SELECTOR
 
@@ -129,7 +129,7 @@ public abstract class NativeCommands {
             RobotOperation operation,
             boolean requireOwnership
     ) throws CommandSyntaxException {
-        List<LovelyRobotEntity> robots = selector.selectRobots(ctx);
+        List<RobotEntity> robots = selector.selectRobots(ctx);
 
         if (robots.isEmpty()) {
             ctx.getSource().sendFailure(Component.literal("No robots found"));
@@ -140,7 +140,7 @@ public abstract class NativeCommands {
         int failureCount = 0;
         List<String> errorMessages = new java.util.ArrayList<>();
 
-        for (LovelyRobotEntity robot : robots) {
+        for (RobotEntity robot : robots) {
             // Ownership validation
             if (requireOwnership) {
                 Player player = ctx.getSource().getPlayerOrException();
@@ -408,7 +408,7 @@ public abstract class NativeCommands {
         static RobotOperation setAppearance() {
             return (robot, ctx) -> {
                 EntityTexture color = ctx.getArgument("color", EntityTexture.class);
-                robot.setTexture(color);
+                robot.setTextureVariant(color.Name());
                 String colorName = color.Name().toLowerCase();
                 return new CommandResult(true, "Set color to " + colorName + " for " + Utils.getEntityCustomName(robot));
             };
@@ -437,7 +437,7 @@ public abstract class NativeCommands {
     protected static CompletableFuture<Suggestions> suggestMaxLevel(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         try {
             Player player = ctx.getSource().getPlayerOrException();
-            LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+            RobotEntity robot = (RobotEntity) findEntityInFront(player);
 
             if (robot != null) {
                 int maxLevel = robot.getLevelSystem()
@@ -459,7 +459,7 @@ public abstract class NativeCommands {
     protected static CompletableFuture<Suggestions> suggestMaxExp(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         try {
             Player player = ctx.getSource().getPlayerOrException();
-            LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+            RobotEntity robot = (RobotEntity) findEntityInFront(player);
 
             if (robot != null) {
                 int maxExp = robot.getLevelSystem()
@@ -480,7 +480,7 @@ public abstract class NativeCommands {
     protected static CompletableFuture<Suggestions> suggestMaxExpForLevel(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         try {
             Player player = ctx.getSource().getPlayerOrException();
-            LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+            RobotEntity robot = (RobotEntity) findEntityInFront(player);
 
             if (robot != null) {
                 // Try to get the level argument that was just typed
@@ -515,7 +515,7 @@ public abstract class NativeCommands {
             int robotCount = 0;
 
             for (Entity entity : entities) {
-                if (entity instanceof LovelyRobotEntity robot) {
+                if (entity instanceof RobotEntity robot) {
                     int maxLevel = robot.getLevelSystem()
                             .map(LevelFeature::getMaxLevel)
                             .orElse(200);
@@ -544,7 +544,7 @@ public abstract class NativeCommands {
             int robotCount = 0;
 
             for (Entity entity : entities) {
-                if (entity instanceof LovelyRobotEntity robot) {
+                if (entity instanceof RobotEntity robot) {
                     int maxExp = robot.getLevelSystem()
                             .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
                             .orElse(Integer.MAX_VALUE);
@@ -581,7 +581,7 @@ public abstract class NativeCommands {
             int finalTargetLevel = targetLevel;
 
             for (Entity entity : entities) {
-                if (entity instanceof LovelyRobotEntity robot) {
+                if (entity instanceof RobotEntity robot) {
                     int maxExp = robot.getLevelSystem()
                             .map(feature -> feature.getExpForLevel(finalTargetLevel))
                             .orElse(Integer.MAX_VALUE);
@@ -666,7 +666,7 @@ public abstract class NativeCommands {
             Player player = EntityArgument.getPlayer(ctx, "player");
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            RobotEntity robot = getOwnerRobotByIndex(player, index);
             if (robot != null) {
                 int maxLevel = robot.getLevelSystem()
                         .map(LevelFeature::getMaxLevel)
@@ -687,7 +687,7 @@ public abstract class NativeCommands {
             Player player = EntityArgument.getPlayer(ctx, "player");
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            RobotEntity robot = getOwnerRobotByIndex(player, index);
             if (robot != null) {
                 int maxExp = robot.getLevelSystem()
                         .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
@@ -715,7 +715,7 @@ public abstract class NativeCommands {
                 targetLevel = 1;
             }
 
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            RobotEntity robot = getOwnerRobotByIndex(player, index);
             if (robot != null) {
                 int finalTargetLevel = targetLevel;
                 int maxExp = robot.getLevelSystem()
@@ -733,7 +733,7 @@ public abstract class NativeCommands {
     protected static CompletableFuture<Suggestions> suggestMaxFireProtection(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         try {
             Player player = ctx.getSource().getPlayerOrException();
-            LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+            RobotEntity robot = (RobotEntity) findEntityInFront(player);
 
             if (robot != null) {
                 int maxLevel = robot.nativeEntity.getFeature(ProtectionFeature.class)
@@ -751,7 +751,7 @@ public abstract class NativeCommands {
     protected static CompletableFuture<Suggestions> suggestMaxFallProtection(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         try {
             Player player = ctx.getSource().getPlayerOrException();
-            LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+            RobotEntity robot = (RobotEntity) findEntityInFront(player);
 
             if (robot != null) {
                 int maxLevel = robot.nativeEntity.getFeature(ProtectionFeature.class)
@@ -769,7 +769,7 @@ public abstract class NativeCommands {
     protected static CompletableFuture<Suggestions> suggestMaxBlastProtection(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         try {
             Player player = ctx.getSource().getPlayerOrException();
-            LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+            RobotEntity robot = (RobotEntity) findEntityInFront(player);
 
             if (robot != null) {
                 int maxLevel = robot.nativeEntity.getFeature(ProtectionFeature.class)
@@ -787,7 +787,7 @@ public abstract class NativeCommands {
     protected static CompletableFuture<Suggestions> suggestMaxProjectileProtection(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         try {
             Player player = ctx.getSource().getPlayerOrException();
-            LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+            RobotEntity robot = (RobotEntity) findEntityInFront(player);
 
             if (robot != null) {
                 int maxLevel = robot.nativeEntity.getFeature(ProtectionFeature.class)
@@ -809,7 +809,7 @@ public abstract class NativeCommands {
             int robotCount = 0;
 
             for (Entity entity : entities) {
-                if (entity instanceof LovelyRobotEntity robot) {
+                if (entity instanceof RobotEntity robot) {
                     int maxLevel = robot.nativeEntity.getFeature(ProtectionFeature.class)
                             .map(feature -> switch (protectionType) {
                                 case "fire" -> feature.getMaxFireProtection();
@@ -839,7 +839,7 @@ public abstract class NativeCommands {
             Player player = EntityArgument.getPlayer(ctx, "player");
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            RobotEntity robot = getOwnerRobotByIndex(player, index);
             if (robot != null) {
                 int maxLevel = robot.nativeEntity.getFeature(ProtectionFeature.class)
                         .map(feature -> switch (protectionType) {
@@ -906,7 +906,7 @@ public abstract class NativeCommands {
             Player player = ctx.getSource().getPlayerOrException();
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            RobotEntity robot = getOwnerRobotByIndex(player, index);
             if (robot != null) {
                 int maxLevel = robot.getLevelSystem()
                         .map(LevelFeature::getMaxLevel)
@@ -927,7 +927,7 @@ public abstract class NativeCommands {
             Player player = ctx.getSource().getPlayerOrException();
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            RobotEntity robot = getOwnerRobotByIndex(player, index);
             if (robot != null) {
                 int maxExp = robot.getLevelSystem()
                         .map(feature -> feature.getExpForLevel(robot.getCurrentLevel()))
@@ -955,7 +955,7 @@ public abstract class NativeCommands {
                 targetLevel = 1;
             }
 
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            RobotEntity robot = getOwnerRobotByIndex(player, index);
             if (robot != null) {
                 int finalTargetLevel = targetLevel;
                 int maxExp = robot.getLevelSystem()
@@ -977,7 +977,7 @@ public abstract class NativeCommands {
             Player player = ctx.getSource().getPlayerOrException();
             int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-            LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+            RobotEntity robot = getOwnerRobotByIndex(player, index);
             if (robot != null) {
                 int maxLevel = robot.nativeEntity.getFeature(ProtectionFeature.class)
                         .map(feature -> switch (protectionType) {
@@ -1164,7 +1164,7 @@ public abstract class NativeCommands {
      */
     protected static int executeCrosshairStats(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Player player = ctx.getSource().getPlayerOrException();
-        LovelyRobotEntity robot = (LovelyRobotEntity) findEntityInFront(player);
+        RobotEntity robot = (RobotEntity) findEntityInFront(player);
 
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("No robot found in crosshair"));
@@ -1357,7 +1357,7 @@ public abstract class NativeCommands {
         Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
 
         for (Entity entity : entities) {
-            if (entity instanceof LovelyRobotEntity robot) {
+            if (entity instanceof RobotEntity robot) {
                 ServerPlayer player = ctx.getSource().getPlayerOrException();
                 player.teleportTo(
                         (ServerLevel) robot.level(),
@@ -1565,7 +1565,7 @@ public abstract class NativeCommands {
         Player player = EntityArgument.getPlayer(ctx, "player");
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        RobotEntity robot = getOwnerRobotByIndex(player, index);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("Robot not found or offline"));
             return 0;
@@ -1624,7 +1624,7 @@ public abstract class NativeCommands {
 
         for (RobotRegistryEntry entry : robots) {
             Object entityObj = entry.getEntity();
-            if (entityObj instanceof LovelyRobotEntity robot && entry.isEntityValid()) {
+            if (entityObj instanceof RobotEntity robot && entry.isEntityValid()) {
                 robot.setHealth(robot.getMaxHealth());
                 healedCount++;
             }
@@ -1648,7 +1648,7 @@ public abstract class NativeCommands {
         Player player = EntityArgument.getPlayer(ctx, "player");
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        RobotEntity robot = getOwnerRobotByIndex(player, index);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("Robot not found or offline"));
             return 0;
@@ -1669,7 +1669,7 @@ public abstract class NativeCommands {
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
         Player toPlayer = EntityArgument.getPlayer(ctx, "to_player");
 
-        LovelyRobotEntity robot = getOwnerRobotByIndex(fromPlayer, index);
+        RobotEntity robot = getOwnerRobotByIndex(fromPlayer, index);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("Robot not found or offline"));
             return 0;
@@ -1848,7 +1848,7 @@ public abstract class NativeCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        RobotEntity robot = getOwnerRobotByIndex(player, index);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("Robot not found or offline"));
             return 0;
@@ -1907,7 +1907,7 @@ public abstract class NativeCommands {
 
         for (RobotRegistryEntry entry : robots) {
             Object entityObj = entry.getEntity();
-            if (entityObj instanceof LovelyRobotEntity robot && entry.isEntityValid()) {
+            if (entityObj instanceof RobotEntity robot && entry.isEntityValid()) {
                 robot.setHealth(robot.getMaxHealth());
                 healedCount++;
             }
@@ -1931,7 +1931,7 @@ public abstract class NativeCommands {
         Player player = ctx.getSource().getPlayerOrException();
         int index = IntegerArgumentType.getInteger(ctx, "robot_index");
 
-        LovelyRobotEntity robot = getOwnerRobotByIndex(player, index);
+        RobotEntity robot = getOwnerRobotByIndex(player, index);
         if (robot == null) {
             ctx.getSource().sendFailure(Component.literal("Robot not found or offline"));
             return 0;
@@ -2126,7 +2126,7 @@ public abstract class NativeCommands {
      * @param index robot index
      * @return robot entity or null if not found/invalid
      */
-    private static LovelyRobotEntity getOwnerRobotByIndex(Player player, int index) {
+    private static RobotEntity getOwnerRobotByIndex(Player player, int index) {
         try {
             ServerLevel world = (ServerLevel) player.level();
             OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(world);
@@ -2140,7 +2140,7 @@ public abstract class NativeCommands {
             RobotRegistryEntry entry = robots.get(index);
             Object entityObj = entry.getEntity();
 
-            if (entityObj instanceof LovelyRobotEntity robot && entry.isEntityValid()) {
+            if (entityObj instanceof RobotEntity robot && entry.isEntityValid()) {
                 return robot;
             }
         } catch (Exception ignored) {}

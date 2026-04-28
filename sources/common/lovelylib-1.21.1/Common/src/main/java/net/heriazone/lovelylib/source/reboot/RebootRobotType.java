@@ -9,9 +9,9 @@ import net.heriazone.lovelylib.common.entity.NativeEntityType;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
 import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.hzlib.api.entity.features.LevelFeature;
-import net.heriazone.lovelylib.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
-import net.heriazone.lovelylib.hzlib.framework.entity.protection.LevelBasedProtectionStrategy;
+import net.heriazone.hzlib.api.entity.features.LevelFeature;
+import net.heriazone.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
+import net.heriazone.hzlib.framework.entity.protection.LevelBasedProtectionStrategy;
 
 /**
  * <p>Registry of native robot types with config-driven values.<p>

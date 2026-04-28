@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.api.recipes;
 
-import net.heriazone.lovelylib.hzlib.api.recipes.interfaces.INbtTransferStrategy;
-import net.heriazone.lovelylib.hzlib.api.recipes.strategies.FullNbtCopyStrategy;
+import net.heriazone.hzlib.api.recipes.interfaces.INbtTransferStrategy;
+import net.heriazone.hzlib.api.recipes.strategies.FullNbtCopyStrategy;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

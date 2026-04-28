@@ -1,9 +1,9 @@
 package net.heriazone.lovelylib.utils;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.hzlib.utils.Utils;
+import net.heriazone.hzlib.utils.Utils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
@@ -33,7 +33,7 @@ public class EntityDataHelper {
      * @param entity the robot entity to extract data from
      * @return CompoundTag containing entity data
      */
-    public static CompoundTag extractEntityData(LovelyRobotEntity entity) {
+    public static CompoundTag extractEntityData(RobotEntity entity) {
         CompoundTag nbt = new CompoundTag();
 
         // Basic entity information
@@ -49,7 +49,7 @@ public class EntityDataHelper {
 
         // Entity type and appearance
         nbt.putString(LovelyConstant.STAT_TYPE, entity.nativeEntity.getKey());
-        nbt.putInt(LovelyConstant.STAT_COLOR, entity.getTextureID());
+        nbt.putString(LovelyConstant.STAT_COLOR, entity.getTextureVariant());
 
         // Level and experience
         nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, entity.getMaxLevel());
@@ -181,7 +181,7 @@ public class EntityDataHelper {
      * @param entity the robot entity to generate name for
      * @return formatted display name
      */
-    public static String getDisplayName(LovelyRobotEntity entity) {
+    public static String getDisplayName(RobotEntity entity) {
         String customName = Utils.getEntityCustomName(entity);
         String typeName = entity.nativeEntity.getKey();
 
@@ -203,7 +203,7 @@ public class EntityDataHelper {
      * @param entity the robot entity to generate component for
      * @return Component with formatted display name
      */
-    public static Component getDisplayNameComponent(LovelyRobotEntity entity) {
+    public static Component getDisplayNameComponent(RobotEntity entity) {
         return Component.literal(getDisplayName(entity));
     } // getDisplayNameComponent()
 

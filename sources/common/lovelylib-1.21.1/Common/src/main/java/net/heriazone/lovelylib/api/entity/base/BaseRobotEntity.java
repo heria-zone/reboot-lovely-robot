@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.api.entity.base;
 
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
@@ -18,11 +18,11 @@ import net.minecraft.world.level.Level;
  * <b>Loader Responsibilities:</b> Subclasses must implement GeckoLib interfaces
  * (GeoEntity), animation controllers, and platform-specific item resolution.
  */
-public abstract class BaseRobotEntity extends LovelyRobotEntity {
+public abstract class BaseRobotEntity extends RobotEntity {
 
     // -- Constructor --
 
-    public BaseRobotEntity(EntityType<? extends LovelyRobotEntity> entityType, Level level, NativeEntityType nativeEntity) {
+    public BaseRobotEntity(EntityType<? extends RobotEntity> entityType, Level level, NativeEntityType nativeEntity) {
         super(entityType, level, nativeEntity);
         handlePostSpawnInitialization();
     } // Constructor: BaseRobotEntity()

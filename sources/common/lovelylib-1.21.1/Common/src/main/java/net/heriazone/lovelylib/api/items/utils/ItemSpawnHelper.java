@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.api.items.utils;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.utils.EntityDataHelper;
@@ -127,7 +127,7 @@ public class ItemSpawnHelper {
      * @param dataNBT the NBT compound from spawn item
      * @param entity the spawned robot entity to initialize
      */
-    public static void initializeEntityFromData(CompoundTag dataNBT, LovelyRobotEntity entity) {
+    public static void initializeEntityFromData(CompoundTag dataNBT, RobotEntity entity) {
         if (dataNBT == null || entity == null) {
             return;
         }
@@ -140,12 +140,19 @@ public class ItemSpawnHelper {
             entity.setCustomName(Component.literal(validatedData.getString(LovelyConstant.STAT_CUSTOM_NAME)));
         }
 
-        // Apply texture if not random
-        int textureId = validatedData.getInt(LovelyConstant.STAT_COLOR);
-        if (textureId != EntityTexture.RANDOM.getId()) {
-            entity.setTexture(textureId);
+        // Apply texture if not random — supports both new string keys and legacy int IDs
+        String colorKey = validatedData.getString(LovelyConstant.STAT_COLOR);
+        if (!colorKey.isEmpty()) {
+            // New string-keyed system (ADR_012)
+            entity.setTextureVariant(colorKey);
+        } else {
+            // Legacy int-based fallback — migrate on load
+            int textureId = validatedData.getInt(LovelyConstant.STAT_COLOR);
+            if (textureId != EntityTexture.RANDOM.getId()) {
+                entity.setTextureVariant(EntityTexture.byId(textureId).Name());
+            }
         }
-        // If texture is RANDOM, keep the entity's already-selected random texture
+        // If neither is set, keep the entity's already-selected random texture
 
         // Apply level and experience if greater than 0
         if (validatedData.getInt(LovelyConstant.STAT_LEVEL) > 0) {

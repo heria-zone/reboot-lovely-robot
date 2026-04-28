@@ -2,7 +2,7 @@ package net.heriazone.lovelylib.utils;
 
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.hzlib.framework.utils.*;
+import net.heriazone.hzlib.framework.utils.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

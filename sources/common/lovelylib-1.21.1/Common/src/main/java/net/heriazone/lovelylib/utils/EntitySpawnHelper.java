@@ -3,7 +3,8 @@ package net.heriazone.lovelylib.utils;
 import net.heriazone.lovelylib.api.registry.OwnerRobotRegistry;
 import net.heriazone.lovelylib.api.registry.RobotRegistryManager;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -75,7 +76,7 @@ public class EntitySpawnHelper {
      * @param player the player who spawned the robot
      * @param customData optional NBT data for entity customization
      */
-    public static void initializeEntity(LovelyRobotEntity entity, Player player, CompoundTag customData) {
+    public static void initializeEntity(RobotEntity entity, Player player, CompoundTag customData) {
         // Tame the entity to the player
         entity.handleTame(player);
 
@@ -102,18 +103,24 @@ public class EntitySpawnHelper {
      * @param entity the robot entity to configure
      * @param customData NBT compound containing entity customization data
      */
-    private static void applyCustomData(LovelyRobotEntity entity, CompoundTag customData) {
+    private static void applyCustomData(RobotEntity entity, CompoundTag customData) {
         // Apply custom name if present and non-empty
         String customName = customData.getString("CustomName");
         if (!customName.isEmpty()) {
             entity.setCustomName(net.minecraft.network.chat.Component.literal(customName));
         }
 
-        // Apply texture if specified and valid
+        // Apply texture if specified and valid — supports both new string keys and legacy int IDs
         if (customData.contains("Color")) {
-            int textureId = customData.getInt("Color");
-            if (textureId >= 0 && textureId <= 15) { // Valid texture range
-                entity.setTexture(textureId);
+            if (customData.get("Color") instanceof net.minecraft.nbt.StringTag) {
+                // New string-keyed system (ADR_012)
+                entity.setTextureVariant(customData.getString("Color"));
+            } else {
+                // Legacy int-based — migrate on load
+                int textureId = customData.getInt("Color");
+                if (textureId >= 0 && textureId <= 15) {
+                    entity.setTextureVariant(EntityTexture.byId(textureId).Name());
+                }
             }
         }
 
@@ -156,7 +163,7 @@ public class EntitySpawnHelper {
      * @param entity the robot entity to configure
      * @param customData NBT compound containing protection data
      */
-    private static void applyProtectionData(LovelyRobotEntity entity, CompoundTag customData) {
+    private static void applyProtectionData(RobotEntity entity, CompoundTag customData) {
         // Fire Protection
         if (customData.contains("FireProtection")) {
             int fireProtection = Math.max(0, Math.min(
@@ -215,7 +222,7 @@ public class EntitySpawnHelper {
      *
      * @param entity the robot entity to validate
      */
-    public static void validateEntityData(LovelyRobotEntity entity) {
+    public static void validateEntityData(RobotEntity entity) {
         // Validate health bounds
         //if (entity.getHealth() > entity.getMaxHealth()) entity.setHealth(entity.getMaxHealth());
 
@@ -242,7 +249,7 @@ public class EntitySpawnHelper {
      *
      * @param entity the robot entity to validate
      */
-    private static void validateProtectionBounds(LovelyRobotEntity entity) {
+    private static void validateProtectionBounds(RobotEntity entity) {
         // Clamp fire protection
         if (entity.getFireProtection() > SharedConfigs.Common.ProtectionLimitFire) {
             entity.setFireProtection(SharedConfigs.Common.ProtectionLimitFire);

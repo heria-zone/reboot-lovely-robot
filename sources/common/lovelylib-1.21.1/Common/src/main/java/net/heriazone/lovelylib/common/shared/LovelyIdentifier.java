@@ -2,7 +2,7 @@ package net.heriazone.lovelylib.common.shared;
 
 import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.common.entity.enums.*;
-import net.heriazone.lovelylib.hzlib.framework.common.InternalIdentifier;
+import net.heriazone.hzlib.framework.common.InternalIdentifier;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 

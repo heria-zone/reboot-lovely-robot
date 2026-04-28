@@ -1,10 +1,9 @@
 package net.heriazone.lovelylib.api.recipes;
 
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
-import net.heriazone.lovelylib.hzlib.api.recipes.interfaces.INbtTransferStrategy;
+import net.heriazone.hzlib.api.recipes.interfaces.INbtTransferStrategy;
 import net.heriazone.lovelylib.api.recipes.modifiers.DyeColorModifier;
-import net.heriazone.lovelylib.hzlib.api.recipes.strategies.AdditiveNbtMergeStrategy;
+import net.heriazone.hzlib.api.recipes.strategies.AdditiveNbtMergeStrategy;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;

@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.api.items.utils;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -163,7 +163,7 @@ public class ItemInteractionHelper {
                     player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
                     level.gameEvent(player, GameEvent.ENTITY_PLACE, entity.position());
 
-                    if (entity instanceof LovelyRobotEntity robotEntity) {
+                    if (entity instanceof RobotEntity robotEntity) {
                         robotEntity.handleTame(player);
                         ItemSpawnHelper.initializeEntityFromData(customTag, robotEntity);
                     }
@@ -238,7 +238,7 @@ public class ItemInteractionHelper {
                     itemStack.shrink(1);
                     level.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
 
-                    if (entity instanceof LovelyRobotEntity robotEntity) {
+                    if (entity instanceof RobotEntity robotEntity) {
                         robotEntity.handleTame(context.getPlayer());
                         ItemSpawnHelper.initializeEntityFromData(customTag, robotEntity);
                     }

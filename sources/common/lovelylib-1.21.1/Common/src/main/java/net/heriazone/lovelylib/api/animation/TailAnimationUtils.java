@@ -1,8 +1,8 @@
 package net.heriazone.lovelylib.api.animation;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.lovelylib.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 
 public class TailAnimationUtils {
 
@@ -22,7 +22,7 @@ public class TailAnimationUtils {
      * @param entity robot entity with level data
      * @return tail visibility configuration
      */
-    public static TailVisibilityConfig calculateTailVisibility(LovelyRobotEntity entity) {
+    public static TailVisibilityConfig calculateTailVisibility(RobotEntity entity) {
         var maxLevel = (entity.nativeEntity instanceof NativeEntityType robotType)
                 ? robotType.getMaxLevel()
                 : 0;
@@ -114,7 +114,7 @@ public class TailAnimationUtils {
      * @param event animation state (unused but required by signature)
      * @param <T> entity type extending InternalEntity
      */
-    public static <T extends InternalEntity> void configureTailVisibility(LovelyRobotEntity entity, Object renderer, Object event) {
+    public static <T extends InternalEntity> void configureTailVisibility(RobotEntity entity, Object renderer, Object event) {
         try {
             // Calculate tail visibility
             TailVisibilityConfig config = calculateTailVisibility(entity);

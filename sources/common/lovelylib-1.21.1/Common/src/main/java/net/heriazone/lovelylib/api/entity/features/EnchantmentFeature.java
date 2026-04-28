@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.api.entity.features;
 
-import net.heriazone.lovelylib.hzlib.framework.entity.enchantment.*;
+import net.heriazone.hzlib.framework.entity.enchantment.*;
 
 import java.util.Objects;
 

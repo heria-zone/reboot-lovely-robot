@@ -1,8 +1,8 @@
 package net.heriazone.lovelylib.api.rendering;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.api.rendering.IInternalRenderLayer;
-import net.heriazone.lovelylib.hzlib.api.rendering.LayerRenderContext;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.hzlib.api.rendering.IInternalRenderLayer;
+import net.heriazone.hzlib.api.rendering.LayerRenderContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +19,14 @@ import java.util.function.Predicate;
  * Displays different patterns for idle, auto-attack, base defense, combat mode, etc.
  * Single layer with texture swapping is more efficient than multiple conditional layers.
  */
-public class HeadphoneOverlayLayer<T extends LovelyRobotEntity> implements IInternalRenderLayer<T> {
+public class HeadphoneOverlayLayer<T extends RobotEntity> implements IInternalRenderLayer<T> {
 
     // -- Conditional Texture Entry --
 
     /**
      * Pairs a condition with its corresponding texture path.
      */
-    private static class ConditionalTexture<T extends LovelyRobotEntity> {
+    private static class ConditionalTexture<T extends RobotEntity> {
         final Predicate<T> condition;
         final String texturePath;
 
@@ -114,7 +114,7 @@ public class HeadphoneOverlayLayer<T extends LovelyRobotEntity> implements IInte
      * @param entity robot entity to check
      * @return true if headphones should render, false otherwise
      */
-    private static boolean shouldShowHeadphones(LovelyRobotEntity entity) {
+    private static boolean shouldShowHeadphones(RobotEntity entity) {
         // Check if entity supports headphones
         if (!entity.supportsHeadphones()) return false;
 

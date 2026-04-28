@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.api.recipes.modifiers;
 
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.hzlib.api.recipes.interfaces.INbtModifier;
+import net.heriazone.hzlib.api.recipes.interfaces.INbtModifier;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
