@@ -47,6 +47,9 @@ Establish shared library architecture for Lovely Robot ecosystem by creating Lov
     - `ADR_001_Library_Architecture_Strategy.md` ✅
     - `ADR_002_Lovely_Lib_Design_Decisions.md` ✅
     - `ADR_003_HZ_Lib_Scope_Definition.md` ✅
+    - `ADR_009_Entity_Hierarchy_Refactoring.md` ✅ (three-tier hierarchy)
+    - `ADR_010_Animation_Profile_System.md` ✅ (2026-04-27)
+    - `ADR_011_Variant_and_Spawn_System_Refactoring.md` ✅ (2026-04-27)
   - **Acceptance Criteria**:
     - [x] All major architectural decisions documented
     - [x] Rationale for Lovely Lib first approach explained
@@ -1664,3 +1667,60 @@ private CombatData combatData;
 - [x] Documentation updated and complete
 
 **Result**: Phase 6.2 of the entity hierarchy refactoring is complete. Both RobotEntity and MonsterEntity are fully implemented, tested, and ready for use as base classes for mod-specific implementations. The three-tier hierarchy (InternalEntity → RobotEntity/MonsterEntity → LovelyRobotEntity/MonstersEntity) is now 2/3 complete and ready for the next phases.
+
+## Progress Update - 2026-04-27
+
+### Architecture Design Phase Complete
+
+The entity architecture and animation system design discussion (see `temp/27-04-2026 Entity Architecture & Variant System Discussion.md`) has concluded with two new ADRs accepted and ready for Sprint 07 implementation.
+
+#### ✅ ADR_010: Animation Profile System
+
+**Status**: Accepted — ready for implementation
+
+**Key decisions**:
+- `AnimationProfile` replaces hardcoded `AnimationDefinitions` constants
+- Every locomotion state is an `AnimationPool` (supports variety via `SelectionStrategy`)
+- `AnimationSequence` supports multi-phase abilities with conditional loops (Dragon's Fury)
+- Pull model for exit conditions: `Predicate<LivingEntity>` evaluated each tick
+- GeckoLib boundary maintained: Common returns strings, loaders construct `RawAnimation`
+- `AnimationDefinitions` class deleted once migration complete
+
+**Asset blocker**: Dragon's Fury sequence (migration step 10) is blocked on animation asset authoring. Do not pick up this step until `attack_prepare`, `attack_charge`, `attack_approach`, `attack_strike`, `attack_fury` animation files exist.
+
+#### ✅ ADR_011: Variant and Spawn System Refactoring
+
+**Status**: Accepted — ready for implementation
+
+**Key decisions**:
+- Terminology locked: Entity Family / Entity Variant / Appearance Variant
+- `SizeVariantFeature` for dynamic hitbox via `getDimensions(Pose)` (Option B)
+- `GourdragoraType` collapses from 9 instances to 3 (Golden, Lumina, Jack'O)
+- Jack'O is an Entity Variant (different taming items = behavioral difference)
+- `initializeSpawnVariants()` hook in `InternalEntity.finalizeSpawn()`
+- Mushroom Brown biome-aware texture selection at spawn time
+- Entity type definitions moved from Fabric module to Common
+
+**Critical implementation note**: `GourdragoraEntity.readAdditionalSaveData()` must call `applyStatMultipliers()` after loading `MODEL_VARIANT` from NBT. Stats are baked at spawn but must be re-applied on world reload. This is explicitly in migration step 6 of ADR_011.
+
+---
+
+### Sprint 07 Preparation
+
+Sprint 07 implementation breaks into two parallel tracks based on the ADR migration plans:
+
+**Track A — HZLib Foundation** (unblocks everything else):
+1. `AnimationPool`, `WeightedAnimation`, `SelectionStrategy`, `LoopBehavior` in HZLib Common
+2. `AnimationProfile` with builder in HZLib Common
+3. `AnimationSequence` and `SequenceStep` in HZLib Common
+4. `SizeVariantFeature` in HZLib Common
+5. `initializeSpawnVariants()` hook in `InternalEntity`
+6. Extend `AnimatorVariantFeature` to carry `AnimationProfile`
+
+**Track B — Reference Implementations** (validates Track A, starts after Track A complete):
+1. Robot profile — replaces `AnimationStateManager` and `AnimationDefinitions`, validates baseline
+2. Gourdragora refactor — validates `SizeVariantFeature` + compound variants + coordinated spawn
+3. Mushroom Brown biome spawn — validates `initializeSpawnVariants()` hook
+4. Dragon's Fury sequence — validates `AnimationSequence` with `LOOP_UNTIL_SIGNAL` (**asset-blocked**)
+
+**Implementation order within Track A**: Implement `RANDOM` and `WEIGHTED_RANDOM` selection first (stateless). Add `SEQUENTIAL` and `AnimationSequence` together in a second pass (both require per-entity index state). Do not mix stateless and stateful paths during initial implementation.

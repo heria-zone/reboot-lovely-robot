@@ -1813,3 +1813,180 @@ HZLib InternalEntity (Generic Base) ✅ Complete
 **Previous Sprints**: 
 - Sprint 02 - NBT Recipe System (Completed 2025-11-23)
 - Sprint 01 - Vanilla & Bunny2 Implementation (Completed 2025-11-25)
+
+---
+
+## Sprint 07 Update — Animation Profile System & Variant Refactoring
+
+**Update Date**: 2026-04-27
+**Sprint**: Sprint 07 — Animation Profile & Variant System Implementation
+**ADRs**: ADR_010 (Animation Profile System), ADR_011 (Variant and Spawn System Refactoring)
+
+---
+
+### New: Animation Profile System (HZLib Common)
+
+**Location**: `sources/common/hzlib-1.21.1/Common/src/main/java/net/heriazone/hzlib/api/animation/`
+
+The hardcoded `AnimationDefinitions` constants and switch-based `AnimationStateManager` have been replaced with a data-driven `AnimationProfile` system. Every animator variant now declares its own animation set — the Java code asks for a state, the profile resolves which animation name(s) to use.
+
+**New classes**:
+
+| Class | Purpose |
+|---|---|
+| `LoopBehavior` | 6 values: `LOOP`, `PLAY_ONCE`, `HOLD_LAST_FRAME`, `INTERRUPT`, `LOOP_TIMED`, `LOOP_UNTIL_SIGNAL` |
+| `SelectionStrategy` | `RANDOM`, `WEIGHTED_RANDOM`, `SEQUENTIAL` |
+| `WeightedAnimation` | name + weight + loop behavior — pure Java, zero Minecraft/GeckoLib |
+| `AnimationPool` | List of weighted animations with stateless selection; `selectNext()` returns `null` for empty pools (fallback to idle) |
+| `ISpecialAnimation` | Marker interface for both pools and sequences |
+| `AnimationProfile` | All locomotion slots (idle/walk/rest/sit/ride/attack/hurt) as pools, optional base pose string, special animations map; full builder with shorthand and full-form methods |
+| `AnimationSequence` | Multi-phase animation chain with pull-model exit conditions (`Predicate<LivingEntity>`); implements `ISpecialAnimation` |
+| `SequenceStep` | Single step: animation name + loop behavior + duration/exit condition |
+| `SequenceState` | Per-entity runtime state for active sequences — pure Java |
+
+**Key design decisions**:
+- `AnimationProfile` and all pool/sequence classes are **zero GeckoLib** — they return `String` names only
+- Loader-specific `InternalAnimation` classes turn those strings into `RawAnimation` objects
+- Any locomotion state can have a pool of multiple animations (variety, not just idle)
+- `LoopBehavior.INTERRUPT` maps to GeckoLib's `PLAY_ONCE` (overrides other controllers)
+- `LOOP_UNTIL_SIGNAL` uses pull-model: `Predicate<LivingEntity>` evaluated each tick — AI goal doesn't need to know about animation state
+- `SEQUENTIAL` strategy requires per-entity index state (same infrastructure as `AnimationSequence`)
+
+**Deleted**:
+- `AnimationDefinitions.java` — from both lovelylib Common and hzlib Common
+- `AnimationStateManager.java` — from lovelylib Common (replaced by profile-aware locomotion in `InternalAnimation`)
+- `BaseAnimationController.java` — was entirely reflection-based GeckoLib bridging, now handled directly in loaders
+
+**Updated**:
+- `StandardAnimatorVariant` — extended with optional `AnimationProfile` field; all existing constructors remain valid (backward compatible)
+- `InternalAnimation` (Fabric, Forge, NeoForge in lovelylib) — reads profile from entity's native type feature, constructs `RawAnimation` from pool selections, legacy fallback preserved
+
+---
+
+### New: Robot Animation Profile
+
+**Location**: `sources/common/lovelylib-1.21.1/Common/src/main/java/net/heriazone/lovelylib/common/entity/LovelyRobotType.java`
+
+All 7 robot types share a single `ROBOT_ANIMATION_PROFILE` constant attached via `withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE)`:
+
+```
+idle:   "idle"   — LOOP
+walk:   "walk"   — LOOP
+rest:   "rest"   — LOOP
+sit:    "sit"    — LOOP
+attack: "attack" — INTERRUPT (overrides locomotion controller)
+```
+
+This is the reference implementation for the stateless path. Future robot types with different animation files register their own profile.
+
+---
+
+### New: SizeVariantFeature (HZLib Common)
+
+**Location**: `sources/common/hzlib-1.21.1/Common/src/main/java/net/heriazone/hzlib/api/entity/features/SizeVariantFeature.java`
+
+Carries per-size configuration for entities with size-based appearance variants. The entity reads its `MODEL_VARIANT` key and calls `getDimensionsForPose(sizeKey, pose)` for dynamic hitboxes.
+
+**`SizeConfig` fields**: model key, scale factor, `Map<Pose, EntityDimensions>`, health/attack/speed/armor multipliers, knockback resistance.
+
+**`applyTo(LivingEntity)`**: applies stat multipliers to entity attributes. Must be called at spawn AND in `readAdditionalSaveData()` after loading `MODEL_VARIANT` from NBT — otherwise stats reset on world reload.
+
+---
+
+### New: `initializeSpawnVariants()` Hook (HZLib InternalEntity)
+
+**Location**: `sources/common/hzlib-1.21.1/Common/src/main/java/net/heriazone/hzlib/api/entity/InternalEntity.java`
+
+`finalizeSpawn()` now calls `initializeSpawnVariants(world, reason)` instead of `initializeRandomVariants()` directly. Default implementation calls `initializeRandomVariants()` — existing behavior preserved.
+
+Override for context-aware selection:
+- **Gourdragora pattern**: pick size → derive animator from size → pick color independently → apply stat multipliers
+- **Mushroom Brown pattern**: look up spawn biome → select texture variant from biome map
+
+---
+
+### Refactored: Gourdragora (ADR_011)
+
+**Location**: `sources/monsters/monsters_girls-1.21.1/Fabric/src/main/java/net/heriazone/monsters_girls/entity/custom/`
+
+**Before**: 9 static `GourdragoraType` instances (3 colors × 3 sizes), 9 entity type registrations.
+
+**After**: 3 Entity Variant instances (GOLDEN, LUMINA, JACKO), 3 entity type registrations. Size is an Appearance Variant managed by `SizeVariantFeature`.
+
+| Entity Variant | Taming Items | Spawn |
+|---|---|---|
+| GOLDEN | Pumpkin Pie + Bone Meal | Year-round |
+| LUMINA | Pumpkin Pie + Bone Meal | Year-round |
+| JACKO | Pumpkin Pie + Cake | October only (spawn registration) |
+
+**Size configurations** (shared `SIZE_FEATURE` across all 3 variants):
+
+| Size | Model | Scale | Standing | Sitting | Health mult | Attack mult |
+|---|---|---|---|---|---|---|
+| mini | gourdragora_girl_mini | 1.0 | 0.5×0.8 | 0.5×0.4 | 0.56× | 0.67× |
+| default | gourdragora_girl_default | 1.0 | 0.6×1.0 | 0.6×0.5 | 1.0× | 1.0× |
+| big | gourdragora_girl_default | 1.4 | 0.8×1.4 | 0.8×0.7 | 1.67× | 2.0× |
+
+Big uses the same model as default at 1.4× renderer scale — no separate `gourdragora_girl_big.geo.json` exists.
+
+**`GourdragoraEntity` overrides**:
+- `getDimensions(Pose)` — O(1) `SizeVariantFeature` lookup, called by Minecraft on every pose change
+- `initializeSpawnVariants()` — coordinates size → animator → color in correct order
+- `readAdditionalSaveData()` — re-applies stat multipliers after NBT load (**critical for world reload**)
+
+**`MonstersConstant`**: 3 new constants added (`GOURDRAGORA_GOLDEN`, `GOURDRAGORA_LUMINA`, `GOURDRAGORA_JACKO`). Legacy 9 constants preserved for world save compatibility.
+
+---
+
+### New: MushroomBrownEntity (ADR_011)
+
+**Location**: `sources/monsters/monsters_girls-1.21.1/Fabric/src/main/java/net/heriazone/monsters_girls/entity/custom/MushroomBrownEntity.java`
+
+Extends `MushroomEntity`. Overrides `initializeSpawnVariants()` with biome-aware texture selection:
+
+| Biome | Texture |
+|---|---|
+| Taiga / Old Growth Taiga / Snowy Taiga | `mushroom_brown_ruby` |
+| Dark Forest | `mushroom_brown_scarlatina` |
+| Birch Forest / Old Growth Birch Forest | `mushroom_brown_orange` |
+| All other biomes | `mushroom_brown_boletus` (fallback) |
+
+Texture is locked at spawn. Null-safe with try/catch fallback to Boletus.
+
+`MushroomType.supportsTummyTexture()` comment fixed — no longer contradicts the `false` return value.
+
+---
+
+### Pending: Dragon's Fury Sequence (Asset-Blocked)
+
+The `AnimationSequence` infrastructure is in place. Dragon's Fury is blocked on animation asset authoring:
+- `attack_prepare`, `attack_charge`, `attack_approach`, `attack_strike`, `attack_fury`
+
+When assets are committed, the remaining work is:
+1. Register `AnimationSequence` as `"fury_attack"` special in Dragon's `AnimationProfile`
+2. Add `SequenceState activeSequence` field to `RobotEntity` or `LovelyRobotEntity`
+3. Add `isSequenceRunning()`, `startSequence()`, `clearSequence()` methods
+4. Update locomotion controller to check `isSequenceRunning()` first
+5. Wire `clearSequence()` into `discard()` and death handlers
+
+---
+
+### Pending: Runtime Validation
+
+The following require in-game testing before Sprint 07 can be fully closed:
+- All 7 robot types animate correctly (idle, walk, rest, sit, attack)
+- Vehicle sitting triggers sit animation
+- Attack INTERRUPT overrides locomotion mid-swing
+- Gourdragora spawns in all three sizes with correct hitboxes and stats
+- Sitting Gourdragora has reduced hitbox
+- Big Gourdragora renders at 1.4× scale
+- **World reload test**: Gourdragora stats persist after save/reload (NBT reapplication check)
+- Mushroom Brown spawns with correct biome texture
+
+---
+
+**Document Status**: Active
+**Last Updated**: 2026-04-27 (Sprint 07 completion)
+**Previous Update**: 2025-12-03
+**Related Sprint**: Sprint 07 — Animation Profile & Variant System Implementation
+**Previous Sprints**: Sprint 06 (Library Architecture Foundation), Sprint 03–05 (various)

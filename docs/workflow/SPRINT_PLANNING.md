@@ -60,16 +60,20 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 **Duration**: 6 weeks (3 sprints)  
 **Target Story Points**: 54 points total (18 pts/sprint)
 
-#### Sprint 07: Lovely Lib Creation & Legacy Extraction
-**Dates**: 2026-01-06 to 2026-01-19  
-**Story Points**: 18  
-**Theme**: Extract robot-specific code from Legacy to Lovely Lib  
+#### Sprint 07: Animation Profile & Variant System Implementation
+**Dates**: 2026-04-27 to 2026-05-11
+**Story Points**: 46 (54 including asset-blocked Dragon task)
+**Theme**: Implement ADR_010 and ADR_011 — animation profile system and variant/spawn refactoring
 **Major Deliverables**:
-- Lovely Lib project structure (multi-loader)
-- Entity abstractions (BaseRobotEntity patterns)
-- AI goal abstractions (Follow, Defense, Attack)
-- Item abstractions (Spawn items, cores)
-- Recipe abstractions (NBT transfer strategies)
+- `AnimationPool`, `AnimationProfile`, `AnimationSequence` in HZLib Common (Track A)
+- `SizeVariantFeature` and `initializeSpawnVariants()` hook in HZLib Common (Track A)
+- Robot profile replaces `AnimationStateManager` and `AnimationDefinitions` (Track B)
+- Gourdragora collapses from 9 to 3 entity type configurations with dynamic hitbox (Track B)
+- Mushroom Brown biome-aware texture selection at spawn (Track B)
+- Dragon's Fury sequence: **asset-blocked, not started this sprint**
+
+**Source ADRs**: ADR_010, ADR_011
+**Task File**: `docs/development/sprints/active/SPRINT_07_TASK.md`
 
 #### Sprint 08: Tribute & Reboot Environment Setup
 **Dates**: 2026-01-20 to 2026-02-02  
