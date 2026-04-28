@@ -120,12 +120,15 @@ public class NbtProcessingUtils {
             }
         }
 
-        // Validate and correct color/texture
-        int colorId = nbt.getInt(LovelyConstant.STAT_COLOR);
-        EntityTexture texture = EntityTexture.byId(colorId);
-        if (texture == null) {
-            nbt.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
-            wasValid = false;
+        // Validate color — skip if already stored as a valid string key (new system, ADR_012)
+        String colorKey = nbt.getString(LovelyConstant.STAT_COLOR);
+        if (colorKey.isEmpty()) {
+            int colorId = nbt.getInt(LovelyConstant.STAT_COLOR);
+            EntityTexture texture = EntityTexture.byId(colorId);
+            if (texture == null) {
+                nbt.putInt(LovelyConstant.STAT_COLOR, EntityTexture.RANDOM.getId());
+                wasValid = false;
+            }
         }
 
         return wasValid;

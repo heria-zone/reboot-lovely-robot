@@ -16,8 +16,79 @@ import net.minecraft.network.chat.Component;
  * <p>
  * <b>Design Decision:</b> Static utility methods provide consistent data handling
  * across all entity types while avoiding inheritance complexity.
+ * <p>
+ * <b>STAT_COLOR dual format:</b> STAT_COLOR is stored as a string key in the new
+ * system (ADR_012) but many item/tooltip systems need the int ID. Use
+ * {@link #getTextureId(CompoundTag)} to read either format safely.
  */
 public class EntityDataHelper {
+
+    // -- Color Resolution --
+
+    /**
+     * Reads the texture ID from NBT, supporting all three storage formats:
+     * <ol>
+     *   <li>{@code STAT_COLOR_VARIANT} string (new system, ADR_012) — highest priority</li>
+     *   <li>{@code STAT_COLOR} string (transitional) — second priority</li>
+     *   <li>{@code STAT_COLOR} int (legacy / item model) — fallback</li>
+     * </ol>
+     * <p>
+     * <b>Entity-specific keys:</b> New system stores keys like {@code "bunny_white"}.
+     * This method strips the entity prefix and resolves the bare color name to an int ID.
+     *
+     * @param nbt the NBT compound to read from
+     * @return int texture ID (0–15) for use with {@link EntityTexture#byId(int)}
+     */
+    public static int getTextureId(CompoundTag nbt) {
+        // Priority 1: STAT_COLOR_VARIANT string (new system — ADR_012, entity-specific key)
+        String colorVariant = nbt.getString(LovelyConstant.STAT_COLOR_VARIANT);
+        if (!colorVariant.isEmpty()) {
+            EntityTexture texture = resolveTextureFromKey(colorVariant);
+            if (texture != null && texture != EntityTexture.RANDOM) return texture.getId();
+        }
+        // Priority 2: STAT_COLOR string (transitional saves)
+        String colorKey = nbt.getString(LovelyConstant.STAT_COLOR);
+        if (!colorKey.isEmpty()) {
+            EntityTexture texture = resolveTextureFromKey(colorKey);
+            if (texture != null && texture != EntityTexture.RANDOM) return texture.getId();
+        }
+        // Priority 3: STAT_COLOR int (legacy / item model predicate)
+        return nbt.getInt(LovelyConstant.STAT_COLOR);
+    } // getTextureId ()
+
+    /**
+     * Resolves an {@link EntityTexture} from a variant key that may be entity-specific
+     * (e.g., {@code "bunny_white"}) or a bare color name (e.g., {@code "white"}).
+     * <p>
+     * Tries the full key first, then strips everything up to and including the last
+     * underscore to get the bare color name.
+     *
+     * @param key variant key to resolve
+     * @return matching {@link EntityTexture}, or {@code null} if not found
+     */
+    /**
+     * Resolves an {@link EntityTexture} from a variant key that may be entity-specific
+     * (e.g., {@code "bunny_white"}) or a bare color name (e.g., {@code "white"}).
+     * <p>
+     * Tries the full key first, then strips everything up to and including each
+     * underscore to find the bare color name.
+     *
+     * @param key variant key to resolve
+     * @return matching {@link EntityTexture}, or {@code null} if not found
+     */
+    public static EntityTexture resolveTextureFromKey(String key) {
+        EntityTexture texture = EntityTexture.byName(key);
+        if (texture != null) return texture;
+        // Strip entity prefix: "bunny_white" → "white", "bunny_light_blue" → "light_blue"
+        int lastUnderscore = key.indexOf('_');
+        while (lastUnderscore >= 0) {
+            String suffix = key.substring(lastUnderscore + 1);
+            texture = EntityTexture.byName(suffix);
+            if (texture != null) return texture;
+            lastUnderscore = key.indexOf('_', lastUnderscore + 1);
+        }
+        return null;
+    } // resolveTextureFromKey ()
 
     // -- Data Extraction Methods --
 
@@ -49,7 +120,10 @@ public class EntityDataHelper {
 
         // Entity type and appearance
         nbt.putString(LovelyConstant.STAT_TYPE, entity.nativeEntity.getKey());
-        nbt.putString(LovelyConstant.STAT_COLOR, entity.getTextureVariant());
+        // STAT_COLOR as int → item model predicate; STAT_COLOR_VARIANT as string → entity restoration
+        EntityTexture tex = resolveTextureFromKey(entity.getTextureVariant());
+        nbt.putInt(LovelyConstant.STAT_COLOR, (tex != null && tex != EntityTexture.RANDOM) ? tex.getId() : EntityTexture.WHITE.getId());
+        nbt.putString(LovelyConstant.STAT_COLOR_VARIANT, entity.getTextureVariant());
 
         // Level and experience
         nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, entity.getMaxLevel());
@@ -85,12 +159,17 @@ public class EntityDataHelper {
     public static CompoundTag validateEntityData(CompoundTag nbt) {
         CompoundTag validatedNbt = nbt.copy();
 
-        // Validate texture ID
-        int textureId = validatedNbt.getInt(LovelyConstant.STAT_COLOR);
-        // Allow RANDOM (16) as a valid texture ID, only fix invalid values
-        if (textureId < 0 || (textureId > 15 && textureId != EntityTexture.RANDOM.getId())) {
-            validatedNbt.putInt(LovelyConstant.STAT_COLOR, EntityTexture.WHITE.getId());
+        // Validate texture — skip if already stored as a valid string key (new system, ADR_012)
+        String colorKey = validatedNbt.getString(LovelyConstant.STAT_COLOR);
+        if (colorKey.isEmpty()) {
+            // Legacy int path — validate the int value
+            int textureId = validatedNbt.getInt(LovelyConstant.STAT_COLOR);
+            // Allow RANDOM (16) as a valid texture ID, only fix invalid values
+            if (textureId < 0 || (textureId > 15 && textureId != EntityTexture.RANDOM.getId())) {
+                validatedNbt.putInt(LovelyConstant.STAT_COLOR, EntityTexture.WHITE.getId());
+            }
         }
+        // If colorKey is non-empty, it's a valid string tag — leave it untouched
 
         // Validate level (non-negative)
         int level = validatedNbt.getInt(LovelyConstant.STAT_LEVEL);
@@ -160,7 +239,7 @@ public class EntityDataHelper {
         // Compare significant fields
         return nbt1.getString(LovelyConstant.STAT_CUSTOM_NAME).equals(nbt2.getString(LovelyConstant.STAT_CUSTOM_NAME)) &&
                 nbt1.getString(LovelyConstant.STAT_TYPE).equals(nbt2.getString(LovelyConstant.STAT_TYPE)) &&
-                nbt1.getInt(LovelyConstant.STAT_COLOR) == nbt2.getInt(LovelyConstant.STAT_COLOR) &&
+                getTextureId(nbt1) == getTextureId(nbt2) &&
                 nbt1.getInt(LovelyConstant.STAT_LEVEL) == nbt2.getInt(LovelyConstant.STAT_LEVEL) &&
                 nbt1.getInt(LovelyConstant.STAT_EXP) == nbt2.getInt(LovelyConstant.STAT_EXP) &&
                 Math.abs(nbt1.getFloat(LovelyConstant.STAT_HP) - nbt2.getFloat(LovelyConstant.STAT_HP)) < 0.01F &&
