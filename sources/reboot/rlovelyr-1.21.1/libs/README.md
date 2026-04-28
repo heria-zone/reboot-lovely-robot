@@ -2,36 +2,55 @@
 
 This directory contains local JAR dependencies for development purposes.
 
-## Contents
+## Required JARs
 
-This directory will contain:
-- `lovelylib-common-1.21.1-1.0.0-dev.jar` - LovelyLib common functionality
-- `lovelylib-forge-1.21.1-1.0.0-dev.jar` - LovelyLib Forge implementation
-- `lovelylib-neoforge-1.21.1-1.0.0-dev.jar` - LovelyLib NeoForge implementation
-- `lovelylib-fabric-1.21.1-1.0.0-dev.jar` - LovelyLib Fabric implementation
+### LovelyLib (`lovelylib_version=1.0.0`)
 
-## Usage
+| Loader   | Expected filename                          |
+|----------|--------------------------------------------|
+| Common   | `lovelylib-Common-1.21.1-1.0.0.jar`       |
+| Fabric   | `lovelylib-fabric-1.21.1-1.0.0.jar`       |
+| Forge    | `lovelylib-forge-1.21.1-1.0.0.jar`        |
+| NeoForge | `lovelylib-neoforge-1.21.1-1.0.0.jar`     |
 
-To refresh dependencies from LovelyLib:
+### HZLib (`hzlib_version=1.0.0`)
+
+HZLib is now a **separate library** from LovelyLib and must be added explicitly.
+
+| Loader   | Expected filename                      |
+|----------|----------------------------------------|
+| Common   | `hzlib-Common-1.21.1-1.0.0.jar`       |
+| Fabric   | `hzlib-fabric-1.21.1-1.0.0.jar`       |
+| Forge    | `hzlib-forge-1.21.1-1.0.0.jar`        |
+| NeoForge | `hzlib-neoforge-1.21.1-1.0.0.jar`     |
+
+## Build Order
+
+HZLib must be built before LovelyLib, and LovelyLib before Reboot:
+
+```
+1. Build HZLib:     cd sources/common/hzlib-1.21.1     && ./gradlew build
+2. Build LovelyLib: cd sources/common/lovelylib-1.21.1  && ./gradlew build
+3. Copy JARs to this libs/ folder (or use refreshDependencies below)
+4. Build Reboot:    cd sources/reboot/rlovelyr-1.21.1   && ./gradlew build
+```
+
+## Automated Refresh
+
+Run from the Reboot project root to build both libraries and copy all JARs automatically:
 
 ```bash
-# From the tribute project root
 ./gradlew refreshDependencies
+```
 
-# To build with fresh dependencies
+Then build and test:
+
+```bash
 ./gradlew buildWithDeps
-
-# To run client with fresh dependencies
 ./gradlew runClientWithDeps
 ```
 
-## Development Workflow
-
-1. Make changes to LovelyLib
-2. Run `./gradlew refreshDependencies` to copy latest JARs
-3. Build and test Tribute with updated dependencies
-4. Iterate as needed
-
 ## Note
 
-These JARs are for local development only. When LovelyLib is published to Maven, this directory will be removed and dependencies will be resolved from the Maven repository.
+JARs are resolved from the build output folders directly (no copy needed during development).
+Copy to this `libs/` folder only for stable/release builds.
