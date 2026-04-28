@@ -1,16 +1,13 @@
 package net.heriazone.hzlib.api.entity;
 
-import net.heriazone.hzlib.api.entity.dynamic.*;
-import net.heriazone.hzlib.framework.entity.data.*;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
-
 import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
 import net.heriazone.hzlib.api.entity.variants.interfaces.IAnimatorVariant;
 import net.heriazone.hzlib.api.entity.variants.interfaces.IModelVariant;
 import net.heriazone.hzlib.api.entity.variants.interfaces.ITextureVariant;
+import net.heriazone.hzlib.framework.entity.data.CombatData;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,19 +15,25 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * <p>Abstract base class for entity type definitions with Minecraft integration.<p>
+ * <p>Abstract base class for all entity type definitions in the HZLib ecosystem.<p>
  * <p>
- * <b>Architecture:</b> Bridges pure Java framework layer with Minecraft's resource system.
- * Provides feature composition pattern allowing optional modules (TextureVariantFeature, 
- * ModelVariantFeature, etc.) to be attached without inheritance coupling.
+ * <b>Architecture:</b> Single shared base for both robot types ({@code NativeEntityType}
+ * in lovelylib) and monster types ({@code NativeEntityType} in monsters_girls). Provides
+ * the feature composition pattern, combat stats configuration, and the
+ * {@link #configureVariants()} hook for variant registration.
  * <p>
  * <b>Design Decision:</b> Generic self-type parameter enables fluent builder pattern with
  * correct return types in subclasses. Feature system uses Class-keyed map for type-safe
- * retrieval without casting. Variant system uses registry-based approach for flexibility.
+ * retrieval without casting. Variant registration is delegated to subclasses via
+ * {@link #configureVariants()} rather than abstract populate methods, allowing
+ * string-keyed variant features ({@link TextureVariantFeature}, {@link ModelVariantFeature},
+ * {@link AnimatorVariantFeature}) to be registered without enum coupling.
  * <p>
- * <b>Resource Management:</b> Delegates variant configuration to feature classes,
- * allowing entity-specific variant selection while maintaining consistent access patterns
- * through the global variant registry system.
+ * <b>Variant System:</b> All variant resolution goes through the feature system.
+ * Subclasses register variants in {@link #configureVariants()} using
+ * {@link #withFeature(Class, Object)}. Entities resolve variants at runtime via
+ * {@link #getTextureVariant(String, String)}, {@link #getModelVariant(String, String)},
+ * and {@link #getAnimatorVariant(String, String)}.
  * <p>
  * <b>Thread Safety:</b> Not thread-safe. Feature map modifications must be synchronized
  * if accessed across threads.
@@ -46,109 +49,102 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
 
     // -- Data Container --
 
+    /**
+     * <p>Base combat statistics for this entity type.<p>
+     * <p>
+     * <b>Architecture:</b> Contains HP, attack, speed, armor — the flat stats every
+     * entity needs for {@code createAttributes()}. No leveling, no experience.
+     * Robot-specific scaling (CombatLevelStats) lives in HZLib's RobotEntity tier.
+     */
     protected final CombatData data;
-
-    // -- Resource Maps --
-
-    protected final ResourceMap<String, ResourceLocation> textures;
-    protected final ResourceMap<String, ResourceLocation> models;
-    protected final ResourceMap<String, ResourceLocation> animators;
-    //protected final ResourceMap<IInternalVariant, ResourceLocation> textures;
-    //protected final ResourceMap<IInternalVariant, ResourceLocation> models;
-    //protected final ResourceMap<IInternalVariant, ResourceLocation> animators;
 
     // -- Feature System --
 
     private final Map<Class<?>, Object> features;
 
-    // -- Constructors --
+    // -- Constructor --
 
     /**
-     * Creates entity type with specified identification and initializes feature system.
+     * Creates entity type with specified key, initializes combat data, and calls
+     * {@link #configureVariants()} to allow subclasses to register variant features.
      * <p>
-     * <b>State Impact:</b> Calls abstract configuration method to initialize variant features.
-     * Subclasses must ensure configuration methods are safe to call during construction.
+     * <b>State Impact:</b> {@link #configureVariants()} is called during construction.
+     * Subclass implementations must not depend on subclass-level state that hasn't
+     * been initialized yet.
      *
-     * @param key unique identifier for this entity type
+     * @param key unique identifier for this entity type (e.g., {@code "bunny"}, {@code "mushroom_brown"})
+     * @throws NullPointerException if key is null
      */
     protected InternalEntityType(String key) {
-        this.key = Objects.requireNonNull(key, "Entity type key cannot be null");
-        this.data = new CombatData(key, "entity." + key);
-        this.name = createTranslation(key);
+        this.key      = Objects.requireNonNull(key, "Entity type key cannot be null");
+        this.data     = new CombatData(key, "entity." + key);
+        this.name     = createTranslation(key);
         this.features = new HashMap<>();
 
-        this.textures = new ResourceMap<>(); // Replace later with a TextureFeature
-        this.models = new ResourceMap<>();  // Replace later with a ModelFeature
-        this.animators = new ResourceMap<>();  // Replace later with a AnimatorFeature
-
-        // Configure variant features through subclass implementation
+        // Allow subclasses to register variant features (TextureVariantFeature, etc.)
         configureVariants();
     } // Constructor: InternalEntityType ()
 
     // -- Abstract Methods --
 
     /**
-     * Populates texture resource map with variant-specific textures.
+     * Creates the translatable display name for this entity type.
      * <p>
-     * <b>Implementation Requirements:</b> Must register at least DEFAULT variant.
-     * Called during construction, so must not depend on subclass state.
+     * <b>Implementation:</b> Typically returns a translation component using the
+     * entity type key. Called during construction — must not depend on subclass state.
      *
-     * @param textures resource map to populate with texture identifiers
-     */
-    protected abstract void populateTextures(ResourceMap<InternalTextureVariant<?>, ResourceLocation> textures);
-
-    /**
-     * Populates model resource map with variant-specific models.
-     * <p>
-     * <b>Implementation Requirements:</b> Must register at least DEFAULT variant.
-     * Called during construction, so must not depend on subclass state.
-     *
-     * @param models resource map to populate with model identifiers
-     */
-    protected abstract void populateModels(ResourceMap<InternalModelVariant<?>, ResourceLocation> models);
-
-    /**
-     * Populates animator resource map with variant-specific animators.
-     * <p>
-     * <b>Implementation Requirements:</b> Must register at least DEFAULT variant.
-     * Called during construction, so must not depend on subclass state.
-     *
-     * @param animators resource map to populate with animator identifiers
-     */
-    protected abstract void populateAnimators(ResourceMap<InternalAnimatorVariant<?>, ResourceLocation> animators);
-
-    /**
-     * Creates translatable text component for entity type name.
-     * <p>
-     * <b>Implementation Requirements:</b> Must return valid MutableComponent for display.
-     * Typically, creates translation key from entity type key.
-     *
-     * @param key entity type key for translation
-     * @return translatable text component for entity name
+     * @param key entity type key
+     * @return translatable text component for display
      */
     protected abstract MutableComponent createTranslation(String key);
 
+    // -- Variant Configuration Hook --
+
     /**
-     * Configures variant features for this entity type.
+     * Registers variant features for this entity type.
      * <p>
-     * <b>Implementation Requirements:</b> Must configure at least texture variants.
-     * Called during construction, so must not depend on subclass state.
+     * <b>Override contract:</b> Override to register {@link TextureVariantFeature},
+     * {@link ModelVariantFeature}, and {@link AnimatorVariantFeature} via
+     * {@link #withFeature(Class, Object)}. Called during construction.
      * <p>
-     * <b>Typical Implementation:</b>
+     * <b>Robot pattern:</b>
      * <pre>{@code
+     * @Override
+     * protected void configureVariants() {
+     *     withFeature(ModelVariantFeature.class, new ModelVariantFeature()
+     *         .withVariants(key, "default", "armed")
+     *         .withDefault(key, "default"));
+     *     withFeature(AnimatorVariantFeature.class, new AnimatorVariantFeature()
+     *         .withVariants(key, "default")
+     *         .withDefault(key, "default"));
+     *     // Texture variants registered separately via withColorPalette()
+     * }
+     * }</pre>
+     * <p>
+     * <b>Monster pattern:</b>
+     * <pre>{@code
+     * @Override
      * protected void configureVariants() {
      *     withFeature(TextureVariantFeature.class, new TextureVariantFeature()
-     *         .withVariants(key, "default", "seasonal", "special")
+     *         .withVariants(key, "default", "tummy")
+     *         .withDefault(key, "default"));
+     *     withFeature(ModelVariantFeature.class, new ModelVariantFeature()
+     *         .withVariants(key, "default")
+     *         .withDefault(key, "default"));
+     *     withFeature(AnimatorVariantFeature.class, new AnimatorVariantFeature()
+     *         .withVariants(key, "default")
      *         .withDefault(key, "default"));
      * }
      * }</pre>
      */
-    protected void configureVariants() {} // TODO: STUDY THIS LATER
+    protected void configureVariants() {
+        // Default: no variants registered. Subclasses override to register features.
+    } // configureVariants ()
 
     // -- Public Accessors --
 
     /**
-     * Returns unique identifier for this entity type.
+     * Returns the unique identifier for this entity type.
      *
      * @return entity type key
      */
@@ -157,7 +153,7 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
     } // getKey ()
 
     /**
-     * Returns translatable name for this entity type.
+     * Returns the translatable display name for this entity type.
      *
      * @return translatable text component
      */
@@ -166,70 +162,44 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
     } // getName ()
 
     /**
-     * Returns combat statistics and metadata container.
+     * Returns the base combat statistics container.
+     * <p>
+     * <b>Usage:</b> Read by {@code InternalEntity.createAttributes()} to set
+     * Minecraft entity attributes (MAX_HEALTH, ATTACK_DAMAGE, etc.).
      *
-     * @return entity type data
+     * @return combat data with base HP, attack, speed, armor
      */
     public CombatData getData() {
         return data;
     } // getData ()
 
-    /**
-     * Returns texture resource map.
-     *
-     * @return texture variant to resource location mapping
-     */
-    public ResourceMap<String, ResourceLocation> getTextures() {
-        return textures;
-    } // getTextures ()
-
-    /**
-     * Returns model resource map.
-     *
-     * @return model variant to resource location mapping
-     */
-    public ResourceMap<String, ResourceLocation> getModels() {
-        return models;
-    } // getModels ()
-
-    /**
-     * Returns animator resource map.
-     *
-     * @return animator variant to resource location mapping
-     */
-    public ResourceMap<String, ResourceLocation> getAnimators() {
-        return animators;
-    } // getAnimators ()
-
     // -- Variant Access Methods --
 
     /**
-     * Returns texture variant for specified entity key and variant key.
+     * Returns the texture variant for the specified entity key and variant key.
      * <p>
-     * <b>Registry Integration:</b> Queries TextureVariantFeature if present,
-     * otherwise returns null. Callers should handle null gracefully.
+     * <b>Null safety:</b> Returns {@code null} if no {@link TextureVariantFeature}
+     * is registered or if the variant key is not found. Callers should handle null.
      *
-     * @param entityKey entity identifier for variant filtering
-     * @param variantKey specific variant to retrieve
-     * @return texture variant if available, null otherwise
+     * @param entityKey  entity identifier for variant filtering
+     * @param variantKey specific variant key to retrieve (e.g., {@code "white"}, {@code "default"})
+     * @return texture variant if available, {@code null} otherwise
      */
     public ITextureVariant getTextureVariant(String entityKey, String variantKey) {
         return getFeature(TextureVariantFeature.class)
                 .filter(feature -> feature.hasVariant(entityKey, variantKey))
                 .map(feature -> feature.getAvailableVariants(entityKey).stream()
-                        .filter(variant -> variant.getKey().equals(variantKey))
+                        .filter(v -> v.getKey().equals(variantKey))
                         .findFirst()
                         .orElse(null))
                 .orElse(null);
     } // getTextureVariant ()
 
     /**
-     * Returns default texture variant for specified entity key.
-     * <p>
-     * <b>Fallback Behavior:</b> Returns highest priority variant if no default configured.
+     * Returns the default texture variant for the specified entity key.
      *
-     * @param entityKey entity identifier for variant filtering
-     * @return default texture variant, or null if no variants configured
+     * @param entityKey entity identifier
+     * @return default texture variant, or {@code null} if no variants configured
      */
     public ITextureVariant getDefaultTextureVariant(String entityKey) {
         return getFeature(TextureVariantFeature.class)
@@ -238,32 +208,27 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
     } // getDefaultTextureVariant ()
 
     /**
-     * Returns model variant for specified entity key and variant key.
-     * <p>
-     * <b>Registry Integration:</b> Queries ModelVariantFeature if present,
-     * otherwise returns null. Callers should handle null gracefully.
+     * Returns the model variant for the specified entity key and variant key.
      *
-     * @param entityKey entity identifier for variant filtering
-     * @param variantKey specific variant to retrieve
-     * @return model variant if available, null otherwise
+     * @param entityKey  entity identifier
+     * @param variantKey specific variant key (e.g., {@code "default"}, {@code "armed"})
+     * @return model variant if available, {@code null} otherwise
      */
     public IModelVariant getModelVariant(String entityKey, String variantKey) {
         return getFeature(ModelVariantFeature.class)
                 .filter(feature -> feature.hasVariant(entityKey, variantKey))
                 .map(feature -> feature.getAvailableVariants(entityKey).stream()
-                        .filter(variant -> variant.getKey().equals(variantKey))
+                        .filter(v -> v.getKey().equals(variantKey))
                         .findFirst()
                         .orElse(null))
                 .orElse(null);
     } // getModelVariant ()
 
     /**
-     * Returns default model variant for specified entity key.
-     * <p>
-     * <b>Fallback Behavior:</b> Returns highest priority variant if no default configured.
+     * Returns the default model variant for the specified entity key.
      *
-     * @param entityKey entity identifier for variant filtering
-     * @return default model variant, or null if no variants configured
+     * @param entityKey entity identifier
+     * @return default model variant, or {@code null} if no variants configured
      */
     public IModelVariant getDefaultModelVariant(String entityKey) {
         return getFeature(ModelVariantFeature.class)
@@ -272,32 +237,27 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
     } // getDefaultModelVariant ()
 
     /**
-     * Returns animator variant for specified entity key and variant key.
-     * <p>
-     * <b>Registry Integration:</b> Queries AnimatorVariantFeature if present,
-     * otherwise returns null. Callers should handle null gracefully.
+     * Returns the animator variant for the specified entity key and variant key.
      *
-     * @param entityKey entity identifier for variant filtering
-     * @param variantKey specific variant to retrieve
-     * @return animator variant if available, null otherwise
+     * @param entityKey  entity identifier
+     * @param variantKey specific variant key (e.g., {@code "default"})
+     * @return animator variant if available, {@code null} otherwise
      */
     public IAnimatorVariant getAnimatorVariant(String entityKey, String variantKey) {
         return getFeature(AnimatorVariantFeature.class)
                 .filter(feature -> feature.hasVariant(entityKey, variantKey))
                 .map(feature -> feature.getAvailableVariants(entityKey).stream()
-                        .filter(variant -> variant.getKey().equals(variantKey))
+                        .filter(v -> v.getKey().equals(variantKey))
                         .findFirst()
                         .orElse(null))
                 .orElse(null);
     } // getAnimatorVariant ()
 
     /**
-     * Returns default animator variant for specified entity key.
-     * <p>
-     * <b>Fallback Behavior:</b> Returns highest priority variant if no default configured.
+     * Returns the default animator variant for the specified entity key.
      *
-     * @param entityKey entity identifier for variant filtering
-     * @return default animator variant, or null if no variants configured
+     * @param entityKey entity identifier
+     * @return default animator variant, or {@code null} if no variants configured
      */
     public IAnimatorVariant getDefaultAnimatorVariant(String entityKey) {
         return getFeature(AnimatorVariantFeature.class)
@@ -305,85 +265,21 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
                 .orElse(null);
     } // getDefaultAnimatorVariant ()
 
-    // -- Legacy Compatibility Methods --
-
-    /**
-     * Returns texture resource location for specified variant.
-     * <p>
-     * <b>Legacy Support:</b> Maintains compatibility with direct texture access.
-     * Uses entity key as both entity and variant identifier for backward compatibility.
-     *
-     * @param variantKey variant identifier
-     * @return texture resource location, or null if not available
-     */
-    public ResourceLocation getTexture(String variantKey) {
-        return textures.get(variantKey);
-    } // getTexture ()
-
-    /**
-     * Returns model resource location for specified variant.
-     * <p>
-     * <b>Legacy Support:</b> Maintains compatibility with direct model access.
-     * Uses entity key as both entity and variant identifier for backward compatibility.
-     *
-     * @param variantKey variant identifier
-     * @return model resource location, or null if not available
-     */
-    public ResourceLocation getModel(String variantKey) {
-        return models.get(variantKey);
-    } // getModel ()
-
-    /**
-     * Returns animator resource location for specified variant.
-     * <p>
-     * <b>Legacy Support:</b> Maintains compatibility with direct animator access.
-     * Uses entity key as both entity and variant identifier for backward compatibility.
-     *
-     * @param variantKey variant identifier
-     * @return animator resource location, or null if not available
-     */
-    public ResourceLocation getAnimator(String variantKey) {
-        return animators.get(variantKey);
-    } // getAnimator ()
-
-    // -- Visual --
-
-    /**
-     * Adds textures to the InternalEntityType.
-     *
-     * @param overrideDefault indicates whether to override the default texture.
-     * @param textureMap      the set of textures to add.
-     * @return the updated InternalEntityType instance.
-     */
-    protected abstract T addTextures(boolean overrideDefault, InternalTextureVariant<?>... textureMap);
-
-    /**
-     * Adds animations to the InternalEntityType entity based on the provided animation set.
-     *
-     * @param animationMap the set of animations to add
-     * @return the updated InternalEntityType instance with animations added
-     */
-    protected abstract T addAnimations(InternalAnimationVariant<?>... animationMap);
-
-
-
     // -- Combat Stats Configuration --
 
     /**
-     * Configures all combat statistics in single fluent call.
+     * Configures all base combat statistics in a single fluent call.
      * <p>
-     * <b>Design Decision:</b> Bulk setter rather than individual setters reduces
-     * boilerplate in entity type definitions while maintaining type safety.
-     * <p>
-     * <b>State Impact:</b> Updates all combat stat fields in CombatData.
-     * Values are clamped to valid ranges by CombatData setters.
+     * <b>Design Decision:</b> Bulk setter reduces boilerplate in entity type definitions.
+     * These are the flat base stats — no leveling, no scaling. Robot-specific stat
+     * scaling (CombatLevelStats) is handled in HZLib's RobotEntity tier.
      *
-     * @param health maximum health points
-     * @param attack damage per attack
-     * @param speed attacks per second
-     * @param armor armor points
+     * @param health    maximum health points
+     * @param attack    damage per attack
+     * @param speed     attack speed (attacks per second)
+     * @param armor     armor points
      * @param toughness armor toughness points
-     * @param knockback knockback resistance (0.0-1.0)
+     * @param knockback knockback resistance (0.0–1.0)
      * @param moveSpeed movement speed multiplier
      * @return this instance for method chaining
      */
@@ -403,17 +299,18 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
     // -- Feature System --
 
     /**
-     * Attaches feature module to this entity type.
+     * Attaches a feature module to this entity type.
      * <p>
      * <b>Architecture:</b> Enables composition over inheritance for optional functionality.
      * Features are stored by class type, allowing type-safe retrieval without casting.
      * <p>
-     * <b>Design Decision:</b> Class-keyed map rather than string keys provides compile-time
-     * type safety and eliminates string constant management.
+     * <b>Examples:</b> {@link TextureVariantFeature}, {@link ModelVariantFeature},
+     * {@link AnimatorVariantFeature}, {@code LevelFeature}, {@code FoodFeature},
+     * {@code DropFeature}, {@code PickupFeature}.
      *
-     * @param <F> feature type
-     * @param featureClass class object for feature type
-     * @param feature feature instance to attach
+     * @param <F>          feature type
+     * @param featureClass class object for the feature type
+     * @param feature      feature instance to attach
      * @return this instance for method chaining
      * @throws NullPointerException if featureClass or feature is null
      */
@@ -426,14 +323,14 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
     } // withFeature ()
 
     /**
-     * Retrieves feature module of specified type.
+     * Retrieves a feature module of the specified type.
      * <p>
-     * <b>Type Safety:</b> Returns Optional with correct generic type, eliminating
-     * need for casting at call sites.
+     * <b>Type Safety:</b> Returns {@code Optional} with correct generic type,
+     * eliminating the need for casting at call sites.
      *
-     * @param <F> feature type
-     * @param featureClass class object for feature type
-     * @return Optional containing feature if present, empty otherwise
+     * @param <F>          feature type
+     * @param featureClass class object for the feature type
+     * @return {@code Optional} containing the feature if present, empty otherwise
      * @throws NullPointerException if featureClass is null
      */
     @SuppressWarnings("unchecked")
@@ -443,10 +340,10 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
     } // getFeature ()
 
     /**
-     * Checks if feature module of specified type is attached.
+     * Checks whether a feature module of the specified type is attached.
      *
-     * @param featureClass class object for feature type
-     * @return true if feature is present, false otherwise
+     * @param featureClass class object for the feature type
+     * @return {@code true} if the feature is present, {@code false} otherwise
      * @throws NullPointerException if featureClass is null
      */
     public boolean hasFeature(Class<?> featureClass) {

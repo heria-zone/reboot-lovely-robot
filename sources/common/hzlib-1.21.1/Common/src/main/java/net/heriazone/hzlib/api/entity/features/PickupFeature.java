@@ -1,6 +1,6 @@
-package net.heriazone.lovelylib.api.entity.features;
+package net.heriazone.hzlib.api.entity.features;
 
-import net.heriazone.lovelylib.Lovely;
+import net.heriazone.hzlib.framework.utils.Version;
 import net.heriazone.hzlib.utils.IReadWriteNBT;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -150,7 +150,7 @@ public class PickupFeature {
      * @param entity entity to receive data
      * @throws NullPointerException if stack or entity is null
      */
-    public void applyPickupData(@NotNull ItemStack stack, @NotNull IReadWriteNBT entity) {
+    public void applyPickupData(@NotNull ItemStack stack, @NotNull IReadWriteNBT entity, Version version) {
         Objects.requireNonNull(stack, "ItemStack cannot be null");
         Objects.requireNonNull(entity, "Entity cannot be null");
 
@@ -159,7 +159,7 @@ public class PickupFeature {
         if (customData != null && !customData.isEmpty()) {
             CompoundTag entityData = customData.copyTag();
             // Entity interprets its own data through readFromNBT
-            entity.readFromNBT(entityData, Lovely.DATA_VERSION);
+            entity.readFromNBT(entityData, version);
         }
     } // applyPickupData ()
 
