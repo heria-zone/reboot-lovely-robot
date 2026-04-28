@@ -9,6 +9,7 @@ import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.llovelyr.LegacyIdentifier;
 import net.heriazone.llovelyr.Legacy;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.minecraftforge.registries.*;
 import net.minecraft.world.level.Level;
@@ -80,13 +81,13 @@ public class LegacyEntities {
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
-        event.put(BUNNY.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.BUNNY));
-        event.put(BUNNY2.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.BUNNY2));
-        event.put(DRAGON.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.DRAGON));
-        event.put(HONEY.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.HONEY));
-        event.put(KITSUNE.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.KITSUNE));
-        event.put(NEKO.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.NEKO));
-        event.put(VANILLA.get(), LovelyRobotEntity.createAttributes(LegacyRobotType.VANILLA));
+        event.put(BUNNY.get(),   InternalEntity.createAttributes(LegacyRobotType.BUNNY));
+        event.put(BUNNY2.get(),  InternalEntity.createAttributes(LegacyRobotType.BUNNY2));
+        event.put(DRAGON.get(),  InternalEntity.createAttributes(LegacyRobotType.DRAGON));
+        event.put(HONEY.get(),   InternalEntity.createAttributes(LegacyRobotType.HONEY));
+        event.put(KITSUNE.get(), InternalEntity.createAttributes(LegacyRobotType.KITSUNE));
+        event.put(NEKO.get(),    InternalEntity.createAttributes(LegacyRobotType.NEKO));
+        event.put(VANILLA.get(), InternalEntity.createAttributes(LegacyRobotType.VANILLA));
     } // registerAttribute()
 
     /**

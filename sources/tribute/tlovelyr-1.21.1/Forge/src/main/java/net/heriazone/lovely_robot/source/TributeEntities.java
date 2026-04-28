@@ -6,6 +6,7 @@ import net.heriazone.lovelylib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.tribute.TributeRobotType;
 import net.minecraft.world.entity.EntityType;
@@ -80,10 +81,10 @@ public class TributeEntities {
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
-        event.put(BUNNY.get(), LovelyRobotEntity.createAttributes(TributeRobotType.BUNNY));
-        event.put(BUNNY2.get(), LovelyRobotEntity.createAttributes(TributeRobotType.BUNNY2));
-        event.put(HONEY.get(), LovelyRobotEntity.createAttributes(TributeRobotType.HONEY));
-        event.put(VANILLA.get(), LovelyRobotEntity.createAttributes(TributeRobotType.VANILLA));
+        event.put(BUNNY.get(),   InternalEntity.createAttributes(TributeRobotType.BUNNY));
+        event.put(BUNNY2.get(),  InternalEntity.createAttributes(TributeRobotType.BUNNY2));
+        event.put(HONEY.get(),   InternalEntity.createAttributes(TributeRobotType.HONEY));
+        event.put(VANILLA.get(), InternalEntity.createAttributes(TributeRobotType.VANILLA));
     } // registerAttribute()
 
     /**

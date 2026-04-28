@@ -8,6 +8,7 @@ import net.heriazone.lovelylib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.tribute.TributeRobotType;
 import net.minecraft.core.Registry;
@@ -62,10 +63,10 @@ public class TributeEntities {
      * Registers entity attributes.
      */
     public static void register() {
-        FabricDefaultAttributeRegistry.register(BUNNY, LovelyRobotEntity.createAttributes(TributeRobotType.BUNNY));
-        FabricDefaultAttributeRegistry.register(BUNNY2, LovelyRobotEntity.createAttributes(TributeRobotType.BUNNY2));
-        FabricDefaultAttributeRegistry.register(HONEY, LovelyRobotEntity.createAttributes(TributeRobotType.HONEY));
-        FabricDefaultAttributeRegistry.register(VANILLA, LovelyRobotEntity.createAttributes(TributeRobotType.VANILLA));
+        FabricDefaultAttributeRegistry.register(BUNNY,   InternalEntity.createAttributes(TributeRobotType.BUNNY));
+        FabricDefaultAttributeRegistry.register(BUNNY2,  InternalEntity.createAttributes(TributeRobotType.BUNNY2));
+        FabricDefaultAttributeRegistry.register(HONEY,   InternalEntity.createAttributes(TributeRobotType.HONEY));
+        FabricDefaultAttributeRegistry.register(VANILLA, InternalEntity.createAttributes(TributeRobotType.VANILLA));
     } // register ()
 
     /**

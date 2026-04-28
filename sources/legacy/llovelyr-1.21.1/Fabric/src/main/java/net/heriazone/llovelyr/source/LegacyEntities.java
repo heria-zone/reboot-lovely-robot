@@ -8,6 +8,7 @@ import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.llovelyr.LegacyIdentifier;
+import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Registry;
@@ -62,13 +63,13 @@ public class LegacyEntities {
      * Registers entity attributes.
      */
     public static void register() {
-        FabricDefaultAttributeRegistry.register(BUNNY, LovelyRobotEntity.createAttributes(LegacyRobotType.BUNNY));
-        FabricDefaultAttributeRegistry.register(BUNNY2, LovelyRobotEntity.createAttributes(LegacyRobotType.BUNNY2));
-        FabricDefaultAttributeRegistry.register(DRAGON, LovelyRobotEntity.createAttributes(LegacyRobotType.DRAGON));
-        FabricDefaultAttributeRegistry.register(HONEY, LovelyRobotEntity.createAttributes(LegacyRobotType.HONEY));
-        FabricDefaultAttributeRegistry.register(KITSUNE, LovelyRobotEntity.createAttributes(LegacyRobotType.KITSUNE));
-        FabricDefaultAttributeRegistry.register(NEKO, LovelyRobotEntity.createAttributes(LegacyRobotType.NEKO));
-        FabricDefaultAttributeRegistry.register(VANILLA, LovelyRobotEntity.createAttributes(LegacyRobotType.VANILLA));
+        FabricDefaultAttributeRegistry.register(BUNNY,   InternalEntity.createAttributes(LegacyRobotType.BUNNY));
+        FabricDefaultAttributeRegistry.register(BUNNY2,  InternalEntity.createAttributes(LegacyRobotType.BUNNY2));
+        FabricDefaultAttributeRegistry.register(DRAGON,  InternalEntity.createAttributes(LegacyRobotType.DRAGON));
+        FabricDefaultAttributeRegistry.register(HONEY,   InternalEntity.createAttributes(LegacyRobotType.HONEY));
+        FabricDefaultAttributeRegistry.register(KITSUNE, InternalEntity.createAttributes(LegacyRobotType.KITSUNE));
+        FabricDefaultAttributeRegistry.register(NEKO,    InternalEntity.createAttributes(LegacyRobotType.NEKO));
+        FabricDefaultAttributeRegistry.register(VANILLA, InternalEntity.createAttributes(LegacyRobotType.VANILLA));
     } // register ()
 
     /**
