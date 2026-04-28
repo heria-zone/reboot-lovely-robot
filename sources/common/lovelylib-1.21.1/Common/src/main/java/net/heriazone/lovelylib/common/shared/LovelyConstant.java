@@ -37,7 +37,10 @@ public class LovelyConstant {
     public static final String STAT_CREATOR = "creator";
     public static final String STAT_CREDITS = "credits";
     public static final String STAT_OWNER = "owner";
+    /** Int texture ID (0–15) — used by item model predicates. */
     public static final String STAT_COLOR = "color";
+    /** String texture variant key (e.g., "magenta") — used by entity restoration (ADR_012). */
+    public static final String STAT_COLOR_VARIANT = "color_variant";
     public static final String STAT_TYPE = "type";
     public static final String STAT_MAX_LEVEL = "max_level";
     public static final String STAT_LEVEL = "level";

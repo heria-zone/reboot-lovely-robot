@@ -181,21 +181,23 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
 
         for (EntityTexture color : EntityTexture.VALUES) {
             if (color != EntityTexture.RANDOM) {
-                String colorKey  = color.Name(); // "white", "orange", "magenta", etc.
+                // Entity-specific key prevents global registry collisions between robot types.
+                // e.g., "bunny_white", "kitsune_magenta" — not just "white", "magenta".
+                String colorKey  = key + "_" + color.Name(); // "bunny_white", "bunny_orange", etc.
                 String colorId   = String.format("%02d", color.getId());
                 ResourceLocation path = LovelyIdentifier.getId(
                         basePath + variant.getName() + "_" + colorId + ".png");
 
-                // Register in the global variant registry
+                // Register in the global variant registry with entity-specific key
                 net.heriazone.hzlib.api.entity.variants.VariantRegistries.TEXTURES.register(
-                        new StandardTextureVariant(colorKey, colorKey, path.toString(), color.getId())
+                        new StandardTextureVariant(colorKey, color.Name(), path.toString(), color.getId())
                 );
 
                 feature.withVariant(key, colorKey);
             }
         }
 
-        feature.withDefault(key, EntityTexture.WHITE.Name());
+        feature.withDefault(key, key + "_" + EntityTexture.WHITE.Name());
         withFeature(TextureVariantFeature.class, feature);
 
         return this;

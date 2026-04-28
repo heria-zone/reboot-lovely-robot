@@ -13,6 +13,7 @@ import net.heriazone.hzlib.framework.entity.data.ProtectionStats;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.heriazone.hzlib.utils.Utils;
 import net.heriazone.lovelylib.Lovely;
+import net.heriazone.lovelylib.utils.EntityDataHelper;
 import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
 import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
 import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
@@ -284,6 +285,21 @@ public abstract class RobotEntity extends InternalEntity {
         if (nativeEntity == null || !nativeEntity.hasFeature(CombatLevelFeature.class)) return 0;
         return (int) getCombatFeature().calculateArmor(combatStats.getLevel());
     } // getArmorLevel ()
+
+    /**
+     * Resolves the current texture variant to an int ID for item model predicates.
+     * <p>
+     * <b>Architecture:</b> The item model predicate system requires an int (0–15).
+     * The entity stores texture as an entity-specific string key (e.g., {@code "bunny_white"}).
+     * This method strips the entity prefix and returns the corresponding int ID.
+     * Falls back to WHITE (0) if the key cannot be resolved.
+     *
+     * @return int texture ID (0–15) for use in item NBT as {@code STAT_COLOR}
+     */
+    private int resolveTextureIdForItem() {
+        EntityTexture texture = EntityDataHelper.resolveTextureFromKey(getTextureVariant());
+        return (texture != null && texture != EntityTexture.RANDOM) ? texture.getId() : EntityTexture.WHITE.getId();
+    } // resolveTextureIdForItem ()
 
     // NOTIFICATION — delegates to InternalEntity.isNotificationEnabled()
 
@@ -888,18 +904,23 @@ public abstract class RobotEntity extends InternalEntity {
     } // readAdditionalSaveData ()
 
     /**
-     * Migrates old int-based {@code TextureID} to the new string-keyed
+     * Migrates old int-based {@code TextureID} to the new entity-specific string-keyed
      * {@code TextureVariant} system on first load of old saves.
      * <p>
      * <b>Mapping:</b> Uses {@link EntityTexture#byId(int)} to convert the old
-     * int ID (0–15) to the corresponding color name string.
+     * int ID (0–15) to the entity-specific color key (e.g., {@code "bunny_white"}).
      *
      * @param oldTextureId the old int texture ID (0–15)
      */
     @Override
     protected void migrateTextureId(int oldTextureId) {
         EntityTexture texture = EntityTexture.byId(oldTextureId);
-        setTextureVariant(texture.Name()); // "white", "orange", "magenta", etc.
+        // Entity-specific key: "bunny_white", "kitsune_magenta", etc.
+        if (nativeEntity != null) {
+            setTextureVariant(nativeEntity.getKey() + "_" + texture.Name());
+        } else {
+            setTextureVariant(texture.Name()); // fallback if nativeEntity not set yet
+        }
     } // migrateTextureId ()
 
     // -- Child Creation --
@@ -1045,6 +1066,39 @@ public abstract class RobotEntity extends InternalEntity {
         super.setTarget(target);
     } // setTarget ()
 
+    /**
+     * Wires Minecraft's attack callback to {@link #handleAttackTarget(Entity)}.
+     * <p>
+     * <b>Architecture:</b> This is the entry point for exp accumulation and combat
+     * mode activation on attack. Without this override, {@link #handleAttackTarget}
+     * would never be called and robots would never gain exp.
+     */
+    @Override
+    public boolean doHurtTarget(@NotNull Entity target) {
+        handleAttackTarget(target);
+        return super.doHurtTarget(target);
+    } // doHurtTarget ()
+
+    /**
+     * Wires Minecraft's damage callback to {@link #handleDamage(DamageSource, float)}.
+     * <p>
+     * <b>Architecture:</b> Applies protection reductions, auto-upgrades protections,
+     * and accumulates exp from the attacker. Returns false to cancel damage if
+     * friendly fire is disabled or the robot is invulnerable.
+     */
+    @Override
+    public boolean hurt(@NotNull DamageSource source, float amount) {
+        boolean result = handleDamage(source, amount);
+
+        // Non-player, non-arrow attackers deal halved damage (prevents mob farming)
+        final Entity entity = source.getEntity();
+        if (entity != null && !(entity instanceof Player) && !(entity instanceof net.minecraft.world.entity.projectile.Arrow)) {
+            amount = (amount + 1.0f) / 2.0f;
+        }
+
+        return result && super.hurt(source, amount);
+    } // hurt ()
+
     @Override
     public boolean isFood(ItemStack itemStack) {
         return false;
@@ -1157,7 +1211,9 @@ public abstract class RobotEntity extends InternalEntity {
         if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
         nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putString(LovelyConstant.STAT_COLOR, this.getTextureVariant());
+        // STAT_COLOR as int → item model predicate; STAT_COLOR_VARIANT as string → entity restoration
+        nbt.putInt(LovelyConstant.STAT_COLOR, resolveTextureIdForItem());
+        nbt.putString(LovelyConstant.STAT_COLOR_VARIANT, this.getTextureVariant());
 
         nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
@@ -1406,23 +1462,24 @@ public abstract class RobotEntity extends InternalEntity {
     @Override
     protected boolean handleTexture(ItemStack stack, Player player) {
         String oldVariant = getTextureVariant();
+        String entityKey = nativeEntity != null ? nativeEntity.getKey() : "";
 
-        if (stack.is(Items.WHITE_DYE))      setTextureVariant(EntityTexture.WHITE.Name());
-        if (stack.is(Items.ORANGE_DYE))     setTextureVariant(EntityTexture.ORANGE.Name());
-        if (stack.is(Items.MAGENTA_DYE))    setTextureVariant(EntityTexture.MAGENTA.Name());
-        if (stack.is(Items.LIGHT_BLUE_DYE)) setTextureVariant(EntityTexture.LIGHT_BLUE.Name());
-        if (stack.is(Items.YELLOW_DYE))     setTextureVariant(EntityTexture.YELLOW.Name());
-        if (stack.is(Items.LIME_DYE))       setTextureVariant(EntityTexture.LIME.Name());
-        if (stack.is(Items.PINK_DYE))       setTextureVariant(EntityTexture.PINK.Name());
-        if (stack.is(Items.GRAY_DYE))       setTextureVariant(EntityTexture.GRAY.Name());
-        if (stack.is(Items.LIGHT_GRAY_DYE)) setTextureVariant(EntityTexture.LIGHT_GRAY.Name());
-        if (stack.is(Items.CYAN_DYE))       setTextureVariant(EntityTexture.CYAN.Name());
-        if (stack.is(Items.PURPLE_DYE))     setTextureVariant(EntityTexture.PURPLE.Name());
-        if (stack.is(Items.BLUE_DYE))       setTextureVariant(EntityTexture.BLUE.Name());
-        if (stack.is(Items.BROWN_DYE))      setTextureVariant(EntityTexture.BROWN.Name());
-        if (stack.is(Items.GREEN_DYE))      setTextureVariant(EntityTexture.GREEN.Name());
-        if (stack.is(Items.RED_DYE))        setTextureVariant(EntityTexture.RED.Name());
-        if (stack.is(Items.BLACK_DYE))      setTextureVariant(EntityTexture.BLACK.Name());
+        if (stack.is(Items.WHITE_DYE))      setTextureVariant(entityKey + "_" + EntityTexture.WHITE.Name());
+        if (stack.is(Items.ORANGE_DYE))     setTextureVariant(entityKey + "_" + EntityTexture.ORANGE.Name());
+        if (stack.is(Items.MAGENTA_DYE))    setTextureVariant(entityKey + "_" + EntityTexture.MAGENTA.Name());
+        if (stack.is(Items.LIGHT_BLUE_DYE)) setTextureVariant(entityKey + "_" + EntityTexture.LIGHT_BLUE.Name());
+        if (stack.is(Items.YELLOW_DYE))     setTextureVariant(entityKey + "_" + EntityTexture.YELLOW.Name());
+        if (stack.is(Items.LIME_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.LIME.Name());
+        if (stack.is(Items.PINK_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.PINK.Name());
+        if (stack.is(Items.GRAY_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.GRAY.Name());
+        if (stack.is(Items.LIGHT_GRAY_DYE)) setTextureVariant(entityKey + "_" + EntityTexture.LIGHT_GRAY.Name());
+        if (stack.is(Items.CYAN_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.CYAN.Name());
+        if (stack.is(Items.PURPLE_DYE))     setTextureVariant(entityKey + "_" + EntityTexture.PURPLE.Name());
+        if (stack.is(Items.BLUE_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.BLUE.Name());
+        if (stack.is(Items.BROWN_DYE))      setTextureVariant(entityKey + "_" + EntityTexture.BROWN.Name());
+        if (stack.is(Items.GREEN_DYE))      setTextureVariant(entityKey + "_" + EntityTexture.GREEN.Name());
+        if (stack.is(Items.RED_DYE))        setTextureVariant(entityKey + "_" + EntityTexture.RED.Name());
+        if (stack.is(Items.BLACK_DYE))      setTextureVariant(entityKey + "_" + EntityTexture.BLACK.Name());
 
         if (!oldVariant.equals(getTextureVariant())) {
             if (!player.getAbilities().instabuild) {
@@ -2138,7 +2195,9 @@ public abstract class RobotEntity extends InternalEntity {
         if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
         nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putString(LovelyConstant.STAT_COLOR, this.getTextureVariant());
+        // STAT_COLOR as int → item model predicate; STAT_COLOR_VARIANT as string → entity restoration
+        nbt.putInt(LovelyConstant.STAT_COLOR, resolveTextureIdForItem());
+        nbt.putString(LovelyConstant.STAT_COLOR_VARIANT, this.getTextureVariant());
 
         nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
@@ -2205,7 +2264,9 @@ public abstract class RobotEntity extends InternalEntity {
         if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
         nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putString(LovelyConstant.STAT_COLOR, this.getTextureVariant());
+        // STAT_COLOR as int → item model predicate; STAT_COLOR_VARIANT as string → entity restoration
+        nbt.putInt(LovelyConstant.STAT_COLOR, resolveTextureIdForItem());
+        nbt.putString(LovelyConstant.STAT_COLOR_VARIANT, this.getTextureVariant());
         nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
         nbt.putInt(LovelyConstant.STAT_EXP, this.getExp());
@@ -2256,14 +2317,22 @@ public abstract class RobotEntity extends InternalEntity {
      * Handles robot initialization after spawning.
      * <p>
      * <b>Common Logic:</b> Performs standard robot setup that applies to all
-     * loaders: registry registration, data validation, and initial state setup.
+     * loaders: syncs max level from {@link LevelFeature}, validates entity data,
+     * and prepares registry state.
      * <p>
-     * <b>Usage:</b> Call from loader-specific spawn handling after entity creation
-     * and before applying custom data.
+     * <b>Max level sync:</b> The {@code MAX_LEVEL} synced field defaults to 0.
+     * This method reads the configured max level from the attached
+     * {@link LevelFeature} (set by {@code reloadFromConfig()}) and writes it
+     * to the synced field so the display and level-cap logic work correctly.
      */
     protected void handlePostSpawnInitialization() {
-        // Registry registration is handled by the base entity during normal lifecycle
-        // ensureRegistered() is called automatically during tick() and data loading
+        // Sync max level from LevelFeature → MAX_LEVEL synced field
+        if (nativeEntity != null) {
+            nativeEntity.getFeature(LevelFeature.class).ifPresent(feature -> {
+                int configuredMax = feature.getMaxLevel();
+                if (configuredMax > 0) setMaxLevel(configuredMax);
+            });
+        }
 
         // Validate entity data consistency
         EntitySpawnHelper.validateEntityData(this);

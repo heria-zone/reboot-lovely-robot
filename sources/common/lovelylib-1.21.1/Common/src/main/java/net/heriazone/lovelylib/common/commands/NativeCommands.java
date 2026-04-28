@@ -408,7 +408,9 @@ public abstract class NativeCommands {
         static RobotOperation setAppearance() {
             return (robot, ctx) -> {
                 EntityTexture color = ctx.getArgument("color", EntityTexture.class);
-                robot.setTextureVariant(color.Name());
+                // Use entity-specific key to match withColorPalette() registration
+                String entityKey = robot.nativeEntity != null ? robot.nativeEntity.getKey() : "";
+                robot.setTextureVariant(entityKey + "_" + color.Name());
                 String colorName = color.Name().toLowerCase();
                 return new CommandResult(true, "Set color to " + colorName + " for " + Utils.getEntityCustomName(robot));
             };
