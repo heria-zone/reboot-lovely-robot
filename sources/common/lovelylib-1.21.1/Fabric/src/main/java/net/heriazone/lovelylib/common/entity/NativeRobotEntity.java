@@ -11,17 +11,17 @@ import software.bernie.geckolib.animation.AnimatableManager;
 /**
  * Fabric-specific robot entity implementation with GeckoLib integration.
  * <p>
- * <b>Architecture:</b> Extends BaseRobotEntity for common behavior while implementing
- * GeoEntity for Fabric-specific GeckoLib animation system integration.
+ * <b>Architecture:</b> Extends {@link RobotEntity} for common behavior while implementing
+ * {@code GeoEntity} for Fabric-specific GeckoLib animation system integration.
  * <p>
- * <b>Design Decision:</b> Composition over inheritance - single entity class with
- * behavior configured via NativeEntityType instead of separate classes per variant.
+ * <b>Design Decision:</b> Composition over inheritance — single entity class with
+ * behavior configured via {@link NativeEntityType} instead of separate classes per variant.
  * Reduces code duplication and simplifies variant addition.
  * <p>
  * <b>Fabric Specifics:</b> Uses constructor-injected pickup item for flexibility
  * and direct item references without Supplier wrappers.
  */
-public class NativeRobotEntity extends LovelyRobotEntity implements GeoEntity {
+public class NativeRobotEntity extends RobotEntity implements GeoEntity {
 
     // -- Variables --
 

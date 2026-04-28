@@ -1,110 +1,154 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.lovelylib.common.entity.enums.*;
+import net.heriazone.hzlib.api.entity.InternalEntityType;
+import net.heriazone.hzlib.api.entity.features.LevelFeature;
+import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
+import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
+import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
+import net.heriazone.hzlib.api.entity.variants.VariantRegistries;
+import net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant;
+import net.heriazone.hzlib.framework.entity.variants.StandardModelVariant;
+import net.heriazone.hzlib.framework.entity.variants.StandardTextureVariant;
+import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
+import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
-import net.heriazone.lovelylib.hzlib.api.entity.InternalEntityType;
-import net.heriazone.lovelylib.hzlib.api.entity.features.*;
-import net.heriazone.lovelylib.hzlib.framework.entity.data.ResourceMap;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 /**
  * <p>Robot-specific entity type with 16-color palette and level system integration.<p>
  * <p>
- * <b>Architecture:</b> Extends InternalEntityType to provide robot-specific functionality
- * including color palette management and automatic LevelFeature attachment. Bridges
- * framework layer (pure Java) with Minecraft's resource system.
+ * <b>Architecture:</b> Extends HZLib's {@link InternalEntityType} to provide robot-specific
+ * functionality including color palette management and automatic {@link LevelFeature}
+ * attachment. Bridges the framework layer (pure Java) with Minecraft's resource system.
  * <p>
- * <b>Design Decision:</b> Automatically attaches LevelFeature during construction to ensure
- * all robots have leveling capability. Color palette uses separate map from base textures
- * to support both variant textures (DEFAULT, ARMED) and color customization.
+ * <b>Variant Dimensions:</b> Robots have two independent variant dimensions:
+ * <ul>
+ *   <li><b>Model state</b>: {@code "default"} (unarmed) or {@code "armed"} (combat mode)
+ *       — registered in {@link #configureVariants()}</li>
+ *   <li><b>Color</b>: 16 dye colors ({@code "white"}, {@code "orange"}, etc.)
+ *       — registered via {@link #withColorPalette(EntityVariant)}</li>
+ * </ul>
  * <p>
- * <b>Resource Management:</b> Populates textures, models, and animators based on EntityVariant.
- * Color textures are populated separately via withColorPalette() for 16-color customization.
+ * <b>Design Decision:</b> Automatically attaches {@link LevelFeature} during construction
+ * to ensure all robots have leveling capability. Color palette uses
+ * {@link TextureVariantFeature} with string keys (migrated from the old int-based
+ * {@code EntityTexture} enum system per ADR_012).
+ * <p>
+ * <b>NBT Backward Compatibility:</b> Old saves with {@code TextureID} (int) are migrated
+ * to {@code TextureVariant} (string) on first load in
+ * {@code InternalEntity.readAdditionalSaveData()}.
  */
 public class NativeEntityType extends InternalEntityType<NativeEntityType> {
 
-    // -- Color Palette --
+    // -- Fields --
 
-    private final Map<EntityTexture, ResourceLocation> colorTextures;
     private final EntityVariant variant;
 
     // -- Constructor --
 
     /**
-     * Creates robot entity type with specified variant and attaches LevelFeature.
+     * Creates robot entity type with specified variant and attaches {@link LevelFeature}.
      * <p>
-     * <b>State Impact:</b> Automatically attaches LevelFeature with maxLevel 0.
-     * Caller should configure maxLevel via LevelFeature.setMaxLevel() after construction.
+     * <b>State Impact:</b> Automatically attaches {@link LevelFeature} with maxLevel 0.
+     * Caller should configure maxLevel via {@code LevelFeature.setMaxLevel()} after
+     * construction (done in {@code LovelyRobotType.create()}).
      * <p>
-     * <b>Design Decision:</b> LevelFeature attached during construction ensures all
-     * robots have leveling capability without requiring explicit feature attachment.
+     * <b>Variant registration:</b> {@link #configureVariants()} is called by the parent
+     * constructor and registers model and animator variants. Texture variants (16 colors)
+     * are registered separately via {@link #withColorPalette(EntityVariant)}.
      *
-     * @param key unique identifier for this robot type
+     * @param key     unique identifier for this robot type (e.g., {@code "bunny"})
      * @param variant entity variant determining resource paths
      */
     public NativeEntityType(String key, EntityVariant variant) {
         super(key);
         this.variant = variant;
-        this.colorTextures = new HashMap<>();
 
-        // Attach LevelFeature automatically
+        // Attach LevelFeature automatically — all robots have leveling capability
         withFeature(LevelFeature.class, new LevelFeature(0));
     } // Constructor: NativeEntityType ()
 
-    // -- Abstract Method Implementations --
+    // -- Variant Configuration --
 
     /**
-     * Populates base texture variants (DEFAULT, ARMED) for this robot type.
+     * Registers model and animator variants for this robot type.
      * <p>
-     * <b>Implementation:</b> Registers DEFAULT texture using variant-specific path.
-     * Color textures are populated separately via withColorPalette().
-     *
-     * @param textures resource map to populate with texture identifiers
+     * <b>Model variants:</b> {@code "{key}_default"} (unarmed) and {@code "{key}_armed"}
+     * (combat mode). Each variant is registered as a {@link StandardModelVariant} in
+     * {@link net.heriazone.hzlib.api.entity.variants.VariantRegistries#MODELS} with the
+     * correct geo file path, then enabled for this entity key via {@link ModelVariantFeature}.
+     * <p>
+     * <b>Animator variants:</b> {@code "{key}_default"} only — all robots share one
+     * animation file ({@code default.animation.json}). Registered as a
+     * {@link StandardAnimatorVariant} in
+     * {@link net.heriazone.hzlib.api.entity.variants.VariantRegistries#ANIMATORS}.
+     * <p>
+     * <b>Path patterns (matching backup populateModels/populateAnimators):</b>
+     * <ul>
+     *   <li>Model default: {@code lovelylib:geo/{key}.default.geo.json}</li>
+     *   <li>Model armed:   {@code lovelylib:geo/{key}.armed.geo.json}</li>
+     *   <li>Animator:      {@code lovelylib:animations/default.animation.json}</li>
+     * </ul>
+     * <p>
+     * <b>Texture variants:</b> Registered separately via {@link #withColorPalette(EntityVariant)}
+     * after construction, since the color palette requires the variant name for path construction.
      */
     @Override
-    protected void populateTextures(ResourceMap<EntityVariantTexture, ResourceLocation> textures) {
-        String basePath = LovelyConstant.TEXTURE_ENTITY_PATH + key + "/";
-        textures.put(EntityVariantTexture.DEFAULT, LovelyIdentifier.getId(basePath + "default.png"));
-    } // populateTextures ()
+    protected void configureVariants() {
+        // -- Model Variants --
+        // Register StandardModelVariant instances in the global registry with actual resource paths,
+        // then enable them for this entity key via ModelVariantFeature.
+        String defaultModelKey = key + "_default";
+        String armedModelKey   = key + "_armed";
+
+        VariantRegistries.MODELS.register(
+                new StandardModelVariant(
+                        defaultModelKey,
+                        defaultModelKey,
+                        LovelyIdentifier.getId("geo/" + key + "." + LovelyConstant.MOD_DEFAULT + ".geo.json").toString(),
+                        1
+                )
+        );
+        VariantRegistries.MODELS.register(
+                new StandardModelVariant(
+                        armedModelKey,
+                        armedModelKey,
+                        LovelyIdentifier.getId("geo/" + key + "." + LovelyConstant.MOD_ARMED + ".geo.json").toString(),
+                        0
+                )
+        );
+
+        withFeature(ModelVariantFeature.class, new ModelVariantFeature()
+                .withVariants(key, defaultModelKey, armedModelKey)
+                .withDefault(key, defaultModelKey));
+
+        // -- Animator Variants --
+        // All robots share one animation file — register once per key.
+        String defaultAnimKey = key + "_default";
+
+        net.heriazone.hzlib.api.entity.variants.VariantRegistries.ANIMATORS.register(
+                new StandardAnimatorVariant(
+                        defaultAnimKey,
+                        defaultAnimKey,
+                        LovelyIdentifier.getId("animations/" + LovelyConstant.ANIM_DEFAULT + ".animation.json").toString(),
+                        0
+                )
+        );
+
+        withFeature(AnimatorVariantFeature.class, new AnimatorVariantFeature()
+                .withVariants(key, defaultAnimKey)
+                .withDefault(key, defaultAnimKey));
+    } // configureVariants ()
 
     /**
-     * Populates model variants (DEFAULT, ARMED) for this robot type.
-     * <p>
-     * <b>Implementation:</b> Registers DEFAULT and ARMED models using variant-specific paths.
+     * Creates the translatable display name for this robot type.
      *
-     * @param models resource map to populate with model identifiers
-     */
-    @Override
-    protected void populateModels(ResourceMap<EntityVariantModel, ResourceLocation> models) {
-        models.put(EntityVariantModel.DEFAULT, LovelyIdentifier.getId("geo/" + key + "." + LovelyConstant.MOD_DEFAULT + ".geo.json"));
-        models.put(EntityVariantModel.ARMED, LovelyIdentifier.getId("geo/" + key + "." + LovelyConstant.MOD_ARMED + ".geo.json"));
-    } // populateModels ()
-
-    /**
-     * Populates animator variants for this robot type.
-     * <p>
-     * <b>Implementation:</b> Registers DEFAULT animator using variant-specific path.
-     *
-     * @param animators resource map to populate with animator identifiers
-     */
-    @Override
-    protected void populateAnimators(ResourceMap<EntityVariantAnimator, ResourceLocation> animators) {
-        animators.put(EntityVariantAnimator.DEFAULT, LovelyIdentifier.getId("animations/" + LovelyConstant.ANIM_DEFAULT + ".animation.json"));
-    } // populateAnimators ()
-
-    /**
-     * Creates translatable text component for robot type name.
-     * <p>
-     * <b>Implementation:</b> Uses variant-specific translation key.
-     *
-     * @param key entity type key for translation
-     * @return translatable text component for robot name
+     * @param key entity type key
+     * @return translatable text component for the robot name
      */
     @Override
     protected MutableComponent createTranslation(String key) {
@@ -114,14 +158,18 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
     // -- Color Palette System --
 
     /**
-     * Populates 16-color texture palette for this robot type.
+     * Registers the 16-color texture palette for this robot type using string-keyed
+     * {@link TextureVariantFeature}.
      * <p>
-     * <b>Architecture:</b> Enables per-robot color customization using Minecraft's
-     * 16-color dye system. Color textures are separate from variant textures to
-     * support independent customization.
+     * <b>Architecture:</b> Migrated from the old int-based {@code Map<EntityTexture, ResourceLocation>}
+     * system to the new string-keyed variant feature system (ADR_012). The 16 color keys
+     * ({@code "white"}, {@code "orange"}, etc.) match the {@link EntityTexture} enum's
+     * {@link EntityTexture#Name()} values.
      * <p>
-     * <b>Performance:</b> Populates all 16 colors at once to avoid repeated path
-     * construction during gameplay.
+     * <b>Texture path pattern:</b> {@code textures/entity/{variant}/{variant}_{colorId:02d}.png}
+     * — unchanged from the old system, only the lookup key changes.
+     * <p>
+     * <b>Called by:</b> {@code LovelyRobotType.create()} after construction.
      *
      * @param variant entity variant determining color texture paths
      * @return this instance for method chaining
@@ -129,71 +177,94 @@ public class NativeEntityType extends InternalEntityType<NativeEntityType> {
     public NativeEntityType withColorPalette(EntityVariant variant) {
         String basePath = LovelyConstant.TEXTURE_ENTITY_PATH + variant.getName() + "/";
 
-        // Populate all 16 colors using variant_ID naming pattern
-        for (EntityTexture color : EntityTexture.values()) {
+        TextureVariantFeature feature = new TextureVariantFeature();
+
+        for (EntityTexture color : EntityTexture.VALUES) {
             if (color != EntityTexture.RANDOM) {
-                String colorId = String.format("%02d", color.getId());
-                colorTextures.put(color, LovelyIdentifier.getId(basePath + variant.getName() + "_" + colorId + ".png"));
+                String colorKey  = color.Name(); // "white", "orange", "magenta", etc.
+                String colorId   = String.format("%02d", color.getId());
+                ResourceLocation path = LovelyIdentifier.getId(
+                        basePath + variant.getName() + "_" + colorId + ".png");
+
+                // Register in the global variant registry
+                net.heriazone.hzlib.api.entity.variants.VariantRegistries.TEXTURES.register(
+                        new StandardTextureVariant(colorKey, colorKey, path.toString(), color.getId())
+                );
+
+                feature.withVariant(key, colorKey);
             }
         }
+
+        feature.withDefault(key, EntityTexture.WHITE.Name());
+        withFeature(TextureVariantFeature.class, feature);
 
         return this;
     } // withColorPalette ()
 
     /**
-     * Retrieves texture identifier for specified color.
+     * Generates a random color key from the registered color palette.
      * <p>
-     * <b>Failure Mode:</b> Returns WHITE texture if requested color not available.
-     * Ensures rendering always has valid texture even with incomplete palettes.
+     * <b>Migration note:</b> Replaces the old {@code getRandomColorId()} which returned
+     * an int. Now returns a string key (e.g., {@code "magenta"}) for use with
+     * {@code setTextureVariant()}.
      *
-     * @param color desired color variant
-     * @return texture identifier for color, or WHITE if not available
+     * @return random color key string, or {@code "white"} if no palette registered
      */
-    public ResourceLocation getColorTexture(EntityTexture color) {
-        if (hasColor(color)) {
-            return colorTextures.get(color);
-        }
-        return colorTextures.getOrDefault(EntityTexture.WHITE,
-                textures.get(EntityVariantTexture.DEFAULT));
-    } // getColorTexture ()
+    public String getRandomColorKey() {
+        return getFeature(TextureVariantFeature.class)
+                .map(feature -> {
+                    var variants = feature.getAvailableVariants(key);
+                    if (variants.isEmpty()) return EntityTexture.WHITE.Name();
+                    var list = new java.util.ArrayList<>(variants);
+                    return list.get(new Random().nextInt(list.size())).getKey();
+                })
+                .orElse(EntityTexture.WHITE.Name());
+    } // getRandomColorKey ()
 
     /**
-     * Checks if color texture is available for this robot type.
+     * Returns the model resource location for the specified model variant key.
+     * <p>
+     * <b>Usage:</b> Called by renderers to resolve the geo model file path.
      *
-     * @param color color variant to check
-     * @return true if color texture exists, false otherwise
+     * @param variantKey model variant key ({@code "default"} or {@code "armed"})
+     * @return resource location for the model, or {@code null} if not found
      */
-    public boolean hasColor(EntityTexture color) {
-        return colorTextures.containsKey(color);
-    } // hasColor ()
+    public ResourceLocation getModelResource(String variantKey) {
+        var modelVariant = getModelVariant(key, variantKey);
+        return modelVariant != null ? modelVariant.getResource(key) : null;
+    } // getModelResource ()
 
     /**
-     * Generates random color ID from available color palette.
+     * Returns the animator resource location for the specified animator variant key.
      * <p>
-     * <b>Performance:</b> Creates new list on each call. Consider caching if
-     * called frequently during gameplay.
+     * <b>Usage:</b> Called by renderers to resolve the animation file path.
      *
-     * @return ID of randomly selected color, or 0 (WHITE) if palette empty
+     * @param variantKey animator variant key ({@code "default"})
+     * @return resource location for the animator, or {@code null} if not found
      */
-    public int getRandomColorId() {
-        if (colorTextures.isEmpty()) {
-            return 0;  // WHITE
-        }
-
-        var colors = colorTextures.keySet().stream().toList();
-        EntityTexture randomColor = colors.get(new Random().nextInt(colors.size()));
-        return randomColor.getId();
-    } // getRandomColorId ()
+    public ResourceLocation getAnimatorResource(String variantKey) {
+        var animatorVariant = getAnimatorVariant(key, variantKey);
+        return animatorVariant != null ? animatorVariant.getResource(key) : null;
+    } // getAnimatorResource ()
 
     // -- Convenience Accessors --
 
     /**
-     * Retrieves maximum level from attached LevelFeature.
+     * Returns the entity variant for this robot type.
+     *
+     * @return entity variant
+     */
+    public EntityVariant getVariant() {
+        return variant;
+    } // getVariant ()
+
+    /**
+     * Returns the maximum level from the attached {@link LevelFeature}.
      * <p>
      * <b>Design Decision:</b> Convenience method eliminates boilerplate Optional
-     * handling at call sites. Returns 0 if LevelFeature not present (defensive).
+     * handling at call sites. Returns 0 if {@link LevelFeature} not present (defensive).
      *
-     * @return maximum level from LevelFeature, or 0 if feature not present
+     * @return maximum level, or 0 if feature not present
      */
     public int getMaxLevel() {
         return getFeature(LevelFeature.class)

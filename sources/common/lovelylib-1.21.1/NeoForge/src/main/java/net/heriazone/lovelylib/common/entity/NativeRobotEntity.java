@@ -11,17 +11,17 @@ import software.bernie.geckolib.animation.AnimatableManager;
 /**
  * NeoForge-specific robot entity implementation with GeckoLib integration.
  * <p>
- * <b>Architecture:</b> Extends BaseRobotEntity for common behavior while implementing
- * GeoEntity for Forge-specific GeckoLib animation system integration.
+ * <b>Architecture:</b> Extends {@link RobotEntity} for common behavior while implementing
+ * {@code GeoEntity} for NeoForge-specific GeckoLib animation system integration.
  * <p>
- * <b>Design Decision:</b> Composition over inheritance - single entity class with
- * behavior configured via NativeEntityType instead of separate classes per variant.
+ * <b>Design Decision:</b> Composition over inheritance — single entity class with
+ * behavior configured via {@link NativeEntityType} instead of separate classes per variant.
  * Reduces code duplication and simplifies variant addition.
  * <p>
  * <b>NeoForge Specifics:</b> Uses variant-based pickup item resolution with Supplier.get()
  * calls for deferred registry object access.
  */
-public class NativeRobotEntity extends LovelyRobotEntity implements GeoEntity {
+public class NativeRobotEntity extends RobotEntity implements GeoEntity {
 
     // -- Variables --
 

@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 
 /**
@@ -23,7 +23,7 @@ public class AiConditionalRandomLookGoal extends RandomLookAroundGoal {
 
     // -- Fields --
 
-    private final LovelyRobotEntity entity;
+    private final RobotEntity entity;
 
     // -- Constructor --
 
@@ -32,7 +32,7 @@ public class AiConditionalRandomLookGoal extends RandomLookAroundGoal {
      *
      * @param entity robot entity
      */
-    public AiConditionalRandomLookGoal(LovelyRobotEntity entity) {
+    public AiConditionalRandomLookGoal(RobotEntity entity) {
         super(entity);
         this.entity = entity;
     } // Constructor: AiConditionalRandomLookGoal ()

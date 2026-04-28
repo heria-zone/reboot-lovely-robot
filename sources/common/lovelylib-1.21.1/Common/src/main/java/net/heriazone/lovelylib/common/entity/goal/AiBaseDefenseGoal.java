@@ -1,8 +1,8 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -64,7 +64,7 @@ public class AiBaseDefenseGoal extends Goal {
     // -- Fields --
 
     private final LevelReader world;
-    private final LovelyRobotEntity entity;
+    private final RobotEntity entity;
     private final PathNavigation navigation;
     private final float speed;
     private final float maxDistance;
@@ -103,7 +103,7 @@ public class AiBaseDefenseGoal extends Goal {
      * @param maxDistance maximum distance before teleportation triggers (blocks)
      * @throws IllegalArgumentException if navigation type unsupported
      */
-    public AiBaseDefenseGoal(LovelyRobotEntity mob, float speed, float minDistance, float maxDistance) {
+    public AiBaseDefenseGoal(RobotEntity mob, float speed, float minDistance, float maxDistance) {
         this.entity = mob;
         this.world = mob.level();
         this.speed = speed;

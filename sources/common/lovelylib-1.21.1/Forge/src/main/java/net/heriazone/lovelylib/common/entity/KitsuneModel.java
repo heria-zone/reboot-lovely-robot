@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.common.entity;
 
+import net.heriazone.hzlib.api.entity.InternalModel;
 import net.heriazone.lovelylib.hzlib.api.entity.InternalAnimation;
-import net.heriazone.lovelylib.hzlib.api.entity.InternalModel;
 import software.bernie.geckolib.animation.AnimationState;
 
 /**
@@ -10,12 +10,12 @@ import software.bernie.geckolib.animation.AnimationState;
  * Delegates model/animation resolution to InternalModel, which queries entity's
  * NativeEntityType for variant-specific resources.
  */
-public class KitsuneModel extends InternalModel<RobotEntity> {
+public class KitsuneModel extends InternalModel<NativeRobotEntity> {
 
     // -- Inherited Methods --
 
     @Override
-    public void setCustomAnimations(RobotEntity animatable, long instanceId, AnimationState<RobotEntity> event) {
+    public void setCustomAnimations(NativeRobotEntity animatable, long instanceId, AnimationState<NativeRobotEntity> event) {
         super.setCustomAnimations(animatable, instanceId, event);
         InternalAnimation.tailConfigAnimation(animatable, this, event);
     } // setCustomAnimations ()

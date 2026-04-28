@@ -1,7 +1,7 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.world.entity.ai.control.LookControl;
 
 /**
@@ -25,7 +25,7 @@ public class RobotLookControl extends LookControl {
 
     // -- Fields --
 
-    private final LovelyRobotEntity robot;
+    private final RobotEntity robot;
 
     // -- Constructor --
 
@@ -34,7 +34,7 @@ public class RobotLookControl extends LookControl {
      *
      * @param robot the robot entity
      */
-    public RobotLookControl(LovelyRobotEntity robot) {
+    public RobotLookControl(RobotEntity robot) {
         super(robot);
         this.robot = robot;
     } // Constructor: RobotLookControl ()

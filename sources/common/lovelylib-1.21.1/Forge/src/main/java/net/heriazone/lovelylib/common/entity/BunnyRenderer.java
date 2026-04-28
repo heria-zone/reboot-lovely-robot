@@ -1,12 +1,12 @@
 package net.heriazone.lovelylib.common.entity;
 
+import net.heriazone.hzlib.api.entity.InternalLayerRenderer;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.shared.LovelyResource;
-import net.heriazone.lovelylib.hzlib.api.entity.InternalLayerRenderer;
-import net.heriazone.lovelylib.hzlib.api.layer.BaseTextureLayer;
-import net.heriazone.lovelylib.hzlib.api.layer.DynamicColorLayer;
-import net.heriazone.lovelylib.hzlib.api.layer.HeadphoneOverlayLayer;
-import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
+import net.heriazone.hzlib.api.layer.BaseTextureLayer;
+import net.heriazone.hzlib.api.layer.DynamicColorLayer;
+import net.heriazone.hzlib.api.layer.HeadphoneOverlayLayer;
+import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
 /**
@@ -15,12 +15,12 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * <b>Architecture:</b> Uses Bunny-specific mode indicator textures while maintaining
  * standard layer composition pattern.
  */
-public class BunnyRenderer extends InternalLayerRenderer<RobotEntity> {
+public class BunnyRenderer extends InternalLayerRenderer<NativeRobotEntity> {
 
     // -- Constructor --
 
     public BunnyRenderer(EntityRendererProvider.Context context) {
-        super(context, new RobotModel(), SharedConfigs.Client.ShadowRadius);
+        super(context, new NativeRobotModel(), SharedConfigs.Client.ShadowRadius);
 
         // Layer stack: Base texture → Health collar → Kitsune-specific headphone overlay
         addLayer(new BaseTextureLayer<>(this));
@@ -39,7 +39,7 @@ public class BunnyRenderer extends InternalLayerRenderer<RobotEntity> {
                         LovelyResource.BUNNY_LAYER_BASE_DEFENSE
                 )
                 .addConditionalTexture(
-                        LovelyRobotEntity::getAutoAttack,
+                        RobotEntity::getAutoAttack,
                         LovelyResource.BUNNY_LAYER_AUTO_ATTACK
                 )
         );

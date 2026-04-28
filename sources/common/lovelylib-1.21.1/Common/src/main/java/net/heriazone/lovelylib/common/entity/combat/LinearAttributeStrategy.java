@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity.combat;
 
-import net.heriazone.lovelylib.hzlib.framework.entity.combat.IAttributeCalculationStrategy;
+import net.heriazone.hzlib.framework.entity.combat.IAttributeCalculationStrategy;
 
 /**
  * <p>Implements linear attribute scaling with 2% growth per level.<p>

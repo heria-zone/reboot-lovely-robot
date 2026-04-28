@@ -1,8 +1,8 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -27,7 +27,7 @@ public class AiConditionalWanderGoal extends WaterAvoidingRandomStrollGoal {
 
     // -- Fields --
 
-    private final LovelyRobotEntity robot;
+    private final RobotEntity robot;
 
     private int ownerStillTicks = 0;
     private int wanderCooldown = 0;
@@ -52,7 +52,7 @@ public class AiConditionalWanderGoal extends WaterAvoidingRandomStrollGoal {
      * @param robot robot entity to control
      * @param speed movement speed multiplier when wandering
      */
-    public AiConditionalWanderGoal(LovelyRobotEntity robot, double speed) {
+    public AiConditionalWanderGoal(RobotEntity robot, double speed) {
         super(robot, speed);
         this.robot = robot;
     } // Constructor: AiConditionalWanderGoal

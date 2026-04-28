@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +34,7 @@ public class AiAutoAttackGoal<T extends LivingEntity> extends NearestAttackableT
     /**
      * Robot entity reference for auto-attack state queries.
      */
-    private final LovelyRobotEntity m_entity;
+    private final RobotEntity m_entity;
 
     // -- Constructors --
 
@@ -45,7 +45,7 @@ public class AiAutoAttackGoal<T extends LivingEntity> extends NearestAttackableT
      * @param targetClass entity type to target
      * @param checkVisibility whether to require line-of-sight
      */
-    public AiAutoAttackGoal(LovelyRobotEntity mob, Class<T> targetClass, boolean checkVisibility) {
+    public AiAutoAttackGoal(RobotEntity mob, Class<T> targetClass, boolean checkVisibility) {
         super(mob, targetClass, 10, checkVisibility, false, null);
         m_entity = mob;
     } // Constructor: AiAutoAttackGoal
@@ -58,7 +58,7 @@ public class AiAutoAttackGoal<T extends LivingEntity> extends NearestAttackableT
      * @param checkVisibility whether to require line-of-sight
      * @param targetPredicate additional target validation (e.g., health checks)
      */
-    public AiAutoAttackGoal(LovelyRobotEntity mob, Class<T> targetClass, boolean checkVisibility, Predicate<LivingEntity> targetPredicate) {
+    public AiAutoAttackGoal(RobotEntity mob, Class<T> targetClass, boolean checkVisibility, Predicate<LivingEntity> targetPredicate) {
         super(mob, targetClass, 10, checkVisibility, false, targetPredicate);
         m_entity = mob;
     } // Constructor: AiAutoAttackGoal
@@ -71,7 +71,7 @@ public class AiAutoAttackGoal<T extends LivingEntity> extends NearestAttackableT
      * @param checkVisibility whether to require line-of-sight
      * @param checkCanNavigate whether to verify pathfinding feasibility
      */
-    public AiAutoAttackGoal(LovelyRobotEntity mob, Class<T> targetClass, boolean checkVisibility, boolean checkCanNavigate) {
+    public AiAutoAttackGoal(RobotEntity mob, Class<T> targetClass, boolean checkVisibility, boolean checkCanNavigate) {
         super(mob, targetClass, 10, checkVisibility, checkCanNavigate, null);
         m_entity = mob;
     } // Constructor: AiAutoAttackGoal
@@ -86,7 +86,7 @@ public class AiAutoAttackGoal<T extends LivingEntity> extends NearestAttackableT
      * @param checkCanNavigate whether to verify pathfinding feasibility
      * @param targetPredicate additional target validation
      */
-    public AiAutoAttackGoal(LovelyRobotEntity mob, Class<T> targetClass, int reciprocalChance, boolean checkVisibility, boolean checkCanNavigate, @Nullable Predicate<LivingEntity> targetPredicate) {
+    public AiAutoAttackGoal(RobotEntity mob, Class<T> targetClass, int reciprocalChance, boolean checkVisibility, boolean checkCanNavigate, @Nullable Predicate<LivingEntity> targetPredicate) {
         super(mob, targetClass, reciprocalChance, checkVisibility, checkCanNavigate, targetPredicate);
         m_entity = mob;
     } // Constructor: AiAutoAttackGoal

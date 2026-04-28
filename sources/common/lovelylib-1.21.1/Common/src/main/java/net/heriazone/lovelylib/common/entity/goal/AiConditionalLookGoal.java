@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 
@@ -23,7 +23,7 @@ public class AiConditionalLookGoal extends LookAtPlayerGoal {
 
     // -- Fields --
 
-    private final LovelyRobotEntity entity;
+    private final RobotEntity entity;
 
     // -- Constructor --
 
@@ -34,7 +34,7 @@ public class AiConditionalLookGoal extends LookAtPlayerGoal {
      * @param targetType entity type to look at (Player.class, LivingEntity.class, etc.)
      * @param lookDistance maximum distance to look at entities (blocks)
      */
-    public AiConditionalLookGoal(LovelyRobotEntity entity, Class<? extends LivingEntity> targetType, float lookDistance) {
+    public AiConditionalLookGoal(RobotEntity entity, Class<? extends LivingEntity> targetType, float lookDistance) {
         super(entity, targetType, lookDistance);
         this.entity = entity;
     } // Constructor: AiConditionalLookGoal ()

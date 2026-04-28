@@ -1,8 +1,8 @@
 package net.heriazone.lovelylib.common.entity.goal;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.LovelyRobotEntity;
-import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -33,7 +33,7 @@ public class AiFollowOwnerGoal extends Goal {
 
     // -- Fields --
 
-    private final LovelyRobotEntity entity;
+    private final RobotEntity entity;
     private final LevelReader level;
     private final PathNavigation navigation;
     private final double speedModifier;
@@ -60,7 +60,7 @@ public class AiFollowOwnerGoal extends Goal {
      * @param startDistance distance at which to start following (blocks)
      * @param stopDistance distance at which to stop following (blocks)
      */
-    public AiFollowOwnerGoal(LovelyRobotEntity entity, double speed, float startDistance, float stopDistance) {
+    public AiFollowOwnerGoal(RobotEntity entity, double speed, float startDistance, float stopDistance) {
         this.entity = entity;
         this.level = entity.level();
         this.navigation = entity.getNavigation();
@@ -342,8 +342,8 @@ public class AiFollowOwnerGoal extends Goal {
         );
 
         // Find nearby robots following same owner
-        List<LovelyRobotEntity> nearbyRobots = entity.level().getEntitiesOfClass(
-                LovelyRobotEntity.class,
+        List<RobotEntity> nearbyRobots = entity.level().getEntitiesOfClass(
+                RobotEntity.class,
                 detectionBox,
                 robot -> robot != entity &&
                         robot.isAlive() &&
@@ -360,7 +360,7 @@ public class AiFollowOwnerGoal extends Goal {
         Vec3 repulsionForce = Vec3.ZERO;
         double minSpacing = SharedConfigs.Common.MinRobotSpacing;
 
-        for (LovelyRobotEntity nearbyRobot : nearbyRobots) {
+        for (RobotEntity nearbyRobot : nearbyRobots) {
             double distance = entity.distanceTo(nearbyRobot);
 
             // Only apply repulsion if too close

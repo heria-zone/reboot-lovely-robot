@@ -1,12 +1,12 @@
 package net.heriazone.lovelylib.common.entity;
 
+import net.heriazone.hzlib.api.entity.InternalLayerRenderer;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.shared.LovelyResource;
-import net.heriazone.lovelylib.hzlib.api.entity.InternalLayerRenderer;
-import net.heriazone.lovelylib.hzlib.api.layer.BaseTextureLayer;
-import net.heriazone.lovelylib.hzlib.api.layer.DynamicColorLayer;
-import net.heriazone.lovelylib.hzlib.api.layer.HeadphoneOverlayLayer;
-import net.heriazone.lovelylib.hzlib.framework.entity.enums.EntityState;
+import net.heriazone.hzlib.api.layer.BaseTextureLayer;
+import net.heriazone.hzlib.api.layer.DynamicColorLayer;
+import net.heriazone.hzlib.api.layer.HeadphoneOverlayLayer;
+import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
 /**
@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * <b>Architecture:</b> Uses KitsuneModel for tail visibility logic while maintaining
  * layer composition for visual effects. Kitsune-specific mode indicator textures.
  */
-public class KitsuneRenderer extends InternalLayerRenderer<RobotEntity> {
+public class KitsuneRenderer extends InternalLayerRenderer<NativeRobotEntity> {
 
     // -- Constructor --
 
@@ -39,7 +39,7 @@ public class KitsuneRenderer extends InternalLayerRenderer<RobotEntity> {
                         LovelyResource.KITSUNE_LAYER_BASE_DEFENSE
                 )
                 .addConditionalTexture(
-                        LovelyRobotEntity::getAutoAttack,
+                        RobotEntity::getAutoAttack,
                         LovelyResource.KITSUNE_LAYER_AUTO_ATTACK
                 )
         );

@@ -12,9 +12,16 @@ import net.heriazone.hzlib.framework.entity.data.EnchantmentStats;
 import net.heriazone.hzlib.framework.entity.data.ProtectionStats;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.heriazone.hzlib.utils.Utils;
+import net.heriazone.lovelylib.Lovely;
+import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
+import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
 import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
+import net.heriazone.lovelylib.api.registry.OwnerRobotRegistry;
+import net.heriazone.lovelylib.api.registry.RobotRegistryEntry;
+import net.heriazone.lovelylib.api.registry.RobotRegistryManager;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
+import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.common.entity.goal.*;
 import net.heriazone.lovelylib.common.entity.utils.EnchantmentProtectionCalculator;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
@@ -25,11 +32,13 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -50,6 +59,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 import static net.heriazone.hzlib.utils.Utils.invertBoolean;
 
@@ -81,6 +92,24 @@ import static net.heriazone.hzlib.utils.Utils.invertBoolean;
  * Stat object mutations should occur on the server thread.
  */
 public abstract class RobotEntity extends InternalEntity {
+
+    // -- Variables --
+
+    protected boolean canWander = false;
+
+    // -- Standby Animation State --
+
+    /**
+     * Ticks spent stationary in standby mode. Counts toward {@link #standbyTargetTicks}.
+     * Reset to -1 on first load to prevent immediate sitting.
+     */
+    private int standbyTicks = 0;
+
+    /**
+     * Random tick threshold before transitioning from REST to SIT pose.
+     * Randomized between {@code StandbyToSitDelayMin} and {@code StandbyToSitDelayMax}.
+     */
+    private int standbyTargetTicks = 0;
 
     // -- Entity Data Accessors (robot-specific) --
 
@@ -173,17 +202,126 @@ public abstract class RobotEntity extends InternalEntity {
      */
     protected ExperienceTracker expTracker = new ExperienceTracker();
 
+    // WANDER PERMISSION
+
+    /**
+     * Checks if robot is allowed to wander.
+     * <p>
+     * <b>Usage:</b> Controlled by AiConditionalWanderGoal to signal when wandering
+     * is active. When true, AiFollowOwnerGoal yields priority to allow wandering.
+     * <p>
+     * <b>Behavior Impact:</b> Disables follow goal when owner is stationary and
+     * robot is wandering nearby.
+     *
+     * @return true if robot can wander (owner stationary, conditions met)
+     */
+    public boolean canWander() {
+        return canWander;
+    } // canWander ()
+
+    /**
+     * Sets whether robot is allowed to wander.
+     * <p>
+     * <b>Usage:</b> Set by AiConditionalWanderGoal when wander conditions are met
+     * or when owner starts moving again.
+     *
+     * @param value true to allow wandering, false to disable
+     */
+    public void setCanWander(boolean value) {
+        canWander = value;
+    } // setCanWander ()
+
+    protected EnchantmentFeature getEnchantmentFeature () {
+        if (nativeEntity == null) return null;
+        if (nativeEntity.getFeature(EnchantmentFeature.class).isPresent()) return nativeEntity.getFeature(EnchantmentFeature.class).get();
+        else return null;
+    } // getEnchantmentFeature ()
+
+    protected CombatLevelFeature getCombatFeature() {
+        if (nativeEntity == null) return null;
+        return nativeEntity.getFeature(CombatLevelFeature.class).orElse(null);
+    } // getCombatFeature ()
+
+    protected ProtectionFeature getProtectionFeature() {
+        if (nativeEntity == null) return null;
+        return nativeEntity.getFeature(ProtectionFeature.class).orElse(null);
+    } // getProtectionFeature ()
+
+    public int getLooting() {
+        int value = 0;
+        if (nativeEntity.hasFeature(EnchantmentFeature.class)) {
+            EnchantmentFeature feature = getEnchantmentFeature();
+            value = feature.calculateLooting(combatStats.getLevel());
+        }
+        return value;
+    } // getLooting ()
+
+    /**
+     * Returns the robot's current attack damage calculated from {@link CombatLevelFeature}.
+     * <p>
+     * <b>Design Decision:</b> Shadows {@code LivingEntity.getAttackDamage()} to return
+     * the feature-calculated int value rather than the raw Minecraft attribute double.
+     * This ensures {@link #displayGeneralMessage} shows the robot's progression value,
+     * consistent with how the backup's {@code InternalEntity.getAttackDamage()} worked.
+     *
+     * @return calculated attack damage, or 0 if {@link CombatLevelFeature} not present
+     */
+    public int getAttackDamage() {
+        if (nativeEntity == null || !nativeEntity.hasFeature(CombatLevelFeature.class)) return 0;
+        return getCombatFeature().calculateAttack(combatStats.getLevel());
+    } // getAttackDamage ()
+
+    /**
+     * Returns the robot's current armor level calculated from {@link CombatLevelFeature}.
+     * <p>
+     * <b>Usage:</b> Called by {@link #displayGeneralMessage} to show the defense stat.
+     * Uses the feature-based calculation rather than Minecraft's attribute value so
+     * the displayed number matches the robot's actual progression curve.
+     *
+     * @return calculated armor level, or 0 if {@link CombatLevelFeature} not present
+     */
+    public int getArmorLevel() {
+        if (nativeEntity == null || !nativeEntity.hasFeature(CombatLevelFeature.class)) return 0;
+        return (int) getCombatFeature().calculateArmor(combatStats.getLevel());
+    } // getArmorLevel ()
+
+    // NOTIFICATION — delegates to InternalEntity.isNotificationEnabled()
+
+    /** @deprecated Use {@link #isNotificationEnabled()} from InternalEntity instead. */
+    public boolean getNotification() {
+        return isNotificationEnabled();
+    } // getNotification ()
+
+    /** @deprecated Use {@link #setNotificationEnabled(boolean)} from InternalEntity instead. */
+    public void setNotification(boolean value) {
+        setNotificationEnabled(value);
+    } // setNotification ()
+
     // -- Constructor --
 
     /**
-     * Creates robot entity. Subclasses must set {@link #nativeEntity} and call
-     * {@link #applyBaseAttributes()} after construction.
+     * Creates robot entity with full initialization.
+     * <p>
+     * <b>Initialization order:</b>
+     * <ol>
+     *   <li>{@code super()} — Minecraft entity setup</li>
+     *   <li>Set {@link #nativeEntity} — required before any attribute calls</li>
+     *   <li>{@link #applyBaseAttributes()} — sets base HP/attack/speed from {@link net.heriazone.hzlib.framework.entity.data.CombatData}</li>
+     *   <li>{@link #recalculateAttributes()} — scales by level using {@code CombatLevelFeature}</li>
+     *   <li>{@link #setHealth(float)} — initializes health to max after all attributes set</li>
+     *   <li>{@link #handlePostSpawnInitialization()} — registry validation</li>
+     * </ol>
      *
-     * @param entityType Minecraft's entity type
-     * @param world      world instance
+     * @param entityType   Minecraft's entity type
+     * @param world        world instance
+     * @param nativeEntity robot type configuration
      */
-    protected RobotEntity(EntityType<? extends TamableAnimal> entityType, Level world) {
+    public RobotEntity(EntityType<? extends TamableAnimal> entityType, Level world, NativeEntityType nativeEntity) {
         super(entityType, world);
+        this.nativeEntity = nativeEntity;
+        applyBaseAttributes();              // sets base HP/attack/speed from CombatData
+        recalculateAttributes();            // scales by level using CombatLevelFeature
+        setHealth(getMaxHealth());          // initialize health to max after all attributes set
         handlePostSpawnInitialization();
     } // Constructor: RobotEntity ()
 
@@ -434,39 +572,234 @@ public abstract class RobotEntity extends InternalEntity {
      */
     public EnchantmentStats getEnchantmentStats()  { return enchantmentStats.copy();  }
 
-    // -- Attribute Recalculation (abstract — implemented in lovelylib RobotEntity) --
+    // -- Attribute Recalculation --
 
     /**
      * Recalculates all entity attributes based on current level and attached features.
      * <p>
-     * <b>Implementation:</b> Implemented in lovelylib's {@code RobotEntity} which has
-     * access to {@code CombatLevelFeature}, {@code EnchantmentFeature}, and
-     * {@code ProtectionFeature} from lovelylib's feature package.
+     * <b>Architecture:</b> Coordinates feature-based calculations for combat stats,
+     * enchantments, and protections. Delegates to attached features on entity type.
      * <p>
      * <b>Call sites:</b> After level-up, after NBT load, after config reload.
      */
-    protected abstract void recalculateAttributes();
+    @Override
+    protected void recalculateAttributes() {
+        if (nativeEntity == null) return;
 
-    // -- Registry Lifecycle (abstract — implemented in lovelylib RobotEntity) --
+        // Calculate combat attributes if CombatLevelFeature exists
+        if (nativeEntity.hasFeature(CombatLevelFeature.class)) {
+            CombatLevelFeature combatFeature = getCombatFeature();
+            int level = combatStats.getLevel();
+
+            int maxHp    = combatFeature.calculateHp(level);
+            int attack   = combatFeature.calculateAttack(level);
+            int defense  = combatFeature.calculateDefense(level);
+            double armor = combatFeature.calculateArmor(level);
+            double calculatedToughness = combatFeature.calculateArmorToughness(level);
+            double baseToughness = nativeEntity.getData().getArmorToughness();
+            double armorToughness = baseToughness + calculatedToughness;
+
+            combatStats.setMaxHp(maxHp);
+            combatStats.setAttack(attack);
+            combatStats.setDefense(defense);
+
+            InternalLogic.handleLevel(this, maxHp, attack, armor, armorToughness);
+            this.setHealth(maxHp);
+            combatStats.setCurrentHp((int) this.getHealth());
+        }
+
+        // Calculate enchantment levels if EnchantmentFeature exists
+        if (nativeEntity.hasFeature(EnchantmentFeature.class)) {
+            EnchantmentFeature enchantFeature = getEnchantmentFeature();
+            int level = combatStats.getLevel();
+            enchantmentStats.setLootingLevel(enchantFeature.calculateLooting(level));
+            enchantmentStats.setSharpnessLevel(enchantFeature.calculateSharpness(level));
+            enchantmentStats.setKnockbackLevel(enchantFeature.calculateKnockback(level));
+        }
+
+        // Auto-upgrade protections if ProtectionFeature exists
+        if (nativeEntity.hasFeature(ProtectionFeature.class)) {
+            ProtectionFeature protectionFeature = getProtectionFeature();
+            int level = combatStats.getLevel();
+
+            int fire       = protectionFeature.calculateAutoFireProtection(level, protectionStats.getFireProtection());
+            int fall       = protectionFeature.calculateAutoFallProtection(level, protectionStats.getFallProtection());
+            int blast      = protectionFeature.calculateAutoBlastProtection(level, protectionStats.getBlastProtection());
+            int projectile = protectionFeature.calculateAutoProjectileProtection(level, protectionStats.getProjectileProtection());
+
+            if (fire       > protectionStats.getFireProtection())       protectionStats.setFireProtection(fire);
+            if (fall       > protectionStats.getFallProtection())       protectionStats.setFallProtection(fall);
+            if (blast      > protectionStats.getBlastProtection())      protectionStats.setBlastProtection(blast);
+            if (projectile > protectionStats.getProjectileProtection()) protectionStats.setProjectileProtection(projectile);
+        }
+    } // recalculateAttributes ()
+
+    // -- Registry Lifecycle --
 
     /**
      * Registers this robot in the owner's registry.
-     * Implemented in lovelylib's {@code RobotEntity} which has access to
-     * {@code RobotRegistryManager}.
+     * Called when the robot is tamed.
      */
-    protected abstract void registerRobot();
+    @Override
+    protected void registerRobot() {
+        if (this.level().isClientSide || !this.isTame() || this.getOwnerUUID() == null) return;
+        try {
+            ServerLevel serverLevel = (ServerLevel) this.level();
+            RobotRegistryManager.getRegistry(serverLevel)
+                    .registerRobot(new RobotRegistryEntry(
+                            this.getUUID(),
+                            this.getOwnerUUID(),
+                            this,
+                            nativeEntity.getKey()
+                    ));
+        } catch (Exception e) {
+            Lovely.LOGGER.error("Failed to register robot {} for owner {}", this.getUUID(), this.getOwnerUUID(), e);
+        }
+    } // registerRobot ()
 
     /**
      * Ensures this robot is registered, creating or updating the registry entry.
      * Called on world load / chunk load.
      */
-    protected abstract void ensureRegistered();
+    @Override
+    protected void ensureRegistered() {
+        if (!(this.level() instanceof ServerLevel serverLevel)) return;
+        OwnerRobotRegistry registry = RobotRegistryManager.getRegistry(serverLevel);
+        RobotRegistryEntry existingEntry = registry.getRobotById(this.getUUID());
+        if (existingEntry != null) {
+            existingEntry.setEntity(this);
+        } else {
+            registry.registerRobot(new RobotRegistryEntry(
+                    this.getUUID(),
+                    this.getOwnerUUID(),
+                    this,
+                    this.getType().getDescriptionId()
+            ));
+            RobotRegistryManager.markDirty(serverLevel);
+        }
+    } // ensureRegistered ()
 
     /**
      * Unregisters this robot from the owner's registry.
      * Called on death or removal.
      */
-    protected abstract void unregisterRobot();
+    @Override
+    protected void unregisterRobot() {
+        if (this.level().isClientSide) return;
+        try {
+            ServerLevel serverLevel = (ServerLevel) this.level();
+            boolean removed = RobotRegistryManager.getRegistry(serverLevel).unregisterRobot(this.getUUID());
+            if (removed) RobotRegistryManager.markDirty(serverLevel);
+        } catch (Exception e) {
+            Lovely.LOGGER.error("Failed to unregister robot {}", this.getUUID(), e);
+        }
+    } // unregisterRobot ()
+
+    /**
+     * Updates the registry timestamp every 20 ticks to maintain "last seen" tracking.
+     */
+    @Override
+    protected void updateRegistryTimestamp() {
+        if (this.level().isClientSide || !this.isTame() || this.getOwnerUUID() == null) return;
+        try {
+            ServerLevel serverLevel = (ServerLevel) this.level();
+            RobotRegistryEntry entry = RobotRegistryManager.getRegistry(serverLevel).getRobotById(this.getUUID());
+            if (entry != null) entry.updateTimestamp();
+        } catch (Exception ignored) {
+            // Timestamp update is not critical — silently skip on failure
+        }
+    } // updateRegistryTimestamp ()
+
+    // -- Display / Notification --
+
+    /**
+     * Displays the owner name to the player after taming.
+     * <p>
+     * <b>Format:</b> {@code "Owner: PlayerName"} on the action bar.
+     *
+     * @param player the player who tamed this robot
+     */
+    @Override
+    protected void displayTameMessage(Player player) {
+        InternalLogic.displayInfo(this,
+                LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_OWNER)
+                        .append(Component.literal(": " + player.getName().getString())),
+                true);
+    } // displayTameMessage ()
+
+    /**
+     * Sends a two-part notification to the owner's action bar.
+     * <p>
+     * <b>Format:</b> {@code "CustomName | notification: message"} if named,
+     * otherwise {@code "notification: message"}.
+     *
+     * @param notification translation key for the notification label
+     * @param message      translation key for the message value
+     * @param display      whether to actually display
+     */
+    protected void displayNotification(String notification, String message, boolean display) {
+        if (!display) return;
+        String customName = Utils.getEntityCustomName(this);
+        MutableComponent content = LovelyIdentifier.getMessageTranslation(notification)
+                .append(Component.nullToEmpty(": ").copy()
+                        .append(LovelyIdentifier.getMessageTranslation(message)));
+        if (!customName.isEmpty()) {
+            InternalLogic.displayInfo(this,
+                    Component.nullToEmpty(customName + " | ").copy().append(content), true);
+        } else {
+            InternalLogic.displayInfo(this, content, true);
+        }
+    } // displayNotification ()
+
+    /**
+     * Sends a single notification to the owner's action bar.
+     * <p>
+     * <b>Format:</b> {@code "CustomName | message"} if named, otherwise {@code "message"}.
+     *
+     * @param message translation key for the message
+     * @param display whether to actually display
+     */
+    protected void displayNotification(String message, boolean display) {
+        if (!display) return;
+        String customName = Utils.getEntityCustomName(this);
+        MutableComponent content = LovelyIdentifier.getMessageTranslation(message);
+        if (!customName.isEmpty()) {
+            InternalLogic.displayInfo(this,
+                    Component.nullToEmpty(customName + " | ").copy().append(content), true);
+        } else {
+            InternalLogic.displayInfo(this, content, true);
+        }
+    } // displayNotification ()
+
+    /**
+     * Displays combat/heal status on the owner's action bar when active.
+     * Shows wary timer when in combat mode, heal timer when auto-healing.
+     * Only displays when {@link #isNotificationEnabled()} is true.
+     */
+    protected void displayExtra() {
+        Component debug = null;
+        MutableComponent entityName = !Utils.getEntityCustomName(this).isEmpty()
+                ? Component.literal(Utils.getEntityCustomName(this))
+                : LovelyIdentifier.getTranslation(
+                        Objects.requireNonNull(EntityVariant.byName(nativeEntity.getKey())));
+
+        if (combatMode && isNotificationEnabled()) {
+            debug = entityName.append(Component.nullToEmpty(": ").copy()
+                    .append(LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_WARY)));
+            debug = debug.copy().append(waryTimer < 10 ? ": 0" + waryTimer + " " : ": " + waryTimer + " ");
+        }
+
+        if (autoHeal && isNotificationEnabled()) {
+            MutableComponent healPart = LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_HEAL);
+            debug = (debug != null)
+                    ? debug.copy().append(healPart)
+                    : entityName.append(Component.nullToEmpty(": ").copy().append(healPart));
+            debug = debug.copy().append(autoHealTimer < 10 ? ": 0" + autoHealTimer + " " : ": " + autoHealTimer + " ");
+            debug = debug.copy().append(this.getHealth() < 10 ? "| 0" + this.getHealth() : "| " + (int) this.getHealth());
+        }
+
+        if (debug != null) InternalLogic.displayInfo(this, debug, true);
+    } // displayExtra ()
 
     // -- NBT Serialization --
 
@@ -492,6 +825,10 @@ public abstract class RobotEntity extends InternalEntity {
         nbt.putFloat("BaseZ",             getBaseZ());
         nbt.putBoolean("IsInSittingPose", isInSittingPose());
         nbt.putFloat("CurrentHealth",     getHealth());
+
+        // Standby animation state
+        nbt.putInt("StandbyTicks",       this.standbyTicks);
+        nbt.putInt("StandbyTargetTicks", this.standbyTargetTicks);
     } // addAdditionalSaveData ()
 
     @Override
@@ -527,7 +864,43 @@ public abstract class RobotEntity extends InternalEntity {
 
         // Recalculate attributes after loading — ensures stats are correct
         recalculateAttributes();
+
+        // Restore standby animation state
+        this.standbyTicks       = nbt.getInt("StandbyTicks");
+        this.standbyTargetTicks = nbt.getInt("StandbyTargetTicks");
+
+        // Prevent immediate sitting on first load if timers are both 0
+        if (!isInSittingPose() && this.standbyTicks == 0 && this.standbyTargetTicks == 0) {
+            this.standbyTicks = -1;
+        }
+
+        // Refresh hitbox on next tick if sitting pose was restored
+        if (isInSittingPose() && !this.level().isClientSide) {
+            this.level().getServer().execute(() -> {
+                if (this.isAlive()) refreshDimensions();
+            });
+        }
+
+        // Register robot after loading to prevent race condition with spawn limit checks
+        if (!this.level().isClientSide && this.isTame() && this.getOwnerUUID() != null) {
+            ensureRegistered();
+        }
     } // readAdditionalSaveData ()
+
+    /**
+     * Migrates old int-based {@code TextureID} to the new string-keyed
+     * {@code TextureVariant} system on first load of old saves.
+     * <p>
+     * <b>Mapping:</b> Uses {@link EntityTexture#byId(int)} to convert the old
+     * int ID (0–15) to the corresponding color name string.
+     *
+     * @param oldTextureId the old int texture ID (0–15)
+     */
+    @Override
+    protected void migrateTextureId(int oldTextureId) {
+        EntityTexture texture = EntityTexture.byId(oldTextureId);
+        setTextureVariant(texture.Name()); // "white", "orange", "magenta", etc.
+    } // migrateTextureId ()
 
     // -- Child Creation --
 
@@ -577,7 +950,48 @@ public abstract class RobotEntity extends InternalEntity {
      * <b>Performance:</b> Runs every tick but only performs calculations when in
      * standby mode. Hitbox refresh is called only on state transitions.
      */
-    protected abstract void handleStandbyAnimation();
+    /**
+     * Manages standby animation transitions between REST and SIT poses.
+     * <p>
+     * <b>State Flow:</b>
+     * <ul>
+     *   <li>Enter Standby → REST animation, timer starts, random target set</li>
+     *   <li>Timer reaches random threshold → SIT animation, hitbox shrinks</li>
+     *   <li>Start moving → WALK animation, timer resets, hitbox restores</li>
+     *   <li>Stop moving → REST animation, timer restarts with new random target</li>
+     *   <li>Exit Standby → IDLE animation, timer resets, hitbox restores</li>
+     * </ul>
+     * <p>
+     * <b>Performance:</b> Runs every tick but only performs calculations when in
+     * standby mode. Hitbox refresh is called only on state transitions.
+     */
+    protected void handleStandbyAnimation() {
+        if (getCurrentState() == EntityState.Standby) {
+            boolean isMoving = this.getDeltaMovement().lengthSqr() > 0.0001;
+
+            if (!isMoving) {
+                // Set random target on first tick or when target is 0
+                if (standbyTargetTicks == 0) {
+                    standbyTargetTicks = SharedConfigs.Common.StandbyToSitDelayMin +
+                            this.random.nextInt(SharedConfigs.Common.StandbyToSitDelayMax - SharedConfigs.Common.StandbyToSitDelayMin + 1);
+                }
+
+                standbyTicks++;
+
+                if (standbyTicks >= standbyTargetTicks && !isInSittingPose()) {
+                    enterSittingPose();
+                }
+            } else {
+                if (isInSittingPose()) exitSittingPose();
+                standbyTicks = 0;
+                standbyTargetTicks = 0;
+            }
+        } else {
+            if (isInSittingPose()) exitSittingPose();
+            standbyTicks = 0;
+            standbyTargetTicks = 0;
+        }
+    } // handleStandbyAnimation ()
 
     /**
      * Transitions robot into sitting pose with smaller hitbox.
@@ -743,7 +1157,7 @@ public abstract class RobotEntity extends InternalEntity {
         if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
         nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putInt(LovelyConstant.STAT_COLOR, this.getTextureID());
+        nbt.putString(LovelyConstant.STAT_COLOR, this.getTextureVariant());
 
         nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
@@ -795,7 +1209,7 @@ public abstract class RobotEntity extends InternalEntity {
         itemEntity.setGlowingTag(true);
 
         // Apply custom glow color based on robot variant
-        applyGlowColor(itemEntity, this.getTextureID());
+        applyGlowColor(itemEntity, this.getTextureVariant());
 
         this.level().addFreshEntity(itemEntity);
     } // handleDropItems ()
@@ -810,18 +1224,18 @@ public abstract class RobotEntity extends InternalEntity {
      * <p>
      * <b>Fallback:</b> If team creation fails, entity retains default white glow.
      *
-     * @param itemEntity the dropped core item entity
-     * @param textureId the robot's texture variant ID
+     * @param itemEntity   the dropped core item entity
+     * @param variantKey   the robot's texture variant key (e.g., {@code "white"}, {@code "magenta"})
      */
-    private void applyGlowColor(ItemEntity itemEntity, int textureId) {
+    private void applyGlowColor(ItemEntity itemEntity, String variantKey) {
         try {
             net.minecraft.world.scores.Scoreboard scoreboard = this.level().getScoreboard();
-            String teamName = "robot_core_" + textureId;
+            String teamName = "robot_core_" + variantKey;
 
             net.minecraft.world.scores.PlayerTeam team = scoreboard.getPlayerTeam(teamName);
             if (team == null) {
                 team = scoreboard.addPlayerTeam(teamName);
-                team.setColor(getColorForTexture(textureId));
+                team.setColor(getColorForVariant(variantKey));
             }
 
             scoreboard.addPlayerToTeam(itemEntity.getStringUUID(), team);
@@ -832,39 +1246,47 @@ public abstract class RobotEntity extends InternalEntity {
     } // applyGlowColor ()
 
     /**
-     * Maps robot texture variant to Minecraft chat formatting color.
+     * Maps a texture variant key to a Minecraft chat formatting color.
      * <p>
      * <b>Design Decision:</b> Uses ChatFormatting enum for color consistency with
      * Minecraft's existing color system. Provides 16 distinct colors matching dye palette.
      *
-     * @param textureId the robot's texture variant ID
+     * @param variantKey the texture variant key (e.g., {@code "white"}, {@code "magenta"})
      * @return corresponding ChatFormatting color
      */
-    private ChatFormatting getColorForTexture(int textureId) {
-        EntityTexture texture = EntityTexture.byId(textureId);
+    private ChatFormatting getColorForVariant(String variantKey) {
+        EntityTexture texture = EntityTexture.byName(variantKey);
+        if (texture == null) return ChatFormatting.WHITE;
         return switch (texture) {
-            case WHITE -> ChatFormatting.WHITE;
-            case ORANGE -> ChatFormatting.GOLD;
-            case MAGENTA -> ChatFormatting.LIGHT_PURPLE;
+            case WHITE      -> ChatFormatting.WHITE;
+            case ORANGE     -> ChatFormatting.GOLD;
+            case MAGENTA    -> ChatFormatting.LIGHT_PURPLE;
             case LIGHT_BLUE -> ChatFormatting.AQUA;
-            case YELLOW -> ChatFormatting.YELLOW;
-            case LIME -> ChatFormatting.GREEN;
-            case PINK -> ChatFormatting.LIGHT_PURPLE;
-            case GRAY -> ChatFormatting.DARK_GRAY;
+            case YELLOW     -> ChatFormatting.YELLOW;
+            case LIME       -> ChatFormatting.GREEN;
+            case PINK       -> ChatFormatting.LIGHT_PURPLE;
+            case GRAY       -> ChatFormatting.DARK_GRAY;
             case LIGHT_GRAY -> ChatFormatting.GRAY;
-            case CYAN -> ChatFormatting.DARK_AQUA;
-            case PURPLE -> ChatFormatting.DARK_PURPLE;
-            case BLUE -> ChatFormatting.BLUE;
-            case BROWN -> ChatFormatting.GOLD;
-            case GREEN -> ChatFormatting.DARK_GREEN;
-            case RED -> ChatFormatting.RED;
-            case BLACK -> ChatFormatting.BLACK;
-            default -> ChatFormatting.WHITE;
+            case CYAN       -> ChatFormatting.DARK_AQUA;
+            case PURPLE     -> ChatFormatting.DARK_PURPLE;
+            case BLUE       -> ChatFormatting.BLUE;
+            case BROWN      -> ChatFormatting.GOLD;
+            case GREEN      -> ChatFormatting.DARK_GREEN;
+            case RED        -> ChatFormatting.RED;
+            case BLACK      -> ChatFormatting.BLACK;
+            default         -> ChatFormatting.WHITE;
         };
-    } // getColorForTexture ()
+    } // getColorForVariant ()
 
-    @Override
-    protected InteractionResult handleItemInteraction (ItemStack stack, Player player) {
+    /**
+     * Handles dye-item interactions — routes to {@link #handleTexture}.
+     * Called from {@link #handleSpecificInteractions} when a dye item is used.
+     *
+     * @param stack  dye item stack
+     * @param player interacting player
+     * @return SUCCESS if texture changed, PASS otherwise
+     */
+    protected InteractionResult handleItemInteraction(ItemStack stack, Player player) {
         if(handleTexture(stack, player)) return InteractionResult.SUCCESS;
         return InteractionResult.PASS;
     } // handleItemInteraction ()
@@ -878,43 +1300,131 @@ public abstract class RobotEntity extends InternalEntity {
         return !stack.is(Items.COMPASS) && !stack.is(Items.RECOVERY_COMPASS);
     } // canInteractWithItems ()
 
-    @Override
-    protected void handleInteract (ItemStack stack, Player player) {
-        super.handleInteract(stack, player);
+    /**
+     * Handles all robot-specific interactions in sequence.
+     * <p>
+     * <b>Order:</b> pickup retrieval → sit toggle → state change → auto-attack →
+     * protection book → display commands → texture (dye).
+     */
+    protected void handleInteract(ItemStack stack, Player player) {
+        handleSit(stack);
+        handleState(stack);
         handlePickupRetrieval(stack, player);
         handleAutoAttack(stack);
         handleProtectionLevelUpInteraction(stack, player);
         handleDisplayInteraction(stack);
-    } // handleInteract
+    } // handleInteract ()
 
-    @Override
+    /**
+     * Handles sit toggle interaction — flips {@link #isOrderedToSit()} state.
+     * Only acts when {@link #canInteractWithItems(ItemStack)} returns true.
+     *
+     * @param stack item stack in player's hand
+     */
+    protected void handleSit(ItemStack stack) {
+        if (!canInteractWithItems(stack)) return;
+        setOrderedToSit(invertBoolean(isOrderedToSit()));
+        this.jumping = false;
+        this.navigation.stop();
+        this.setTarget(null);
+    } // handleSit ()
+
+    /**
+     * Transitions robot to Standby state if not already in it.
+     *
+     * @param stack item stack in player's hand
+     * @return true if state was changed
+     */
+    protected boolean handleStandbyState(ItemStack stack) {
+        if (!canInteractWithItems(stack) || getCurrentState() == EntityState.Standby) return false;
+        setCurrentState(EntityState.Standby);
+        displayNotification(LovelyConstant.MSG_STANDBY, isNotificationEnabled());
+        return true;
+    } // handleStandbyState ()
+
+    /**
+     * Transitions robot to Follow state if not already in it.
+     *
+     * @param stack item stack in player's hand
+     * @return true if state was changed
+     */
+    protected boolean handleFollowState(ItemStack stack) {
+        if (!canInteractWithItems(stack) || getCurrentState() == EntityState.Follow) return false;
+        setCurrentState(EntityState.Follow);
+        displayNotification(LovelyConstant.MSG_FOLLOW, isNotificationEnabled());
+        return true;
+    } // handleFollowState ()
+
+    /**
+     * Dispatches state-change interactions for robots.
+     * Adds base-defense state on top of the standard Follow/Standby from the base.
+     *
+     * @param stack item stack in player's hand
+     */
     protected void handleState(ItemStack stack) {
         if (handleStandbyState(stack)) return;
         if (handleFollowState(stack)) return;
         if (handleBaseDefenseState(stack)) return;
-    } // handleState
+    } // handleState ()
+
+    /**
+     * Implements the robot interaction dispatch — the entry point called by
+     * {@link net.heriazone.hzlib.api.entity.InternalEntity#mobInteract}.
+     * <p>
+     * <b>Dispatch logic (mirrors backup InternalEntity.mobInteract):</b>
+     * <ul>
+     *   <li>Client side: return CONSUME if owned/tame/interactable, else PASS</li>
+     *   <li>Server side, owned, dye item: route to {@link #handleItemInteraction}</li>
+     *   <li>Server side, owned, other item: try common interactions, then {@link #handleInteract}</li>
+     *   <li>Not owned: return PASS (taming handled by common interactions layer)</li>
+     * </ul>
+     */
+    @Override
+    protected InteractionResult handleSpecificInteractions(Player player, InteractionHand hand, ItemStack stack) {
+        if (this.level().isClientSide) {
+            boolean flag = this.isOwnedBy(player) || this.isTame()
+                    || (canInteractWithItems(stack) && !this.isTame());
+            return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
+        }
+
+        if (this.isTame() && this.isOwnedBy(player)) {
+            if (stack.getItem() instanceof DyeItem) {
+                return handleItemInteraction(stack, player);
+            }
+
+            // Let common interactions (TamableAnimal sit command etc.) run first
+            InteractionResult commonResult = handleCommonInteractions(player, hand, stack);
+            if (commonResult.consumesAction()) return commonResult;
+
+            handleInteract(stack, player);
+            return InteractionResult.SUCCESS;
+        }
+
+        return InteractionResult.PASS;
+    } // handleSpecificInteractions ()
 
     @Override
     protected boolean handleTexture(ItemStack stack, Player player) {
-        var oldTexture = getTextureID();
-        if(stack.is(Items.WHITE_DYE)) setTexture(EntityTexture.WHITE);
-        if(stack.is(Items.ORANGE_DYE)) setTexture(EntityTexture.ORANGE);
-        if(stack.is(Items.MAGENTA_DYE)) setTexture(EntityTexture.MAGENTA);
-        if(stack.is(Items.LIGHT_BLUE_DYE)) setTexture(EntityTexture.LIGHT_BLUE);
-        if(stack.is(Items.YELLOW_DYE)) setTexture(EntityTexture.YELLOW);
-        if(stack.is(Items.LIME_DYE)) setTexture(EntityTexture.LIME);
-        if(stack.is(Items.PINK_DYE)) setTexture(EntityTexture.PINK);
-        if(stack.is(Items.GRAY_DYE)) setTexture(EntityTexture.GRAY);
-        if(stack.is(Items.LIGHT_GRAY_DYE)) setTexture(EntityTexture.LIGHT_GRAY);
-        if(stack.is(Items.CYAN_DYE)) setTexture(EntityTexture.CYAN);
-        if(stack.is(Items.PURPLE_DYE)) setTexture(EntityTexture.PURPLE);
-        if(stack.is(Items.BLUE_DYE)) setTexture(EntityTexture.BLUE);
-        if(stack.is(Items.BROWN_DYE)) setTexture(EntityTexture.BROWN);
-        if(stack.is(Items.GREEN_DYE)) setTexture(EntityTexture.GREEN);
-        if(stack.is(Items.RED_DYE)) setTexture(EntityTexture.RED);
-        if(stack.is(Items.BLACK_DYE)) setTexture(EntityTexture.BLACK);
+        String oldVariant = getTextureVariant();
 
-        if(oldTexture != getTextureID()) {
+        if (stack.is(Items.WHITE_DYE))      setTextureVariant(EntityTexture.WHITE.Name());
+        if (stack.is(Items.ORANGE_DYE))     setTextureVariant(EntityTexture.ORANGE.Name());
+        if (stack.is(Items.MAGENTA_DYE))    setTextureVariant(EntityTexture.MAGENTA.Name());
+        if (stack.is(Items.LIGHT_BLUE_DYE)) setTextureVariant(EntityTexture.LIGHT_BLUE.Name());
+        if (stack.is(Items.YELLOW_DYE))     setTextureVariant(EntityTexture.YELLOW.Name());
+        if (stack.is(Items.LIME_DYE))       setTextureVariant(EntityTexture.LIME.Name());
+        if (stack.is(Items.PINK_DYE))       setTextureVariant(EntityTexture.PINK.Name());
+        if (stack.is(Items.GRAY_DYE))       setTextureVariant(EntityTexture.GRAY.Name());
+        if (stack.is(Items.LIGHT_GRAY_DYE)) setTextureVariant(EntityTexture.LIGHT_GRAY.Name());
+        if (stack.is(Items.CYAN_DYE))       setTextureVariant(EntityTexture.CYAN.Name());
+        if (stack.is(Items.PURPLE_DYE))     setTextureVariant(EntityTexture.PURPLE.Name());
+        if (stack.is(Items.BLUE_DYE))       setTextureVariant(EntityTexture.BLUE.Name());
+        if (stack.is(Items.BROWN_DYE))      setTextureVariant(EntityTexture.BROWN.Name());
+        if (stack.is(Items.GREEN_DYE))      setTextureVariant(EntityTexture.GREEN.Name());
+        if (stack.is(Items.RED_DYE))        setTextureVariant(EntityTexture.RED.Name());
+        if (stack.is(Items.BLACK_DYE))      setTextureVariant(EntityTexture.BLACK.Name());
+
+        if (!oldVariant.equals(getTextureVariant())) {
             if (!player.getAbilities().instabuild) {
                 stack.shrink(1);
                 return true;
@@ -1628,7 +2138,7 @@ public abstract class RobotEntity extends InternalEntity {
         if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
         nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putInt(LovelyConstant.STAT_COLOR, this.getTextureID());
+        nbt.putString(LovelyConstant.STAT_COLOR, this.getTextureVariant());
 
         nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
@@ -1695,7 +2205,7 @@ public abstract class RobotEntity extends InternalEntity {
         if (!ownerName.isEmpty()) nbt.putString(LovelyConstant.STAT_OWNER, ownerName);
 
         nbt.putString(LovelyConstant.STAT_TYPE, this.nativeEntity.getKey());
-        nbt.putInt(LovelyConstant.STAT_COLOR, this.getTextureID());
+        nbt.putString(LovelyConstant.STAT_COLOR, this.getTextureVariant());
         nbt.putInt(LovelyConstant.STAT_MAX_LEVEL, this.getMaxLevel());
         nbt.putInt(LovelyConstant.STAT_LEVEL, this.getCurrentLevel());
         nbt.putInt(LovelyConstant.STAT_EXP, this.getExp());
