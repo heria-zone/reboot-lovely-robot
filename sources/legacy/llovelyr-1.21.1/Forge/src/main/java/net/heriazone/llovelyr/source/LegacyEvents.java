@@ -2,7 +2,7 @@ package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
 import net.heriazone.lovelylib.common.commands.LovelyCommands;
-import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.lovelylib.common.entity.NativeRobotEntity;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -62,7 +62,7 @@ public class LegacyEvents {
         @SubscribeEvent
         public static void onRegisterCommands(RegisterCommandsEvent event) {
             LovelyCommands.register(event.getDispatcher());
-            Legacy.LOGGER.info("Registered LovelyRobotEntity commands");
+            Legacy.LOGGER.info("Registered NativeRobotEntity commands");
         } // onRegisterCommands()
 
         /**
@@ -84,7 +84,7 @@ public class LegacyEvents {
             java.util.UUID deadEntityId = event.getEntity().getUUID();
 
             // Find all robots in the world and let them claim exp from this entity
-            event.getEntity().level().getEntitiesOfClass(RobotEntity.class,
+            event.getEntity().level().getEntitiesOfClass(NativeRobotEntity.class,
                     event.getEntity().getBoundingBox().inflate(100.0),
                     robot -> true
             ).forEach(robot -> robot.claimAccumulatedExp(deadEntityId));

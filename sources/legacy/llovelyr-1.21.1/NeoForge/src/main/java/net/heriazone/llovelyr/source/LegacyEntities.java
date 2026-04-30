@@ -10,14 +10,14 @@ import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.llovelyr.LegacyIdentifier;
 import net.heriazone.llovelyr.Legacy;
 import net.heriazone.hzlib.api.entity.InternalEntity;
-import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
+import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.neoforged.neoforge.registries.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.*;
 
 /**
- * Registry for LovelyRobotEntity Legacy entity types (NeoForge).
+ * Registry for NativeRobotEntity Legacy entity types (NeoForge).
  * <p>
  * <b>Architecture:</b> Manages entity type registration, attribute creation,
  * and renderer binding for all robot variants in the Legacy mod.
@@ -32,20 +32,20 @@ public class LegacyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotType.BUNNY);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotType.BUNNY2);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotType.DRAGON);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotType.HONEY);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotType.KITSUNE);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, LegacyRobotType.NEKO);
-    public static final DeferredHolder<EntityType<?>, EntityType<RobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, LegacyRobotType.VANILLA);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotType.BUNNY);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotType.BUNNY2);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotType.DRAGON);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotType.HONEY);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotType.KITSUNE);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, LegacyRobotType.NEKO);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, LegacyRobotType.VANILLA);
 
     // -- Registration Methods --
 
     /**
-     * Registers a robot entity type with RobotEntity implementation.
+     * Registers a robot entity type with NativeRobotEntity implementation.
      * <p>
-     * Type-safe registration that ensures RobotEntity is used consistently
+     * Type-safe registration that ensures NativeRobotEntity is used consistently
      * across all robot variants.
      * <p>
      * <b>Spawn Item Handling:</b> Spawn item is resolved lazily during entity
@@ -55,9 +55,9 @@ public class LegacyEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static DeferredHolder<EntityType<?>, EntityType<RobotEntity>> registerRobot(String name, NativeEntityType robotType) {
+    private static DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> registerRobot(String name, NativeEntityType robotType) {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
-                        (EntityType<RobotEntity> type, Level level) -> new RobotEntity(type, level, robotType), MobCategory.CREATURE)
+                        (EntityType<NativeRobotEntity> type, Level level) -> new NativeRobotEntity(type, level, robotType), MobCategory.CREATURE)
                 .sized(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT)
                 .build(LegacyIdentifier.getId(name).toString()));
     } // registerRobot()
@@ -97,12 +97,12 @@ public class LegacyEntities {
      */
     public static void registerRender(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(BUNNY.get(), BunnyRenderer::new);
-        event.registerEntityRenderer(BUNNY2.get(), RobotRenderer::new);
-        event.registerEntityRenderer(DRAGON.get(), RobotRenderer::new);
-        event.registerEntityRenderer(HONEY.get(), RobotRenderer::new);
+        event.registerEntityRenderer(BUNNY2.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(DRAGON.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(HONEY.get(), NativeRobotRenderer::new);
         event.registerEntityRenderer(KITSUNE.get(), KitsuneRenderer::new);
-        event.registerEntityRenderer(NEKO.get(), RobotRenderer::new);
-        event.registerEntityRenderer(VANILLA.get(), RobotRenderer::new);
+        event.registerEntityRenderer(NEKO.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(VANILLA.get(), NativeRobotRenderer::new);
     } // registerRender()
 
     /**

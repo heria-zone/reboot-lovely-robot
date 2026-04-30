@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.heriazone.llovelyr.Legacy;
 import net.heriazone.llovelyr.LegacyIdentifier;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.hzlib.api.groups.InternalGroups;
+import net.heriazone.hzlib.api.groups.InternalGroups;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;

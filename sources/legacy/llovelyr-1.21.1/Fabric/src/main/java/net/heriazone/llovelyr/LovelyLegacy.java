@@ -5,8 +5,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.llovelyr.source.*;
 import net.heriazone.lovelylib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
-import net.heriazone.lovelylib.hzlib.api.services.*;
+import net.heriazone.hzlib.api.entity.features.DropFeature;
+import net.heriazone.hzlib.api.services.*;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
 
 /**

@@ -4,7 +4,7 @@ import net.heriazone.llovelyr.Legacy;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.items.LovelyCoreItem;
 import net.heriazone.lovelylib.common.items.LovelySpawnItem;
-import net.heriazone.lovelylib.hzlib.api.items.InternalItems;
+import net.heriazone.hzlib.api.items.InternalItems;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;

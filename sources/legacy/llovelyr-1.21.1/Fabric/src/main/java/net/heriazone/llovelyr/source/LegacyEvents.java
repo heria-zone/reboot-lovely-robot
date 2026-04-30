@@ -3,7 +3,7 @@ package net.heriazone.llovelyr.source;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.heriazone.lovelylib.common.commands.LovelyCommands;
-import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.lovelylib.common.entity.NativeRobotEntity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -47,7 +47,7 @@ public class LegacyEvents {
 
                 // Find all robots in the world and let them claim exp from this entity
                 world.getEntitiesOfClass(
-                        RobotEntity.class,
+                        NativeRobotEntity.class,
                         entity.getBoundingBox().inflate(100.0),
                         robot -> true
                 ).forEach(robot -> robot.claimAccumulatedExp(deadEntityId));

@@ -3,12 +3,12 @@ package net.heriazone.llovelyr.source;
 import net.heriazone.llovelyr.Legacy;
 import net.heriazone.lovelylib.common.configs.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.hzlib.api.configs.*;
+import net.heriazone.hzlib.api.configs.*;
 
 import java.util.HashMap;
 
 /**
- * Configuration management for Legacy LovelyRobotEntity mod.
+ * Configuration management for Legacy NativeRobotEntity mod.
  * <p>
  * <b>Architecture:</b> Uses SimpleConfig for file handling and ConfigProvider for
  * structured config generation. Provides static config values with automatic file

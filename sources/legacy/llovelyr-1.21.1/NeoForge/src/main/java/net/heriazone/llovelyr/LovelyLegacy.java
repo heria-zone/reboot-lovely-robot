@@ -2,7 +2,7 @@ package net.heriazone.llovelyr;
 
 import net.heriazone.llovelyr.source.*;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
-import net.heriazone.lovelylib.hzlib.api.services.*;
+import net.heriazone.hzlib.api.services.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
