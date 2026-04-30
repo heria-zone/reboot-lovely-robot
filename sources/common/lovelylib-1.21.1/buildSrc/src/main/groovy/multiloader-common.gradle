@@ -40,17 +40,26 @@ repositories {
         flatDir {
             dirs rootProject.file('libs')
         }
+        // Development fallback: HZLib Common build output
+        if (rootProject.hasProperty('hzlib_project_path')) {
+            flatDir {
+                dirs rootProject.file("${rootProject.hzlib_project_path}/Common/build/libs")
+            }
+        }
     }
 }
 
 dependencies {
-    // HZ Lib dependency (conditional) — uses local JARs from libs/ folder
+    // HZ Lib dependency (conditional) — Common module only
     if (project.name == 'Common' && project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        def hzLibJar = rootProject.file("libs/hzlib-common-${minecraft_version}-${hzlib_version}.jar")
-        if (hzLibJar.exists()) {
-            api name: "hzlib-common-${minecraft_version}-${hzlib_version}", version: ''
+        def hzLibLocalJar = rootProject.file("libs/hzlib-Common-${minecraft_version}-${hzlib_version}.jar")
+        def hzLibBuildJar = rootProject.hasProperty('hzlib_project_path')
+                ? new File(rootProject.file(rootProject.hzlib_project_path), "Common/build/libs/hzlib-Common-${minecraft_version}-${hzlib_version}.jar")
+                : null
+        if (hzLibLocalJar.exists() || (hzLibBuildJar != null && hzLibBuildJar.exists())) {
+            api name: "hzlib-Common-${minecraft_version}-${hzlib_version}", version: ''
         } else {
-            logger.warn("HZLib Common JAR not found: ${hzLibJar.path}. Add the JAR to the libs/ folder.")
+            logger.warn("HZLib Common JAR not found. Build HZLib first: cd sources/common/hzlib-1.21.1 && ./gradlew build")
         }
     }
 }

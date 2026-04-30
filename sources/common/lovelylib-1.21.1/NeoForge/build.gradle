@@ -20,11 +20,14 @@ dependencies {
     
     // HZ Lib dependency (NeoForge version, if needed)
     if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        def hzLibJar = rootProject.file("libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
-        if (hzLibJar.exists()) {
+        def hzLibBuildJar = rootProject.hasProperty('hzlib_project_path')
+                ? new File(rootProject.file(rootProject.hzlib_project_path), "NeoForge/build/libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
+                : null
+        def hzLibLocalJar = rootProject.file("libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibLocalJar.exists() || (hzLibBuildJar != null && hzLibBuildJar.exists())) {
             implementation name: "hzlib-neoforge-${minecraft_version}-${hzlib_version}", version: ''
         } else {
-            logger.warn("HZLib NeoForge JAR not found: ${hzLibJar.path}. Add the JAR to the libs/ folder.")
+            logger.warn("HZLib NeoForge JAR not found. Build HZLib first: cd sources/common/hzlib-1.21.1 && ./gradlew build")
         }
     }
     

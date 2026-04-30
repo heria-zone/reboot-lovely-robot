@@ -16,10 +16,16 @@ repositories {
         url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
     }
 
-    // Local library JARs
+    // Local library JARs — libs/ folder and HZLib build output
     if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
         flatDir {
             dirs rootProject.file('libs')
+        }
+        if (rootProject.hasProperty('hzlib_project_path')) {
+            def hzlibBase = rootProject.file(rootProject.hzlib_project_path)
+            flatDir {
+                dirs new File(hzlibBase, 'Forge/build/libs')
+            }
         }
     }
 }
@@ -75,11 +81,14 @@ dependencies {
 
     // HZ Lib dependency (Forge version, if needed)
     if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        def hzLibJar = rootProject.file("libs/hzlib-forge-${minecraft_version}-${hzlib_version}.jar")
-        if (hzLibJar.exists()) {
+        def hzLibBuildJar = rootProject.hasProperty('hzlib_project_path')
+                ? new File(rootProject.file(rootProject.hzlib_project_path), "Forge/build/libs/hzlib-forge-${minecraft_version}-${hzlib_version}.jar")
+                : null
+        def hzLibLocalJar = rootProject.file("libs/hzlib-forge-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibLocalJar.exists() || (hzLibBuildJar != null && hzLibBuildJar.exists())) {
             implementation name: "hzlib-forge-${minecraft_version}-${hzlib_version}", version: ''
         } else {
-            logger.warn("HZLib Forge JAR not found: ${hzLibJar.path}. Add the JAR to the libs/ folder.")
+            logger.warn("HZLib Forge JAR not found. Build HZLib first: cd sources/common/hzlib-1.21.1 && ./gradlew build")
         }
     }
 }

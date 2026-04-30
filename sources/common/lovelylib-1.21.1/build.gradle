@@ -42,6 +42,16 @@ subprojects {
             flatDir {
                 dirs '../hzlib-1.21.1/build/libs'
             }
+            // Development fallback: HZLib per-loader build output
+            if (project.hasProperty('hzlib_project_path')) {
+                def hzlibBase = rootProject.file(project.hzlib_project_path)
+                flatDir {
+                    dirs new File(hzlibBase, 'Common/build/libs')
+                    dirs new File(hzlibBase, 'Fabric/build/libs')
+                    dirs new File(hzlibBase, 'Forge/build/libs')
+                    dirs new File(hzlibBase, 'NeoForge/build/libs')
+                }
+            }
         }
     }
 
