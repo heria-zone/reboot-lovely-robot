@@ -1,8 +1,8 @@
 package net.heriazone.lovely_robot;
 
 import net.heriazone.lovely_robot.source.*;
-import net.heriazone.lovelylib.hzlib.api.services.NeoForgeServices;
-import net.heriazone.lovelylib.hzlib.api.services.Services;
+import net.heriazone.hzlib.api.services.NeoForgeServices;
+import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.tribute.TributeRobotType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;

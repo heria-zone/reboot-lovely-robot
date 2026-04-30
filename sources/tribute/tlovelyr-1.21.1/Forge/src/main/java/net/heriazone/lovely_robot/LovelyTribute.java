@@ -1,8 +1,8 @@
 package net.heriazone.lovely_robot;
 
 import net.heriazone.lovely_robot.source.*;
-import net.heriazone.lovelylib.hzlib.api.services.ForgeServices;
-import net.heriazone.lovelylib.hzlib.api.services.Services;
+import net.heriazone.hzlib.api.services.ForgeServices;
+import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.tribute.TributeRobotType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;

@@ -4,8 +4,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.lovely_robot.source.*;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.lovelylib.hzlib.api.services.FabricServices;
-import net.heriazone.lovelylib.hzlib.api.services.Services;
+import net.heriazone.hzlib.api.services.FabricServices;
+import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.tribute.TributeRobotType;
 
 /**

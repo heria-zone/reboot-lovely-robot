@@ -2,7 +2,7 @@ package net.heriazone.lovely_robot.source;
 
 import net.heriazone.lovely_robot.Tribute;
 import net.heriazone.lovelylib.common.commands.LovelyCommands;
-import net.heriazone.lovelylib.common.entity.RobotEntity;
+import net.heriazone.lovelylib.common.entity.NativeRobotEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -69,7 +69,7 @@ public class TributeEvents {
         @SubscribeEvent
         public static void onRegisterCommands(RegisterCommandsEvent event) {
             LovelyCommands.register(event.getDispatcher());
-            Tribute.LOGGER.info("Registered LovelyRobotEntity commands");
+            Tribute.LOGGER.info("Registered NativeRobotEntity commands");
         } // onRegisterCommands()
 
         /**
@@ -91,7 +91,7 @@ public class TributeEvents {
             java.util.UUID deadEntityId = event.getEntity().getUUID();
 
             // Find all robots in the world and let them claim exp from this entity
-            event.getEntity().level().getEntitiesOfClass(RobotEntity.class,
+            event.getEntity().level().getEntitiesOfClass(NativeRobotEntity.class,
                     event.getEntity().getBoundingBox().inflate(100.0),
                     robot -> true
             ).forEach(robot -> robot.claimAccumulatedExp(deadEntityId));

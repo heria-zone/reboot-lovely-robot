@@ -3,7 +3,7 @@ package net.heriazone.lovely_robot;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.hzlib.framework.common.InternalIdentifier;
+import net.heriazone.hzlib.framework.common.InternalIdentifier;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 

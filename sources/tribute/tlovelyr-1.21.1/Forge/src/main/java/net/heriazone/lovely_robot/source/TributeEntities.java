@@ -7,7 +7,7 @@ import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.entity.InternalEntity;
-import net.heriazone.lovelylib.hzlib.api.entity.features.DropFeature;
+import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.tribute.TributeRobotType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -19,7 +19,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 /**
- * Registry for LovelyRobotEntity Tribute entity types (Forge).
+ * Registry for NativeRobotEntity Tribute entity types (Forge).
  * <p>
  * <b>Architecture:</b> Manages entity type registration, attribute creation,
  * and renderer binding for all robot variants in the Tribute mod.
@@ -36,17 +36,17 @@ public class TributeEntities {
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<RobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, TributeRobotType.BUNNY);
-    public static final RegistryObject<EntityType<RobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, TributeRobotType.BUNNY2);
-    public static final RegistryObject<EntityType<RobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, TributeRobotType.HONEY);
-    public static final RegistryObject<EntityType<RobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotType.VANILLA);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, TributeRobotType.BUNNY);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, TributeRobotType.BUNNY2);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, TributeRobotType.HONEY);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotType.VANILLA);
 
     // -- Registration Methods --
 
     /**
-     * Registers a robot entity type with RobotEntity implementation.
+     * Registers a robot entity type with NativeRobotEntity implementation.
      * <p>
-     * Type-safe registration that ensures RobotEntity is used consistently
+     * Type-safe registration that ensures NativeRobotEntity is used consistently
      * across all robot variants.
      * <p>
      * <b>Spawn Item Handling:</b> Spawn item is resolved lazily during entity
@@ -56,9 +56,9 @@ public class TributeEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static RegistryObject<EntityType<RobotEntity>> registerRobot(String name, NativeEntityType robotType) {
+    private static RegistryObject<EntityType<NativeRobotEntity>> registerRobot(String name, NativeEntityType robotType) {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
-                        (EntityType<RobotEntity> type, Level level) -> new RobotEntity(type, level, robotType), MobCategory.CREATURE)
+                        (EntityType<NativeRobotEntity> type, Level level) -> new NativeRobotEntity(type, level, robotType), MobCategory.CREATURE)
                 .sized(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT)
                 .build(TributeIdentifier.getId(name).toString()));
     } // registerRobot()
@@ -94,9 +94,9 @@ public class TributeEntities {
      */
     public static void registerRender(net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(BUNNY.get(), BunnyRenderer::new);
-        event.registerEntityRenderer(BUNNY2.get(), RobotRenderer::new);
-        event.registerEntityRenderer(HONEY.get(), RobotRenderer::new);
-        event.registerEntityRenderer(VANILLA.get(), RobotRenderer::new);
+        event.registerEntityRenderer(BUNNY2.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(HONEY.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(VANILLA.get(), NativeRobotRenderer::new);
     } // registerRender()
 
     /**
