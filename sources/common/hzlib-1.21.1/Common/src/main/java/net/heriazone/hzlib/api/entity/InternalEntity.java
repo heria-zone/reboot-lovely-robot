@@ -289,13 +289,17 @@ public abstract class InternalEntity extends TamableAnimal {
 
     /**
      * Activates combat mode and resets the wary timer.
-     * <p>
-     * Called when the entity attacks, is attacked, or acquires a target.
-     * Subclasses can override to add visual effects (e.g., switching to armed model).
+     * Also immediately switches to the armed model variant so the visual
+     * change happens on the same tick as combat activation.
      */
     protected void handleActivateCombatMode() {
         combatMode = true;
         waryTimer = getCombatWaryTime();
+        // Immediately switch to armed model — don't wait for next handleCombatMode() tick
+        if (nativeEntity != null && !level().isClientSide) {
+            String armedKey = getArmedModelVariantKey();
+            if (!armedKey.equals(getModelVariant())) setModelVariant(armedKey);
+        }
     } // handleActivateCombatMode ()
 
     /**
@@ -322,17 +326,21 @@ public abstract class InternalEntity extends TamableAnimal {
 
         if (level().isClientSide && !combatMode) return;
 
+        // Guard: nativeEntity must be set for model variant resolution
+        if (nativeEntity == null) return;
+
         if (waryTimer > 0) {
             // Switch to armed model variant while in combat
             String armedKey = getArmedModelVariantKey();
             if (!armedKey.equals(getModelVariant())) setModelVariant(armedKey);
             waryTimer--;
-        } else {
-            // Return to default model variant when combat ends
+        } else if (combatMode) {
+            // Timer expired — exit combat mode and return to default model
+            combatMode = false;
             String defaultKey = getDefaultModelVariantKey();
             if (!defaultKey.equals(getModelVariant())) setModelVariant(defaultKey);
-            combatMode = false;
         }
+        // If combatMode is already false, model is already default — nothing to do
     } // handleCombatMode ()
 
     /**
