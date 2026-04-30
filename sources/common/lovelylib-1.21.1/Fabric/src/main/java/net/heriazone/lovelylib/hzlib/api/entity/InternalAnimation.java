@@ -74,7 +74,8 @@ public class InternalAnimation {
         return new AnimationController<>(animatable, CONTROLLER_ATTACK,
                 ATTACK_TRANSITION_TICKS, state -> {
             if (!animatable.swinging) {
-                state.getController().forceAnimationReset();
+                // Stop without resetting — allows the controller to resume cleanly
+                // on the next swing without losing state from a model switch
                 return PlayState.STOP;
             }
 
