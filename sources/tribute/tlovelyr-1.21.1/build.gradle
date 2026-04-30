@@ -37,15 +37,30 @@ subprojects {
             }
         }
         
-        // Local library dependencies
+        // Local library dependencies — always resolved from root project
         flatDir {
-            dirs 'libs'  // Local JARs directory
+            dirs rootProject.file('libs')
         }
-        
-        // Development: LovelyLib build output (fallback)
-        if (project.hasProperty('lovelylib_project_path')) {
+
+        // Development: LovelyLib build output (fallback — per-loader)
+        if (rootProject.hasProperty('lovelylib_project_path')) {
+            def lovelylibBase = rootProject.file(rootProject.lovelylib_project_path)
             flatDir {
-                dirs "${lovelylib_project_path}/build/libs"
+                dirs new File(lovelylibBase, 'Common/build/libs')
+                dirs new File(lovelylibBase, 'Fabric/build/libs')
+                dirs new File(lovelylibBase, 'Forge/build/libs')
+                dirs new File(lovelylibBase, 'NeoForge/build/libs')
+            }
+        }
+
+        // Development: HZLib build output (fallback — per-loader)
+        if (rootProject.hasProperty('hzlib_project_path')) {
+            def hzlibBase = rootProject.file(rootProject.hzlib_project_path)
+            flatDir {
+                dirs new File(hzlibBase, 'Common/build/libs')
+                dirs new File(hzlibBase, 'Fabric/build/libs')
+                dirs new File(hzlibBase, 'Forge/build/libs')
+                dirs new File(hzlibBase, 'NeoForge/build/libs')
             }
         }
     }
@@ -65,42 +80,67 @@ subprojects {
     }
 }
 
-// Task to refresh dependencies from LovelyLib
+// Task to refresh dependencies from LovelyLib and HZLib
 task refreshDependencies {
-    description = 'Copy latest LovelyLib JARs from build output to local libs directory'
+    description = 'Copy latest LovelyLib and HZLib JARs from build output to local libs directory'
     group = 'dependencies'
-    
+
     doLast {
-        def lovelyLibProject = file(lovelylib_project_path)
         def libsDir = file('libs')
-        
-        if (!lovelyLibProject.exists()) {
-            throw new GradleException("LovelyLib project not found at: ${lovelylib_project_path}")
-        }
-        
-        // Create libs directory if it doesn't exist
         libsDir.mkdirs()
-        
-        // Execute LovelyLib build and copy
-        println "Building LovelyLib..."
-        exec {
-            workingDir lovelyLibProject
-            commandLine './gradlew', 'build'
-        }
-        
-        // Copy JARs from LovelyLib build output
-        def lovelyLibBuildDir = file("${lovelylib_project_path}/build/libs")
-        if (lovelyLibBuildDir.exists()) {
-            copy {
-                from lovelyLibBuildDir
-                into libsDir
-                include '*.jar'
-                exclude '*-sources.jar'
-                exclude '*-javadoc.jar'
+
+        // ── LovelyLib ──────────────────────────────────────────────────────────
+        if (project.hasProperty('lovelylib_project_path')) {
+            def lovelyLibProject = rootProject.file(lovelylib_project_path)
+            if (!lovelyLibProject.exists()) {
+                throw new GradleException("LovelyLib project not found at: ${lovelylib_project_path}")
             }
-            println "Copied LovelyLib JARs to libs directory"
-        } else {
-            throw new GradleException("LovelyLib build directory not found: ${lovelyLibBuildDir}")
+            println "Building LovelyLib..."
+            exec {
+                workingDir lovelyLibProject
+                commandLine './gradlew', 'build'
+            }
+            ['Common', 'Fabric', 'Forge', 'NeoForge'].each { loader ->
+                def buildDir = new File(lovelyLibProject, "${loader}/build/libs")
+                if (buildDir.exists()) {
+                    copy {
+                        from buildDir
+                        into libsDir
+                        include '*.jar'
+                        exclude '*-sources.jar'
+                        exclude '*-javadoc.jar'
+                        exclude '*-dev.jar'
+                    }
+                }
+            }
+            println "Copied LovelyLib JARs to libs/"
+        }
+
+        // ── HZLib ──────────────────────────────────────────────────────────────
+        if (project.hasProperty('hzlib_project_path')) {
+            def hzLibProject = rootProject.file(hzlib_project_path)
+            if (!hzLibProject.exists()) {
+                throw new GradleException("HZLib project not found at: ${hzlib_project_path}")
+            }
+            println "Building HZLib..."
+            exec {
+                workingDir hzLibProject
+                commandLine './gradlew', 'build'
+            }
+            ['Common', 'Fabric', 'Forge', 'NeoForge'].each { loader ->
+                def buildDir = new File(hzLibProject, "${loader}/build/libs")
+                if (buildDir.exists()) {
+                    copy {
+                        from buildDir
+                        into libsDir
+                        include '*.jar'
+                        exclude '*-sources.jar'
+                        exclude '*-javadoc.jar'
+                        exclude '*-dev.jar'
+                    }
+                }
+            }
+            println "Copied HZLib JARs to libs/"
         }
     }
 }

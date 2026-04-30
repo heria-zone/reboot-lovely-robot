@@ -13,16 +13,26 @@ dependencies {
     
     // Local library dependencies (NeoForge versions) - only if JARs exist
     if (project.hasProperty('depends_on_lovelylib') && depends_on_lovelylib.toBoolean()) {
-        def lovelyLibJar = rootProject.file("libs/lovelylib-neoforge-${minecraft_version}-${lovelylib_version}.jar")
-        if (lovelyLibJar.exists()) {
+        def lovelyLibBuildJar = rootProject.hasProperty('lovelylib_project_path')
+                ? new File(rootProject.file(rootProject.lovelylib_project_path), "NeoForge/build/libs/lovelylib-neoforge-${minecraft_version}-${lovelylib_version}.jar")
+                : null
+        def lovelyLibLocalJar = rootProject.file("libs/lovelylib-neoforge-${minecraft_version}-${lovelylib_version}.jar")
+        if (lovelyLibLocalJar.exists() || (lovelyLibBuildJar != null && lovelyLibBuildJar.exists())) {
             implementation name: "lovelylib-neoforge-${minecraft_version}-${lovelylib_version}", version: ''
         } else {
-            logger.warn("LovelyLib NeoForge JAR not found: ${lovelyLibJar.path}. Run 'gradle refreshDependencies' first.")
+            logger.warn("LovelyLib NeoForge JAR not found. Run 'gradle refreshDependencies' first.")
         }
-    } else if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        def hzLibJar = rootProject.file("libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
-        if (hzLibJar.exists()) {
+    }
+
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibBuildJar = rootProject.hasProperty('hzlib_project_path')
+                ? new File(rootProject.file(rootProject.hzlib_project_path), "NeoForge/build/libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
+                : null
+        def hzLibLocalJar = rootProject.file("libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibLocalJar.exists() || (hzLibBuildJar != null && hzLibBuildJar.exists())) {
             implementation name: "hzlib-neoforge-${minecraft_version}-${hzlib_version}", version: ''
+        } else {
+            logger.warn("HZLib NeoForge JAR not found. Run 'gradle refreshDependencies' first.")
         }
     }
     
