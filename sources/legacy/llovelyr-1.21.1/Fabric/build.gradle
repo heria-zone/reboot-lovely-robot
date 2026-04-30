@@ -16,16 +16,26 @@ dependencies {
     
     // Local library dependencies (Fabric versions) - only if JARs exist
     if (project.hasProperty('depends_on_lovelylib') && depends_on_lovelylib.toBoolean()) {
-        def lovelyLibJar = rootProject.file("libs/lovelylib-fabric-${minecraft_version}-${lovelylib_version}.jar")
-        if (lovelyLibJar.exists()) {
+        def lovelyLibBuildJar = rootProject.hasProperty('lovelylib_project_path')
+                ? new File(rootProject.file(rootProject.lovelylib_project_path), "Fabric/build/libs/lovelylib-fabric-${minecraft_version}-${lovelylib_version}.jar")
+                : null
+        def lovelyLibLocalJar = rootProject.file("libs/lovelylib-fabric-${minecraft_version}-${lovelylib_version}.jar")
+        if (lovelyLibLocalJar.exists() || (lovelyLibBuildJar != null && lovelyLibBuildJar.exists())) {
             modApi name: "lovelylib-fabric-${minecraft_version}-${lovelylib_version}", version: ''
         } else {
-            logger.warn("LovelyLib Fabric JAR not found: ${lovelyLibJar.path}. Run 'gradle refreshDependencies' first.")
+            logger.warn("LovelyLib Fabric JAR not found. Run 'gradle refreshDependencies' first.")
         }
-    } else if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
-        def hzLibJar = rootProject.file("libs/hzlib-fabric-${minecraft_version}-${hzlib_version}.jar")
-        if (hzLibJar.exists()) {
+    }
+
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibBuildJar = rootProject.hasProperty('hzlib_project_path')
+                ? new File(rootProject.file(rootProject.hzlib_project_path), "Fabric/build/libs/hzlib-fabric-${minecraft_version}-${hzlib_version}.jar")
+                : null
+        def hzLibLocalJar = rootProject.file("libs/hzlib-fabric-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibLocalJar.exists() || (hzLibBuildJar != null && hzLibBuildJar.exists())) {
             modApi name: "hzlib-fabric-${minecraft_version}-${hzlib_version}", version: ''
+        } else {
+            logger.warn("HZLib Fabric JAR not found. Run 'gradle refreshDependencies' first.")
         }
     }
     
