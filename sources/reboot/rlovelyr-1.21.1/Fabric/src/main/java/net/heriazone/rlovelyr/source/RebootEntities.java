@@ -3,12 +3,13 @@ package net.heriazone.rlovelyr.source;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.rlovelyr.RebootIdentifier;
 import net.heriazone.hzlib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.reboot.RebootRobotType;
 import net.minecraft.core.Registry;
@@ -66,13 +67,13 @@ public class RebootEntities {
      * Registers entity attributes.
      */
     public static void register() {
-        FabricDefaultAttributeRegistry.register(BUNNY,   InternalEntity.createAttributes(RebootRobotType.BUNNY));
-        FabricDefaultAttributeRegistry.register(BUNNY2,  InternalEntity.createAttributes(RebootRobotType.BUNNY2));
-        FabricDefaultAttributeRegistry.register(DRAGON,  InternalEntity.createAttributes(RebootRobotType.DRAGON));
-        FabricDefaultAttributeRegistry.register(HONEY,   InternalEntity.createAttributes(RebootRobotType.HONEY));
-        FabricDefaultAttributeRegistry.register(KITSUNE, InternalEntity.createAttributes(RebootRobotType.KITSUNE));
-        FabricDefaultAttributeRegistry.register(NEKO,    InternalEntity.createAttributes(RebootRobotType.NEKO));
-        FabricDefaultAttributeRegistry.register(VANILLA, InternalEntity.createAttributes(RebootRobotType.VANILLA));
+        FabricDefaultAttributeRegistry.register(BUNNY,   NativeEntityFamily.createAttributes(RebootRobotType.BUNNY));
+        FabricDefaultAttributeRegistry.register(BUNNY2,  NativeEntityFamily.createAttributes(RebootRobotType.BUNNY2));
+        FabricDefaultAttributeRegistry.register(DRAGON,  NativeEntityFamily.createAttributes(RebootRobotType.DRAGON));
+        FabricDefaultAttributeRegistry.register(HONEY,   NativeEntityFamily.createAttributes(RebootRobotType.HONEY));
+        FabricDefaultAttributeRegistry.register(KITSUNE, NativeEntityFamily.createAttributes(RebootRobotType.KITSUNE));
+        FabricDefaultAttributeRegistry.register(NEKO,    NativeEntityFamily.createAttributes(RebootRobotType.NEKO));
+        FabricDefaultAttributeRegistry.register(VANILLA, NativeEntityFamily.createAttributes(RebootRobotType.VANILLA));
     } // register ()
 
     /**

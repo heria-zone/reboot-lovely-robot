@@ -6,7 +6,7 @@ import net.heriazone.hzlib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.reboot.RebootRobotType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -83,13 +83,13 @@ public class RebootEntities {
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
-        event.put(BUNNY.get(),   InternalEntity.createAttributes(RebootRobotType.BUNNY));
-        event.put(BUNNY2.get(),  InternalEntity.createAttributes(RebootRobotType.BUNNY2));
-        event.put(DRAGON.get(),  InternalEntity.createAttributes(RebootRobotType.DRAGON));
-        event.put(HONEY.get(),   InternalEntity.createAttributes(RebootRobotType.HONEY));
-        event.put(KITSUNE.get(), InternalEntity.createAttributes(RebootRobotType.KITSUNE));
-        event.put(NEKO.get(),    InternalEntity.createAttributes(RebootRobotType.NEKO));
-        event.put(VANILLA.get(), InternalEntity.createAttributes(RebootRobotType.VANILLA));
+        event.put(BUNNY.get(),   NativeEntity.createAttributes(RebootRobotType.BUNNY));
+        event.put(BUNNY2.get(),  NativeEntity.createAttributes(RebootRobotType.BUNNY2));
+        event.put(DRAGON.get(),  NativeEntity.createAttributes(RebootRobotType.DRAGON));
+        event.put(HONEY.get(),   NativeEntity.createAttributes(RebootRobotType.HONEY));
+        event.put(KITSUNE.get(), NativeEntity.createAttributes(RebootRobotType.KITSUNE));
+        event.put(NEKO.get(),    NativeEntity.createAttributes(RebootRobotType.NEKO));
+        event.put(VANILLA.get(), NativeEntity.createAttributes(RebootRobotType.VANILLA));
     } // registerAttribute()
 
     /**
