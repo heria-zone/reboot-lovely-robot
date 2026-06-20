@@ -22,11 +22,11 @@ Execute ADR_018 — rename all `Internal*` classes across HZLib, LovelyLib, and 
 ## Objectives
 
 ### Phase 1 — HZLib Common
-- [ ] `InternalEntity` → `NativeEntity`
-- [ ] `InternalEntityType<T>` → `NativeEntityFamily<T>`
-- [ ] `InternalLogic` → `EntityLogic`
-- [ ] `InternalParticle` → `EntityParticles`
-- [ ] `InternalLayerRenderer<T>` (Common) → `LayerRenderPipeline<T>`
+- [x] `InternalEntity` → `NativeEntity`
+- [x] `InternalEntityType<T>` → `NativeEntityFamily<T>`
+- [x] `InternalLogic` → `EntityLogic`
+- [x] `InternalParticle` → `EntityParticles`
+- [x] `InternalLayerRenderer<T>` (Common) → `LayerRenderPipeline<T>`
 
 ### Phase 2 — HZLib Loaders (Fabric / Forge / NeoForge)
 - [ ] `InternalAnimation` → `NativeAnimation`
@@ -382,11 +382,11 @@ After renaming, update the class-level JavaDoc on each renamed class to reflect 
 
 | Task | Points | Phase | Status |
 |---|---|---|---|
-| 1.1 `InternalEntity` → `NativeEntity` | 3 | 1 | ⬜ |
-| 1.2 `InternalEntityType` → `NativeEntityFamily` | 3 | 1 | ⬜ |
-| 1.3 `InternalLogic` → `EntityLogic` | 1 | 1 | ⬜ |
-| 1.4 `InternalParticle` → `EntityParticles` | 1 | 1 | ⬜ |
-| 1.5 Common `InternalLayerRenderer` → `LayerRenderPipeline` | 2 | 1 | ⬜ |
+| 1.1 `InternalEntity` → `NativeEntity` | 3 | 1 | ✅ |
+| 1.2 `InternalEntityType` → `NativeEntityFamily` | 3 | 1 | ✅ |
+| 1.3 `InternalLogic` → `EntityLogic` | 1 | 1 | ✅ |
+| 1.4 `InternalParticle` → `EntityParticles` | 1 | 1 | ✅ |
+| 1.5 Common `InternalLayerRenderer` → `LayerRenderPipeline` | 2 | 1 | ✅ |
 | 2.1 HZLib `InternalAnimation` → `NativeAnimation` (×3 loaders) | 3 | 2 | ⬜ |
 | 2.2 `InternalModel` → `NativeModel` (×3 loaders) | 2 | 2 | ⬜ |
 | 2.3 Loader `InternalLayerRenderer` → `NativeRenderer` (×3 loaders) | 3 | 2 | ⬜ |
