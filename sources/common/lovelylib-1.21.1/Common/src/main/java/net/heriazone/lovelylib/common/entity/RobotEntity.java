@@ -729,6 +729,33 @@ public abstract class RobotEntity extends InternalEntity {
     // -- Display / Notification --
 
     /**
+     * Handles robot taming — adds Poof particles and totem sound on top of the
+     * base ownership/registration flow.
+     * <p>
+     * <b>Architecture:</b> Robot-specific taming feedback lives here, not in
+     * {@link net.heriazone.hzlib.api.entity.InternalEntity#handleTame} — that base
+     * method is intentionally silent so monster entities don't receive robot effects.
+     * <p>
+     * <b>Sound:</b> Volume scales with entity dimensions to feel proportional
+     * across robot sizes.
+     *
+     * @param player the player taming this robot
+     */
+    @Override
+    public void handleTame(Player player) {
+        // Poof particles — robot materialization effect
+        InternalParticle.Poof(this);
+
+        // Totem sound — volume scales with entity size
+        float volume = (float) Math.max(0.5F, Math.min(2.0F, this.getBbWidth() * this.getBbHeight()));
+        this.level().playSound(null, this.blockPosition(),
+                SoundEvents.TOTEM_USE, net.minecraft.sounds.SoundSource.NEUTRAL, volume, 1.2F);
+
+        // Ownership, sit, display message, registry
+        super.handleTame(player);
+    } // handleTame ()
+
+    /**
      * Displays the owner name to the player after taming.
      * <p>
      * <b>Format:</b> {@code "Owner: PlayerName"} on the action bar.
@@ -1427,13 +1454,17 @@ public abstract class RobotEntity extends InternalEntity {
      * Implements the robot interaction dispatch — the entry point called by
      * {@link net.heriazone.hzlib.api.entity.InternalEntity#mobInteract}.
      * <p>
-     * <b>Dispatch logic (mirrors backup InternalEntity.mobInteract):</b>
+     * <b>Dispatch logic:</b>
      * <ul>
      *   <li>Client side: return CONSUME if owned/tame/interactable, else PASS</li>
      *   <li>Server side, owned, dye item: route to {@link #handleItemInteraction}</li>
-     *   <li>Server side, owned, other item: try common interactions, then {@link #handleInteract}</li>
-     *   <li>Not owned: return PASS (taming handled by common interactions layer)</li>
+     *   <li>Server side, owned, other item: run robot-specific behaviors via {@link #handleInteract}</li>
+     *   <li>Not owned: return PASS (taming handled by the common interactions layer)</li>
      * </ul>
+     * <p>
+     * <b>Note:</b> {@code handleCommonInteractions} (exchange feature, taming food) is
+     * already called by {@code InternalEntity.mobInteract} before this method is reached.
+     * There is no need to call it again here.
      */
     @Override
     protected InteractionResult handleSpecificInteractions(Player player, InteractionHand hand, ItemStack stack) {
@@ -1447,10 +1478,6 @@ public abstract class RobotEntity extends InternalEntity {
             if (stack.getItem() instanceof DyeItem) {
                 return handleItemInteraction(stack, player);
             }
-
-            // Let common interactions (TamableAnimal sit command etc.) run first
-            InteractionResult commonResult = handleCommonInteractions(player, hand, stack);
-            if (commonResult.consumesAction()) return commonResult;
 
             handleInteract(stack, player);
             return InteractionResult.SUCCESS;

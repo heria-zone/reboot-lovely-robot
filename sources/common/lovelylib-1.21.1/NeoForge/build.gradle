@@ -30,8 +30,6 @@ dependencies {
             logger.warn("HZLib NeoForge JAR not found. Build HZLib first: cd sources/common/hzlib-1.21.1 && ./gradlew build")
         }
     }
-    
-
 }
 
 neoForge {
@@ -53,8 +51,6 @@ neoForge {
         }
     }
 }
-
-
 
 publishing {
     publications {
