@@ -36,11 +36,7 @@ Go through the interaction surface and check what's currently silent:
 
 - **Sitting down / standing up** — a small mechanical click or settle sound.
 - **State change (Follow → Standby → Defence)** — a short confirmation beep or chime. Could reuse an existing UI sound.
-- **Level-up** — already has `PLAYER_LEVELUP`, but worth checking if the volume and pitch feel right in context.
 - **Protection upgrade** (enchanted book fed) — currently silent. A soft enchantment shimmer would fit.
-- **Smart core retrieval** (core sent to inventory on death) — already plays `ITEM_PICKUP`, which is fine.
-- **Pickup retrieval** (Ctrl+Shift to pick up robot) — plays `ITEM_PICKUP` too. Could differentiate with something slightly heavier.
-- **Taming** — plays `TOTEM_USE`. Worth revisiting whether that's the right feel or if something softer fits better.
 
 ---
 
