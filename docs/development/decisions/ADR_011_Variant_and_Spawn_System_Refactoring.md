@@ -9,7 +9,7 @@
 
 The current variant and spawn systems have several structural problems identified during the entity architecture review:
 
-**Problem 1 — Gourdragora over-registration**: The current `GourdragoraType` has 9 static instances (GOLDEN_MINI, GOLDEN_DEFAULT, GOLDEN_BIG, LUMINA_MINI, etc.), treating size as a type. This is wrong — size is an appearance variant, not an entity variant. The 9 instances should collapse to 3 entity variant configurations (Golden, Lumina, Jack'O), each with 3 appearance variants (Mini, Default, Big).
+**Problem 1 — Gourdragora over-registration**: The current `GourdragoraType` has 9 static instances (GOLDEN_MINI, GOLDEN_DEFAULT, GOLDEN_BIG, LUMINA_MINI, etc.), treating size as a type. This is wrong — size is an entity appearance, not an entity variant. The 9 instances should collapse to 3 entity variant configurations (Golden, Lumina, Jack'O), each with 3 entity appearances (Mini, Default, Big).
 
 **Problem 2 — Size inference via string-sniffing**: `GourdragoraType` infers size from `key.endsWith("_mini")` / `key.endsWith("_big")`. This is fragile — the size information is implicit in the key name rather than explicit in the type.
 
@@ -19,7 +19,7 @@ The current variant and spawn systems have several structural problems identifie
 
 **Problem 5 — `supportsTummyTexture()` contradiction**: `MushroomType.supportsTummyTexture()` returns `false` with a comment saying "all mushroom variants support belly progression." The method name and return value contradict the comment.
 
-**Problem 6 — Jack'O behavioral difference unmodeled**: Jack'O Gourdragora uses different taming items (`CAKE` + `CANDIES`) than Golden/Lumina (`CAKE` + `BONE_MEAL`). By the project's own terminology, this makes Jack'O an Entity Variant (behavioral difference), not merely an Appearance Variant with a spawn restriction. The current flat structure does not express this.
+**Problem 6 — Jack'O behavioral difference unmodeled**: Jack'O Gourdragora uses different taming items (`CAKE` + `CANDIES`) than Golden/Lumina (`CAKE` + `BONE_MEAL`). By the project's own terminology, this makes Jack'O an Entity Variant (behavioral difference), not merely an Entity Appearance with a spawn restriction. The current flat structure does not express this.
 
 ## Terminology (Locked)
 
@@ -27,13 +27,13 @@ These terms are used consistently throughout this ADR and all related documentat
 
 - **Entity Family** — The conceptual creature. One family = one registered `EntityType<>`. Example: Gourdragora, Mushroom Brown, Bunny Robot.
 - **Entity Variant** — A meaningful configuration within a family that differs in stats, behaviors, or spawn conditions. Example: Gourdragora Golden vs. Jack'O (different taming items). Robot Bunny vs. Dragon (different stats and abilities).
-- **Appearance Variant** — A visual change within the same entity variant. Changes texture, model, hitbox, or scale — but not fundamental identity, stats, or behavior class. Example: Gourdragora Mini/Default/Big (different size). Mushroom Brown Boletus/Ruby/Scarlatina/Orange (different texture by biome). Robot 16 dye colors.
+- **Entity Appearance** — A visual change within the same entity variant. Changes texture, model, hitbox, or scale — but not fundamental identity, stats, or behavior class. Example: Gourdragora Mini/Default/Big (different size). Mushroom Brown Boletus/Ruby/Scarlatina/Orange (different texture by biome). Robot 16 dye colors.
 
 ## Decision
 
 ### Decision 1: `SizeVariantFeature` for Dynamic Hitbox
 
-Entities with size-based appearance variants (Gourdragora) will use a `SizeVariantFeature` that carries per-size configuration. The entity reads its current `MODEL_VARIANT` key and applies the corresponding dimensions dynamically.
+Entities with size-based entity appearances (Gourdragora) will use a `SizeVariantFeature` that carries per-size configuration. The entity reads its current `MODEL_VARIANT` key and applies the corresponding dimensions dynamically.
 
 **Why Option B (dynamic via `getDimensions(Pose)`) over Option A (baked at spawn)**:
 - Sitting/moving/special-state hitbox requirements make dynamic reading mandatory regardless of whether size ever changes post-spawn
