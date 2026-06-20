@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.lovelylib.hzlib.api.entity.InternalAnimation;
+import net.heriazone.lovelylib.hzlib.api.entity.RobotAnimation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -15,7 +15,7 @@ import software.bernie.geckolib.animation.AnimatableManager;
  * {@code GeoEntity} for NeoForge-specific GeckoLib animation system integration.
  * <p>
  * <b>Design Decision:</b> Composition over inheritance — single entity class with
- * behavior configured via {@link NativeEntityType} instead of separate classes per variant.
+ * behavior configured via {@link RobotFamily} instead of separate classes per variant.
  * Reduces code duplication and simplifies variant addition.
  * <p>
  * <b>NeoForge Specifics:</b> Uses variant-based pickup item resolution with Supplier.get()
@@ -29,7 +29,7 @@ public class NativeRobotEntity extends RobotEntity implements GeoEntity {
 
     // -- Constructor --
 
-    public NativeRobotEntity(EntityType<? extends RobotEntity> entityType, Level level, NativeEntityType nativeEntity) {
+    public NativeRobotEntity(EntityType<? extends RobotEntity> entityType, Level level, RobotFamily nativeEntity) {
         super(entityType, level, nativeEntity);
     } // Constructor: NativeRobotEntity ()
 
@@ -37,8 +37,8 @@ public class NativeRobotEntity extends RobotEntity implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegister) {
-        controllerRegister.add(InternalAnimation.locomotionAnimation(this));
-        controllerRegister.add(InternalAnimation.attackAnimation(this));
+        controllerRegister.add(RobotAnimation.locomotionAnimation(this));
+        controllerRegister.add(RobotAnimation.attackAnimation(this));
     } // registerControllers ()
 
     @Override
