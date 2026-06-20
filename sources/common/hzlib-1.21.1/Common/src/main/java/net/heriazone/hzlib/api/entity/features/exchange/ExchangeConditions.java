@@ -1,7 +1,7 @@
 package net.heriazone.hzlib.api.entity.features.exchange;
 
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
-import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -146,8 +146,8 @@ public final class ExchangeConditions {
     /**
      * Passes when the entity's current behavioral state matches any of the specified states.
      * <p>
-     * <b>Note:</b> Only applies to entities that extend {@link InternalEntity} and expose a
-     * behavioral state. Non-InternalEntity entities always fail this condition.
+     * <b>Note:</b> Only applies to entities that extend {@link NativeEntity} and expose a
+     * behavioral state. Non-NativeEntity entities always fail this condition.
      *
      * @param states allowed states
      * @return entity state condition
@@ -155,7 +155,7 @@ public final class ExchangeConditions {
     public static ExchangeCondition entityInState(EntityState... states) {
         Set<EntityState> stateSet = new HashSet<>(Arrays.asList(states));
         return ctx -> {
-            if (ctx.getEntity() instanceof InternalEntity internal) {
+            if (ctx.getEntity() instanceof NativeEntity internal) {
                 return stateSet.contains(internal.getCurrentState());
             }
             return false;

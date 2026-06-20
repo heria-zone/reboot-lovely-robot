@@ -16,7 +16,7 @@ import net.minecraft.nbt.CompoundTag;
  * entity's nature is always ready to express itself once enough time has passed.
  * <p>
  * Lives on {@code MonsterEntity} as {@code protected final EmanationState emanationState}.
- * Declared there rather than on {@code InternalEntity} since robots don't use
+ * Declared there rather than on {@code NativeEntity} since robots don't use
  * emanation mechanics yet.
  */
 public final class EmanationState {

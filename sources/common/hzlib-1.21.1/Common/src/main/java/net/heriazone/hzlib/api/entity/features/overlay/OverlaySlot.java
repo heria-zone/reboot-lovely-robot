@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.entity.features.overlay;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 
 import java.util.*;
 import java.util.function.Function;
@@ -11,7 +11,7 @@ import java.util.function.Predicate;
  * per-entry conditions, and optional per-entry color tint providers.<p>
  * <p>
  * <b>Architecture:</b> Pure data declaration, no GeckoLib dependency. The loader-side
- * overlay layer reads slot state via {@link InternalEntity#getOverlaySlot(String)} and
+ * overlay layer reads slot state via {@link NativeEntity#getOverlaySlot(String)} and
  * uses the entry's color provider (if present) to tint the grayscale mask texture.
  * <p>
  * <b>Slot key constants:</b> Always declare slot keys as {@code public static final String}
@@ -40,14 +40,14 @@ public final class OverlaySlot {
     public static final class Entry {
 
         private final String texturePath;                                    // fixed path, or "" for dynamic
-        private final Function<InternalEntity, String> pathResolver;         // null = use fixed texturePath
-        private final Predicate<InternalEntity> condition;
-        private final Function<InternalEntity, Integer> colorProvider;
+        private final Function<NativeEntity, String> pathResolver;         // null = use fixed texturePath
+        private final Predicate<NativeEntity> condition;
+        private final Function<NativeEntity, Integer> colorProvider;
 
         private Entry(String texturePath,
-                      Function<InternalEntity, String> pathResolver,
-                      Predicate<InternalEntity> condition,
-                      Function<InternalEntity, Integer> colorProvider) {
+                      Function<NativeEntity, String> pathResolver,
+                      Predicate<NativeEntity> condition,
+                      Function<NativeEntity, Integer> colorProvider) {
             this.texturePath   = texturePath != null ? texturePath : "";
             this.pathResolver  = pathResolver;
             this.condition     = condition;
@@ -56,8 +56,8 @@ public final class OverlaySlot {
 
         /** Convenience 3-arg constructor (no dynamic path resolver). */
         private Entry(String texturePath,
-                      Predicate<InternalEntity> condition,
-                      Function<InternalEntity, Integer> colorProvider) {
+                      Predicate<NativeEntity> condition,
+                      Function<NativeEntity, Integer> colorProvider) {
             this(texturePath, null, condition, colorProvider);
         } // Constructor: Entry (no pathResolver)
 
@@ -67,7 +67,7 @@ public final class OverlaySlot {
          *
          * @param entity entity at render time (may be null during static lookup)
          */
-        public String getTexturePath(InternalEntity entity) {
+        public String getTexturePath(NativeEntity entity) {
             if (pathResolver != null && entity != null) return pathResolver.apply(entity);
             return texturePath;
         } // getTexturePath ()
@@ -79,7 +79,7 @@ public final class OverlaySlot {
         public String getTexturePath() { return texturePath; }
 
         /** Returns {@code true} if this entry's condition passes for the given entity. */
-        public boolean test(InternalEntity entity) {
+        public boolean test(NativeEntity entity) {
             return condition == null || condition.test(entity);
         } // test ()
 
@@ -90,7 +90,7 @@ public final class OverlaySlot {
          * Calculates the ARGB tint color for this entry.
          * Returns {@code 0xFFFFFFFF} (white = no tint) when no provider is set.
          */
-        public int getColor(InternalEntity entity) {
+        public int getColor(NativeEntity entity) {
             return colorProvider != null ? colorProvider.apply(entity) : 0xFFFFFFFF;
         } // getColor ()
 
@@ -121,7 +121,7 @@ public final class OverlaySlot {
      * CONDITIONAL and ALWAYS slots have their own condition mechanisms; this field is
      * ignored for those modes.
      */
-    private Predicate<InternalEntity> renderCondition = null;
+    private Predicate<NativeEntity> renderCondition = null;
 
     // -- Constructor --
 
@@ -155,7 +155,7 @@ public final class OverlaySlot {
      * @param condition per-frame predicate; slot is hidden when this returns {@code false}
      * @return this slot for method chaining
      */
-    public OverlaySlot withRenderCondition(Predicate<InternalEntity> condition) {
+    public OverlaySlot withRenderCondition(Predicate<NativeEntity> condition) {
         this.renderCondition = condition;
         return this;
     } // withRenderCondition ()
@@ -180,7 +180,7 @@ public final class OverlaySlot {
      * For CONDITIONAL/ALWAYS slots the pool entries carry their own conditions;
      * this method is only meaningful for RANDOM and INTERACTIVE slots.
      */
-    public boolean testRenderCondition(InternalEntity entity) {
+    public boolean testRenderCondition(NativeEntity entity) {
         return renderCondition == null || renderCondition.test(entity);
     } // testRenderCondition ()
 
@@ -218,7 +218,7 @@ public final class OverlaySlot {
     /**
      * Creates a {@code CONDITIONAL} entry — texture path + predicate.
      */
-    public static Entry entry(String texturePath, Predicate<InternalEntity> condition) {
+    public static Entry entry(String texturePath, Predicate<NativeEntity> condition) {
         return new Entry(texturePath, null, condition, null);
     } // entry (conditional) ()
 
@@ -227,8 +227,8 @@ public final class OverlaySlot {
      * The color provider runs every render tick; keep it lightweight.
      */
     public static Entry entry(String texturePath,
-                              Predicate<InternalEntity> condition,
-                              Function<InternalEntity, Integer> colorProvider) {
+                              Predicate<NativeEntity> condition,
+                              Function<NativeEntity, Integer> colorProvider) {
         return new Entry(texturePath, null, condition, colorProvider);
     } // entry (conditional + color) ()
 
@@ -260,7 +260,7 @@ public final class OverlaySlot {
      * @param texturePaths  pool of grayscale mask textures
      */
     public static OverlaySlot randomColored(String key,
-                                            Function<InternalEntity, Integer> colorProvider,
+                                            Function<NativeEntity, Integer> colorProvider,
                                             String... texturePaths) {
         List<Entry> entries = new ArrayList<>();
         for (String p : texturePaths) entries.add(new Entry(p, null, colorProvider));
@@ -298,7 +298,7 @@ public final class OverlaySlot {
      * Creates an {@code INTERACTIVE} entry — texture path + color tint provider.
      * Used for Golden/Lumina carving patterns: one grayscale texture tinted per variant.
      */
-    public static Entry entry(String texturePath, Function<InternalEntity, Integer> colorProvider) {
+    public static Entry entry(String texturePath, Function<NativeEntity, Integer> colorProvider) {
         return new Entry(texturePath, null, colorProvider);
     } // entry (interactive + color) ()
 
@@ -314,14 +314,14 @@ public final class OverlaySlot {
      * <b>INTERACTIVE cycling:</b> Because the pool stores entries by {@link Entry#getTexturePath()}
      * (fixed path) for {@link #cycleNext(String)}, dynamic entries must still carry a non-null
      * stage key as the fixed path — typically a short stage identifier like {@code "stage_01"}.
-     * The renderer calls {@link Entry#getTexturePath(InternalEntity)} which returns the dynamic
+     * The renderer calls {@link Entry#getTexturePath(NativeEntity)} which returns the dynamic
      * path for rendering, while {@link #cycleNext(String)} uses the stable stage key for state.
      *
      * @param stageKey     stable stage identifier stored in {@code SynchedEntityData} (e.g. {@code "stage_01"})
      * @param pathResolver function from entity → full resource location string
      * @return dynamic interactive entry
      */
-    public static Entry entryDynamic(String stageKey, Function<InternalEntity, String> pathResolver) {
+    public static Entry entryDynamic(String stageKey, Function<NativeEntity, String> pathResolver) {
         return new Entry(stageKey, pathResolver, null, null);
     } // entryDynamic ()
 
@@ -336,8 +336,8 @@ public final class OverlaySlot {
      * @return dynamic interactive entry with color tint
      */
     public static Entry entryDynamic(String stageKey,
-                                     Function<InternalEntity, String> pathResolver,
-                                     Function<InternalEntity, Integer> colorProvider) {
+                                     Function<NativeEntity, String> pathResolver,
+                                     Function<NativeEntity, Integer> colorProvider) {
         return new Entry(stageKey, pathResolver, null, colorProvider);
     } // entryDynamic (with color) ()
 
@@ -346,8 +346,8 @@ public final class OverlaySlot {
      * <p>
      * Deliberately named differently from {@link #entryDynamic(String, Function, Function)}
      * to avoid Java overload ambiguity when the third argument is a lambda (the compiler
-     * cannot distinguish {@code Function<InternalEntity, Integer>} from
-     * {@code Predicate<InternalEntity>} without a target type).
+     * cannot distinguish {@code Function<NativeEntity, Integer>} from
+     * {@code Predicate<NativeEntity>} without a target type).
      * <p>
      * Use for CONDITIONAL slots where the rendered texture path also depends on runtime
      * entity state (e.g. Jack'o face-cover: dynamic size path, only rendered when the
@@ -359,8 +359,8 @@ public final class OverlaySlot {
      * @return dynamic conditional entry
      */
     public static Entry entryDynamicConditional(String stageKey,
-                                                Function<InternalEntity, String> pathResolver,
-                                                Predicate<InternalEntity> condition) {
+                                                Function<NativeEntity, String> pathResolver,
+                                                Predicate<NativeEntity> condition) {
         return new Entry(stageKey, pathResolver, condition, null);
     } // entryDynamicConditional ()
 
@@ -375,7 +375,7 @@ public final class OverlaySlot {
      * @param pathResolver function from entity → full resource location string
      * @return ALWAYS slot with a size-dependent (or otherwise dynamic) texture
      */
-    public static OverlaySlot alwaysDynamic(String key, Function<InternalEntity, String> pathResolver) {
+    public static OverlaySlot alwaysDynamic(String key, Function<NativeEntity, String> pathResolver) {
         return new OverlaySlot(key, SlotMode.ALWAYS,
                 List.of(new Entry("", pathResolver, null, null)));
     } // alwaysDynamic ()
@@ -413,13 +413,13 @@ public final class OverlaySlot {
 
     /**
      * Evaluates CONDITIONAL entries in order and returns the first matching path.
-     * Dynamic entries call {@link Entry#getTexturePath(InternalEntity)} with the entity.
+     * Dynamic entries call {@link Entry#getTexturePath(NativeEntity)} with the entity.
      * Returns empty string if no entry matches.
      *
      * @param entity entity to evaluate predicates against
      * @return active texture path, or empty string
      */
-    public String resolveConditional(InternalEntity entity) {
+    public String resolveConditional(NativeEntity entity) {
         for (Entry e : pool) {
             if (e.test(entity)) return e.getTexturePath(entity);
         }

@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.entity.features.exchange;
 
-import net.heriazone.hzlib.api.entity.internal.InternalParticle;
+import net.heriazone.hzlib.api.entity.internal.EntityParticles;
 import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,9 +16,9 @@ import org.jetbrains.annotations.Nullable;
  * {@code globalFeedback} used by any rule that does not specify its own feedback.
  * Per-rule feedback overrides the global one for that rule only.
  * <p>
- * <b>Particles:</b> Delegates to {@link InternalParticle} for consistent visual behavior
+ * <b>Particles:</b> Delegates to {@link EntityParticles} for consistent visual behavior
  * across all HZLib entities. The {@link ParticleType} enum maps to existing
- * {@link InternalParticle} effects so new particle types added there automatically
+ * {@link EntityParticles} effects so new particle types added there automatically
  * become available here.
  * <p>
  * <b>Animation:</b> Stores an optional animation key that the entity can read and
@@ -30,9 +30,9 @@ public final class ExchangeFeedback {
     // -- Inner Enum --
 
     /**
-     * <p>Maps symbolic particle choices to {@link InternalParticle} methods.<p>
+     * <p>Maps symbolic particle choices to {@link EntityParticles} methods.<p>
      * <p>
-     * <b>Extension:</b> Add new entries here when {@link InternalParticle} gains new
+     * <b>Extension:</b> Add new entries here when {@link EntityParticles} gains new
      * particle methods. The {@code play} method below dispatches to them.
      */
     public enum ParticleType {
@@ -111,11 +111,11 @@ public final class ExchangeFeedback {
         // -- Particles --
         if (particle != null) {
             switch (particle) {
-                case HAPPY_VILLAGER -> InternalParticle.HappyVillager(entity);
-                case HEART          -> InternalParticle.Heart(entity);
-                case ASH            -> InternalParticle.Ash(entity);
-                case POOF           -> InternalParticle.Poof(entity);
-                case SMOKE          -> InternalParticle.Smoke(entity, 7, 0.2);
+                case HAPPY_VILLAGER -> EntityParticles.HappyVillager(entity);
+                case HEART          -> EntityParticles.Heart(entity);
+                case ASH            -> EntityParticles.Ash(entity);
+                case POOF           -> EntityParticles.Poof(entity);
+                case SMOKE          -> EntityParticles.Smoke(entity, 7, 0.2);
             }
         }
 

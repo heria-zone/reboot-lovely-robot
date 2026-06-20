@@ -1,6 +1,7 @@
 package net.heriazone.hzlib.api.entity.features;
 
-import net.heriazone.hzlib.api.entity.internal.InternalParticle;
+import net.heriazone.hzlib.api.entity.NativeEntity;
+import net.heriazone.hzlib.api.entity.internal.EntityParticles;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -200,7 +201,7 @@ public class FoodFeature {
      * </ol>
      * <p>
      * <b>Server-only:</b> Must only be called on the server side. Call site is
-     * {@link net.heriazone.hzlib.api.entity.InternalEntity#onCommonInteraction}.
+     * {@link NativeEntity#onCommonInteraction}.
      *
      * @param entity entity being tamed
      * @param player player attempting to tame
@@ -353,7 +354,7 @@ public class FoodFeature {
 
         /**
          * Particle types available for taming feedback.
-         * Delegates to {@link InternalParticle} for consistent visuals.
+         * Delegates to {@link EntityParticles} for consistent visuals.
          */
         public enum ParticleType {
             /** Heart burst — taming success, bonding. */
@@ -410,11 +411,11 @@ public class FoodFeature {
             // -- Particles --
             ParticleType particle = success ? successParticle : failParticle;
             switch (particle) {
-                case HEART         -> InternalParticle.Heart(entity);
-                case ASH           -> InternalParticle.Ash(entity);
-                case HAPPY_VILLAGER-> InternalParticle.HappyVillager(entity);
-                case POOF          -> InternalParticle.Poof(entity);
-                case SMOKE         -> InternalParticle.Smoke(entity, 7, 0.2);
+                case HEART         -> EntityParticles.Heart(entity);
+                case ASH           -> EntityParticles.Ash(entity);
+                case HAPPY_VILLAGER-> EntityParticles.HappyVillager(entity);
+                case POOF          -> EntityParticles.Poof(entity);
+                case SMOKE         -> EntityParticles.Smoke(entity, 7, 0.2);
                 case NONE          -> { /* intentionally silent */ }
             }
 
