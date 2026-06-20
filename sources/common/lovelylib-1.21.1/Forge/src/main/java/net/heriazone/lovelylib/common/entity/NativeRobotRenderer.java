@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.hzlib.api.entity.InternalLayerRenderer;
+import net.heriazone.hzlib.api.entity.NativeRenderer;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.shared.LovelyResource;
 import net.heriazone.hzlib.api.layer.BaseTextureLayer;
@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * configuring layer stack. Variant-specific renderers only needed for unique
  * visual requirements (e.g., Kitsune tail system).
  */
-public class NativeRobotRenderer extends InternalLayerRenderer<NativeRobotEntity> {
+public class NativeRobotRenderer extends NativeRenderer<NativeRobotEntity> {
 
     // -- Constructor --
 
