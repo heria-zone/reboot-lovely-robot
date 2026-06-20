@@ -28,7 +28,7 @@ import net.heriazone.hzlib.framework.entity.protection.LevelBasedProtectionStrat
  * exponential progression for harder leveling. KITSUNE uses custom formula with tail-unlock
  * progression (harder every 30 levels).
  */
-public class RebootRobotType extends RobotFamilyRegistry {
+public class RebootRobotFamilies extends RobotFamilyRegistry {
 
     // -- Robot Types --
 
