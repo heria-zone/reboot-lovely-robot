@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
  * <b>Performance:</b> Layer list is built once during initialization and reused
  * across all rendering calls. shouldRender() checks prevent unnecessary work.
  */
-public class InternalLayerRenderer<T extends InternalEntity> {
+public class LayerRenderPipeline<T extends NativeEntity> {
 
     // -- Fields --
 
@@ -30,9 +30,9 @@ public class InternalLayerRenderer<T extends InternalEntity> {
     /**
      * Creates layer renderer with empty layer list.
      */
-    public InternalLayerRenderer() {
+    public LayerRenderPipeline() {
         this.layers = new ArrayList<>();
-    } // Constructor: InternalLayerRenderer()
+    } // Constructor: LayerRenderPipeline()
 
     // -- Layer Management --
 
@@ -49,7 +49,7 @@ public class InternalLayerRenderer<T extends InternalEntity> {
      * @param layer render layer to add
      * @return this renderer for method chaining
      */
-    public InternalLayerRenderer<T> addLayer(IInternalRenderLayer<T> layer) {
+    public LayerRenderPipeline<T> addLayer(IInternalRenderLayer<T> layer) {
         if (layer != null) {
             layers.add(layer);
         }
@@ -62,7 +62,7 @@ public class InternalLayerRenderer<T extends InternalEntity> {
      * @param layer render layer to remove
      * @return this renderer for method chaining
      */
-    public InternalLayerRenderer<T> removeLayer(IInternalRenderLayer<T> layer) {
+    public LayerRenderPipeline<T> removeLayer(IInternalRenderLayer<T> layer) {
         layers.remove(layer);
         return this;
     } // removeLayer()
@@ -72,7 +72,7 @@ public class InternalLayerRenderer<T extends InternalEntity> {
      *
      * @return this renderer for method chaining
      */
-    public InternalLayerRenderer<T> clearLayers() {
+    public LayerRenderPipeline<T> clearLayers() {
         layers.clear();
         return this;
     } // clearLayers()
@@ -135,4 +135,4 @@ public class InternalLayerRenderer<T extends InternalEntity> {
         return layers.stream().anyMatch(layer -> layer.shouldRender(entity, partialTick));
     } // hasActiveLayersFor()
 
-} // Class: InternalLayerRenderer
+} // Class: LayerRenderPipeline

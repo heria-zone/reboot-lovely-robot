@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
  * <b>Performance:</b> Spawns fixed particle count to avoid overwhelming clients with
  * excessive particle rendering in scenarios with many robots.
  */
-public class InternalParticle {
+public class EntityParticles {
 
     // -- Particle Configuration --
 
@@ -157,4 +157,4 @@ public class InternalParticle {
         return MathUtils.RANDOM.nextGaussian() * multiplier;
     } // calculateVelocity ()
 
-} // Class: InternalParticle
+} // Class: EntityParticles

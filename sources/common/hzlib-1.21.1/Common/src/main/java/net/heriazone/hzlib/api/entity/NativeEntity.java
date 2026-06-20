@@ -9,8 +9,6 @@ import net.heriazone.hzlib.api.entity.features.overlay.OverlaySlot;
 import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
-import net.heriazone.hzlib.api.entity.internal.InternalLogic;
-import net.heriazone.hzlib.api.entity.internal.InternalParticle;
 import net.heriazone.hzlib.api.entity.variants.VariantRegistries;
 import net.heriazone.hzlib.api.entity.variants.interfaces.IAnimatorVariant;
 import net.heriazone.hzlib.api.entity.variants.interfaces.IModelVariant;
@@ -25,8 +23,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -51,181 +47,129 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * <p>Shared base entity class for all HZLib-based mods — robots and monsters alike.<p>
+ * Root entity base for all HZLib-managed tameable entities.
  * <p>
- * <b>Architecture:</b> Single shared root below {@code TamableAnimal} for both the
- * robot hierarchy (via HZLib {@code RobotEntity} → lovelylib {@code RobotEntity}) and
- * the monster hierarchy (via monsters_girls {@code MonsterEntity}). Provides:
+ * <b>Architecture:</b> Sits directly below {@code TamableAnimal} and above all
+ * HZLib entity tiers. Owns the concerns every HZLib entity shares:
  * <ul>
- *   <li>String-based variant system ({@code TEXTURE_VARIANT}, {@code MODEL_VARIANT},
- *       {@code ANIMATOR_VARIANT}) — the new system from ADR_011</li>
- *   <li>Base combat stats ({@link CombatData}) — HP, attack, speed, armor for
- *       {@link #createAttributes(InternalEntityType)}</li>
- *   <li>Combat mode and auto-heal timers — shared by both robots and monsters</li>
- *   <li>Complete NBT with backward compatibility migration
- *       ({@code TextureID} int → {@code TextureVariant} string)</li>
- *   <li>Context-aware spawn variant hook ({@link #initializeSpawnVariants})</li>
- *   <li>Generic interaction framework — taming, item handling, display hooks</li>
- *   <li>Registry lifecycle hooks — concrete no-ops, overridden in lovelylib's
- *       {@code RobotEntity} (robot-specific, not propagated to monsters yet)</li>
+ *   <li>Three string-keyed appearance dimensions — {@code TEXTURE_VARIANT},
+ *       {@code MODEL_VARIANT}, {@code ANIMATOR_VARIANT} — resolved at runtime
+ *       via {@link NativeEntityFamily}'s feature system</li>
+ *   <li>Base combat attributes applied from {@link CombatData} on the entity's
+ *       {@link NativeEntityFamily}</li>
+ *   <li>Combat mode and auto-heal lifecycle — wary timer, heal timer, model
+ *       variant toggling between default and armed states</li>
+ *   <li>Spawn variant initialisation — random and biome-aware selection via
+ *       {@link #initializeSpawnVariants}</li>
+ *   <li>Persistent overlay slot state — maps {@link OverlayFeature} RANDOM and
+ *       INTERACTIVE slots to {@code SynchedEntityData} accessors declared by
+ *       the concrete subclass</li>
+ *   <li>Interaction pipeline — {@link ExchangeFeature} first, then
+ *       {@link #handleSpecificInteractions}</li>
+ *   <li>Registry lifecycle hooks — concrete no-ops, overridden by subclasses
+ *       that implement a registry</li>
  * </ul>
  * <p>
- * <b>Abstract contracts subclasses must implement:</b>
- * {@link #handleSpecificInteractions}, {@link #recalculateAttributes},
- * {@link #handleItemDrop}, {@link #handleAttackTarget}, {@link #handleDamage}.
+ * <b>Abstract contracts:</b> {@link #handleSpecificInteractions},
+ * {@link #recalculateAttributes}, {@link #handleItemDrop},
+ * {@link #handleAttackTarget}, {@link #handleDamage}.
  * <p>
- * <b>What does NOT belong here:</b> Robot leveling ({@code CombatLevelStats}),
- * protection stats, enchantment stats, experience tracking — all of these live in
- * HZLib's {@code RobotEntity} tier.
- * <p>
- * <b>Thread Safety:</b> {@code EntityDataAccessor} fields are synchronized automatically.
- * NBT operations should be performed on the server thread.
+ * <b>Thread safety:</b> {@code EntityDataAccessor} fields are synced automatically.
+ * NBT and registry operations must run on the server thread.
  */
-public abstract class InternalEntity extends TamableAnimal {
+public abstract class NativeEntity extends TamableAnimal {
 
     // -- Entity Data Accessors --
 
-    /**
-     * Behavioral state (Follow, Standby, Defense, etc.).
-     * Controls AI behavior patterns — distinct from texture/model variants.
-     */
-    protected static final EntityDataAccessor<Integer> STATE =
-            SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.INT);
+    /** Whether the entity sends status messages to its owner. */
+    protected static final EntityDataAccessor<Boolean> NOTIFICATION_ENABLED = SynchedEntityData.defineId(NativeEntity.class, EntityDataSerializers.BOOLEAN);
+
+    /** Behavioral state — drives AI goal selection independently of visual variants. */
+    protected static final EntityDataAccessor<Integer> STATE = SynchedEntityData.defineId(NativeEntity.class, EntityDataSerializers.INT);
+
+    /** Active texture variant key — resolved to a resource path via {@link NativeEntityFamily}. */
+    protected static final EntityDataAccessor<String> TEXTURE_VARIANT = SynchedEntityData.defineId(NativeEntity.class, EntityDataSerializers.STRING);
+
+    /** Active model variant key — controls which geo model the renderer loads. */
+    protected static final EntityDataAccessor<String> MODEL_VARIANT = SynchedEntityData.defineId(NativeEntity.class, EntityDataSerializers.STRING);
+
+    /** Active animator variant key — controls which animation file the renderer loads. */
+    protected static final EntityDataAccessor<String> ANIMATOR_VARIANT = SynchedEntityData.defineId(NativeEntity.class, EntityDataSerializers.STRING);
+
+    // -- Family Reference --
 
     /**
-     * String-keyed texture variant (e.g., {@code "white"}, {@code "default"}).
-     * Replaces the old int-based {@code TEXTURE_ID} system (ADR_012).
+     * This entity's family descriptor — the source of variant features, combat data,
+     * and all feature composition. Set by the concrete subclass before calling
+     * {@link #applyBaseAttributes()} and {@link #registerOverlayData()}.
      */
-    protected static final EntityDataAccessor<String> TEXTURE_VARIANT =
-            SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.STRING);
-
-    /**
-     * String-keyed model variant (e.g., {@code "default"}, {@code "armed"}).
-     * Replaces the old int-based {@code MODEL_ID} system (ADR_012).
-     */
-    protected static final EntityDataAccessor<String> MODEL_VARIANT =
-            SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.STRING);
-
-    /**
-     * String-keyed animator variant (e.g., {@code "default"}).
-     * New field — lovelylib's old system had no animator variant tracking.
-     */
-    protected static final EntityDataAccessor<String> ANIMATOR_VARIANT =
-            SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.STRING);
-
-    /**
-     * Notification preference — whether the entity shows status messages to its owner.
-     */
-    protected static final EntityDataAccessor<Boolean> NOTIFICATION_ENABLED =
-            SynchedEntityData.defineId(InternalEntity.class, EntityDataSerializers.BOOLEAN);
-
-    // -- Entity Type Reference --
-
-    /**
-     * Reference to this entity's type configuration.
-     * Provides access to variant features, combat data, and feature composition.
-     */
-    public InternalEntityType<?> nativeEntity;
+    public NativeEntityFamily<?> nativeEntity;
 
     // -- Exchange State --
 
     /**
-     * <p>Per-entity runtime state for {@link ExchangeFeature}.<p>
+     * Per-instance runtime state for {@link ExchangeFeature}.
      * <p>
-     * <b>Architecture:</b> Holds per-player sequence buffers and per-rule cooldown
-     * expiry ticks. Stateless feature declaration lives on {@code nativeEntity};
-     * this object holds the mutable instance-level tracking.
-     * <p>
-     * <b>Lifecycle:</b> Created eagerly — always present, even if the entity type
-     * has no {@link ExchangeFeature} registered. This avoids null checks at interaction
-     * time and costs nothing at rest (both maps start empty).
+     * Holds per-player sequence buffers and per-rule cooldown expiry ticks.
+     * Created eagerly so interaction code never needs a null check — both internal
+     * maps start empty and cost nothing at rest.
      */
     protected final ExchangeState exchangeState = new ExchangeState();
 
     // -- Overlay Slot State --
 
     /**
-     * <p>Pre-declared synced data accessors for persistent overlay slots.<p>
+     * Maps slot keys to the pre-declared {@code SynchedEntityData} accessors used
+     * to persist RANDOM and INTERACTIVE {@link OverlayFeature} slots.
      * <p>
-     * <b>Why static pre-declaration:</b> Minecraft requires ALL {@code SynchedEntityData}
-     * accessors to be registered via {@link SynchedEntityData.Builder#define} inside
-     * {@link #defineSynchedData} — before the entity is fully constructed. Calling
-     * {@link SynchedEntityData#defineId} after {@code super()} returns causes
-     * {@link IllegalStateException} because the data map is locked at that point.
-     * <p>
-     * <b>Subclass responsibility:</b> Subclasses that use {@link OverlayFeature} must
-     * declare their own static pool (e.g., on {@code MonsterEntity}) and register each
-     * accessor in their {@code defineSynchedData} override. The pool is <em>not</em>
-     * declared here on {@code InternalEntity} to avoid shifting synced data IDs for
-     * robot entities (which do not yet use {@code OverlayFeature}).
-     * <p>
-     * {@link #registerOverlayData()} reads {@link #getOverlaySlotPool()} to map slot
-     * keys to pre-declared accessors at construction time.
+     * <b>Why not declared here:</b> {@code SynchedEntityData} accessors must be
+     * registered in {@link #defineSynchedData} before construction completes — the
+     * data map locks immediately after. Subclasses that use {@link OverlayFeature}
+     * declare a static accessor pool and register it in their own
+     * {@code defineSynchedData} override. {@link #registerOverlayData()} then maps
+     * slot keys to those pool entries at entity construction time.
      */
     private final Map<String, EntityDataAccessor<String>> overlaySlotAccessors = new HashMap<>();
 
     /**
-     * Returns the ordered pool of pre-declared {@code SynchedEntityData<String>} accessors
-     * available for persistent overlay slots. The pool must be declared as static fields on
-     * the concrete subclass and registered in {@code defineSynchedData()}.
+     * Returns the ordered pool of pre-declared accessors available for persistent
+     * overlay slots. Index 0 maps to the first persistent slot, index 1 to the second,
+     * and so on.
      * <p>
-     * Override this in subclasses that declare overlay slots (e.g., {@code MonsterEntity}).
-     * The base implementation returns an empty list — overlay slots are silently skipped
-     * for entity classes that do not override this method.
-     *
-     * @return ordered list of pre-declared accessors; first persistent slot maps to index 0
+     * Override in subclasses that declare {@link OverlayFeature} slots. The base
+     * implementation returns an empty list — overlay slots are silently skipped for
+     * subclasses that do not override.
      */
     protected List<EntityDataAccessor<String>> getOverlaySlotPool() {
         return List.of();
     } // getOverlaySlotPool ()
 
-    // -- Combat State (shared by robots and monsters) --
+    // -- Combat State --
 
-    /**
-     * Ticks remaining in combat (wary) mode.
-     * Counts down from {@code WaryTime} after last combat event.
-     */
+    /** Ticks remaining in combat mode. Counts down after each combat event. */
     protected int waryTimer = 0;
 
-    /**
-     * Ticks remaining until next auto-heal tick.
-     * Counts down from {@code HealInterval}.
-     */
+    /** Ticks remaining until the next auto-heal pulse. */
     protected int autoHealTimer = 0;
 
-    /**
-     * Whether this entity is currently in combat (wary) mode.
-     * Activated by attacks, cleared when {@link #waryTimer} reaches 0.
-     */
+    /** Whether combat mode is active. Set by attacks, cleared when {@link #waryTimer} reaches 0. */
     protected boolean combatMode = false;
 
-    /**
-     * Whether auto-heal is currently active.
-     * Set when health drops below max; cleared after a heal tick.
-     */
+    /** Whether auto-heal is active. Set when health falls below max; cleared after healing. */
     protected boolean autoHeal = false;
 
     // -- Constructor --
 
-    /**
-     * Creates the entity. Subclasses must set {@link #nativeEntity} and call
-     * {@link #applyBaseAttributes()} after construction.
-     *
-     * @param entityType Minecraft's entity type
-     * @param world      world instance
-     */
-    protected InternalEntity(EntityType<? extends TamableAnimal> entityType, Level world) {
+    protected NativeEntity(EntityType<? extends TamableAnimal> entityType, Level world, NativeEntityFamily<? extends NativeEntityFamily<?>> entityFamily) {
         super(entityType, world);
-    } // Constructor: InternalEntity ()
+        this.nativeEntity = entityFamily;
+    } // Constructor: NativeEntity ()
 
     // -- Custom Methods --
 
     /**
-     * Gets display name for entity including type and custom name if available.
-     * <p>
-     * <b>Format:</b> Returns "CustomName (Type)" if named, otherwise just "Type"
-     *
-     * @return formatted robot display name
+     * Returns the entity's display name, incorporating the custom name if set.
+     * Format: {@code "CustomName (Key)"} when named, {@code "Key"} otherwise.
      */
     protected String getEntityName() {
         String customName = Utils.getEntityCustomName(this);
@@ -234,16 +178,7 @@ public abstract class InternalEntity extends TamableAnimal {
         return typeName;
     } // getEntityName ()
 
-    /**
-     * Drops item at specified location with default pickup delay.
-     * <p>
-     * <b>Helper Method:</b> Centralizes item dropping logic for consistency.
-     *
-     * @param itemStack the item to drop
-     * @param x x coordinate
-     * @param y y coordinate
-     * @param z z coordinate
-     */
+    /** Drops an item at the given coordinates with the default pickup delay. */
     protected void dropItemAtLocation(ItemStack itemStack, double x, double y, double z) {
         ItemEntity itemEntity = new ItemEntity(this.level(), x, y, z, itemStack);
         itemEntity.setDefaultPickUpDelay();
@@ -253,16 +188,13 @@ public abstract class InternalEntity extends TamableAnimal {
     // -- Overlay Slot API --
 
     /**
-     * Maps slot keys from this entity's {@link OverlayFeature} to the pre-declared
-     * {@link #OVERLAY_SLOT_POOL} accessors, then initialises each to its default value.
+     * Maps {@link OverlayFeature} slot keys to the pre-declared
+     * {@link #getOverlaySlotPool()} accessors and initialises each to its default.
      * <p>
-     * <b>Must be called</b> after {@link #nativeEntity} is set (constructor body, after
-     * {@code super()} returns). It does NOT call {@code defineId} — the accessors are
-     * already registered via {@link #defineSynchedData}. It only maps keys → pool entries
-     * and writes the default empty-string value.
-     * <p>
-     * Silently skips any persistent slots beyond the pool size — log a warning if this
-     * ever triggers so the pool can be extended.
+     * Must be called after {@link #nativeEntity} is set. Does not call
+     * {@code defineId} — accessors are already registered in
+     * {@link #defineSynchedData}. Logs a warning if the feature declares more
+     * persistent slots than the pool provides.
      */
     protected void registerOverlayData() {
         if (nativeEntity == null) return;
@@ -285,15 +217,11 @@ public abstract class InternalEntity extends TamableAnimal {
     } // registerOverlayData ()
 
     /**
-     * Returns the currently active texture path for a persistent overlay slot.
-     * <p>
-     * <b>Clients:</b> Called by the renderer every frame to resolve the texture.
-     * <b>Server:</b> Called by {@link #cycleOverlaySlot(String)} and interaction handlers.
-     * <p>
-     * Returns {@code ""} (no render pass) for unknown keys and for
-     * CONDITIONAL / ALWAYS slots (which have no persistent state).
+     * Returns the active texture path for a persistent overlay slot.
+     * Returns {@code ""} for unknown keys and for CONDITIONAL / ALWAYS slots
+     * which carry no persistent state.
      *
-     * @param slotKey slot key constant (e.g., {@code MandrakeType.SLOT_HAIR})
+     * @param slotKey slot key declared on the entity's {@link OverlayFeature}
      * @return active texture path, or empty string
      */
     public String getOverlaySlot(String slotKey) {
@@ -305,16 +233,10 @@ public abstract class InternalEntity extends TamableAnimal {
 
     /**
      * Sets the active texture path for a persistent overlay slot.
-     * <p>
-     * <b>Call sites:</b>
-     * <ul>
-     *   <li>{@code initializeSpawnVariants} — sets RANDOM slots at spawn</li>
-     *   <li>Interaction handlers — advances INTERACTIVE slots on player tool use</li>
-     * </ul>
      * Silently ignores unknown slot keys.
      *
-     * @param slotKey     slot key constant
-     * @param texturePath new active texture path (empty string = no render pass)
+     * @param slotKey     slot key declared on the entity's {@link OverlayFeature}
+     * @param texturePath new active texture path; empty string = no render pass
      */
     public void setOverlaySlot(String slotKey, String texturePath) {
         EntityDataAccessor<String> accessor = overlaySlotAccessors.get(slotKey);
@@ -323,13 +245,11 @@ public abstract class InternalEntity extends TamableAnimal {
     } // setOverlaySlot ()
 
     /**
-     * Advances an INTERACTIVE overlay slot to the next texture in its pool, cycling at
-     * the end. Convenience wrapper combining {@link OverlaySlot#cycleNext(String)} with
-     * {@link #setOverlaySlot(String, String)}.
-     * <p>
-     * No-op if the slot key is unknown or the entity type has no {@link OverlayFeature}.
+     * Advances an INTERACTIVE overlay slot to the next entry in its declared pool,
+     * cycling at the end. No-op if the key is unknown or no {@link OverlayFeature}
+     * is registered.
      *
-     * @param slotKey slot key constant (e.g., {@code GourdragoraType.SLOT_CARVING})
+     * @param slotKey slot key of the INTERACTIVE slot to cycle
      */
     public void cycleOverlaySlot(String slotKey) {
         if (nativeEntity == null) return;
@@ -341,54 +261,26 @@ public abstract class InternalEntity extends TamableAnimal {
         });
     } // cycleOverlaySlot ()
 
-    // -- Attribute Creation --
-
-    /**
-     * Creates entity attributes from NativeEntityType configuration.
-     * <p>
-     * Retrieves combat stats (health, attack, armor, speed) from entity's CombatData,
-     * which is populated from config during mod initialization.
-     *
-     * @param entity robot entity type containing configured stats
-     * @return attribute supplier with configured values
-     */
-    public static AttributeSupplier createAttributes(InternalEntityType<?> entity) {
-        return Animal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, entity.getData().getMaxHealth())
-                .add(Attributes.ATTACK_DAMAGE, entity.getData().getAttackDamage())
-                .add(Attributes.ATTACK_SPEED, entity.getData().getAttackSpeed())
-                .add(Attributes.MOVEMENT_SPEED, entity.getData().getMoveSpeed())
-                .add(Attributes.ARMOR, entity.getData().getArmor())
-                .add(Attributes.ARMOR_TOUGHNESS, entity.getData().getArmorToughness())
-                .build();
-    } // createAttributes ()
-
     // -- Attribute Initialization --
 
     /**
-     * Applies base combat attributes from {@link #nativeEntity}'s {@link CombatData}.
+     * Applies {@link CombatData} attributes from {@link #nativeEntity} to this entity
+     * and resets all three variant keys to their family-specific defaults.
      * <p>
-     * <b>Call site:</b> Must be called after {@link #nativeEntity} is set — typically
-     * at the end of the subclass constructor. Also called in {@link #finalizeSpawn}
-     * to ensure attributes are correct after spawn initialization.
-     * <p>
-     * <b>Variant initialization:</b> Also resets {@code MODEL_VARIANT} and
-     * {@code ANIMATOR_VARIANT} to the entity-type-specific defaults (e.g.,
-     * {@code "bunny_default"} instead of the generic {@code "default"} set in
-     * {@link #defineSynchedData}).
-     * <p>
-     * <b>Attributes set:</b> MAX_HEALTH, ATTACK_DAMAGE, ATTACK_SPEED, MOVEMENT_SPEED,
-     * ARMOR, ARMOR_TOUGHNESS, KNOCKBACK_RESISTANCE.
+     * Must be called after {@link #nativeEntity} is set. {@link #defineSynchedData}
+     * initialises variant keys to the placeholder {@code "default"} because
+     * {@code nativeEntity} is not yet available at that point — this corrects them.
+     * Also called in {@link #finalizeSpawn} to re-apply after spawn variant selection.
      */
     protected void applyBaseAttributes() {
         if (nativeEntity == null) return;
         createAttributes(nativeEntity, this);
 
-        // Reset model/animator variants to entity-specific defaults now that nativeEntity is set.
-        // defineSynchedData() initializes them to "default" before nativeEntity is available.
+        // Correct model variant — defineSynchedData sets "default" before nativeEntity is available
         String defaultModelKey = getDefaultModelVariantKey();
         if (!defaultModelKey.equals("default")) setModelVariant(defaultModelKey);
 
+        // Correct animator variant for the same reason
         nativeEntity.getFeature(net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature.class)
                 .ifPresent(f -> {
                     var defaultAnim = f.getDefaultVariant(nativeEntity.getKey());
@@ -397,9 +289,8 @@ public abstract class InternalEntity extends TamableAnimal {
                     }
                 });
 
-        // Reset TEXTURE_VARIANT to entity-specific default if still at the generic "default"
-        // placeholder set by defineSynchedData(). initializeRandomVariants() will override
-        // this at spawn time, but this ensures a valid key is set for NBT-loaded entities.
+        // Correct texture variant — initializeRandomVariants() will override at spawn,
+        // but NBT-loaded entities need a valid key before that hook runs
         nativeEntity.getFeature(net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature.class)
                 .ifPresent(f -> {
                     var defaultTex = f.getDefaultVariant(nativeEntity.getKey());
@@ -410,15 +301,15 @@ public abstract class InternalEntity extends TamableAnimal {
     } // applyBaseAttributes ()
 
     /**
-     * Applies base combat attributes from the given entity type to the given entity.
+     * Applies {@link CombatData} from a {@link NativeEntityFamily} to a live entity.
      * <p>
-     * <b>Static utility:</b> Can be called from {@code createAttributes()} static
-     * methods in entity registration (e.g., {@code LovelyRobotEntity.createAttributes()}).
+     * Static overload used when attributes must be pushed onto an already-constructed
+     * entity rather than built via the registration-time {@link AttributeSupplier}.
      *
-     * @param entityType the entity type providing {@link CombatData}
-     * @param entity     the living entity to apply attributes to
+     * @param entityType family descriptor providing {@link CombatData}
+     * @param entity     target entity to receive the attribute values
      */
-    public static void createAttributes(InternalEntityType<?> entityType, LivingEntity entity) {
+    public static void createAttributes(NativeEntityFamily<?> entityType, LivingEntity entity) {
         if (entityType == null || entity == null) return;
         CombatData data = entityType.getData();
 
@@ -441,14 +332,13 @@ public abstract class InternalEntity extends TamableAnimal {
     // -- Combat Mode --
 
     /**
-     * Activates combat mode and resets the wary timer.
-     * Also immediately switches to the armed model variant so the visual
-     * change happens on the same tick as combat activation.
+     * Enters combat mode and switches the model variant to armed immediately,
+     * without waiting for the next {@link #handleCombatMode()} tick.
      */
     protected void handleActivateCombatMode() {
         combatMode = true;
         waryTimer = getCombatWaryTime();
-        // Immediately switch to armed model — don't wait for next handleCombatMode() tick
+        // Switch model immediately — same tick as activation, not next handleCombatMode() cycle
         if (nativeEntity != null && !level().isClientSide) {
             String armedKey = getArmedModelVariantKey();
             if (!armedKey.equals(getModelVariant())) setModelVariant(armedKey);
@@ -456,50 +346,42 @@ public abstract class InternalEntity extends TamableAnimal {
     } // handleActivateCombatMode ()
 
     /**
-     * Ticks the combat mode timer and clears combat mode when the timer expires.
-     * Drives the {@code MODEL_VARIANT} between the armed and default model variants
-     * as the wary timer ticks.
+     * Ticks the wary timer and drives {@code MODEL_VARIANT} between the armed and
+     * default model variants. Resolves variant keys through {@link ModelVariantFeature}
+     * rather than hardcoded strings.
      * <p>
-     * <b>Variant keys:</b> Uses the entity type's registered default and armed model
-     * variants rather than hardcoded strings, so entity-specific keys like
-     * {@code "bunny_default"} / {@code "bunny_armed"} are resolved correctly.
-     * <p>
-     * <b>Call site:</b> Call from {@code tick()} on the server side.
+     * Call from {@code tick()} on the server side.
      */
     protected void handleCombatMode() {
-        // Clear stale targets
+        // Drop stale targets — dead or removed entities should not sustain combat mode
         if (getTarget() != null && (!getTarget().isAlive() || getTarget().isRemoved())) {
             setTarget(null);
         }
 
-        // Activate combat mode if swinging at a live target
+        // Re-enter combat mode whenever a live target is being engaged
         if ((swinging && getTarget() != null) || (getTarget() != null && getTarget().isAlive())) {
             handleActivateCombatMode();
         }
 
         if (level().isClientSide && !combatMode) return;
-
-        // Guard: nativeEntity must be set for model variant resolution
         if (nativeEntity == null) return;
 
         if (waryTimer > 0) {
-            // Switch to armed model variant while in combat
+            // Hold armed model while the wary timer counts down
             String armedKey = getArmedModelVariantKey();
             if (!armedKey.equals(getModelVariant())) setModelVariant(armedKey);
             waryTimer--;
         } else if (combatMode) {
-            // Timer expired — exit combat mode and return to default model
+            // Timer expired — return to default model and clear combat mode
             combatMode = false;
             String defaultKey = getDefaultModelVariantKey();
             if (!defaultKey.equals(getModelVariant())) setModelVariant(defaultKey);
         }
-        // If combatMode is already false, model is already default — nothing to do
     } // handleCombatMode ()
 
     /**
-     * Returns the key for the default (unarmed) model variant.
-     * Resolves from the registered {@link ModelVariantFeature} default, falling back
-     * to {@code "default"} if no feature is configured.
+     * Returns the key of the default (unarmed) model variant from {@link ModelVariantFeature}.
+     * Falls back to {@code "default"} if no feature is registered.
      */
     protected String getDefaultModelVariantKey() {
         if (nativeEntity == null) return "default";
@@ -511,9 +393,9 @@ public abstract class InternalEntity extends TamableAnimal {
     } // getDefaultModelVariantKey ()
 
     /**
-     * Returns the key for the armed model variant.
-     * Looks for a variant whose key contains {@code "armed"} in the registered
-     * {@link ModelVariantFeature}, falling back to {@code "armed"} if not found.
+     * Returns the key of the armed model variant from {@link ModelVariantFeature} —
+     * the first registered variant whose key contains {@code "armed"}.
+     * Falls back to {@code "armed"} if none is found.
      */
     protected String getArmedModelVariantKey() {
         if (nativeEntity == null) return "armed";
@@ -527,11 +409,7 @@ public abstract class InternalEntity extends TamableAnimal {
                 .orElse("armed");
     } // getArmedModelVariantKey ()
 
-    /**
-     * Returns whether this entity is currently in combat (wary) mode.
-     *
-     * @return true if in combat mode
-     */
+    /** Returns {@code true} if this entity is currently in combat mode. */
     public boolean isWary() {
         return combatMode;
     } // isWary ()
@@ -539,9 +417,8 @@ public abstract class InternalEntity extends TamableAnimal {
     // -- Auto-Heal --
 
     /**
-     * Ticks the auto-heal system, healing the entity periodically when below max health.
-     * <p>
-     * <b>Call site:</b> Call from {@code tick()} on the server side.
+     * Ticks the auto-heal timer and heals the entity by 1/16 of current health
+     * once the interval elapses. Call from {@code tick()} on the server side.
      */
     protected void handleAutoHeal() {
         if (getHealth() < getMaxHealth()) autoHeal = true;
@@ -556,23 +433,19 @@ public abstract class InternalEntity extends TamableAnimal {
         }
     } // handleAutoHeal ()
 
-    // -- Configurable Timers (override in subclasses or read from config) --
+    // -- Configurable Timers --
 
     /**
-     * Returns the number of ticks to remain in combat mode after last combat event.
-     * Override to read from config (e.g., {@code SharedConfigs.Common.WaryTime}).
-     *
-     * @return wary timer duration in ticks
+     * Ticks the entity remains in combat mode after the last combat event.
+     * Override to read from a config value.
      */
     protected int getCombatWaryTime() {
         return 100; // 5 seconds default
     } // getCombatWaryTime ()
 
     /**
-     * Returns the number of ticks between auto-heal ticks.
-     * Override to read from config (e.g., {@code SharedConfigs.Common.HealInterval}).
-     *
-     * @return heal interval in ticks
+     * Ticks between auto-heal pulses.
+     * Override to read from a config value.
      */
     protected int getAutoHealInterval() {
         return 50; // 2.5 seconds default
@@ -617,26 +490,22 @@ public abstract class InternalEntity extends TamableAnimal {
     } // setCurrentState ()
 
     /**
-     * Called when the behavioral state changes.
-     * Override to add state-specific behaviors (AI changes, animation triggers, etc.).
-     *
-     * @param newState the new state
+     * Hook called when the behavioral state changes.
+     * Handles the built-in Standby / Follow transitions. Override to add further
+     * state-specific behavior such as AI goal changes or animation triggers.
      */
     protected void onStateChanged(EntityState newState) {
+        if (!isTame()) return;
         switch (newState) {
             case Standby -> {
-                if (isTame()) {
-                    setOrderedToSit(true);
-                    setInSittingPose(true);
-                    setTarget(null);
-                    getNavigation().stop();
-                }
+                setOrderedToSit(true);
+                setInSittingPose(true);
+                setTarget(null);
+                getNavigation().stop();
             }
             case Follow -> {
-                if (isTame()) {
-                    setOrderedToSit(false);
-                    setInSittingPose(false);
-                }
+                setOrderedToSit(false);
+                setInSittingPose(false);
             }
             default -> {}
         }
@@ -644,42 +513,39 @@ public abstract class InternalEntity extends TamableAnimal {
 
     // -- Variant Accessors --
 
-    /** Returns the current texture variant key (e.g., {@code "white"}, {@code "default"}). */
+    /** Returns the active texture variant key. */
     public String getTextureVariant() {
         try { return entityData.get(TEXTURE_VARIANT); }
         catch (Exception ignored) { return "default"; }
     } // getTextureVariant ()
 
-    /**
-     * Sets the texture variant key if it is valid for this entity type.
-     * Invalid keys are silently ignored to prevent client-server desync.
-     */
+    /** Sets the texture variant key. Silently ignores keys not registered on this entity's family. */
     public void setTextureVariant(String variantKey) {
         if (nativeEntity != null && isValidTextureVariant(variantKey)) {
             entityData.set(TEXTURE_VARIANT, variantKey);
         }
     } // setTextureVariant ()
 
-    /** Returns the current model variant key (e.g., {@code "default"}, {@code "armed"}). */
+    /** Returns the active model variant key. */
     public String getModelVariant() {
         try { return entityData.get(MODEL_VARIANT); }
         catch (Exception ignored) { return "default"; }
     } // getModelVariant ()
 
-    /** Sets the model variant key if it is valid for this entity type. */
+    /** Sets the model variant key. Silently ignores unregistered keys. */
     public void setModelVariant(String variantKey) {
         if (nativeEntity != null && isValidModelVariant(variantKey)) {
             entityData.set(MODEL_VARIANT, variantKey);
         }
     } // setModelVariant ()
 
-    /** Returns the current animator variant key (e.g., {@code "default"}). */
+    /** Returns the active animator variant key. */
     public String getAnimatorVariant() {
         try { return entityData.get(ANIMATOR_VARIANT); }
         catch (Exception ignored) { return "default"; }
     } // getAnimatorVariant ()
 
-    /** Sets the animator variant key if it is valid for this entity type. */
+    /** Sets the animator variant key. Silently ignores unregistered keys. */
     public void setAnimatorVariant(String variantKey) {
         if (nativeEntity != null && isValidAnimatorVariant(variantKey)) {
             entityData.set(ANIMATOR_VARIANT, variantKey);
@@ -702,8 +568,9 @@ public abstract class InternalEntity extends TamableAnimal {
     // -- Resource Resolution --
 
     /**
-     * Returns the current texture {@link ResourceLocation} resolved via
-     * {@link TextureVariantFeature}. Returns {@code null} if not available.
+     * Resolves the active texture variant to a {@link ResourceLocation}.
+     * Checks the family's {@link TextureVariantFeature} first, then falls back to
+     * the global {@link VariantRegistries}. Returns {@code null} if unresolvable.
      */
     public ResourceLocation getCurrentTexture() {
         if (nativeEntity == null) return null;
@@ -715,8 +582,9 @@ public abstract class InternalEntity extends TamableAnimal {
     } // getCurrentTexture ()
 
     /**
-     * Returns the current model {@link ResourceLocation} resolved via
-     * {@link ModelVariantFeature}. Returns {@code null} if not available.
+     * Resolves the active model variant to a {@link ResourceLocation}.
+     * Checks the family's {@link ModelVariantFeature} first, then falls back to
+     * the global {@link VariantRegistries}. Returns {@code null} if unresolvable.
      */
     public ResourceLocation getCurrentModel() {
         if (nativeEntity == null) return null;
@@ -728,8 +596,9 @@ public abstract class InternalEntity extends TamableAnimal {
     } // getCurrentModel ()
 
     /**
-     * Returns the current animator {@link ResourceLocation} resolved via
-     * {@link AnimatorVariantFeature}. Returns {@code null} if not available.
+     * Resolves the active animator variant to a {@link ResourceLocation}.
+     * Checks the family's {@link AnimatorVariantFeature} first, then falls back to
+     * the global {@link VariantRegistries}. Returns {@code null} if unresolvable.
      */
     public ResourceLocation getCurrentAnimator() {
         if (nativeEntity == null) return null;
@@ -740,15 +609,21 @@ public abstract class InternalEntity extends TamableAnimal {
                 .orElse(null);
     } // getCurrentAnimator ()
 
+    /**
+     * Returns the render scale for the active model variant via {@link SizeVariantFeature}.
+     * Returns {@code 1.0} if the feature is not present.
+     */
     public float getCurrentScale() {
         if (nativeEntity == null || !nativeEntity.hasFeature(SizeVariantFeature.class)) return 1.0f;
-
         return nativeEntity.getFeature(SizeVariantFeature.class)
                 .map(f -> f.getConfig(getModelVariant()).getScale())
                 .orElse(1.0f);
     } // getCurrentScale ()
 
     // -- Variant Validation --
+
+    // Guards setters — ensures only keys registered on the family's features are accepted,
+    // preventing client-server desync from unknown variant keys.
 
     protected boolean isValidTextureVariant(String variantKey) {
         if (nativeEntity == null || variantKey == null) return false;
@@ -773,10 +648,7 @@ public abstract class InternalEntity extends TamableAnimal {
 
     // -- Navigation --
 
-    /**
-     * Configures ground path navigation with edge traversal and door handling.
-     * Prevents spinning at ledges when following owners.
-     */
+    /** Ground navigation with floating, door-opening, and edge-traversal enabled. */
     @Override
     protected PathNavigation createNavigation(Level level) {
         GroundPathNavigation nav = new GroundPathNavigation(this, level);
@@ -789,15 +661,8 @@ public abstract class InternalEntity extends TamableAnimal {
     // -- Entity Lifecycle --
 
     /**
-     * Handles entity removal and ensures registry cleanup.
-     * <p>
-     * <b>Architecture:</b> Intercepts all removal scenarios (death, despawn, chunk
-     * unload, manual removal) to ensure the robot is unregistered from the owner's
-     * registry. Prevents registry leaks and incorrect spawn limit counts.
-     * <p>
-     * <b>Thread Safety:</b> Only unregisters on server side.
-     *
-     * @param reason the reason for entity removal
+     * Hooks into all removal scenarios to give subclasses a chance to clean up
+     * registry state. Only fires on the server side.
      */
     @Override
     public void remove(RemovalReason reason) {
@@ -807,11 +672,12 @@ public abstract class InternalEntity extends TamableAnimal {
         super.remove(reason);
     } // remove ()
 
+    /** Randomises spawn orientation, initialises variants, and applies base attributes. */
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty,
                                         MobSpawnType spawnReason, @Nullable SpawnGroupData entityData) {
-        // Randomize spawn orientation — prevents all entities facing the same direction
+        // Random orientation prevents all fresh spawns facing the same direction
         rotate(Rotation.getRandom(this.getRandom()));
         initializeSpawnVariants(world, spawnReason);
         applyBaseAttributes();
@@ -819,18 +685,22 @@ public abstract class InternalEntity extends TamableAnimal {
     } // finalizeSpawn ()
 
     /**
-     * Initializes entity variants at spawn time with access to world context.
-     * Default calls {@link #initializeRandomVariants()}. Override for biome-aware
-     * or coordinated variant selection (see ADR_011).
-     *
-     * @param world  server level accessor providing biome and world context
-     * @param reason spawn reason
+     * Selects spawn-time variants with access to world context.
+     * <p>
+     * Default delegates to {@link #initializeRandomVariants()}. Override to make
+     * selection context-aware — biome, dimension, spawn reason, etc.
      */
     protected void initializeSpawnVariants(ServerLevelAccessor world, MobSpawnType reason) {
         initializeRandomVariants();
     } // initializeSpawnVariants ()
 
-    /** Selects random variants from all registered variant features. */
+    /**
+     * Randomly selects texture, model, and animator variants from the family's registered
+     * features, then seeds all RANDOM {@link OverlayFeature} slots.
+     * <p>
+     * INTERACTIVE slots start at their declared default. CONDITIONAL and ALWAYS slots
+     * carry no persistent state and are skipped.
+     */
     protected void initializeRandomVariants() {
         if (nativeEntity == null) return;
 
@@ -849,9 +719,7 @@ public abstract class InternalEntity extends TamableAnimal {
             if (v != null) setAnimatorVariant(v.getKey());
         });
 
-        // Seed RANDOM overlay slots — pick once at spawn, persist via SynchedEntityData.
-        // INTERACTIVE slots start at their declared default (index 0, typically empty string).
-        // CONDITIONAL / ALWAYS slots require no persistent state — skipped here.
+        // Seed RANDOM overlay slots once at spawn — persisted via SynchedEntityData
         nativeEntity.getFeature(net.heriazone.hzlib.api.entity.features.overlay.OverlayFeature.class)
                 .ifPresent(feature -> feature.getSlots().stream()
                         .filter(s -> s.getMode() == net.heriazone.hzlib.api.entity.features.overlay.SlotMode.RANDOM)
@@ -863,18 +731,18 @@ public abstract class InternalEntity extends TamableAnimal {
     @Override
     public void addAdditionalSaveData(CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putInt("StateId",              getCurrentStateID());
-        nbt.putString("TextureVariant",    getTextureVariant());
-        nbt.putString("ModelVariant",      getModelVariant());
-        nbt.putString("AnimatorVariant",   getAnimatorVariant());
+        nbt.putInt("StateId",                 getCurrentStateID());
+        nbt.putString("TextureVariant",       getTextureVariant());
+        nbt.putString("ModelVariant",         getModelVariant());
+        nbt.putString("AnimatorVariant",      getAnimatorVariant());
         nbt.putBoolean("NotificationEnabled", isNotificationEnabled());
 
-        // Exchange cooldowns (sequence buffers are intentionally not persisted)
+        // Sequence buffers are transient — only cooldown expiry ticks are worth persisting
         CompoundTag exchangeTag = new CompoundTag();
         exchangeState.save(exchangeTag);
         if (!exchangeTag.isEmpty()) nbt.put("ExchangeState", exchangeTag);
 
-        // Persistent overlay slots (RANDOM + INTERACTIVE only)
+        // RANDOM and INTERACTIVE slots carry persistent state; CONDITIONAL and ALWAYS do not
         if (!overlaySlotAccessors.isEmpty()) {
             CompoundTag overlayTag = new CompoundTag();
             overlaySlotAccessors.keySet().forEach(key ->
@@ -887,26 +755,22 @@ public abstract class InternalEntity extends TamableAnimal {
     public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
 
-        if (nbt.contains("StateId"))            setCurrentState(nbt.getInt("StateId"));
+        if (nbt.contains("StateId"))             setCurrentState(nbt.getInt("StateId"));
         if (nbt.contains("NotificationEnabled")) setNotificationEnabled(nbt.getBoolean("NotificationEnabled"));
 
-        // TextureVariant — new string system (ADR_012)
+        // Prefer the string key; fall back to int migration for saves predating the string system
         if (nbt.contains("TextureVariant")) {
             setTextureVariant(nbt.getString("TextureVariant"));
         } else if (nbt.contains("TextureID")) {
-            // Backward compat: migrate old int-based TextureID to string key (ADR_012)
             migrateTextureId(nbt.getInt("TextureID"));
         }
 
         if (nbt.contains("ModelVariant"))    setModelVariant(nbt.getString("ModelVariant"));
         if (nbt.contains("AnimatorVariant")) setAnimatorVariant(nbt.getString("AnimatorVariant"));
 
-        // Exchange cooldowns
         if (nbt.contains("ExchangeState")) exchangeState.load(nbt.getCompound("ExchangeState"));
 
-        // Persistent overlay slots — restore into registered accessors.
-        // Falls back to the slot's declared default (first pool entry) for any key absent from
-        // the save (old-save entities that predate OverlayFeature, or a new slot was added).
+        // Missing keys fall back to the slot's declared default — safe for old saves
         if (nbt.contains("OverlaySlots")) {
             CompoundTag overlayTag = nbt.getCompound("OverlaySlots");
             overlayTag.getAllKeys().forEach(key -> setOverlaySlot(key, overlayTag.getString(key)));
@@ -914,21 +778,21 @@ public abstract class InternalEntity extends TamableAnimal {
     } // readAdditionalSaveData ()
 
     /**
-     * Migrates an old int-based {@code TextureID} to the new string-keyed
-     * {@code TextureVariant} system. Called once on first load of old saves.
+     * Migrates a legacy int-based {@code TextureID} to a string variant key.
+     * Called once on first load of saves predating the string variant system.
      * <p>
-     * <b>Subclass override:</b> Override in robot entities to use
-     * {@code EntityTexture.byId(id).Name()} for the 16-color palette mapping.
-     * The base implementation sets {@code "default"} as a safe fallback.
-     *
-     * @param oldTextureId the old int texture ID (0–15 for robots)
+     * The base implementation falls back to {@code "default"}. Override in
+     * subclasses that maintain a color palette to perform the proper int-to-key
+     * mapping.
      */
     protected void migrateTextureId(int oldTextureId) {
-        // Base fallback — robot subclass overrides with EntityTexture.byId(id).Name()
         setTextureVariant("default");
     } // migrateTextureId ()
 
     // -- Sound System --
+
+    // Base overrides are no-ops — subclasses wire in their sounds via SoundFeature
+    // or by overriding these methods directly.
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
@@ -956,52 +820,32 @@ public abstract class InternalEntity extends TamableAnimal {
     } // mobInteract ()
 
     /**
-     * Handles interactions common to all entity types.
+     * Runs the shared interaction pipeline in guaranteed order and returns the first
+     * non-PASS result. Subclasses extend common logic via {@link #onCommonInteraction},
+     * not by overriding this method.
      * <p>
-     * <b>Final — do not override.</b> The exchange feature is guaranteed to run here
-     * before anything else. Subclasses add common interaction logic by overriding
-     * {@link #onCommonInteraction(Player, InteractionHand, ItemStack)} instead.
-     * <p>
-     * <b>Pipeline:</b>
-     * <ol>
-     *   <li>{@link ExchangeFeature} — evaluated first, always</li>
-     *   <li>{@link #onCommonInteraction} — subclass hook for taming food, etc.</li>
-     * </ol>
+     * Order: {@link ExchangeFeature} → {@link #onCommonInteraction}.
      */
     protected final InteractionResult handleCommonInteractions(Player player, InteractionHand hand, ItemStack stack) {
-        // Exchange feature — always runs first, for every entity in every mod
+        // ExchangeFeature always runs first — before taming food or any other logic
         InteractionResult exchangeResult = handleExchangeInteraction(player, stack);
         if (exchangeResult != InteractionResult.PASS) return exchangeResult;
 
-        // Delegate to the subclass hook
         return onCommonInteraction(player, hand, stack);
     } // handleCommonInteractions ()
 
     /**
-     * Subclass hook for common interaction logic.
+     * Override point for common interaction logic that runs after {@link ExchangeFeature}.
      * <p>
-     * <b>Override this, not {@link #handleCommonInteractions}.</b> The exchange feature
-     * has already been evaluated by the time this method is called. Returning anything
-     * other than {@code PASS} short-circuits the interaction chain.
-     * <p>
-     * <b>Default behavior:</b> Handles taming via {@link FoodFeature}. If the entity
-     * type has a {@link FoodFeature} registered and the held item is a declared food,
-     * and the entity is not yet tamed, a taming attempt is made. The item is always
-     * consumed. Heart particles play on success; ash particles play on failure. Both
-     * particles and sounds are configurable via {@link FoodFeature.TamingFeedback}.
-     * <p>
-     * Robot entities are unaffected — {@code RobotEntity} has no {@link FoodFeature}
-     * and is tamed via {@code handleTame()} from item use, not right-click feeding.
-     *
-     * @param player interacting player
-     * @param hand   interaction hand
-     * @param stack  item the player is holding
-     * @return {@code PASS} to continue, or a consuming result to stop the chain
+     * Default behavior: attempts taming via {@link FoodFeature} if the entity type
+     * declares one, the held item is a registered food, and the entity is untamed.
+     * The item is always consumed on a taming attempt; feedback is provided by
+     * {@link FoodFeature.TamingFeedback}.
      */
     protected InteractionResult onCommonInteraction(Player player, InteractionHand hand, ItemStack stack) {
         if (nativeEntity == null || level().isClientSide) return InteractionResult.PASS;
 
-        // Taming food — probabilistic, item always consumed, feedback played
+        // Taming food — probabilistic attempt, item consumed regardless of outcome
         nativeEntity.getFeature(FoodFeature.class).ifPresent(food -> {
             if (!isTame() && food.isFood(stack)) {
                 boolean tamed = food.attemptTame(this, player, stack);
@@ -1012,25 +856,15 @@ public abstract class InternalEntity extends TamableAnimal {
         return InteractionResult.PASS;
     } // onCommonInteraction ()
 
-    /**
-     * Handles entity-type-specific interactions.
-     * Subclasses must implement (robot commands, monster feeding, etc.).
-     */
+    /** Entity-type-specific interactions. Implement for all entity-specific input handling. */
     protected abstract InteractionResult handleSpecificInteractions(Player player, InteractionHand hand, ItemStack stack);
 
     /**
-     * Handles item exchanges declared via {@link ExchangeFeature} on this entity's type.
-     * <p>
-     * <b>Architecture:</b> Called from {@link #handleCommonInteractions} before
-     * type-specific handling. Delegates to {@link ExchangeFeature#tryExchange} which
-     * owns all sequence buffer and cooldown logic.
-     * <p>
-     * <b>Server-only:</b> Returns {@code PASS} immediately on the client side.
+     * Delegates to {@link ExchangeFeature#tryExchange} if the feature is registered.
+     * Server-side only — returns PASS immediately on the client.
      *
-     * @param player interacting player
-     * @param stack  item the player is holding
-     * @return {@code SUCCESS} if an exchange fired, {@code CONSUME} if item was accepted
-     *         into a partial sequence, or {@code PASS} if no rule matched
+     * @return SUCCESS if an exchange fired, CONSUME if item entered a partial sequence,
+     *         PASS if no rule matched or feature is absent
      */
     protected InteractionResult handleExchangeInteraction(Player player, ItemStack stack) {
         if (level().isClientSide) return InteractionResult.PASS;
@@ -1042,45 +876,27 @@ public abstract class InternalEntity extends TamableAnimal {
     } // handleExchangeInteraction ()
 
     /**
-     * Handles dye/item texture interaction. Override in robot entities to apply
-     * color changes via {@link #setTextureVariant(String)}.
-     *
-     * @param stack  item stack used
-     * @param player interacting player
-     * @return true if texture was changed and item should be consumed
+     * Override to handle item-driven texture changes via {@link #setTextureVariant}.
+     * Returns {@code false} by default — item is not consumed.
      */
     protected boolean handleTexture(ItemStack stack, Player player) {
         return false;
     } // handleTexture ()
 
     /**
-     * Returns whether the given item stack can trigger interaction handling.
-     * Override to whitelist specific items (e.g., dyes, books, swords).
-     *
-     * @param stack item stack to check
-     * @return true if interactions should be processed for this item
+     * Override to whitelist item types that should reach the interaction pipeline.
+     * Returns {@code false} by default.
      */
     protected boolean canInteractWithItems(ItemStack stack) {
         return false;
     } // canInteractWithItems ()
 
     /**
-     * Handles taming — sets ownership, shows message, registers entity.
+     * Completes the taming flow: assigns ownership, clears sitting pose, displays a
+     * confirmation message, and calls {@link #registerRobot()}.
      * <p>
-     * <b>Architecture:</b> Generic taming flow shared by all tameable entity types.
-     * Calls the abstract {@link #registerRobot()} hook so subclasses can register
-     * in their respective registry systems.
-     * <p>
-     * <b>Visual/audio feedback:</b> Not played here — this base implementation is
-     * intentionally silent and particle-free so monster entities receive feedback
-     * only from {@link net.heriazone.hzlib.api.entity.features.FoodFeature.TamingFeedback},
-     * not from robot-specific effects. Robot-specific feedback (Poof particles, totem
-     * sound) is added by overriding this method in lovelylib's {@code RobotEntity}.
-     * <p>
-     * <b>Display:</b> Override {@link #displayTameMessage(Player)} to show a
-     * mod-specific owner message after taming.
-     *
-     * @param player the player taming this entity
+     * No visual or audio feedback is played here — the base implementation is
+     * intentionally silent so subclasses can control presentation independently.
      */
     public void handleTame(Player player) {
         this.tame(player);
@@ -1092,91 +908,53 @@ public abstract class InternalEntity extends TamableAnimal {
     } // handleTame ()
 
     /**
-     * Displays the tame confirmation message to the player.
-     * Override in lovelylib's {@code RobotEntity} to show the owner name using
-     * {@code LovelyIdentifier} and {@code LovelyConstant.MSG_OWNER}.
-     *
-     * @param player the player who tamed this entity
+     * Override to display a tame confirmation message to the new owner.
+     * No-op by default.
      */
     protected void displayTameMessage(Player player) {
-        // Default no-op — override in lovelylib RobotEntity with mod-specific message
+        // No-op — override to show ownership message
     } // displayTameMessage ()
 
-    // -- Registry Lifecycle (concrete no-ops — override in lovelylib RobotEntity) --
+    // -- Registry Lifecycle --
 
-    /**
-     * Registers this entity in the owner's registry when tamed.
-     * <p>
-     * <b>Design Decision:</b> Concrete no-op here rather than abstract — registry
-     * is a robot-specific concern. {@code MonsterEntity} and future entity types
-     * that don't use a registry don't need to implement this.
-     * Override in lovelylib's {@code RobotEntity} to register in {@code RobotRegistryManager}.
-     */
+    // Concrete no-ops. Subclasses that maintain an entity registry override these
+    // to integrate with their registry system.
+
+    /** Called when this entity is tamed. Override to register in the owner's registry. */
     protected void registerRobot() {
-        // No-op — override in lovelylib RobotEntity
+        // No-op — override in subclasses with a registry
     } // registerRobot ()
 
-    /**
-     * Ensures this entity is registered, creating or updating the registry entry.
-     * <p>
-     * <b>Design Decision:</b> Concrete no-op — registry is robot-specific.
-     * Override in lovelylib's {@code RobotEntity}.
-     */
+    /** Called to ensure this entity has a valid registry entry. Override as needed. */
     protected void ensureRegistered() {
-        // No-op — override in lovelylib RobotEntity
+        // No-op — override in subclasses with a registry
     } // ensureRegistered ()
 
-    /**
-     * Unregisters this entity from the owner's registry.
-     * <p>
-     * <b>Design Decision:</b> Concrete no-op — registry is robot-specific.
-     * Override in lovelylib's {@code RobotEntity}.
-     */
+    /** Called on removal to clean up the registry entry. Override as needed. */
     protected void unregisterRobot() {
-        // No-op — override in lovelylib RobotEntity
+        // No-op — override in subclasses with a registry
     } // unregisterRobot ()
 
-    /**
-     * Updates the registry timestamp for this entity.
-     * <p>
-     * <b>Architecture:</b> Called every 20 ticks to maintain "last seen" timestamp.
-     * Override in lovelylib's {@code RobotEntity} to call {@code RobotRegistryManager}.
-     */
+    /** Called periodically to keep the registry "last seen" timestamp current. Override as needed. */
     protected void updateRegistryTimestamp() {
-        // No-op — override in lovelylib RobotEntity
+        // No-op — override in subclasses with a registry
     } // updateRegistryTimestamp ()
 
     // -- Abstract Contracts --
 
-    /**
-     * Recalculates all entity attributes based on current level and attached features.
-     * <p>
-     * <b>Call sites:</b> After level-up, after NBT load, after config reload.
-     * Implemented in lovelylib's {@code RobotEntity} using feature system.
-     */
+    /** Recalculates all live attributes. Call after level-up, NBT load, or config reload. */
     protected abstract void recalculateAttributes();
 
-    /**
-     * Handles item drop on entity death.
-     * Implemented in lovelylib's {@code RobotEntity} to drop the robot core.
-     */
+    /** Handles item drops on death. */
     protected abstract void handleItemDrop();
 
-    /**
-     * Handles attack target event — exp accumulation, combat mode activation.
-     * Implemented in lovelylib's {@code RobotEntity}.
-     *
-     * @param target the entity being attacked
-     */
+    /** Called when this entity attacks a target. Use for combat mode activation and stat tracking. */
     protected abstract void handleAttackTarget(Entity target);
 
     /**
-     * Handles incoming damage — protection reduction, exp accumulation.
-     * Implemented in lovelylib's {@code RobotEntity}.
+     * Called when this entity takes damage.
      *
-     * @param source damage source
-     * @param amount raw damage amount
-     * @return true if damage should be applied, false to cancel
+     * @return {@code true} to apply damage normally, {@code false} to cancel it
      */
     protected abstract boolean handleDamage(DamageSource source, float amount);
 
@@ -1185,26 +963,23 @@ public abstract class InternalEntity extends TamableAnimal {
     @Override
     @Nullable
     public AgeableMob getBreedOffspring(ServerLevel world, AgeableMob otherParent) {
-        return null; // HZLib entities don't breed by default
+        return null; // HZLib entities do not breed
     } // getBreedOffspring ()
 
     // -- Utility --
 
-    /**
-     * Returns whether this entity is owned by the specified player.
-     * Handles null player and owner references gracefully.
-     */
+    /** Returns {@code true} if this entity's owner UUID matches the given player. */
     public boolean isOwnedBy(@Nullable Player player) {
         if (player == null) return false;
         return Objects.equals(getOwnerUUID(), player.getUUID());
     } // isOwnedBy ()
 
     /**
-     * Returns the entity type key for variant resolution.
-     * Returns {@code "unknown"} if {@link #nativeEntity} is not set.
+     * Returns the family key used for variant resolution.
+     * Returns {@code "unknown"} if {@link #nativeEntity} is not yet set.
      */
     public String getEntityTypeKey() {
         return nativeEntity != null ? nativeEntity.getKey() : "unknown";
     } // getEntityTypeKey ()
 
-} // Class: InternalEntity
+} // Class: NativeEntity

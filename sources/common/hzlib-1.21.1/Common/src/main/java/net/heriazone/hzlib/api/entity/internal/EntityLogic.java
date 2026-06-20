@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
  * avoid coupling with specific entity implementations, enabling shared logic
  * across all robot variants.
  */
-public class InternalLogic { // TODO: Replace the calculate methods with CombatLevelFeature, & ProtectionFeature
+public class EntityLogic { // TODO: Replace the calculate methods with CombatLevelFeature, & ProtectionFeature
 
     // -- Methods --
 
@@ -110,4 +110,4 @@ public class InternalLogic { // TODO: Replace the calculate methods with CombatL
         displayInfo(entity, Component.nullToEmpty(message), overlay);
     } // displayInfo()
 
-} // Class: InternalLogic
+} // Class: EntityLogic

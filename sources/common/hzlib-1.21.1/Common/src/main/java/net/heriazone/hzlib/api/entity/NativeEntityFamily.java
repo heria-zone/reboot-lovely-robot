@@ -40,7 +40,7 @@ import java.util.Optional;
  *
  * @param <T> concrete entity type for fluent builder pattern
  */
-public abstract class InternalEntityType<T extends InternalEntityType<T>> {
+public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
 
     // -- Identification Fields --
 
@@ -75,7 +75,7 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
      * @param key unique identifier for this entity type (e.g., {@code "bunny"}, {@code "mushroom_brown"})
      * @throws NullPointerException if key is null
      */
-    protected InternalEntityType(String key) {
+    protected NativeEntityFamily(String key) {
         this.key      = Objects.requireNonNull(key, "Entity type key cannot be null");
         this.data     = new CombatData(key, "entity." + key);
         this.name     = createTranslation(key);
@@ -83,7 +83,7 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
 
         // Allow subclasses to register variant features (TextureVariantFeature, etc.)
         configureVariants();
-    } // Constructor: InternalEntityType ()
+    } // Constructor: NativeEntityFamily ()
 
     // -- Abstract Methods --
 
@@ -164,7 +164,7 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
     /**
      * Returns the base combat statistics container.
      * <p>
-     * <b>Usage:</b> Read by {@code InternalEntity.createAttributes()} to set
+     * <b>Usage:</b> Read by {@code NativeEntity.createAttributes()} to set
      * Minecraft entity attributes (MAX_HEALTH, ATTACK_DAMAGE, etc.).
      *
      * @return combat data with base HP, attack, speed, armor
@@ -351,4 +351,4 @@ public abstract class InternalEntityType<T extends InternalEntityType<T>> {
         return features.containsKey(featureClass);
     } // hasFeature ()
 
-} // Class: InternalEntityType
+} // Class: NativeEntityFamily
