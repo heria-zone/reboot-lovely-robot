@@ -10,7 +10,7 @@ import net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant;
 import net.heriazone.hzlib.framework.entity.variants.StandardModelVariant;
 import net.heriazone.hzlib.framework.entity.variants.StandardTextureVariant;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
+import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.minecraft.network.chat.MutableComponent;
@@ -30,7 +30,7 @@ import java.util.Random;
  *   <li><b>Model state</b>: {@code "default"} (unarmed) or {@code "armed"} (combat mode)
  *       — registered in {@link #configureVariants()}</li>
  *   <li><b>Color</b>: 16 dye colors ({@code "white"}, {@code "orange"}, etc.)
- *       — registered via {@link #withColorPalette(EntityVariant)}</li>
+ *       — registered via {@link #withColorPalette(RobotVariant)}</li>
  * </ul>
  * <p>
  * <b>Design Decision:</b> Automatically attaches {@link LevelFeature} during construction
@@ -42,11 +42,11 @@ import java.util.Random;
  * to {@code TextureVariant} (string) on first load in
  * {@code InternalEntity.readAdditionalSaveData()}.
  */
-public class NativeEntityType extends NativeEntityFamily<NativeEntityType> {
+public class RobotFamily extends NativeEntityFamily<RobotFamily> {
 
     // -- Fields --
 
-    private final EntityVariant variant;
+    private final RobotVariant variant;
 
     // -- Constructor --
 
@@ -55,22 +55,22 @@ public class NativeEntityType extends NativeEntityFamily<NativeEntityType> {
      * <p>
      * <b>State Impact:</b> Automatically attaches {@link LevelFeature} with maxLevel 0.
      * Caller should configure maxLevel via {@code LevelFeature.setMaxLevel()} after
-     * construction (done in {@code LovelyRobotType.create()}).
+     * construction (done in {@code RobotFamilyRegistry.create()}).
      * <p>
      * <b>Variant registration:</b> {@link #configureVariants()} is called by the parent
      * constructor and registers model and animator variants. Texture variants (16 colors)
-     * are registered separately via {@link #withColorPalette(EntityVariant)}.
+     * are registered separately via {@link #withColorPalette(RobotVariant)}.
      *
      * @param key     unique identifier for this robot type (e.g., {@code "bunny"})
      * @param variant entity variant determining resource paths
      */
-    public NativeEntityType(String key, EntityVariant variant) {
+    public RobotFamily(String key, RobotVariant variant) {
         super(key);
         this.variant = variant;
 
         // Attach LevelFeature automatically — all robots have leveling capability
         withFeature(LevelFeature.class, new LevelFeature(0));
-    } // Constructor: NativeEntityType ()
+    } // Constructor: RobotFamily ()
 
     // -- Variant Configuration --
 
@@ -94,7 +94,7 @@ public class NativeEntityType extends NativeEntityFamily<NativeEntityType> {
      *   <li>Animator:      {@code lovelylib:animations/default.animation.json}</li>
      * </ul>
      * <p>
-     * <b>Texture variants:</b> Registered separately via {@link #withColorPalette(EntityVariant)}
+     * <b>Texture variants:</b> Registered separately via {@link #withColorPalette(RobotVariant)}
      * after construction, since the color palette requires the variant name for path construction.
      */
     @Override
@@ -169,12 +169,12 @@ public class NativeEntityType extends NativeEntityFamily<NativeEntityType> {
      * <b>Texture path pattern:</b> {@code textures/entity/{variant}/{variant}_{colorId:02d}.png}
      * — unchanged from the old system, only the lookup key changes.
      * <p>
-     * <b>Called by:</b> {@code LovelyRobotType.create()} after construction.
+     * <b>Called by:</b> {@code RobotFamilyRegistry.create()} after construction.
      *
      * @param variant entity variant determining color texture paths
      * @return this instance for method chaining
      */
-    public NativeEntityType withColorPalette(EntityVariant variant) {
+    public RobotFamily withColorPalette(RobotVariant variant) {
         String basePath = LovelyConstant.TEXTURE_ENTITY_PATH + variant.getName() + "/";
 
         TextureVariantFeature feature = new TextureVariantFeature();
@@ -256,7 +256,7 @@ public class NativeEntityType extends NativeEntityFamily<NativeEntityType> {
      *
      * @return entity variant
      */
-    public EntityVariant getVariant() {
+    public RobotVariant getVariant() {
         return variant;
     } // getVariant ()
 
@@ -274,4 +274,4 @@ public class NativeEntityType extends NativeEntityFamily<NativeEntityType> {
                 .orElse(0);
     } // getMaxLevel ()
 
-} // Class: NativeEntityType
+} // Class: RobotFamily

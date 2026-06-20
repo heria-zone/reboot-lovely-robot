@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
+import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.hzlib.api.animation.AnimationProfile;
 import net.heriazone.hzlib.api.animation.LoopBehavior;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
@@ -25,7 +25,7 @@ import java.util.List;
  * {@link RobotFamily#withFeature}. The loader-specific {@code InternalAnimation} reads
  * this profile to resolve animation names instead of using hardcoded constants.
  */
-public class LovelyRobotType {
+public class RobotFamilyRegistry {
 
     // -- Registry --
 
@@ -79,7 +79,7 @@ public class LovelyRobotType {
      * @param moveSpeed movement speed multiplier
      * @return configured RobotFamily instance
      */
-    protected static RobotFamily create(EntityVariant variant,
+    protected static RobotFamily create(RobotVariant variant,
                                         int maxLevel,
                                         float maxHealth,
                                         float baseAttack,
@@ -123,7 +123,7 @@ public class LovelyRobotType {
      * @param variant entity variant determining resource paths
      * @return configured RobotFamily instance
      */
-    protected static RobotFamily create(EntityVariant variant) {
+    protected static RobotFamily create(RobotVariant variant) {
         // Create robot type
         RobotFamily robotType = new RobotFamily(variant.getName(), variant);
 
@@ -139,4 +139,4 @@ public class LovelyRobotType {
         return robotType;
     } // create ()
 
-} // Class: LovelyRobotType
+} // Class: RobotFamilyRegistry

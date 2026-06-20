@@ -17,7 +17,7 @@ import java.util.Comparator;
  * (Dragon, Kitsune, Neko) add specialized roles. Premium variants (Prime, Hyperion,
  * Empyrium) offer advanced features for progression.
  */
-public enum EntityVariant {
+public enum RobotVariant {
 
     // -- Original Variants (Base Functionality) --
 
@@ -44,9 +44,9 @@ public enum EntityVariant {
 
     // -- Deserialization Cache --
 
-    private static final EntityVariant[] CODEC = Arrays.stream(values())
-            .sorted(Comparator.comparingInt(EntityVariant::getId))
-            .toArray(EntityVariant[]::new);
+    private static final RobotVariant[] CODEC = Arrays.stream(values())
+            .sorted(Comparator.comparingInt(RobotVariant::getId))
+            .toArray(RobotVariant[]::new);
 
     // -- Variant Identity --
 
@@ -61,10 +61,10 @@ public enum EntityVariant {
      * @param id persistent identifier for serialization
      * @param name registry name for entity type lookup
      */
-    EntityVariant(int id, String name) {
+    RobotVariant(int id, String name) {
         this.m_id = id;
         this.m_name = name;
-    } // Constructor: EntityVariant ()
+    } // Constructor: RobotVariant ()
 
     // -- Deserialization --
 
@@ -72,9 +72,9 @@ public enum EntityVariant {
      * Recovers variant from serialized identifier.
      *
      * @param id serialized variant identifier
-     * @return corresponding EntityVariant, or Bunny if invalid
+     * @return corresponding RobotVariant, or Bunny if invalid
      */
-    public static EntityVariant byId(int id) {
+    public static RobotVariant byId(int id) {
         if (id < 0 || id >= CODEC.length) {
             id = 0;
         }
@@ -94,10 +94,10 @@ public enum EntityVariant {
      * Finds variant by registry name.
      *
      * @param name registry name of variant
-     * @return matching EntityVariant, or null if not found
+     * @return matching RobotVariant, or null if not found
      */
-    public static EntityVariant byName(String name) {
-        for (EntityVariant item : CODEC) {
+    public static RobotVariant byName(String name) {
+        for (RobotVariant item : CODEC) {
             if (item.getName().equals(name)) {
                 return item;
             }
@@ -114,4 +114,4 @@ public enum EntityVariant {
         return this.m_name;
     } // getName ()
 
-} // Enum: EntityVariant
+} // Enum: RobotVariant
