@@ -2,7 +2,7 @@ package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -24,7 +24,7 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
  *
  * @param <T> entity type extending LovelyRobotEntity and GeoEntity
  */
-public interface IInternalRenderLayer<T extends InternalEntity & GeoEntity> {
+public interface IInternalRenderLayer<T extends NativeEntity & GeoEntity> {
 
     /**
      * Determines if this layer should render for the given entity state.

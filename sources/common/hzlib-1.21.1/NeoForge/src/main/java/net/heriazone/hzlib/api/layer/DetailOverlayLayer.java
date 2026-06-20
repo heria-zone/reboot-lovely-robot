@@ -2,7 +2,7 @@ package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.api.rendering.LayerRenderContext;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
  * extracting reusable overlay rendering logic to Common module.
  */
-public class DetailOverlayLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class DetailOverlayLayer<T extends NativeEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 

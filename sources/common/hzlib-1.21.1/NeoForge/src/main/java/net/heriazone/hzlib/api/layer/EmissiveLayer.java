@@ -2,7 +2,7 @@ package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -21,7 +21,7 @@ import software.bernie.geckolib.renderer.GeoRenderer;
  * <b>Design Decision:</b> Wrapper pattern maintains GeckoLib isolation while
  * extracting reusable emissive rendering logic to Common module.
  */
-public class EmissiveLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class EmissiveLayer<T extends NativeEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 

@@ -40,10 +40,10 @@ public class InternalAnimation {
      * {@link Animation.LoopType#PLAY_ONCE} (overrides other controllers).
      *
      * @param animatable entity to animate
-     * @param <T>        entity type extending InternalEntity and GeoAnimatable
+     * @param <T>        entity type extending NativeEntity and GeoAnimatable
      * @return configured attack animation controller
      */
-    public static <T extends InternalEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
+    public static <T extends NativeEntity & GeoAnimatable> AnimationController<T> attackAnimation(T animatable) {
         return new AnimationController<>(animatable,
                 AnimationStateManager.ControllerType.ATTACK.getName(),
                 AnimationStateManager.ATTACK_TRANSITION_TICKS, state -> {
@@ -77,10 +77,10 @@ public class InternalAnimation {
      * Delegates state resolution to {@link AnimationStateManager#getLocomotionAnimation}.
      *
      * @param entity entity to animate
-     * @param <T>    entity type extending InternalEntity and GeoAnimatable
+     * @param <T>    entity type extending NativeEntity and GeoAnimatable
      * @return configured locomotion animation controller
      */
-    public static <T extends InternalEntity & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
+    public static <T extends NativeEntity & GeoAnimatable> AnimationController<T> locomotionAnimation(T entity) {
         return new AnimationController<>(entity,
                 AnimationStateManager.ControllerType.LOCOMOTION.getName(),
                 AnimationStateManager.LOCOMOTION_TRANSITION_TICKS, state -> {
@@ -129,7 +129,7 @@ public class InternalAnimation {
      * Resolves the loop behavior for the given animation name from the entity's profile.
      * Returns {@link LoopBehavior#LOOP} as the default for locomotion animations.
      */
-    private static LoopBehavior resolveLoopBehavior(InternalEntity entity, String animName) {
+    private static LoopBehavior resolveLoopBehavior(NativeEntity entity, String animName) {
         AnimationProfile profile = AnimationStateManager.resolveProfilePublic(entity);
         if (profile == null) return LoopBehavior.LOOP;
 
@@ -155,9 +155,9 @@ public class InternalAnimation {
      * @param renderer GeoModel containing bone hierarchy
      * @param event    animation state with entity data
      * @param headBone name of the head bone in the model
-     * @param <T>      entity type extending InternalEntity and GeoAnimatable
+     * @param <T>      entity type extending NativeEntity and GeoAnimatable
      */
-    public static <T extends InternalEntity & GeoAnimatable> void headAnimation(GeoModel renderer, AnimationState<T> event, String headBone) {
+    public static <T extends NativeEntity & GeoAnimatable> void headAnimation(GeoModel renderer, AnimationState<T> event, String headBone) {
         GeoBone head = renderer.getAnimationProcessor().getBone(headBone);
         if (head != null) {
             EntityModelData entityData = event.getData(DataTickets.ENTITY_MODEL_DATA);

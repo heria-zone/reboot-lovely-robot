@@ -33,14 +33,14 @@ import java.util.List;
  * <p>
  * <b>Usage Example:</b>
  * <pre>{@code
- * new InternalLayerRenderer(context, model)
+ * new LayerRenderPipeline(context, model)
  *     .addLayer(new BaseTextureLayer<>(this))
  *     .addLayer(new EmissiveLayer<>(this, EMISSIVE_TEXTURE))
  *     .addLayer(new DetailOverlayLayer<>(this, HEADPHONES_TEXTURE))
  *     .addLayer(new DynamicColorLayer<>(this, COLLAR_MASK, DynamicColorLayer::healthGradientColor));
  * }</pre>
  */
-public class InternalLayerRenderer<T extends InternalEntity & GeoEntity> extends GeoEntityRenderer<T> {
+public class InternalLayerRenderer<T extends NativeEntity & GeoEntity> extends GeoEntityRenderer<T> {
 
     // -- Fields --
 
@@ -57,7 +57,7 @@ public class InternalLayerRenderer<T extends InternalEntity & GeoEntity> extends
      */
     public InternalLayerRenderer(EntityRendererProvider.Context context, GeoModel<T> model) {
         super(context, model);
-    } // Constructor: InternalLayerRenderer()
+    } // Constructor: LayerRenderPipeline()
 
     /**
      * Creates renderer with specified model and shadow radius.
@@ -69,7 +69,7 @@ public class InternalLayerRenderer<T extends InternalEntity & GeoEntity> extends
     public InternalLayerRenderer(EntityRendererProvider.Context context, GeoModel<T> model, float shadowRadius) {
         super(context, model);
         this.shadowRadius = shadowRadius;
-    } // Constructor: InternalLayerRenderer()
+    } // Constructor: LayerRenderPipeline()
 
     // -- Layer Management --
 
@@ -152,4 +152,4 @@ public class InternalLayerRenderer<T extends InternalEntity & GeoEntity> extends
         return entity.getCurrentTexture();
     } // getTextureLocation()
 
-} // Class: InternalLayerRenderer
+} // Class: LayerRenderPipeline

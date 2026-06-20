@@ -2,7 +2,7 @@ package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.api.entity.features.overlay.OverlayFeature;
 import net.heriazone.hzlib.api.entity.features.overlay.OverlaySlot;
 import net.heriazone.hzlib.api.entity.features.overlay.SlotMode;
@@ -27,7 +27,7 @@ import software.bernie.geckolib.renderer.GeoRenderer;
  *   <li>{@link SlotMode#ALWAYS} — texture is fixed at construction; rendered unconditionally.</li>
  *   <li>{@link SlotMode#CONDITIONAL} — evaluates entries in declaration order; first passing
  *       entry's path is rendered. Stateless — no entity data involved.</li>
- *   <li>{@link SlotMode#RANDOM} — reads {@link InternalEntity#getOverlaySlot(String)} for the
+ *   <li>{@link SlotMode#RANDOM} — reads {@link NativeEntity#getOverlaySlot(String)} for the
  *       path chosen at spawn. If the entry has a color provider, uses {@code DynamicColorLayer}
  *       render path (grayscale mask × ARGB tint).</li>
  *   <li>{@link SlotMode#INTERACTIVE} — same as RANDOM read path; state was set by player action.</li>
@@ -38,7 +38,7 @@ import software.bernie.geckolib.renderer.GeoRenderer;
  * using {@code RenderType.armorCutoutNoCull}. This is identical to {@link DynamicColorLayer}'s
  * render path. When no color provider is present, {@code -1} (white/no tint) is passed.
  */
-public class OverlayLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class OverlayLayer<T extends NativeEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
