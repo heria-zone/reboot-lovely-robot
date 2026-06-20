@@ -10,104 +10,67 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * Centralizes robot stat calculation and attribute management logic.
+ * Static utilities for attribute mutation and owner message display.
  * <p>
- * <b>Architecture:</b> Provides pure functions for RPG-style stat progression
- * (HP, attack, defense, armor) with level-based scaling. Separates calculation
- * logic from entity state management for testability and reusability.
- * <p>
- * <b>Scaling Formula:</b> Uses linear progression (base + level * base / 50)
- * for HP/attack/defense, with armor capping at 30 and overflow converting to
- * armor toughness for diminishing returns on high-level robots.
- * <p>
- * <b>Design Decision:</b> Static utility class rather than instance methods to
- * avoid coupling with specific entity implementations, enabling shared logic
- * across all robot variants.
+ * Centralises the two concerns that appear repeatedly across entity tiers:
+ * pushing recalculated stat values onto live Minecraft attributes, and sending
+ * status messages to the entity's owner. Neither concern belongs on a specific
+ * entity class — extracting them here keeps entity code free of boilerplate.
  */
-public class EntityLogic { // TODO: Replace the calculate methods with CombatLevelFeature, & ProtectionFeature
+public class EntityLogic { // TODO: Replace handleLevel with CombatLevelFeature and ProtectionFeature
 
-    // -- Methods --
-
-    // LOGIC
+    // -- Attribute Mutation --
 
     /**
-     * Applies calculated stats to entity attributes.
-     * <p>
-     * <b>Side Effect:</b> Mutates entity attribute base values. Call after
-     * level-up or stat recalculation to sync entity with computed values.
+     * Pushes recalculated stat values onto the entity's live attributes.
+     * Call after any stat change that should take effect immediately.
      *
-     * @param entity the entity to update
-     * @param hp the new max health
-     * @param attack the new attack damage
-     * @param armorLevel the new armor value
-     * @param armorToughness the new armor toughness
+     * @param entity        the entity to update
+     * @param hp            new max health
+     * @param attack        new attack damage
+     * @param armor         new armor value
+     * @param armorToughness new armor toughness value
      */
-    public static void handleLevel(LivingEntity entity, int hp, int attack, double armorLevel, double armorToughness) {
+    public static void handleLevel(LivingEntity entity, int hp, int attack, double armor, double armorToughness) {
         updateEntityAttribute(entity, Attributes.MAX_HEALTH, hp);
         updateEntityAttribute(entity, Attributes.ATTACK_DAMAGE, attack);
-        updateEntityAttribute(entity, Attributes.ARMOR, armorLevel);
+        updateEntityAttribute(entity, Attributes.ARMOR, armor);
         updateEntityAttribute(entity, Attributes.ARMOR_TOUGHNESS, armorToughness);
-    } // handleLevel()
+    } // handleLevel ()
 
-    // UTILITY
+    // int and double overloads — Minecraft's AttributeInstance.setBaseValue takes a double,
+    // but call sites often produce ints; both avoid a cast at every call site.
 
-    /**
-     * Updates entity attribute with integer value.
-     * <p>
-     * <b>1.21.1 API:</b> Uses Holder&lt;Attribute&gt; for attribute references.
-     *
-     * @param entity the entity to modify
-     * @param attribute the attribute holder to update
-     * @param value the new base value
-     */
     private static void updateEntityAttribute(LivingEntity entity, Holder<Attribute> attribute, int value) {
-        AttributeInstance defaultAttributeValue = entity.getAttribute(attribute);
-        assert defaultAttributeValue != null;
-        defaultAttributeValue.setBaseValue(value);
-    } // updateEntityAttribute()
+        AttributeInstance instance = entity.getAttribute(attribute);
+        assert instance != null;
+        instance.setBaseValue(value);
+    } // updateEntityAttribute ()
 
-    /**
-     * Updates entity attribute with double value.
-     * <p>
-     * <b>1.21.1 API:</b> Uses Holder&lt;Attribute&gt; for attribute references.
-     *
-     * @param entity the entity to modify
-     * @param attribute the attribute holder to update
-     * @param value the new base value
-     */
     private static void updateEntityAttribute(LivingEntity entity, Holder<Attribute> attribute, double value) {
-        AttributeInstance defaultAttributeValue = entity.getAttribute(attribute);
-        assert defaultAttributeValue != null;
-        defaultAttributeValue.setBaseValue(value);
-    } // updateEntityAttribute()
+        AttributeInstance instance = entity.getAttribute(attribute);
+        assert instance != null;
+        instance.setBaseValue(value);
+    } // updateEntityAttribute ()
 
-    // DISPLAY
+    // -- Owner Display --
 
     /**
-     * Sends message to robot owner's action bar or chat.
-     * <p>
-     * <b>Usage:</b> For level-up notifications, stat changes, or status updates.
+     * Sends a message to the entity's owner.
      *
-     * @param entity the robot entity
+     * @param entity  the tameable entity whose owner receives the message
      * @param message the message component
-     * @param overlay true for action bar, false for chat
+     * @param overlay {@code true} to show on the action bar, {@code false} for chat
      */
     public static void displayInfo(TamableAnimal entity, Component message, boolean overlay) {
-        if (entity.getOwner() != null) {
-            Player player = (Player) entity.getOwner();
+        if (entity.getOwner() instanceof Player player) {
             player.displayClientMessage(message, overlay);
         }
-    } // displayInfo()
+    } // displayInfo ()
 
-    /**
-     * Convenience overload accepting string message.
-     *
-     * @param entity the robot entity
-     * @param message the message string
-     * @param overlay true for action bar, false for chat
-     */
+    /** Convenience overload that wraps a plain string into a {@link Component}. */
     public static void displayInfo(TamableAnimal entity, String message, boolean overlay) {
         displayInfo(entity, Component.nullToEmpty(message), overlay);
-    } // displayInfo()
+    } // displayInfo ()
 
 } // Class: EntityLogic
