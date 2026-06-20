@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Supplier;
@@ -22,7 +22,7 @@ public record LayerRenderContext(
         float alpha,
         boolean useOverlay,
         Supplier<Boolean> additionalConditions,
-        InternalEntity entity
+        NativeEntity entity
 ) {
 
     // -- Factory Methods --
@@ -34,7 +34,7 @@ public record LayerRenderContext(
      * @param entity  robot entity for context
      * @return render context with default settings
      */
-    public static LayerRenderContext texture(ResourceLocation texture, InternalEntity entity) {
+    public static LayerRenderContext texture(ResourceLocation texture, NativeEntity entity) {
         return new LayerRenderContext(texture, 0xFFFFFFFF, 1.0f, true, () -> true, entity);
     } // texture()
 
@@ -46,7 +46,7 @@ public record LayerRenderContext(
      * @param entity  robot entity for context
      * @return render context with specified color
      */
-    public static LayerRenderContext coloredTexture(ResourceLocation texture, int color, InternalEntity entity) {
+    public static LayerRenderContext coloredTexture(ResourceLocation texture, int color, NativeEntity entity) {
         return new LayerRenderContext(texture, color, 1.0f, true, () -> true, entity);
     } // coloredTexture()
 
@@ -58,7 +58,7 @@ public record LayerRenderContext(
      * @param entity  robot entity for context
      * @return render context with specified transparency
      */
-    public static LayerRenderContext transparentTexture(ResourceLocation texture, float alpha, InternalEntity entity) {
+    public static LayerRenderContext transparentTexture(ResourceLocation texture, float alpha, NativeEntity entity) {
         return new LayerRenderContext(texture, 0xFFFFFFFF, alpha, true, () -> true, entity);
     } // transparentTexture()
 
@@ -70,7 +70,7 @@ public record LayerRenderContext(
      * @param entity    robot entity for context
      * @return render context with conditional rendering
      */
-    public static LayerRenderContext conditionalTexture(ResourceLocation texture, Supplier<Boolean> condition, InternalEntity entity) {
+    public static LayerRenderContext conditionalTexture(ResourceLocation texture, Supplier<Boolean> condition, NativeEntity entity) {
         return new LayerRenderContext(texture, 0xFFFFFFFF, 1.0f, true, condition, entity);
     } // conditionalTexture()
 
@@ -99,7 +99,7 @@ public record LayerRenderContext(
      *
      * @return robot entity for this context
      */
-    public InternalEntity getEntity() {
+    public NativeEntity getEntity() {
         return entity;
     } // getEntity()
 

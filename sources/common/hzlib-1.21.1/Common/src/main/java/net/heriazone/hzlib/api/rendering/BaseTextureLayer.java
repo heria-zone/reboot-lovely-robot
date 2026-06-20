@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 
 import java.util.function.Predicate;
 
@@ -14,7 +14,7 @@ import java.util.function.Predicate;
  * <b>Design Decision:</b> Separated from renderer to allow texture swapping
  * without renderer changes. Entity controls texture selection based on state.
  */
-public class BaseTextureLayer<T extends InternalEntity> implements IInternalRenderLayer<T> {
+public class BaseTextureLayer<T extends NativeEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 

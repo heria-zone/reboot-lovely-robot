@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Function;
@@ -20,7 +20,7 @@ import java.util.function.Predicate;
  * <b>Performance:</b> Emissive rendering typically uses fullbright lighting,
  * which may have different performance characteristics than normal lighting.
  */
-public class EmissiveLayer<T extends InternalEntity> extends BaseInternalRenderLayer<T> {
+public class EmissiveLayer<T extends NativeEntity> extends BaseInternalRenderLayer<T> {
 
     // -- Constructors --
 

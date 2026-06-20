@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +17,14 @@ import java.util.function.Predicate;
  * Displays different patterns for idle, auto-attack, base defense, combat mode, etc.
  * Single layer with texture swapping is more efficient than multiple conditional layers.
  */
-public class ConditionalOverlayLayer<T extends InternalEntity> implements IInternalRenderLayer<T> {
+public class ConditionalOverlayLayer<T extends NativeEntity> implements IInternalRenderLayer<T> {
 
     // -- Conditional Texture Entry --
 
     /**
      * Pairs a condition with its corresponding texture path.
      */
-    private static class ConditionalTexture<T extends InternalEntity> {
+    private static class ConditionalTexture<T extends NativeEntity> {
         final Predicate<T> condition;
         final String texturePath;
 

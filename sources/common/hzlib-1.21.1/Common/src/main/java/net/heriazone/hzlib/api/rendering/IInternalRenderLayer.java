@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 
 /**
  * Composable render layer interface for robot visual effects.
@@ -18,7 +18,7 @@ import net.heriazone.hzlib.api.entity.InternalEntity;
  *
  * @param <T> entity type extending LovelyRobotEntity
  */
-public interface IInternalRenderLayer<T extends InternalEntity> {
+public interface IInternalRenderLayer<T extends NativeEntity> {
 
     /**
      * Determines if this layer should render for the given entity state.

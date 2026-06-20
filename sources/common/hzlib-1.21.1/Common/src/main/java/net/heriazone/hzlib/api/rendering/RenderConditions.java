@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -49,7 +49,7 @@ public final class RenderConditions {
      * @param <T>    entity type (predicate is entity-agnostic; the entity parameter is ignored)
      * @return month-matching predicate
      */
-    public static <T extends InternalEntity> Predicate<T> inMonth(Month... months) {
+    public static <T extends NativeEntity> Predicate<T> inMonth(Month... months) {
         Set<Month> monthSet = new HashSet<>(Arrays.asList(months));
         return entity -> monthSet.contains(LocalDate.now().getMonth());
     } // inMonth ()
@@ -61,7 +61,7 @@ public final class RenderConditions {
      * @param <T>    entity type
      * @return negated month predicate
      */
-    public static <T extends InternalEntity> Predicate<T> notInMonth(Month... months) {
+    public static <T extends NativeEntity> Predicate<T> notInMonth(Month... months) {
         return RenderConditions.<T>inMonth(months).negate();
     } // notInMonth ()
 
@@ -82,7 +82,7 @@ public final class RenderConditions {
      * @param <T>     entity type
      * @return predicate that passes when the named slot has no active texture
      */
-    public static <T extends InternalEntity> Predicate<T> overlaySlotEmpty(String slotKey) {
+    public static <T extends NativeEntity> Predicate<T> overlaySlotEmpty(String slotKey) {
         return entity -> {
             String val = entity.getOverlaySlot(slotKey);
             return val == null || val.isEmpty();
@@ -98,7 +98,7 @@ public final class RenderConditions {
      * @param <T>     entity type
      * @return predicate that passes when the named slot has an active texture
      */
-    public static <T extends InternalEntity> Predicate<T> overlaySlotActive(String slotKey) {
+    public static <T extends NativeEntity> Predicate<T> overlaySlotActive(String slotKey) {
         return RenderConditions.<T>overlaySlotEmpty(slotKey).negate();
     } // overlaySlotActive ()
 

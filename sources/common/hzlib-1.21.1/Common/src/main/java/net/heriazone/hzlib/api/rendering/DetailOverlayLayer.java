@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Predicate;
@@ -16,7 +16,7 @@ import java.util.function.Predicate;
  * provide consistent visual quality and performance. Use DynamicColorLayer for
  * state-dependent visual effects.
  */
-public class DetailOverlayLayer<T extends InternalEntity> extends BaseInternalRenderLayer<T> {
+public class DetailOverlayLayer<T extends NativeEntity> extends BaseInternalRenderLayer<T> {
 
     // -- Constructors --
 

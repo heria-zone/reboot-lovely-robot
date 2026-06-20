@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Function;
@@ -16,7 +16,7 @@ import java.util.function.Predicate;
  * <b>Design Decision:</b> Abstract class rather than interface allows sharing
  * common implementations while maintaining flexibility for specialized layers.
  */
-public abstract class BaseInternalRenderLayer<T extends InternalEntity> implements IInternalRenderLayer<T> {
+public abstract class BaseInternalRenderLayer<T extends NativeEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 

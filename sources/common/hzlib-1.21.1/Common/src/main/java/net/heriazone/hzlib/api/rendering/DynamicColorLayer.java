@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.rendering;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 
@@ -26,13 +26,13 @@ import java.util.function.Predicate;
  * <b>Performance:</b> Color calculation runs every frame. Keep color functions
  * lightweight. Cache complex calculations in entity tick logic.
  */
-public class DynamicColorLayer<T extends InternalEntity> implements IInternalRenderLayer<T> {
+public class DynamicColorLayer<T extends NativeEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
     private final String maskTexturePath;
-    private final Function<InternalEntity, Integer> colorProvider;
-    private final Predicate<InternalEntity> renderCondition;
+    private final Function<NativeEntity, Integer> colorProvider;
+    private final Predicate<NativeEntity> renderCondition;
 
     // -- Constructors --
 
@@ -68,7 +68,7 @@ public class DynamicColorLayer<T extends InternalEntity> implements IInternalRen
      * @param colorProvider function calculating ARGB color from entity state
      * @param renderCondition predicate determining if layer should render
      */
-    public DynamicColorLayer(String maskTexturePath, Function<InternalEntity, Integer> colorProvider, Predicate<InternalEntity> renderCondition) {
+    public DynamicColorLayer(String maskTexturePath, Function<NativeEntity, Integer> colorProvider, Predicate<NativeEntity> renderCondition) {
         this.maskTexturePath = maskTexturePath;
         this.colorProvider = colorProvider;
         this.renderCondition = renderCondition;
@@ -89,7 +89,7 @@ public class DynamicColorLayer<T extends InternalEntity> implements IInternalRen
      * @param entity robot entity with health data
      * @return ARGB color representing health percentage
      */
-    public static int healthGradientColor(InternalEntity entity) {
+    public static int healthGradientColor(NativeEntity entity) {
         float healthPercent = entity.getHealth() / entity.getMaxHealth();
 
         // Bright lime green (similar to headphone green)
