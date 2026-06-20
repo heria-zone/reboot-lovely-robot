@@ -430,3 +430,74 @@ The NBT migration requires `EntityTexture.byId(int).getName()` to return the str
 - `sources/common/lovelylib-1.21.1/Common/src/main/java/net/heriazone/lovelylib/source/legacy/LegacyRobotType.java` — reference for three mod variants
 - `sources/common/lovelylib-1.21.1/Common/src/main/java/net/heriazone/lovelylib/source/reboot/RebootRobotType.java`
 - `sources/common/lovelylib-1.21.1/Common/src/main/java/net/heriazone/lovelylib/source/tribute/TributeRobotType.java`
+
+---
+
+## ADR_017 — OverlayFeature Implementation (Completed 2026-06-20)
+
+**Source ADR**: `docs/development/decisions/ADR_017_OverlayFeature_Composable_Visual_Layer_System.md`
+
+This work was carried out across multiple sessions. All implementation tasks are complete and ready for runtime validation.
+
+### Completed Work
+
+#### HZLib Common — `OverlaySlot.java`
+- [x] Added `entryDynamic(stageKey, pathResolver)` — dynamic path for INTERACTIVE/RANDOM slots
+- [x] Added `entryDynamic(stageKey, pathResolver, colorProvider)` — dynamic path + tint
+- [x] Added `entryDynamicConditional(stageKey, pathResolver, condition)` — dynamic path + predicate (named distinctly to avoid Java overload ambiguity with `Function` vs `Predicate`)
+- [x] Added `alwaysDynamic(key, pathResolver)` — ALWAYS slot whose texture resolves from entity state at render time
+- [x] Added 3-arg private `Entry` constructor `(String, Predicate, Function)` to preserve backward compat with existing 3-arg `new Entry(path, null, null)` call sites
+- [x] Fixed `resolveConditional()` to call entity-aware `getTexturePath(entity)` on each entry
+
+#### HZLib Fabric — `OverlayLayer.java`
+- [x] Fixed constructor: ALWAYS slot with dynamic path no longer pre-caches `alwaysTexture` (sets null, resolves per frame)
+- [x] Fixed `resolveTexturePath()`: RANDOM/INTERACTIVE slots now look up the `Entry` by stage key and call `entry.getTexturePath(entity)` for dynamic path resolution
+- [x] Fixed `resolveColor()`: RANDOM/INTERACTIVE slots look up the `Entry` by stage key (not rendered path) so color providers work with dynamic-path entries
+
+#### HZLib Common — `InternalEntity.java` (already complete from prior session)
+- [x] `registerOverlayData()` — registers `SynchedEntityData<String>` per persistent slot
+- [x] `getOverlaySlot(key)` / `setOverlaySlot(key, path)` / `cycleOverlaySlot(key)`
+- [x] `initializeRandomVariants()` — seeds RANDOM slots at spawn
+- [x] NBT `addAdditionalSaveData` / `readAdditionalSaveData` with `"OverlaySlots"` compound
+
+#### monsters_girls — `GourdragoraType.java`
+- [x] Slot key constants: `SLOT_CARVING`, `SLOT_FACE_COVER`, `SLOT_EMISSIVE`
+- [x] `buildTintedOverlay(int tintArgb)` — INTERACTIVE carving (5 stages, grayscale+tint) + ALWAYS emissive; wired on `GOLDEN` (amber `0xFFD4A017`) and `LUMINA` (pale yellow `0xFFF0E68C`)
+- [x] `buildJackoOverlay()` — CONDITIONAL face_cover + INTERACTIVE carving (6 stages, full-color) + ALWAYS emissive; wired on `JACKO`
+- [x] Dynamic path helpers: `sizeSegment()`, `carvingPath()`, `carvingJackoPath()`, `faceCoverPath()`, `emissivePath()` — all derive size from `MODEL_VARIANT` at render time
+
+#### monsters_girls — `MandrakeType.java`
+- [x] Slot key constants: `SLOT_HAIR`, `SLOT_EMISSIVE`
+- [x] `FLOWER` variant: RANDOM hair slot (4 options: twintails_blue, twintails_green, flower_crown_green, ponytails_yellow) + ALWAYS emissive
+- [x] `CHORUS` and `FRUCTUS` unchanged — no layer assets authored
+
+#### monsters_girls — `MushroomType.java`
+- [x] Slot key constants: `SLOT_HAT`, `SLOT_COSTUME`
+- [x] `BROWN_GIRL_COSTUME` — RANDOM hat (3 pumpkin colours) + CONDITIONAL costume shown in October; wired on `BROWN`, `INFERNAL`, `MOLTEN`
+- [x] `DEFAULT_GIRL_COSTUME` — RANDOM hat (3 witch colours) + CONDITIONAL costume shown in October; wired on `AMANITA`, `CRIMSON`, `SOUL_WANDERER`, `WARPED`
+- [x] `INKCAPS`, `PUFFBALL`, `SNOWBALL` unchanged — no layer assets authored
+
+#### monsters_girls — `GourdragoraEntity.java` (Fabric)
+- [x] `handleSpecificInteractions()`: shears branch calls `cycleOverlaySlot(SLOT_CARVING)`, plays sound, damages shears 1 durability
+- [x] Placeholder sound: `GOURDRAGORA_ROAR` at 0.6f/1.2f — **TODO: replace with dedicated carve sound once audio asset authored**
+
+#### monsters_girls — `MonstersEntities.java` (Fabric)
+- [x] `registerRender()` updated: entities with `OverlayFeature` use factory lambdas calling `buildOverlayLayers()` after renderer construction
+- [x] Affected: GOURDRAGORA_GOLDEN, GOURDRAGORA_LUMINA, GOURDRAGORA_JACKO, MANDRAKE_FLOWER, MUSHROOM_AMANITA, MUSHROOM_BROWN, MUSHROOM_CRIMSON, MUSHROOM_INFERNAL, MUSHROOM_MOLTEN, MUSHROOM_SOUL_WANDERER, MUSHROOM_WARPED
+- [x] `OverlayFeature` import added
+
+### Open Items / Follow-up
+
+- [ ] **Dedicated carve sound**: Author `GOURDRAGORA_CARVE` OGG + register in `MonstersSounds` and `sounds.json`, then update `GourdragoraEntity.handleSpecificInteractions()`
+- [ ] **Runtime validation**: Spawn each entity family in-game and verify overlay layers render correctly
+- [ ] **Forge/NeoForge renderer registration**: Mirror `registerRender()` changes from Fabric to Forge and NeoForge `MonstersEntities` when those loaders are activated
+- [ ] **Robot renderer migration** (planned follow-up per ADR_017): Move robot collar/headphone layer declarations to `OverlayFeature` on each robot `NativeEntityType`, collapse the three renderer subclasses into one
+
+### Modified Files
+- `sources/common/hzlib-1.21.1/Common/src/main/java/net/heriazone/hzlib/api/entity/features/overlay/OverlaySlot.java`
+- `sources/common/hzlib-1.21.1/Fabric/src/main/java/net/heriazone/hzlib/api/layer/OverlayLayer.java`
+- `sources/monsters/monsters_girls-1.21.1/Common/src/main/java/net/heriazone/monsters_girls/entity/custom/GourdragoraType.java`
+- `sources/monsters/monsters_girls-1.21.1/Common/src/main/java/net/heriazone/monsters_girls/entity/custom/MandrakeType.java`
+- `sources/monsters/monsters_girls-1.21.1/Common/src/main/java/net/heriazone/monsters_girls/entity/custom/MushroomType.java`
+- `sources/monsters/monsters_girls-1.21.1/Fabric/src/main/java/net/heriazone/monsters_girls/entity/custom/GourdragoraEntity.java`
+- `sources/monsters/monsters_girls-1.21.1/Fabric/src/main/java/net/heriazone/monsters_girls/source/MonstersEntities.java`

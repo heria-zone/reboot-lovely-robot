@@ -1693,7 +1693,7 @@ The entity architecture and animation system design discussion (see `temp/27-04-
 **Status**: Accepted — ready for implementation
 
 **Key decisions**:
-- Terminology locked: Entity Family / Entity Variant / Appearance Variant
+- Terminology locked: Entity Family / Entity Variant / Entity Appearance
 - `SizeVariantFeature` for dynamic hitbox via `getDimensions(Pose)` (Option B)
 - `GourdragoraType` collapses from 9 instances to 3 (Golden, Lumina, Jack'O)
 - Jack'O is an Entity Variant (different taming items = behavioral difference)
