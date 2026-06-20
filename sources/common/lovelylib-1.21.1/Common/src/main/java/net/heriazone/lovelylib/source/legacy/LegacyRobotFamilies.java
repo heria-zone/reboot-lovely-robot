@@ -1,13 +1,11 @@
-package net.heriazone.lovelylib.source.tribute;
+package net.heriazone.lovelylib.source.legacy;
 
-import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
-import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
-import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
+import net.heriazone.lovelylib.api.entity.features.*;
+import net.heriazone.lovelylib.common.entity.RobotFamilyRegistry;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.LovelyRobotType;
-import net.heriazone.lovelylib.common.entity.NativeEntityType;
+import net.heriazone.lovelylib.common.entity.RobotFamily;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
-import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
+import net.heriazone.lovelylib.common.entity.enums.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
@@ -28,7 +26,7 @@ import net.heriazone.hzlib.framework.entity.protection.LevelBasedProtectionStrat
  * exponential progression for harder leveling. KITSUNE uses custom formula with tail-unlock
  * progression (harder every 30 levels).
  */
-public class TributeRobotType extends LovelyRobotType {
+public class LegacyRobotType extends RobotFamilyRegistry {
 
     // -- Robot Types --
 
@@ -38,7 +36,7 @@ public class TributeRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via BunnyMaxLevel, BunnyBaseHp, etc.
      */
-    public static final NativeEntityType BUNNY = create(EntityVariant.Bunny);
+    public static final RobotFamily BUNNY = create(RobotVariant.Bunny);
 
     /**
      * BUNNY2 robot type - alternative bunny design.
@@ -46,7 +44,16 @@ public class TributeRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via Bunny2MaxLevel, Bunny2BaseHp, etc.
      */
-    public static final NativeEntityType BUNNY2 = create(EntityVariant.Bunny2);
+    public static final RobotFamily BUNNY2 = create(RobotVariant.Bunny2);
+
+    /**
+     * DRAGON robot type - enhanced combat capabilities.
+     * <p>
+     * <b>Characteristics:</b> High health and damage, knockback resistance 0.5F,
+     * exponential XP progression (base 1.1). Configured via DragonMaxLevel,
+     * DragonBaseHp, etc.
+     */
+    public static final RobotFamily DRAGON = create(RobotVariant.Dragon);
 
     /**
      * HONEY robot type - support-oriented companion.
@@ -54,7 +61,24 @@ public class TributeRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> Lower combat stats, default XP progression.
      * Configured via HoneyMaxLevel, HoneyBaseHp, etc.
      */
-    public static final NativeEntityType HONEY = create(EntityVariant.Honey);
+    public static final RobotFamily HONEY = create(RobotVariant.Honey);
+
+    /**
+     * KITSUNE robot type - tail-unlock progression.
+     * <p>
+     * <b>Characteristics:</b> Moderate stats, custom XP formula with tail-unlock
+     * progression (harder every 30 levels). Configured via KitsuneMaxLevel,
+     * KitsuneBaseHp, etc.
+     */
+    public static final RobotFamily KITSUNE = create(RobotVariant.Kitsune);
+
+    /**
+     * NEKO robot type - agile combat specialist.
+     * <p>
+     * <b>Characteristics:</b> High attack and speed, default XP progression.
+     * Configured via NekoMaxLevel, NekoBaseHp, etc.
+     */
+    public static final RobotFamily NEKO = create(RobotVariant.Neko);
 
     /**
      * VANILLA robot type - general-purpose companion.
@@ -62,7 +86,7 @@ public class TributeRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via VanillaMaxLevel, VanillaBaseHp, etc.
      */
-    public static final NativeEntityType VANILLA = create(EntityVariant.Vanilla);
+    public static final RobotFamily VANILLA = create(RobotVariant.Vanilla);
 
     // -- Config Reload --
 
@@ -90,7 +114,7 @@ public class TributeRobotType extends LovelyRobotType {
                         SharedConfigs.Common.LootEnchantmentLevel);
 
         // Configure BUNNY
-        SharedConfigs.EntityConfigData bunny = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY);
+        SharedConfigs.EntityConfigData bunny = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY);
         BUNNY.withCombatStats(bunny.baseHp,
                         bunny.baseAttack,
                         bunny.attackSpeed,
@@ -110,7 +134,7 @@ public class TributeRobotType extends LovelyRobotType {
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure BUNNY2
-        SharedConfigs.EntityConfigData bunny2 = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY2);
+        SharedConfigs.EntityConfigData bunny2 = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY2);
         BUNNY2.withCombatStats(bunny2.baseHp,
                         bunny2.baseAttack,
                         bunny2.attackSpeed,
@@ -129,8 +153,28 @@ public class TributeRobotType extends LovelyRobotType {
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
+        // Configure DRAGON
+        SharedConfigs.EntityConfigData dragon = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_DRAGON);
+        DRAGON.withCombatStats(dragon.baseHp,
+                        dragon.baseAttack,
+                        dragon.attackSpeed,
+                        dragon.baseDefense,
+                        dragon.baseToughness,
+                        0F,
+                        dragon.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(dragon.maxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                dragon.baseHp,
+                                dragon.baseAttack,
+                                dragon.baseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
         // Configure HONEY
-        SharedConfigs.EntityConfigData honey = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_HONEY);
+        SharedConfigs.EntityConfigData honey = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_HONEY);
         HONEY.withCombatStats(honey.baseHp,
                         honey.baseAttack,
                         honey.attackSpeed,
@@ -149,8 +193,48 @@ public class TributeRobotType extends LovelyRobotType {
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
+        // Configure KITSUNE
+        SharedConfigs.EntityConfigData kitsune = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_KITSUNE);
+        KITSUNE.withCombatStats(kitsune.baseHp,
+                        kitsune.baseAttack,
+                        kitsune.attackSpeed,
+                        kitsune.baseDefense,
+                        kitsune.baseToughness,
+                        0F,
+                        kitsune.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(kitsune.maxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                kitsune.baseHp,
+                                kitsune.baseAttack,
+                                kitsune.baseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
+        // Configure NEKO
+        SharedConfigs.EntityConfigData neko = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_NEKO);
+        NEKO.withCombatStats(neko.baseHp,
+                        neko.baseAttack,
+                        neko.attackSpeed,
+                        neko.baseDefense,
+                        neko.baseToughness,
+                        0F,
+                        neko.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(neko.maxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                neko.baseHp,
+                                neko.baseAttack,
+                                neko.baseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
         // Configure VANILLA
-        SharedConfigs.EntityConfigData vanilla = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_VANILLA);
+        SharedConfigs.EntityConfigData vanilla = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_VANILLA);
         VANILLA.withCombatStats(vanilla.baseHp,
                         vanilla.baseAttack,
                         vanilla.attackSpeed,

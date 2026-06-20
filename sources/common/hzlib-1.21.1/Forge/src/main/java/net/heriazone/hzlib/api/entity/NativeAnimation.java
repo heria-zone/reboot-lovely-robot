@@ -24,7 +24,7 @@ import java.util.Random;
  * <b>Fallback behavior:</b> If no profile is attached to the entity type, the controller
  * falls back to the standard animation name constants in {@link AnimationStateManager}.
  */
-public class InternalAnimation {
+public class NativeAnimation {
 
     // -- Shared Random --
 
@@ -170,4 +170,4 @@ public class InternalAnimation {
         }
     } // headAnimation ()
 
-} // Class: InternalAnimation
+} // Class: NativeAnimation

@@ -3,11 +3,11 @@ package net.heriazone.lovelylib.source.reboot;
 import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
 import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
 import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
-import net.heriazone.lovelylib.common.entity.LovelyRobotType;
+import net.heriazone.lovelylib.common.entity.RobotFamilyRegistry;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.NativeEntityType;
+import net.heriazone.lovelylib.common.entity.RobotFamily;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
-import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
+import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
@@ -28,7 +28,7 @@ import net.heriazone.hzlib.framework.entity.protection.LevelBasedProtectionStrat
  * exponential progression for harder leveling. KITSUNE uses custom formula with tail-unlock
  * progression (harder every 30 levels).
  */
-public class RebootRobotType extends LovelyRobotType {
+public class RebootRobotType extends RobotFamilyRegistry {
 
     // -- Robot Types --
 
@@ -38,7 +38,7 @@ public class RebootRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via BunnyMaxLevel, BunnyBaseHp, etc.
      */
-    public static final NativeEntityType BUNNY = create(EntityVariant.Bunny);
+    public static final RobotFamily BUNNY = create(RobotVariant.Bunny);
 
     /**
      * BUNNY2 robot type - alternative bunny design.
@@ -46,7 +46,7 @@ public class RebootRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via Bunny2MaxLevel, Bunny2BaseHp, etc.
      */
-    public static final NativeEntityType BUNNY2 = create(EntityVariant.Bunny2);
+    public static final RobotFamily BUNNY2 = create(RobotVariant.Bunny2);
 
     /**
      * DRAGON robot type - enhanced combat capabilities.
@@ -55,7 +55,7 @@ public class RebootRobotType extends LovelyRobotType {
      * exponential XP progression (base 1.1). Configured via DragonMaxLevel,
      * DragonBaseHp, etc.
      */
-    public static final NativeEntityType DRAGON = create(EntityVariant.Dragon);
+    public static final RobotFamily DRAGON = create(RobotVariant.Dragon);
 
     /**
      * HONEY robot type - support-oriented companion.
@@ -63,7 +63,7 @@ public class RebootRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> Lower combat stats, default XP progression.
      * Configured via HoneyMaxLevel, HoneyBaseHp, etc.
      */
-    public static final NativeEntityType HONEY = create(EntityVariant.Honey);
+    public static final RobotFamily HONEY = create(RobotVariant.Honey);
 
     /**
      * KITSUNE robot type - tail-unlock progression.
@@ -72,7 +72,7 @@ public class RebootRobotType extends LovelyRobotType {
      * progression (harder every 30 levels). Configured via KitsuneMaxLevel,
      * KitsuneBaseHp, etc.
      */
-    public static final NativeEntityType KITSUNE = create(EntityVariant.Kitsune);
+    public static final RobotFamily KITSUNE = create(RobotVariant.Kitsune);
 
     /**
      * NEKO robot type - agile combat specialist.
@@ -80,7 +80,7 @@ public class RebootRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> High attack and speed, default XP progression.
      * Configured via NekoMaxLevel, NekoBaseHp, etc.
      */
-    public static final NativeEntityType NEKO = create(EntityVariant.Neko);
+    public static final RobotFamily NEKO = create(RobotVariant.Neko);
 
     /**
      * VANILLA robot type - general-purpose companion.
@@ -88,7 +88,7 @@ public class RebootRobotType extends LovelyRobotType {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via VanillaMaxLevel, VanillaBaseHp, etc.
      */
-    public static final NativeEntityType VANILLA = create(EntityVariant.Vanilla);
+    public static final RobotFamily VANILLA = create(RobotVariant.Vanilla);
 
     // -- Config Reload --
 
@@ -258,4 +258,4 @@ public class RebootRobotType extends LovelyRobotType {
         //LovelyConstant.LOGGER.info("Robot type configurations reloaded from config");
     } // reloadFromConfig ()
 
-} // Class: LegacyRobotType
+} // Class: LegacyRobotFamilies

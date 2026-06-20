@@ -16,7 +16,7 @@ import software.bernie.geckolib.model.GeoModel;
  * hardcoded, allowing dynamic model/texture switching based on entity state (armed
  * vs unarmed, different color variants).
  */
-public abstract class InternalModel<T extends NativeEntity & GeoEntity> extends GeoModel<T> {
+public abstract class NativeModel<T extends NativeEntity & GeoEntity> extends GeoModel<T> {
 
     // -- Resource Resolution --
 
@@ -27,7 +27,7 @@ public abstract class InternalModel<T extends NativeEntity & GeoEntity> extends 
      * unarmed). Entity determines appropriate model, renderer just displays it.
      *
      * @param animatable robot entity being rendered
-     * @return ResourceLocation pointing to .geo.json model file
+     * @return Identifier pointing to .geo.json model file
      */
     @Override
     public ResourceLocation getModelResource(T animatable) {
@@ -41,7 +41,7 @@ public abstract class InternalModel<T extends NativeEntity & GeoEntity> extends 
      * color. Allows 16+ color variants per robot type without separate model classes.
      *
      * @param animatable robot entity being rendered
-     * @return ResourceLocation pointing to texture PNG file
+     * @return Identifier pointing to texture PNG file
      */
     @Override
     public ResourceLocation getTextureResource(T animatable) {
@@ -56,7 +56,7 @@ public abstract class InternalModel<T extends NativeEntity & GeoEntity> extends 
      * robot type.
      *
      * @param animatable robot entity being rendered
-     * @return ResourceLocation pointing to .animation.json file
+     * @return Identifier pointing to .animation.json file
      */
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
@@ -81,7 +81,7 @@ public abstract class InternalModel<T extends NativeEntity & GeoEntity> extends 
      */
     @Override
     public void setCustomAnimations(T animatable, long instanceId, AnimationState<T> event) {
-        InternalAnimation.headAnimation(this, event, "head");
+        NativeAnimation.headAnimation(this, event, "head");
     } // setCustomAnimations()
 
-} // Class: InternalModel
+} // Class: NativeModel

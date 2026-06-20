@@ -40,7 +40,7 @@ import java.util.List;
  *     .addLayer(new DynamicColorLayer<>(this, COLLAR_MASK, DynamicColorLayer::healthGradientColor));
  * }</pre>
  */
-public class InternalLayerRenderer<T extends NativeEntity & GeoEntity> extends GeoEntityRenderer<T> {
+public class NativeRenderer<T extends NativeEntity & GeoEntity> extends GeoEntityRenderer<T> {
 
     // -- Fields --
 
@@ -55,7 +55,7 @@ public class InternalLayerRenderer<T extends NativeEntity & GeoEntity> extends G
      * @param context renderer provider context
      * @param model GeoModel for entity geometry and animations
      */
-    public InternalLayerRenderer(EntityRendererProvider.Context context, GeoModel<T> model) {
+    public NativeRenderer(EntityRendererProvider.Context context, GeoModel<T> model) {
         super(context, model);
     } // Constructor: LayerRenderPipeline()
 
@@ -66,7 +66,7 @@ public class InternalLayerRenderer<T extends NativeEntity & GeoEntity> extends G
      * @param model GeoModel for entity geometry and animations
      * @param shadowRadius shadow size (0.0 = no shadow, 0.5 = default)
      */
-    public InternalLayerRenderer(EntityRendererProvider.Context context, GeoModel<T> model, float shadowRadius) {
+    public NativeRenderer(EntityRendererProvider.Context context, GeoModel<T> model, float shadowRadius) {
         super(context, model);
         this.shadowRadius = shadowRadius;
     } // Constructor: LayerRenderPipeline()
@@ -85,7 +85,7 @@ public class InternalLayerRenderer<T extends NativeEntity & GeoEntity> extends G
      * @param layer render layer to add
      * @return this renderer for method chaining
      */
-    public InternalLayerRenderer<T> addLayer(IInternalRenderLayer<T> layer) {
+    public NativeRenderer<T> addLayer(IInternalRenderLayer<T> layer) {
         renderLayers.add(layer);
         return this;
     } // addLayer()
@@ -97,7 +97,7 @@ public class InternalLayerRenderer<T extends NativeEntity & GeoEntity> extends G
      *
      * @return this renderer for method chaining
      */
-    public InternalLayerRenderer<T> clearLayers() {
+    public NativeRenderer<T> clearLayers() {
         renderLayers.clear();
         return this;
     } // clearLayers()

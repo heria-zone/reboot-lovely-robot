@@ -22,7 +22,7 @@ import java.util.List;
  * <b>Animation Profile:</b> All robot types share a single {@link AnimationProfile} instance
  * since they all use the same animation file ({@code default.animation.json}) with the same
  * five animation names. The profile is attached as a feature on each robot type via
- * {@link NativeEntityType#withFeature}. The loader-specific {@code InternalAnimation} reads
+ * {@link RobotFamily#withFeature}. The loader-specific {@code InternalAnimation} reads
  * this profile to resolve animation names instead of using hardcoded constants.
  */
 public class LovelyRobotType {
@@ -35,7 +35,7 @@ public class LovelyRobotType {
      * <b>Usage:</b> Enables iteration over all robot types for registration,
      * rendering setup, or bulk operations.
      */
-    public static final List<NativeEntityType> TYPES = new ArrayList<>();
+    public static final List<RobotFamily> TYPES = new ArrayList<>();
 
     // -- Shared Animation Profile --
 
@@ -63,7 +63,7 @@ public class LovelyRobotType {
     /**
      * Creates robot type with specified variant and combat stats.
      * <p>
-     * <b>Implementation:</b> Creates NativeEntityType, configures combat stats,
+     * <b>Implementation:</b> Creates RobotFamily, configures combat stats,
      * applies color palette, and adds to registry.
      * <p>
      * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
@@ -77,19 +77,19 @@ public class LovelyRobotType {
      * @param baseToughness amour toughness value
      * @param knockbackResistance knockback resistance (0.0 to 1.0)
      * @param moveSpeed movement speed multiplier
-     * @return configured NativeEntityType instance
+     * @return configured RobotFamily instance
      */
-    protected static NativeEntityType create(EntityVariant variant,
-                                           int maxLevel,
-                                           float maxHealth,
-                                           float baseAttack,
-                                           float attackSpeed,
-                                           float baseDefense,
-                                           float baseToughness,
-                                           float knockbackResistance,
-                                           float moveSpeed) {
+    protected static RobotFamily create(EntityVariant variant,
+                                        int maxLevel,
+                                        float maxHealth,
+                                        float baseAttack,
+                                        float attackSpeed,
+                                        float baseDefense,
+                                        float baseToughness,
+                                        float knockbackResistance,
+                                        float moveSpeed) {
         // Create robot type
-        NativeEntityType robotType = new NativeEntityType(variant.getName(), variant);
+        RobotFamily robotType = new RobotFamily(variant.getName(), variant);
 
         // Configure combat stats
         robotType.withCombatStats(maxHealth, baseAttack, attackSpeed,
@@ -115,17 +115,17 @@ public class LovelyRobotType {
     /**
      * Creates robot type with specified variant and combat stats.
      * <p>
-     * <b>Implementation:</b> Creates NativeEntityType, configures combat stats,
+     * <b>Implementation:</b> Creates RobotFamily, configures combat stats,
      * applies color palette, and adds to registry.
      * <p>
      * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
      *
      * @param variant entity variant determining resource paths
-     * @return configured NativeEntityType instance
+     * @return configured RobotFamily instance
      */
-    protected static NativeEntityType create(EntityVariant variant) {
+    protected static RobotFamily create(EntityVariant variant) {
         // Create robot type
-        NativeEntityType robotType = new NativeEntityType(variant.getName(), variant);
+        RobotFamily robotType = new RobotFamily(variant.getName(), variant);
 
         // Apply color palette
         robotType.withColorPalette(variant);
