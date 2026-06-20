@@ -33,7 +33,7 @@ import java.util.Random;
  * entities), the controller falls back to the hardcoded idle animation name to
  * prevent null pointer errors during migration.
  */
-public class InternalAnimation {
+public class RobotAnimation {
 
     // -- Controller Name Constants --
 
@@ -272,4 +272,4 @@ public class InternalAnimation {
         }
     } // tailConfigAnimation ()
 
-} // Class: InternalAnimation
+} // Class: RobotAnimation
