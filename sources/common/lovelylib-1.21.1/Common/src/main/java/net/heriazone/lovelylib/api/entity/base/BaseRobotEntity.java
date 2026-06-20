@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.api.entity.base;
 
-import net.heriazone.lovelylib.common.entity.NativeEntityType;
+import net.heriazone.lovelylib.common.entity.RobotFamily;
 import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
@@ -22,7 +22,7 @@ public abstract class BaseRobotEntity extends RobotEntity {
 
     // -- Constructor --
 
-    public BaseRobotEntity(EntityType<? extends RobotEntity> entityType, Level level, NativeEntityType nativeEntity) {
+    public BaseRobotEntity(EntityType<? extends RobotEntity> entityType, Level level, RobotFamily nativeEntity) {
         super(entityType, level, nativeEntity);
         handlePostSpawnInitialization();
     } // Constructor: BaseRobotEntity()

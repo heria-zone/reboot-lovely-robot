@@ -1977,7 +1977,7 @@ public abstract class NativeCommands {
             Object entityObj = entry.getEntity();
             if (entityObj instanceof NativeEntity robot) {
                 // Get robot type name using LovelyIdentifier translation
-                Component robotTypeName = LovelyIdentifier.getTranslation(java.util.Objects.requireNonNull(EntityVariant.byName(robot.nativeEntity.getKey())));
+                Component robotTypeName = LovelyIdentifier.getTranslation(java.util.Objects.requireNonNull(RobotVariant.byName(robot.nativeEntity.getKey())));
 
                 // Build display: [index] Type (CustomName)
                 Component display = Component.literal("[" + index + "] ");
@@ -1992,7 +1992,7 @@ public abstract class NativeCommands {
                 ctx.getSource().sendSuccess(() -> finalDisplay.copy().withStyle(ChatFormatting.WHITE), false);
             } else {
                 // For offline robots, use translation key
-                EntityVariant variant = EntityVariant.byName(entry.getRobotType().replace("entity.llovelyr.", ""));
+                RobotVariant variant = RobotVariant.byName(entry.getRobotType().replace("entity.llovelyr.", ""));
                 Component robotTypeName = variant != null
                         ? LovelyIdentifier.getTranslation(variant)
                         : Component.literal(entry.getRobotType());
@@ -2083,7 +2083,7 @@ public abstract class NativeCommands {
             Object entityObj = entry.getEntity();
             if (entityObj instanceof NativeEntity robot) {
                 // Get robot type name using LovelyIdentifier translation (same as displayExtra)
-                Component robotTypeName = LovelyIdentifier.getTranslation(java.util.Objects.requireNonNull(EntityVariant.byName(robot.nativeEntity.getKey())));
+                Component robotTypeName = LovelyIdentifier.getTranslation(java.util.Objects.requireNonNull(RobotVariant.byName(robot.nativeEntity.getKey())));
 
                 // Build display: [index] Type (CustomName) - dimension
                 // If has custom name, show: Type (CustomName), otherwise just Type
@@ -2099,7 +2099,7 @@ public abstract class NativeCommands {
                 ctx.getSource().sendSuccess(() -> finalDisplay.copy().withStyle(ChatFormatting.WHITE), false);
             } else {
                 // For offline robots, use translation key
-                EntityVariant variant = EntityVariant.byName(entry.getRobotType().replace("entity.llovelyr.", ""));
+                RobotVariant variant = RobotVariant.byName(entry.getRobotType().replace("entity.llovelyr.", ""));
                 Component robotTypeName = variant != null
                         ? LovelyIdentifier.getTranslation(variant)
                         : Component.literal(entry.getRobotType());

@@ -74,7 +74,7 @@ public class LovelyIdentifier extends InternalIdentifier {
      * @param variant entity variant to translate
      * @return translatable component for variant name
      */
-    public static MutableComponent getTranslation(EntityVariant variant) {
+    public static MutableComponent getTranslation(RobotVariant variant) {
         return switch (variant) {
             case Bunny -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY);
             case Bunny2 -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY2);

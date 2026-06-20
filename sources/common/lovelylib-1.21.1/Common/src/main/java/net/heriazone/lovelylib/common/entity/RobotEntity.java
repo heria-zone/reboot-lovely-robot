@@ -13,6 +13,7 @@ import net.heriazone.hzlib.framework.entity.data.ProtectionStats;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.heriazone.hzlib.utils.Utils;
 import net.heriazone.lovelylib.Lovely;
+import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.lovelylib.utils.EntityDataHelper;
 import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
 import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
@@ -22,7 +23,6 @@ import net.heriazone.lovelylib.api.registry.RobotRegistryEntry;
 import net.heriazone.lovelylib.api.registry.RobotRegistryManager;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
 import net.heriazone.lovelylib.common.entity.goal.*;
 import net.heriazone.lovelylib.common.entity.utils.EnchantmentProtectionCalculator;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
@@ -332,7 +332,7 @@ public abstract class RobotEntity extends NativeEntity {
      * @param world        world instance
      * @param nativeEntity robot type configuration
      */
-    public RobotEntity(EntityType<? extends TamableAnimal> entityType, Level world, NativeEntityType nativeEntity) {
+    public RobotEntity(EntityType<? extends TamableAnimal> entityType, Level world, RobotFamily nativeEntity) {
         super(entityType, world, nativeEntity);
         applyBaseAttributes();              // sets base HP/attack/speed from CombatData
         recalculateAttributes();            // scales by level using CombatLevelFeature
@@ -823,7 +823,7 @@ public abstract class RobotEntity extends NativeEntity {
         MutableComponent entityName = !Utils.getEntityCustomName(this).isEmpty()
                 ? Component.literal(Utils.getEntityCustomName(this))
                 : LovelyIdentifier.getTranslation(
-                        Objects.requireNonNull(EntityVariant.byName(nativeEntity.getKey())));
+                        Objects.requireNonNull(RobotVariant.byName(nativeEntity.getKey())));
 
         if (combatMode && isNotificationEnabled()) {
             debug = entityName.append(Component.nullToEmpty(": ").copy()
@@ -1788,7 +1788,7 @@ public abstract class RobotEntity extends NativeEntity {
     /**
      * Checks if this robot has a level system attached.
      * <p>
-     * <b>Architecture:</b> Verifies that the robot's entity type is a NativeEntityType
+     * <b>Architecture:</b> Verifies that the robot's entity type is a RobotFamily
      * with an attached LevelFeature. This check is essential before accessing level
      * system functionality to prevent ClassCastException or NullPointerException.
      * <p>
@@ -1798,14 +1798,14 @@ public abstract class RobotEntity extends NativeEntity {
      * <b>Performance:</b> Lightweight check - only performs instanceof and Optional.isPresent().
      * Safe to call frequently.
      *
-     * @return true if robot has NativeEntityType with LevelFeature attached, false otherwise
+     * @return true if robot has RobotFamily with LevelFeature attached, false otherwise
      */
     private boolean hasLevelSystem() {
-        if (!(nativeEntity instanceof NativeEntityType)) {
+        if (!(nativeEntity instanceof RobotFamily)) {
             return false;
         }
-        NativeEntityType robotType =
-                (NativeEntityType) nativeEntity;
+        RobotFamily robotType =
+                (RobotFamily) nativeEntity;
         return robotType.getFeature(LevelFeature.class).isPresent();
     } // hasLevelSystem ()
 
@@ -1816,7 +1816,7 @@ public abstract class RobotEntity extends NativeEntity {
      * without requiring repeated instanceof checks and Optional handling at call sites.
      * Centralizes the feature retrieval logic.
      * <p>
-     * <b>Safety:</b> Returns Optional.empty() if robot doesn't have NativeEntityType
+     * <b>Safety:</b> Returns Optional.empty() if robot doesn't have RobotFamily
      * or if LevelFeature is not attached. Callers should check with hasLevelSystem()
      * first or handle empty Optional appropriately.
      * <p>
@@ -1831,11 +1831,11 @@ public abstract class RobotEntity extends NativeEntity {
      * @return Optional containing LevelFeature if present, empty Optional otherwise
      */
     public java.util.Optional<LevelFeature> getLevelSystem() {
-        if (!(nativeEntity instanceof NativeEntityType)) {
+        if (!(nativeEntity instanceof RobotFamily)) {
             return java.util.Optional.empty();
         }
-        NativeEntityType robotType =
-                (NativeEntityType) nativeEntity;
+        RobotFamily robotType =
+                (RobotFamily) nativeEntity;
         return robotType.getFeature(LevelFeature.class);
     } // getLevelSystem ()
 
