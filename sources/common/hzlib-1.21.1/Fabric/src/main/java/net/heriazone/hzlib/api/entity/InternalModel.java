@@ -16,7 +16,7 @@ import software.bernie.geckolib.model.GeoModel;
  * hardcoded, allowing dynamic model/texture switching based on entity state (armed
  * vs unarmed, different color variants).
  */
-public abstract class InternalModel<T extends InternalEntity & GeoEntity> extends GeoModel<T> {
+public abstract class InternalModel<T extends NativeEntity & GeoEntity> extends GeoModel<T> {
 
     // -- Resource Resolution --
 

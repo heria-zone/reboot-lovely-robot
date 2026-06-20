@@ -2,7 +2,7 @@ package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -22,9 +22,9 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
  * <b>Performance:</b> Each layer adds one render pass. Keep layer count reasonable
  * (typically 2-4 layers). Layers should cache expensive calculations.
  *
- * @param <T> entity type extending InternalEntity and GeoEntity
+ * @param <T> entity type extending NativeEntity and GeoEntity
  */
-public interface IInternalRenderLayer<T extends InternalEntity & GeoEntity> {
+public interface IInternalRenderLayer<T extends NativeEntity & GeoEntity> {
 
     /**
      * Determines if this layer should render for the given entity state.
