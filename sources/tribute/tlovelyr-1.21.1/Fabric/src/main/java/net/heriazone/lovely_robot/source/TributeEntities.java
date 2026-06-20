@@ -3,14 +3,14 @@ package net.heriazone.lovely_robot.source;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.lovely_robot.TributeIdentifier;
 import net.heriazone.lovelylib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
-import net.heriazone.lovelylib.source.tribute.TributeRobotType;
+import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityDimensions;
@@ -32,10 +32,10 @@ public class TributeEntities {
 
     // -- Entity Type Definitions --
 
-    public static final EntityType<NativeRobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, TributeRobotType.BUNNY);
-    public static final EntityType<NativeRobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, TributeRobotType.BUNNY2);
-    public static final EntityType<NativeRobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, TributeRobotType.HONEY);
-    public static final EntityType<NativeRobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotType.VANILLA);
+    public static final EntityType<NativeRobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, TributeRobotFamilies.BUNNY);
+    public static final EntityType<NativeRobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, TributeRobotFamilies.BUNNY2);
+    public static final EntityType<NativeRobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, TributeRobotFamilies.HONEY);
+    public static final EntityType<NativeRobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotFamilies.VANILLA);
 
     // -- Registration Methods --
 
@@ -49,7 +49,7 @@ public class TributeEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static EntityType<NativeRobotEntity> registerRobot(String name, NativeEntityType robotType) {
+    private static EntityType<NativeRobotEntity> registerRobot(String name, RobotFamily robotType) {
         return Registry.register(
                 BuiltInRegistries.ENTITY_TYPE,
                 TributeIdentifier.getId(name),
@@ -63,10 +63,10 @@ public class TributeEntities {
      * Registers entity attributes.
      */
     public static void register() {
-        FabricDefaultAttributeRegistry.register(BUNNY,   InternalEntity.createAttributes(TributeRobotType.BUNNY));
-        FabricDefaultAttributeRegistry.register(BUNNY2,  InternalEntity.createAttributes(TributeRobotType.BUNNY2));
-        FabricDefaultAttributeRegistry.register(HONEY,   InternalEntity.createAttributes(TributeRobotType.HONEY));
-        FabricDefaultAttributeRegistry.register(VANILLA, InternalEntity.createAttributes(TributeRobotType.VANILLA));
+        FabricDefaultAttributeRegistry.register(BUNNY,   NativeEntityFamily.createAttributes(TributeRobotFamilies.BUNNY));
+        FabricDefaultAttributeRegistry.register(BUNNY2,  NativeEntityFamily.createAttributes(TributeRobotFamilies.BUNNY2));
+        FabricDefaultAttributeRegistry.register(HONEY,   NativeEntityFamily.createAttributes(TributeRobotFamilies.HONEY));
+        FabricDefaultAttributeRegistry.register(VANILLA, NativeEntityFamily.createAttributes(TributeRobotFamilies.VANILLA));
     } // register ()
 
     /**
@@ -105,22 +105,22 @@ public class TributeEntities {
      */
     public static void registerNativeRobotFeature() {
         // BUNNY
-        TributeRobotType.BUNNY
+        TributeRobotFamilies.BUNNY
                 .withFeature(PickupFeature.class, new PickupFeature(TributeItems.BUNNY_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(TributeItems.ROBOT_CORE));
 
         // BUNNY2
-        TributeRobotType.BUNNY2
+        TributeRobotFamilies.BUNNY2
                 .withFeature(PickupFeature.class, new PickupFeature(TributeItems.BUNNY2_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(TributeItems.ROBOT_CORE));
 
         // HONEY
-        TributeRobotType.HONEY
+        TributeRobotFamilies.HONEY
                 .withFeature(PickupFeature.class, new PickupFeature(TributeItems.HONEY_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(TributeItems.ROBOT_CORE));
 
         // VANILLA
-        TributeRobotType.VANILLA
+        TributeRobotFamilies.VANILLA
                 .withFeature(PickupFeature.class, new PickupFeature(TributeItems.VANILLA_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(TributeItems.ROBOT_CORE));
     } // registerNativeRobotFeature ()

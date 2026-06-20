@@ -1,14 +1,14 @@
 package net.heriazone.lovely_robot.source;
 
+import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.lovely_robot.Tribute;
 import net.heriazone.lovely_robot.TributeIdentifier;
 import net.heriazone.lovelylib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.hzlib.api.entity.InternalEntity;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
-import net.heriazone.lovelylib.source.tribute.TributeRobotType;
+import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -34,10 +34,10 @@ public class TributeEntities {
 
     // -- Entity Type Definitions --
 
-    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, TributeRobotType.BUNNY);
-    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, TributeRobotType.BUNNY2);
-    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, TributeRobotType.HONEY);
-    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotType.VANILLA);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, TributeRobotFamilies.BUNNY);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, TributeRobotFamilies.BUNNY2);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, TributeRobotFamilies.HONEY);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotFamilies.VANILLA);
 
     // -- Registration Methods --
 
@@ -54,7 +54,7 @@ public class TributeEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> registerRobot(String name, NativeEntityType robotType) {
+    private static DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> registerRobot(String name, RobotFamily robotType) {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
                         (EntityType<NativeRobotEntity> type, Level level) -> new NativeRobotEntity(type, level, robotType), MobCategory.CREATURE)
                 .sized(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT)
@@ -80,10 +80,10 @@ public class TributeEntities {
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
-        event.put(BUNNY.get(),   InternalEntity.createAttributes(TributeRobotType.BUNNY));
-        event.put(BUNNY2.get(),  InternalEntity.createAttributes(TributeRobotType.BUNNY2));
-        event.put(HONEY.get(),   InternalEntity.createAttributes(TributeRobotType.HONEY));
-        event.put(VANILLA.get(), InternalEntity.createAttributes(TributeRobotType.VANILLA));
+        event.put(BUNNY.get(),   NativeEntityFamily.createAttributes(TributeRobotFamilies.BUNNY));
+        event.put(BUNNY2.get(),  NativeEntityFamily.createAttributes(TributeRobotFamilies.BUNNY2));
+        event.put(HONEY.get(),   NativeEntityFamily.createAttributes(TributeRobotFamilies.HONEY));
+        event.put(VANILLA.get(), NativeEntityFamily.createAttributes(TributeRobotFamilies.VANILLA));
     } // registerAttribute()
 
     /**
@@ -121,22 +121,22 @@ public class TributeEntities {
      */
     public static void registerNativeRobotFeature() {
         // BUNNY
-        TributeRobotType.BUNNY
+        TributeRobotFamilies.BUNNY
                 .withFeature(PickupFeature.class, new PickupFeature(TributeItems.BUNNY_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(TributeItems.ROBOT_CORE.get()));
 
         // BUNNY2
-        TributeRobotType.BUNNY2
+        TributeRobotFamilies.BUNNY2
                 .withFeature(PickupFeature.class, new PickupFeature(TributeItems.BUNNY2_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(TributeItems.ROBOT_CORE.get()));
 
         // HONEY
-        TributeRobotType.HONEY
+        TributeRobotFamilies.HONEY
                 .withFeature(PickupFeature.class, new PickupFeature(TributeItems.HONEY_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(TributeItems.ROBOT_CORE.get()));
 
         // VANILLA
-        TributeRobotType.VANILLA
+        TributeRobotFamilies.VANILLA
                 .withFeature(PickupFeature.class, new PickupFeature(TributeItems.VANILLA_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(TributeItems.ROBOT_CORE.get()));
     } // registerNativeRobotFeature ()

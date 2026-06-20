@@ -1,7 +1,7 @@
 package net.heriazone.lovely_robot;
 
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.common.entity.enums.EntityVariant;
+import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.framework.common.InternalIdentifier;
 import net.minecraft.network.chat.MutableComponent;
@@ -63,7 +63,7 @@ public class TributeIdentifier extends InternalIdentifier {
      * @param variant entity variant to translate
      * @return translatable component for variant name
      */
-    public static MutableComponent getTranslation(EntityVariant variant) {
+    public static MutableComponent getTranslation(RobotVariant variant) {
         return switch (variant) {
             case Bunny -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY);
             case Bunny2 -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY2);

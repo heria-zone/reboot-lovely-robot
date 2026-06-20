@@ -3,7 +3,7 @@ package net.heriazone.lovely_robot;
 import net.heriazone.lovely_robot.source.*;
 import net.heriazone.hzlib.api.services.ForgeServices;
 import net.heriazone.hzlib.api.services.Services;
-import net.heriazone.lovelylib.source.tribute.TributeRobotType;
+import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -46,7 +46,7 @@ public class LovelyTribute {
         Tribute.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
 
         TributeConfigs.register(context);
-        TributeConfigs.onLoadCallback(TributeRobotType::reloadFromConfig);
+        TributeConfigs.onLoadCallback(TributeRobotFamilies::reloadFromConfig);
 
         //LovelyBlocks.register(events);
         TributeItems.register(events);

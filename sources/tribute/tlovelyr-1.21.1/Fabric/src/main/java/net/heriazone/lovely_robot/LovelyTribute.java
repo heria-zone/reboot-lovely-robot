@@ -6,7 +6,7 @@ import net.heriazone.lovely_robot.source.*;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
 import net.heriazone.hzlib.api.services.FabricServices;
 import net.heriazone.hzlib.api.services.Services;
-import net.heriazone.lovelylib.source.tribute.TributeRobotType;
+import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
 
 /**
  * Main mod class for Tribute variant (Fabric loader).
@@ -52,7 +52,7 @@ public class LovelyTribute implements ModInitializer, ClientModInitializer {
 
         // Register Fabric-specific features here
         TributeConfigs.register();
-        TributeRobotType.reloadFromConfig();
+        TributeRobotFamilies.reloadFromConfig();
         TributeEntities.registerNativeRobotFeature();
         TributeGroups.register();
         TributeItems.register();

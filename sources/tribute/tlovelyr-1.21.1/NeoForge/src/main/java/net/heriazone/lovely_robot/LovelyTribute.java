@@ -3,7 +3,7 @@ package net.heriazone.lovely_robot;
 import net.heriazone.lovely_robot.source.*;
 import net.heriazone.hzlib.api.services.NeoForgeServices;
 import net.heriazone.hzlib.api.services.Services;
-import net.heriazone.lovelylib.source.tribute.TributeRobotType;
+import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -59,7 +59,7 @@ public class LovelyTribute {
 
         // Register configuration system
         TributeConfigs.register(modContainer);
-        TributeConfigs.onLoadCallback(TributeRobotType::reloadFromConfig);
+        TributeConfigs.onLoadCallback(TributeRobotFamilies::reloadFromConfig);
 
         // Register deferred registers
         TributeItems.register(modEventBus);
