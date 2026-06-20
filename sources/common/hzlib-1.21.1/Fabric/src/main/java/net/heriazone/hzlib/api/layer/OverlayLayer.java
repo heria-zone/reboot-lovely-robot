@@ -45,7 +45,7 @@ public class OverlayLayer<T extends InternalEntity & GeoEntity> implements IInte
     private final GeoRenderer<T> renderer;
     private final OverlaySlot slot;
 
-    /** Cached texture for ALWAYS slots — resolved once at construction. */
+    /** Cached texture for ALWAYS slots — resolved once at construction (static path only). */
     private final ResourceLocation alwaysTexture;
 
     // -- Constructor --
@@ -60,10 +60,16 @@ public class OverlayLayer<T extends InternalEntity & GeoEntity> implements IInte
         this.renderer = renderer;
         this.slot = slot;
 
-        // Pre-resolve texture for ALWAYS slots so we don't parse the string every frame.
+        // Pre-resolve texture for ALWAYS slots with a static (non-dynamic) path.
+        // Dynamic ALWAYS slots (path depends on entity) must be resolved per-frame — no cache.
         if (slot.getMode() == SlotMode.ALWAYS && !slot.getPool().isEmpty()) {
-            String path = slot.getPool().get(0).getTexturePath();
-            this.alwaysTexture = path.isEmpty() ? null : ResourceLocation.parse(path);
+            OverlaySlot.Entry e = slot.getPool().get(0);
+            if (!e.hasDynamicPath()) {
+                String path = e.getTexturePath();
+                this.alwaysTexture = path.isEmpty() ? null : ResourceLocation.parse(path);
+            } else {
+                this.alwaysTexture = null; // resolved per-frame via entity
+            }
         } else {
             this.alwaysTexture = null;
         }
@@ -73,7 +79,12 @@ public class OverlayLayer<T extends InternalEntity & GeoEntity> implements IInte
 
     @Override
     public boolean shouldRender(T entity, float partialTick) {
-        // Resolve the active texture path without rendering — return false if empty.
+        // For RANDOM/INTERACTIVE slots, check the render condition gate first
+        // (e.g. hat slot only shows in October — the inMonth check lives here).
+        if ((slot.getMode() == SlotMode.RANDOM || slot.getMode() == SlotMode.INTERACTIVE)
+                && !slot.testRenderCondition(entity)) {
+            return false;
+        }
         return !resolveTexturePath(entity).isEmpty();
     } // shouldRender ()
 
@@ -87,21 +98,40 @@ public class OverlayLayer<T extends InternalEntity & GeoEntity> implements IInte
         if (path.isEmpty()) return;
 
         ResourceLocation texture = ResourceLocation.parse(path);
-        int color = resolveColor(entity, path);
 
-        RenderType overlayRenderType = RenderType.armorCutoutNoCull(texture);
-        renderer.reRender(
-                bakedModel,
-                poseStack,
-                bufferSource,
-                entity,
-                overlayRenderType,
-                bufferSource.getBuffer(overlayRenderType),
-                partialTick,
-                packedLight,
-                OverlayTexture.NO_OVERLAY,
-                color
-        );
+        if (slot.isEmissive()) {
+            // Emissive path: full-brightness rendering, unaffected by world light.
+            // Equivalent to EmissiveLayer — uses RenderType.eyes + max packed light.
+            RenderType emissiveRenderType = RenderType.eyes(texture);
+            renderer.reRender(
+                    bakedModel,
+                    poseStack,
+                    bufferSource,
+                    entity,
+                    emissiveRenderType,
+                    bufferSource.getBuffer(emissiveRenderType),
+                    partialTick,
+                    15728880, // 0xF000F0 — maximum packed light (full brightness)
+                    OverlayTexture.NO_OVERLAY,
+                    -1 // white tint — no colour modification
+            );
+        } else {
+            // Standard overlay path: lit by world lighting, optional colour tint.
+            int color = resolveColor(entity, path);
+            RenderType overlayRenderType = RenderType.armorCutoutNoCull(texture);
+            renderer.reRender(
+                    bakedModel,
+                    poseStack,
+                    bufferSource,
+                    entity,
+                    overlayRenderType,
+                    bufferSource.getBuffer(overlayRenderType),
+                    partialTick,
+                    packedLight,
+                    OverlayTexture.NO_OVERLAY,
+                    color
+            );
+        }
     } // render ()
 
     // -- Private helpers --
@@ -112,19 +142,39 @@ public class OverlayLayer<T extends InternalEntity & GeoEntity> implements IInte
      */
     private String resolveTexturePath(T entity) {
         return switch (slot.getMode()) {
-            case ALWAYS -> alwaysTexture != null ? alwaysTexture.toString() : "";
+            case ALWAYS -> {
+                // Static ALWAYS: use cached ResourceLocation; dynamic ALWAYS: call path resolver.
+                if (alwaysTexture != null) yield alwaysTexture.toString();
+                if (!slot.getPool().isEmpty()) yield slot.getPool().get(0).getTexturePath(entity);
+                yield "";
+            }
             case CONDITIONAL -> slot.resolveConditional(entity);
-            case RANDOM, INTERACTIVE -> entity.getOverlaySlot(slot.getKey());
+            case RANDOM, INTERACTIVE -> {
+                // Stage key stored in SynchedEntityData — look up the matching entry to get
+                // the dynamic or static render-time path.
+                String stageKey = entity.getOverlaySlot(slot.getKey());
+                if (stageKey == null || stageKey.isEmpty()) yield "";
+                OverlaySlot.Entry entry = slot.findEntry(stageKey);
+                if (entry == null) yield stageKey; // fallback: treat key as direct path
+                yield entry.getTexturePath(entity);  // dynamic path resolver or fixed path
+            }
         };
     } // resolveTexturePath ()
 
     /**
      * Returns the ARGB tint color for the active texture path.
-     * Looks up the matching {@link OverlaySlot.Entry} and calls its color provider if present.
+     * For RANDOM/INTERACTIVE slots, looks up the entry by stage key (SynchedEntityData value)
+     * so the color provider is found even when the rendered path is dynamic.
      * Falls back to {@code -1} (white = no tint) for entries without a provider.
      */
     private int resolveColor(T entity, String activePath) {
-        OverlaySlot.Entry entry = slot.findEntry(activePath);
+        OverlaySlot.Entry entry = switch (slot.getMode()) {
+            case RANDOM, INTERACTIVE -> {
+                String stageKey = entity.getOverlaySlot(slot.getKey());
+                yield (stageKey != null && !stageKey.isEmpty()) ? slot.findEntry(stageKey) : null;
+            }
+            default -> slot.findEntry(activePath);
+        };
         if (entry == null || !entry.hasColor()) return -1; // -1 = 0xFFFFFFFF white
         return entry.getColor(entity);
     } // resolveColor ()
