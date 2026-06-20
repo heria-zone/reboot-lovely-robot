@@ -1,12 +1,12 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.api.entity.data.ExperienceTracker;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.hzlib.api.entity.features.PickupFeature;
-import net.heriazone.hzlib.api.entity.internal.InternalLogic;
-import net.heriazone.hzlib.api.entity.internal.InternalParticle;
+import net.heriazone.hzlib.api.entity.internal.EntityLogic;
+import net.heriazone.hzlib.api.entity.internal.EntityParticles;
 import net.heriazone.hzlib.framework.entity.data.CombatLevelStats;
 import net.heriazone.hzlib.framework.entity.data.EnchantmentStats;
 import net.heriazone.hzlib.framework.entity.data.ProtectionStats;
@@ -68,8 +68,8 @@ import static net.heriazone.hzlib.utils.Utils.invertBoolean;
 /**
  * <p>Robot-specific entity tier — level progression, protection, enchantments, and registry.<p>
  * <p>
- * <b>Architecture:</b> Extends {@link InternalEntity} with all robot-specific fields.
- * Sits between the shared {@link InternalEntity} base and lovelylib's {@code RobotEntity}
+ * <b>Architecture:</b> Extends {@link NativeEntity} with all robot-specific fields.
+ * Sits between the shared {@link NativeEntity} base and lovelylib's {@code RobotEntity}
  * (renamed from {@code LovelyRobotEntity}) which adds AI goals and robot behaviors.
  * <p>
  * <b>Field ownership:</b>
@@ -92,7 +92,7 @@ import static net.heriazone.hzlib.utils.Utils.invertBoolean;
  * <b>Thread Safety:</b> {@code EntityDataAccessor} fields are synchronized automatically.
  * Stat object mutations should occur on the server thread.
  */
-public abstract class RobotEntity extends InternalEntity {
+public abstract class RobotEntity extends NativeEntity {
 
     // -- Variables --
 
@@ -303,12 +303,12 @@ public abstract class RobotEntity extends InternalEntity {
 
     // NOTIFICATION — delegates to InternalEntity.isNotificationEnabled()
 
-    /** @deprecated Use {@link #isNotificationEnabled()} from InternalEntity instead. */
+    /** @deprecated Use {@link #isNotificationEnabled()} from NativeEntity instead. */
     public boolean getNotification() {
         return isNotificationEnabled();
     } // getNotification ()
 
-    /** @deprecated Use {@link #setNotificationEnabled(boolean)} from InternalEntity instead. */
+    /** @deprecated Use {@link #setNotificationEnabled(boolean)} from NativeEntity instead. */
     public void setNotification(boolean value) {
         setNotificationEnabled(value);
     } // setNotification ()
@@ -333,8 +333,7 @@ public abstract class RobotEntity extends InternalEntity {
      * @param nativeEntity robot type configuration
      */
     public RobotEntity(EntityType<? extends TamableAnimal> entityType, Level world, NativeEntityType nativeEntity) {
-        super(entityType, world);
-        this.nativeEntity = nativeEntity;
+        super(entityType, world, nativeEntity);
         applyBaseAttributes();              // sets base HP/attack/speed from CombatData
         recalculateAttributes();            // scales by level using CombatLevelFeature
         setHealth(getMaxHealth());          // initialize health to max after all attributes set
@@ -619,7 +618,7 @@ public abstract class RobotEntity extends InternalEntity {
             combatStats.setAttack(attack);
             combatStats.setDefense(defense);
 
-            InternalLogic.handleLevel(this, maxHp, attack, armor, armorToughness);
+            EntityLogic.handleLevel(this, maxHp, attack, armor, armorToughness);
             this.setHealth(maxHp);
             combatStats.setCurrentHp((int) this.getHealth());
         }
@@ -733,7 +732,7 @@ public abstract class RobotEntity extends InternalEntity {
      * base ownership/registration flow.
      * <p>
      * <b>Architecture:</b> Robot-specific taming feedback lives here, not in
-     * {@link net.heriazone.hzlib.api.entity.InternalEntity#handleTame} — that base
+     * {@link net.heriazone.hzlib.api.entity.NativeEntity#handleTame} — that base
      * method is intentionally silent so monster entities don't receive robot effects.
      * <p>
      * <b>Sound:</b> Volume scales with entity dimensions to feel proportional
@@ -744,7 +743,7 @@ public abstract class RobotEntity extends InternalEntity {
     @Override
     public void handleTame(Player player) {
         // Poof particles — robot materialization effect
-        InternalParticle.Poof(this);
+        EntityParticles.Poof(this);
 
         // Totem sound — volume scales with entity size
         float volume = (float) Math.max(0.5F, Math.min(2.0F, this.getBbWidth() * this.getBbHeight()));
@@ -764,7 +763,7 @@ public abstract class RobotEntity extends InternalEntity {
      */
     @Override
     protected void displayTameMessage(Player player) {
-        InternalLogic.displayInfo(this,
+        EntityLogic.displayInfo(this,
                 LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_OWNER)
                         .append(Component.literal(": " + player.getName().getString())),
                 true);
@@ -787,10 +786,10 @@ public abstract class RobotEntity extends InternalEntity {
                 .append(Component.nullToEmpty(": ").copy()
                         .append(LovelyIdentifier.getMessageTranslation(message)));
         if (!customName.isEmpty()) {
-            InternalLogic.displayInfo(this,
+            EntityLogic.displayInfo(this,
                     Component.nullToEmpty(customName + " | ").copy().append(content), true);
         } else {
-            InternalLogic.displayInfo(this, content, true);
+            EntityLogic.displayInfo(this, content, true);
         }
     } // displayNotification ()
 
@@ -807,10 +806,10 @@ public abstract class RobotEntity extends InternalEntity {
         String customName = Utils.getEntityCustomName(this);
         MutableComponent content = LovelyIdentifier.getMessageTranslation(message);
         if (!customName.isEmpty()) {
-            InternalLogic.displayInfo(this,
+            EntityLogic.displayInfo(this,
                     Component.nullToEmpty(customName + " | ").copy().append(content), true);
         } else {
-            InternalLogic.displayInfo(this, content, true);
+            EntityLogic.displayInfo(this, content, true);
         }
     } // displayNotification ()
 
@@ -841,7 +840,7 @@ public abstract class RobotEntity extends InternalEntity {
             debug = debug.copy().append(this.getHealth() < 10 ? "| 0" + this.getHealth() : "| " + (int) this.getHealth());
         }
 
-        if (debug != null) InternalLogic.displayInfo(this, debug, true);
+        if (debug != null) EntityLogic.displayInfo(this, debug, true);
     } // displayExtra ()
 
     // -- NBT Serialization --
@@ -1452,7 +1451,7 @@ public abstract class RobotEntity extends InternalEntity {
 
     /**
      * Implements the robot interaction dispatch — the entry point called by
-     * {@link net.heriazone.hzlib.api.entity.InternalEntity#mobInteract}.
+     * {@link net.heriazone.hzlib.api.entity.NativeEntity#mobInteract}.
      * <p>
      * <b>Dispatch logic:</b>
      * <ul>
@@ -1886,7 +1885,7 @@ public abstract class RobotEntity extends InternalEntity {
                 } catch (Exception ignored) {}
 
                 // Spawn level-up particle effects (villager trade refresh particles)
-                InternalParticle.HappyVillager(this);
+                EntityParticles.HappyVillager(this);
 
                 // Play level-up sound effect (player experience level-up sound) - positional at robot location
                 this.level().playSound(
@@ -1997,25 +1996,25 @@ public abstract class RobotEntity extends InternalEntity {
 
     public void displayGeneralMessage(boolean canShow, boolean showLevelUp) {
         if(!canShow) return;
-        InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR)), false);
-        if(showLevelUp) InternalLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LEVEL_UP)), false);
-        if(this.getCustomName() != null) InternalLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.getKey()).append(": " + this.getCustomName().getString()), false);
-        else InternalLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.getKey()), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LEVEL).append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
-        getLevelSystem().ifPresent(feature -> InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_EXPERIENCE).append(": " + this.getExp()                 + "/" + feature.getExpForLevel(this.getCurrentLevel())), false));
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_HEALTH).append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_ATTACK).append(": " + this.getAttackDamage()), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_DEFENCE).append(": " + this.getArmorLevel()), false);
+        EntityLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR)), false);
+        if(showLevelUp) EntityLogic.displayInfo(this, (LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LEVEL_UP)), false);
+        if(this.getCustomName() != null) EntityLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.getKey()).append(": " + this.getCustomName().getString()), false);
+        else EntityLogic.displayInfo(this, LovelyIdentifier.getVariantTranslation(nativeEntity.getKey()), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LEVEL).append(": " + this.getCurrentLevel()             + "/" + this.getMaxLevel()), false);
+        getLevelSystem().ifPresent(feature -> EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_EXPERIENCE).append(": " + this.getExp()                 + "/" + feature.getExpForLevel(this.getCurrentLevel())), false));
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_HEALTH).append(": " + (int)Math.floor(this.getHealth()) + "/" + (int)this.getMaxHealth()), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_ATTACK).append(": " + this.getAttackDamage()), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_DEFENCE).append(": " + this.getArmorLevel()), false);
     } // displayGeneralMessage ()
 
     public void displayEnchantmentMessage() {
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_ENCHANTMENT), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LOOTING).append(": " + this.getLooting()                            + "/" + SharedConfigs.Common.MaxLootEnchantment), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_FIRE_PROTECTION).append(": " + this.getFireProtection()             + "/" + SharedConfigs.Common.ProtectionLimitFire), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_FALL_PROTECTION).append(": " + this.getFallProtection()             + "/" + SharedConfigs.Common.ProtectionLimitFall), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BLAST_PROTECTION).append(": " + this.getBlastProtection()           + "/" + SharedConfigs.Common.ProtectionLimitBlast), false);
-        InternalLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_PROJECTILE_PROTECTION).append(": " + this.getProjectileProtection() + "/" + SharedConfigs.Common.ProtectionLimitProjectile), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BAR), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_ENCHANTMENT), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_LOOTING).append(": " + this.getLooting()                            + "/" + SharedConfigs.Common.MaxLootEnchantment), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_FIRE_PROTECTION).append(": " + this.getFireProtection()             + "/" + SharedConfigs.Common.ProtectionLimitFire), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_FALL_PROTECTION).append(": " + this.getFallProtection()             + "/" + SharedConfigs.Common.ProtectionLimitFall), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_BLAST_PROTECTION).append(": " + this.getBlastProtection()           + "/" + SharedConfigs.Common.ProtectionLimitBlast), false);
+        EntityLogic.displayInfo(this, LovelyIdentifier.getMessageTranslation(LovelyConstant.MSG_PROJECTILE_PROTECTION).append(": " + this.getProjectileProtection() + "/" + SharedConfigs.Common.ProtectionLimitProjectile), false);
     } // displayEnchantmentMessage ()
 
     /**
@@ -2175,7 +2174,7 @@ public abstract class RobotEntity extends InternalEntity {
         }
 
         // Spawn particle effects (POOF particles)
-        InternalParticle.Poof(this);
+        EntityParticles.Poof(this);
 
         // Play sound effect
         this.level().playSound(
@@ -2321,7 +2320,7 @@ public abstract class RobotEntity extends InternalEntity {
         // Check if the entire stack was added (stack should be empty)
         if (added && coreStack.isEmpty()) {
             // Success - spawn particles and send message
-            InternalParticle.HappyVillager(this);
+            EntityParticles.HappyVillager(this);
             playRetrievalSound(owner);
 
             String robotName = getEntityName();

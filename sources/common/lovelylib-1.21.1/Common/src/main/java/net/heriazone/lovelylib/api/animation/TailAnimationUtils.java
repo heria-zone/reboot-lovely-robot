@@ -2,7 +2,7 @@ package net.heriazone.lovelylib.api.animation;
 
 import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.heriazone.lovelylib.common.entity.NativeEntityType;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 
 public class TailAnimationUtils {
 
@@ -114,7 +114,7 @@ public class TailAnimationUtils {
      * @param event animation state (unused but required by signature)
      * @param <T> entity type extending InternalEntity
      */
-    public static <T extends InternalEntity> void configureTailVisibility(RobotEntity entity, Object renderer, Object event) {
+    public static <T extends NativeEntity> void configureTailVisibility(RobotEntity entity, Object renderer, Object event) {
         try {
             // Calculate tail visibility
             TailVisibilityConfig config = calculateTailVisibility(entity);

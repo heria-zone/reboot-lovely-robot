@@ -13,7 +13,7 @@ import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -640,7 +640,7 @@ public abstract class NativeCommands {
                     Object entityObj = entry.getEntity();
 
                     String robotInfo;
-                    if (entityObj instanceof InternalEntity robot && robot.hasCustomName()) {
+                    if (entityObj instanceof NativeEntity robot && robot.hasCustomName()) {
                         robotInfo = robot.getCustomName().getString();
                     } else {
                         robotInfo = entry.getRobotType().replace("entity.llovelyr.", "");
@@ -880,7 +880,7 @@ public abstract class NativeCommands {
                     Object entityObj = entry.getEntity();
 
                     String robotInfo;
-                    if (entityObj instanceof InternalEntity robot && robot.hasCustomName()) {
+                    if (entityObj instanceof NativeEntity robot && robot.hasCustomName()) {
                         robotInfo = robot.getCustomName().getString();
                     } else {
                         robotInfo = entry.getRobotType().replace("entity.llovelyr.", "");
@@ -1975,7 +1975,7 @@ public abstract class NativeCommands {
             final int index = i;
 
             Object entityObj = entry.getEntity();
-            if (entityObj instanceof InternalEntity robot) {
+            if (entityObj instanceof NativeEntity robot) {
                 // Get robot type name using LovelyIdentifier translation
                 Component robotTypeName = LovelyIdentifier.getTranslation(java.util.Objects.requireNonNull(EntityVariant.byName(robot.nativeEntity.getKey())));
 
@@ -2081,7 +2081,7 @@ public abstract class NativeCommands {
             final int index = i;
 
             Object entityObj = entry.getEntity();
-            if (entityObj instanceof InternalEntity robot) {
+            if (entityObj instanceof NativeEntity robot) {
                 // Get robot type name using LovelyIdentifier translation (same as displayExtra)
                 Component robotTypeName = LovelyIdentifier.getTranslation(java.util.Objects.requireNonNull(EntityVariant.byName(robot.nativeEntity.getKey())));
 
@@ -2160,7 +2160,7 @@ public abstract class NativeCommands {
      * @param player player performing raycast
      * @return robot entity or null if none found
      */
-    public static InternalEntity findEntityInFront(Player player) {
+    public static NativeEntity findEntityInFront(Player player) {
         Vec3 eyePos = player.getEyePosition();
         Vec3 lookVec = player.getViewVector(1.0F);
         Vec3 endPos = eyePos.add(lookVec.scale(5.0));
@@ -2168,11 +2168,11 @@ public abstract class NativeCommands {
         AABB searchBox = new AABB(eyePos, endPos).inflate(1.0);
         List<Entity> entities = player.level().getEntities(player, searchBox);
 
-        InternalEntity closestRobot = null;
+        NativeEntity closestRobot = null;
         double closestDistance = Double.MAX_VALUE;
 
         for (Entity entity : entities) {
-            if (entity instanceof InternalEntity robot) {
+            if (entity instanceof NativeEntity robot) {
                 Optional<Vec3> hit = entity.getBoundingBox().clip(eyePos, endPos);
                 if (hit.isPresent()) {
                     double distance = eyePos.distanceTo(hit.get());

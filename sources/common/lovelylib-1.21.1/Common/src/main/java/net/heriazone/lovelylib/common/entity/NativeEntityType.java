@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.hzlib.api.entity.InternalEntityType;
+import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
@@ -21,7 +21,7 @@ import java.util.Random;
 /**
  * <p>Robot-specific entity type with 16-color palette and level system integration.<p>
  * <p>
- * <b>Architecture:</b> Extends HZLib's {@link InternalEntityType} to provide robot-specific
+ * <b>Architecture:</b> Extends HZLib's {@link NativeEntityFamily} to provide robot-specific
  * functionality including color palette management and automatic {@link LevelFeature}
  * attachment. Bridges the framework layer (pure Java) with Minecraft's resource system.
  * <p>
@@ -42,7 +42,7 @@ import java.util.Random;
  * to {@code TextureVariant} (string) on first load in
  * {@code InternalEntity.readAdditionalSaveData()}.
  */
-public class NativeEntityType extends InternalEntityType<NativeEntityType> {
+public class NativeEntityType extends NativeEntityFamily<NativeEntityType> {
 
     // -- Fields --
 
