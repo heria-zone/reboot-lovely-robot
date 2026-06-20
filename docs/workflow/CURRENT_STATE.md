@@ -1885,7 +1885,7 @@ This is the reference implementation for the stateless path. Future robot types 
 
 **Location**: `sources/common/hzlib-1.21.1/Common/src/main/java/net/heriazone/hzlib/api/entity/features/SizeVariantFeature.java`
 
-Carries per-size configuration for entities with size-based appearance variants. The entity reads its `MODEL_VARIANT` key and calls `getDimensionsForPose(sizeKey, pose)` for dynamic hitboxes.
+Carries per-size configuration for entities with size-based entity appearances. The entity reads its `MODEL_VARIANT` key and calls `getDimensionsForPose(sizeKey, pose)` for dynamic hitboxes.
 
 **`SizeConfig` fields**: model key, scale factor, `Map<Pose, EntityDimensions>`, health/attack/speed/armor multipliers, knockback resistance.
 
@@ -1911,7 +1911,7 @@ Override for context-aware selection:
 
 **Before**: 9 static `GourdragoraType` instances (3 colors × 3 sizes), 9 entity type registrations.
 
-**After**: 3 Entity Variant instances (GOLDEN, LUMINA, JACKO), 3 entity type registrations. Size is an Appearance Variant managed by `SizeVariantFeature`.
+**After**: 3 Entity Variant instances (GOLDEN, LUMINA, JACKO), 3 entity type registrations. Size is an Entity Appearance managed by `SizeVariantFeature`.
 
 | Entity Variant | Taming Items | Spawn |
 |---|---|---|

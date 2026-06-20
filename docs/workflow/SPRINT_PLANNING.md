@@ -1,7 +1,7 @@
 # Sprint Planning - LovelyRobot Project (Updated)
 
 **Status**: Active
-**Last Updated**: 2025-12-11
+**Last Updated**: 2026-06-20
 **Project**: LovelyRobot Multi-Variant Minecraft Mod Ecosystem
 **Related Documents**:
 - [CURRENT_STATE.md](CURRENT_STATE.md) - Current implementation status
@@ -85,16 +85,22 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 - Legacy refactored to use Lovely Lib
 - Multi-loader testing (Forge + Fabric + NeoForge)
 
-#### Sprint 09: HZ Lib Extraction & Optimization
-**Dates**: 2026-02-03 to 2026-02-16  
-**Story Points**: 18  
-**Theme**: Extract general utilities and publish libraries  
+#### Sprint 09: Ecosystem Terminology & Rename System
+**Dates**: 2026-06-20 to 2026-07-04  
+**Story Points**: 44  
+**Theme**: Execute ADR_018 — rename all `Internal*` classes across the ecosystem to align with canonical Family / Variant / Appearance terminology  
+**Source ADR**: ADR_018  
+**Task File**: `docs/development/sprints/active/SPRINT_09_TASK.md`  
 **Major Deliverables**:
-- HZ Lib 1.0.0 created (math, NBT, validation utilities)
-- Lovely Lib refactored to use HZ Lib
-- Maven repository setup and publishing
-- Library API documentation
-- **✅ Milestone 1: Library Foundation Complete**
+- `InternalEntity` → `NativeEntity` (HZLib Common)
+- `InternalEntityType<T>` → `NativeEntityFamily<T>` (HZLib Common)
+- `InternalLogic` → `EntityLogic`, `InternalParticle` → `EntityParticles` (HZLib Common)
+- `InternalAnimation` → `NativeAnimation`, `InternalModel` → `NativeModel`, `InternalLayerRenderer` → `NativeRenderer` (HZLib loaders)
+- `NativeEntityType` → `RobotFamily`, `LovelyRobotType` → `RobotFamilyRegistry`, `EntityVariant` → `RobotVariant` (LovelyLib Common)
+- `InternalAnimation` → `RobotAnimation` (LovelyLib loaders)
+- `LegacyRobotType` → `LegacyRobotFamilies`, `RebootRobotType` → `RebootRobotFamilies`, `TributeRobotType` → `TributeRobotFamilies` (LovelyLib registries)
+- `NativeEntityType<T>` → `MonstersFamily<T>` and all nine concrete `*Type` → `*Family` (Monsters & Girls)
+- Full build verification (0 errors across all projects) and runtime smoke test
 
 ---
 
@@ -242,42 +248,108 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 
 ## Current Sprint
 
-### Sprint 06: Preparation for Library Foundation
-**Status**: 🔄 Planning (Bridge Sprint)  
-**Timeframe**: 2025-12-12 to 2025-12-25 (Holiday Sprint)  
-**Sprint Goal**: Prepare for Phase 1 library work and celebrate 2025
+### Sprint 09: Ecosystem Terminology & Rename System
+**Status**: 🔄 ACTIVE  
+**Dates**: 2026-06-20 to 2026-07-04  
+**Sprint Goal**: Execute ADR_018 — rename all `Internal*` classes across HZLib, LovelyLib, and Monsters & Girls to align with the canonical Family / Variant / Appearance terminology. Every class name must reflect its tier and role after this sprint.
 
-**Objectives**:
-- 🎯 Review and finalize library extraction strategy
-- 🎯 Create architectural decision records (ADRs) for library design
-- 🎯 Set up Maven repository infrastructure
-- 🎯 Clean up and document existing 1.21.1 codebase
-- 🎯 Prepare development environment for multi-variant work
-- 🎯 Create library API design specifications
-- 🎯 Community engagement: Year-end retrospective
+**Story Points**: 44 (7 phases)
 
-**Story Points**: 8 (Holiday sprint, reduced capacity)
+**Source ADR**: `docs/development/decisions/ADR_018_Ecosystem_Terminology_and_Rename_System.md`  
+**Task File**: `docs/development/sprints/active/SPRINT_09_TASK.md`  
+**Terminology Reference**: `docs/documentation/TERMINOLOGY.md`
 
-**User Stories**:
-- [ ] As a developer, I have clear ADRs documenting library architecture decisions (3 pts)
-- [ ] As a developer, I have Maven repository set up and tested (2 pts)
-- [ ] As a developer, I have clean, well-documented 1.21.1 codebase as reference (2 pts)
-- [ ] As a community member, I understand the 2026 roadmap and can provide feedback (1 pt)
+**Phase Overview**:
+- Phase 1 — HZLib Common (10 pts): `NativeEntity`, `NativeEntityFamily`, `EntityLogic`, `EntityParticles`, `LayerRenderPipeline`
+- Phase 2 — HZLib Loaders (8 pts): `NativeAnimation`, `NativeModel`, `NativeRenderer`
+- Phase 3 — LovelyLib Common (7 pts): `RobotFamily`, `RobotFamilyRegistry`, `RobotVariant`
+- Phase 4 — LovelyLib Loaders (3 pts): `RobotAnimation`
+- Phase 5 — LovelyLib Registries (3 pts): `LegacyRobotFamilies`, `RebootRobotFamilies`, `TributeRobotFamilies`
+- Phase 6 — Monsters & Girls (8 pts): `MonstersFamily`, nine concrete `*Family` classes
+- Phase 7 — Validation (5 pts): Full build + runtime smoke test
 
 **Known Risks**:
-- **Holiday Schedule**: Reduced availability, allocate lighter workload
-- **Strategic Planning**: Time spent on planning doesn't produce visible features
-- **Scope Temptation**: Resist starting library work before sprint 07
+- Partial rename breaks the build if phases are not followed in dependency order
+- Generic type bounds may be missed by IDE rename — verify with a search for old name after each phase
 
 **Mitigation**:
-- Accept reduced story points for holiday period
-- Focus on preparation and documentation
-- Celebrate 2025 achievements with community
-- Use time for strategic thinking and planning
+- Execute phases in strict order (HZLib → LovelyLib → Monsters & Girls)
+- Verify 0 remaining references to old name before moving to the next phase
 
 ---
 
-## Completed Sprints (2025)
+## Completed Sprints
+
+### Sprint 08: InternalEntity Consolidation & OverlayFeature ✅
+**Status**: ✅ Completed  
+**Timeframe**: 2026-04-27 to 2026-06-20  
+**Completion Date**: 2026-06-20  
+**Sprint Type**: Architecture & Feature
+
+**Sprint Goal**: Execute ADR_012 (InternalEntity Consolidation) and ADR_017 (OverlayFeature)
+
+**Story Points**: 50 (InternalEntity work) + OverlayFeature implementation
+
+**Key Achievements**:
+- Rebuilt HZLib `InternalEntityType` — removed dead code, `configureVariants()` as single hook
+- Updated lovelylib `NativeEntityType` to extend HZLib's rebuilt type
+- Rebuilt HZLib `InternalEntity` with solid foundations (combat timers, NBT, lifecycle)
+- Built HZLib `RobotEntity` robot-specific tier (level, exp, protection, enchantments)
+- Migrated lovelylib hierarchy to extend HZLib's `RobotEntity`
+- Executed rename chain: `LovelyRobotEntity` → `RobotEntity`, loader `RobotEntity` → `BaseRobotEntity`
+- Implemented `OverlayFeature` (ADR_017): RANDOM/CONDITIONAL/INTERACTIVE/ALWAYS slot modes
+- Gourdragora tinted carving + Jack'o face-cover inversion
+- Mandrake Flower RANDOM hairstyle slots
+- Mushroom Halloween costume CONDITIONAL slots
+
+**Archive**: `docs/development/sprints/archive/[COMPLETED]_SPRINT_08_InternalEntity_Consolidation_OverlayFeature_2026-06-20.md`
+
+---
+
+### Sprint 07: Animation Profile & Variant System ✅
+**Status**: ✅ Completed  
+**Timeframe**: 2026-04-27 to 2026-04-27 (single-session sprint)  
+**Completion Date**: 2026-04-27  
+**Sprint Type**: Architecture
+
+**Sprint Goal**: Implement ADR_010 (Animation Profile System) and ADR_011 (Variant and Spawn System)
+
+**Story Points**: 46 (54 including asset-blocked Dragon's Fury)
+
+**Key Achievements**:
+- `AnimationPool`, `AnimationProfile`, `AnimationSequence` in HZLib Common
+- `SizeVariantFeature` with per-pose `EntityDimensions` and stat multipliers
+- `initializeSpawnVariants()` hook in `InternalEntity.finalizeSpawn()`
+- Robot profile replaces `AnimationStateManager` and `AnimationDefinitions` (deleted)
+- Gourdragora collapsed from 9 to 3 entity type configurations with dynamic hitbox
+- Mushroom Brown biome-aware texture selection at spawn
+- Dragon's Fury sequence: asset-blocked, not started
+
+**Archive**: `docs/development/sprints/archive/[COMPLETED]_SPRINT_07_Animation_Profile_Variant_System_2026-04-27.md`
+
+---
+
+### Sprint 06: Shared Library Architecture Foundation ✅
+**Status**: ✅ Completed  
+**Timeframe**: 2025-12-11 to 2025-12-25  
+**Completion Date**: 2025-12-25  
+**Sprint Type**: Infrastructure & Planning
+
+**Sprint Goal**: Establish HZLib and LovelyLib environments; create architectural ADRs; fix build systems
+
+**Story Points**: 8 (Holiday sprint, reduced capacity)
+
+**Key Achievements**:
+- HZLib and LovelyLib multi-loader environments created and compiling
+- ADR_001–005 created (Library Architecture, Design Decisions, Scope, Robot Creator, Config Screen)
+- Follow behavior enhancement (position prediction, body-head coordination)
+- Combat mode model synchronization fix (armed model now synced client-side)
+- Random texture + health bug fixes in Legacy 1.21.1
+- Vehicle sitting animation feature
+
+**Archive**: `docs/development/sprints/archive/[COMPLETED]_SPRINT_06_Shared_Library_Architecture_Foundation_2025-12-25.md`
+
+---
 
 ### Sprint 05: Enchanted Book Protection Feature ✅
 **Status**: ✅ Completed  
