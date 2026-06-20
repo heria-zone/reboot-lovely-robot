@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.hzlib.api.entity.InternalLayerRenderer;
+import net.heriazone.hzlib.api.entity.NativeRenderer;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.shared.LovelyResource;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * configuring layer stack. HeadphoneOverlayLayer replaces multiple DetailOverlayLayers
  * with intelligent texture swapping.
  */
-public class NativeRobotRenderer extends InternalLayerRenderer<NativeRobotEntity> {
+public class NativeRobotRenderer extends NativeRenderer<NativeRobotEntity> {
 
     // -- Constructor --
 

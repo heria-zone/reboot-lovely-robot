@@ -1,11 +1,11 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.hzlib.api.entity.InternalModel;
+import net.heriazone.hzlib.api.entity.NativeModel;
 
 /**
  * GeckoLib model provider for robot entities.
  * <p>
- * Delegates model/animation resolution to InternalModel, which queries entity's
- * NativeEntityType for variant-specific resources.
+ * Delegates model/animation resolution to NativeModel, which queries entity's
+ * RobotFamily for variant-specific resources.
  */
-public class NativeRobotModel extends InternalModel<NativeRobotEntity> { } // Class: NativeRobotModel
+public class NativeRobotModel extends NativeModel<NativeRobotEntity> { } // Class: NativeRobotModel
