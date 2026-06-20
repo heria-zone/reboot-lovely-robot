@@ -1,5 +1,6 @@
 package net.heriazone.rlovelyr.source;
 
+import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.rlovelyr.Reboot;
 import net.heriazone.rlovelyr.RebootIdentifier;
 import net.heriazone.hzlib.api.entity.features.PickupFeature;
@@ -8,7 +9,7 @@ import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
-import net.heriazone.lovelylib.source.reboot.RebootRobotType;
+import net.heriazone.lovelylib.source.reboot.RebootRobotFamilies;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
@@ -36,13 +37,13 @@ public class RebootEntities {
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, RebootRobotType.BUNNY);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, RebootRobotType.BUNNY2);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, RebootRobotType.DRAGON);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, RebootRobotType.HONEY);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, RebootRobotType.KITSUNE);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, RebootRobotType.NEKO);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, RebootRobotType.VANILLA);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, RebootRobotFamilies.BUNNY);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, RebootRobotFamilies.BUNNY2);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, RebootRobotFamilies.DRAGON);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, RebootRobotFamilies.HONEY);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, RebootRobotFamilies.KITSUNE);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, RebootRobotFamilies.NEKO);
+    public static final RegistryObject<EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, RebootRobotFamilies.VANILLA);
 
     // -- Registration Methods --
 
@@ -59,7 +60,7 @@ public class RebootEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static RegistryObject<EntityType<NativeRobotEntity>> registerRobot(String name, NativeEntityType robotType) {
+    private static RegistryObject<EntityType<NativeRobotEntity>> registerRobot(String name, RobotFamily robotType) {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
                         (EntityType<NativeRobotEntity> type, Level level) -> new NativeRobotEntity(type, level, robotType), MobCategory.CREATURE)
                 .sized(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT)
@@ -84,13 +85,13 @@ public class RebootEntities {
      * @param event entity attribute creation event
      */
     public static void registerAttribute(EntityAttributeCreationEvent event) {
-        event.put(BUNNY.get(),   NativeEntity.createAttributes(RebootRobotType.BUNNY));
-        event.put(BUNNY2.get(),  NativeEntity.createAttributes(RebootRobotType.BUNNY2));
-        event.put(DRAGON.get(),  NativeEntity.createAttributes(RebootRobotType.DRAGON));
-        event.put(HONEY.get(),   NativeEntity.createAttributes(RebootRobotType.HONEY));
-        event.put(KITSUNE.get(), NativeEntity.createAttributes(RebootRobotType.KITSUNE));
-        event.put(NEKO.get(),    NativeEntity.createAttributes(RebootRobotType.NEKO));
-        event.put(VANILLA.get(), NativeEntity.createAttributes(RebootRobotType.VANILLA));
+        event.put(BUNNY.get(),   NativeEntityFamily.createAttributes(RebootRobotFamilies.BUNNY));
+        event.put(BUNNY2.get(),  NativeEntityFamily.createAttributes(RebootRobotFamilies.BUNNY2));
+        event.put(DRAGON.get(),  NativeEntityFamily.createAttributes(RebootRobotFamilies.DRAGON));
+        event.put(HONEY.get(),   NativeEntityFamily.createAttributes(RebootRobotFamilies.HONEY));
+        event.put(KITSUNE.get(), NativeEntityFamily.createAttributes(RebootRobotFamilies.KITSUNE));
+        event.put(NEKO.get(),    NativeEntityFamily.createAttributes(RebootRobotFamilies.NEKO));
+        event.put(VANILLA.get(), NativeEntityFamily.createAttributes(RebootRobotFamilies.VANILLA));
     } // registerAttribute()
 
     /**
@@ -131,37 +132,37 @@ public class RebootEntities {
      */
     public static void registerNativeRobotFeature() {
         // BUNNY
-        RebootRobotType.BUNNY
+        RebootRobotFamilies.BUNNY
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.BUNNY_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
 
         // BUNNY2
-        RebootRobotType.BUNNY2
+        RebootRobotFamilies.BUNNY2
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.BUNNY2_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
 
         // DRAGON
-        RebootRobotType.DRAGON
+        RebootRobotFamilies.DRAGON
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.DRAGON_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
 
         // HONEY
-        RebootRobotType.HONEY
+        RebootRobotFamilies.HONEY
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.HONEY_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
 
         // KITSUNE
-        RebootRobotType.KITSUNE
+        RebootRobotFamilies.KITSUNE
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.KITSUNE_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
 
         // NEKO
-        RebootRobotType.NEKO
+        RebootRobotFamilies.NEKO
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.NEKO_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
 
         // VANILLA
-        RebootRobotType.VANILLA
+        RebootRobotFamilies.VANILLA
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.VANILLA_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
     } // registerNativeRobotFeature ()

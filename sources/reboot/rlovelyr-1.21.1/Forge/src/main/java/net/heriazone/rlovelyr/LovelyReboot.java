@@ -2,7 +2,7 @@ package net.heriazone.rlovelyr;
 
 import net.heriazone.hzlib.api.services.ForgeServices;
 import net.heriazone.hzlib.api.services.Services;
-import net.heriazone.lovelylib.source.reboot.RebootRobotType;
+import net.heriazone.lovelylib.source.reboot.RebootRobotFamilies;
 import net.heriazone.rlovelyr.source.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -45,7 +45,7 @@ public class LovelyReboot {
         Reboot.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
 
         RebootConfigs.register(context);
-        RebootConfigs.onLoadCallback(RebootRobotType::reloadFromConfig);
+        RebootConfigs.onLoadCallback(RebootRobotFamilies::reloadFromConfig);
 
         //LovelyBlocks.register(events);
         RebootItems.register(events);

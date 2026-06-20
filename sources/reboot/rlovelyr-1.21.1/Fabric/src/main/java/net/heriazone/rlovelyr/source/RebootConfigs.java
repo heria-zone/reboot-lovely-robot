@@ -363,8 +363,8 @@ public class RebootConfigs {
         net.heriazone.lovelylib.source.reboot.RebootConfigs.Entities = new HashMap<>();
         //RebootConfigs.Entities.clear();
 
-        //Reboot.LOGGER.warn("Loading variants '{}'", (long) RebootRobotType.TYPES.stream().map(NativeEntityType::getKey).toList().size());
-        //for (String variant : RebootRobotType.TYPES.stream().map(NativeEntityType::getKey).toList())
+        //Reboot.LOGGER.warn("Loading variants '{}'", (long) RebootRobotFamilies.TYPES.stream().map(RobotFamily::getKey).toList().size());
+        //for (String variant : RebootRobotFamilies.TYPES.stream().map(RobotFamily::getKey).toList())
         for (String variant : LovelyConstant.REBOOT_VARIANTS) {
 
             try {

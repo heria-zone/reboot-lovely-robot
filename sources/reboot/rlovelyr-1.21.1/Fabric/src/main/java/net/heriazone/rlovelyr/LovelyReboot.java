@@ -5,7 +5,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
 import net.heriazone.hzlib.api.services.FabricServices;
 import net.heriazone.hzlib.api.services.Services;
-import net.heriazone.lovelylib.source.reboot.RebootRobotType;
+import net.heriazone.lovelylib.source.reboot.RebootRobotFamilies;
 import net.heriazone.rlovelyr.source.*;
 
 /**
@@ -52,7 +52,7 @@ public class LovelyReboot implements ModInitializer, ClientModInitializer {
 
         // Register Fabric-specific features here
         RebootConfigs.register();
-        RebootRobotType.reloadFromConfig();
+        RebootRobotFamilies.reloadFromConfig();
         RebootEntities.registerNativeRobotFeature();
         RebootGroups.register();
         RebootItems.register();
