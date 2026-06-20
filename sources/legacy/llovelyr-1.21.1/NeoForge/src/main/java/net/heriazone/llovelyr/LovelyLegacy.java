@@ -1,7 +1,7 @@
 package net.heriazone.llovelyr;
 
 import net.heriazone.llovelyr.source.*;
-import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
 import net.heriazone.hzlib.api.services.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -57,7 +57,7 @@ public class LovelyLegacy {
 
         // Register configuration system
         LegacyConfigs.register(modContainer);
-        LegacyConfigs.onLoadCallback(LegacyRobotType::reloadFromConfig);
+        LegacyConfigs.onLoadCallback(LegacyRobotFamilies::reloadFromConfig);
 
         // Register deferred registers
         LegacyItems.register(modEventBus);

@@ -1,7 +1,7 @@
 package net.heriazone.llovelyr;
 
 import net.heriazone.llovelyr.source.*;
-import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
 import net.heriazone.hzlib.api.services.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -44,7 +44,7 @@ public class LovelyLegacy {
         Legacy.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
 
         LegacyConfigs.register(context);
-        LegacyConfigs.onLoadCallback(LegacyRobotType::reloadFromConfig);
+        LegacyConfigs.onLoadCallback(LegacyRobotFamilies::reloadFromConfig);
 
         //LovelyBlocks.register(events);
         LegacyItems.register(events);

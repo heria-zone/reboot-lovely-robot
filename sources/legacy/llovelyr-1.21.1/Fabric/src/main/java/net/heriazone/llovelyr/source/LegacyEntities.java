@@ -3,12 +3,12 @@ package net.heriazone.llovelyr.source;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.*;
 import net.heriazone.lovelylib.api.entity.features.PickupFeature;
-import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.llovelyr.LegacyIdentifier;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Registry;
@@ -29,13 +29,13 @@ public class LegacyEntities {
 
     // -- Entity Type Definitions --
 
-    public static final EntityType<NativeRobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotType.BUNNY);
-    public static final EntityType<NativeRobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotType.BUNNY2);
-    public static final EntityType<NativeRobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotType.DRAGON);
-    public static final EntityType<NativeRobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotType.HONEY);
-    public static final EntityType<NativeRobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotType.KITSUNE);
-    public static final EntityType<NativeRobotEntity> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, LegacyRobotType.NEKO);
-    public static final EntityType<NativeRobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, LegacyRobotType.VANILLA);
+    public static final EntityType<NativeRobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotFamilies.BUNNY);
+    public static final EntityType<NativeRobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotFamilies.BUNNY2);
+    public static final EntityType<NativeRobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotFamilies.DRAGON);
+    public static final EntityType<NativeRobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotFamilies.HONEY);
+    public static final EntityType<NativeRobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotFamilies.KITSUNE);
+    public static final EntityType<NativeRobotEntity> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, LegacyRobotFamilies.NEKO);
+    public static final EntityType<NativeRobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, LegacyRobotFamilies.VANILLA);
 
     // -- Registration Methods --
 
@@ -49,7 +49,7 @@ public class LegacyEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static EntityType<NativeRobotEntity> registerRobot(String name, NativeEntityType robotType) {
+    private static EntityType<NativeRobotEntity> registerRobot(String name, RobotFamily robotType) {
         return Registry.register(
                 BuiltInRegistries.ENTITY_TYPE,
                 LegacyIdentifier.getId(name),
@@ -63,13 +63,13 @@ public class LegacyEntities {
      * Registers entity attributes.
      */
     public static void register() {
-        FabricDefaultAttributeRegistry.register(BUNNY,   InternalEntity.createAttributes(LegacyRobotType.BUNNY));
-        FabricDefaultAttributeRegistry.register(BUNNY2,  InternalEntity.createAttributes(LegacyRobotType.BUNNY2));
-        FabricDefaultAttributeRegistry.register(DRAGON,  InternalEntity.createAttributes(LegacyRobotType.DRAGON));
-        FabricDefaultAttributeRegistry.register(HONEY,   InternalEntity.createAttributes(LegacyRobotType.HONEY));
-        FabricDefaultAttributeRegistry.register(KITSUNE, InternalEntity.createAttributes(LegacyRobotType.KITSUNE));
-        FabricDefaultAttributeRegistry.register(NEKO,    InternalEntity.createAttributes(LegacyRobotType.NEKO));
-        FabricDefaultAttributeRegistry.register(VANILLA, InternalEntity.createAttributes(LegacyRobotType.VANILLA));
+        FabricDefaultAttributeRegistry.register(BUNNY,   NativeEntityFamily.createAttributes(LegacyRobotFamilies.BUNNY));
+        FabricDefaultAttributeRegistry.register(BUNNY2,  NativeEntityFamily.createAttributes(LegacyRobotFamilies.BUNNY2));
+        FabricDefaultAttributeRegistry.register(DRAGON,  NativeEntityFamily.createAttributes(LegacyRobotFamilies.DRAGON));
+        FabricDefaultAttributeRegistry.register(HONEY,   NativeEntityFamily.createAttributes(LegacyRobotFamilies.HONEY));
+        FabricDefaultAttributeRegistry.register(KITSUNE, NativeEntityFamily.createAttributes(LegacyRobotFamilies.KITSUNE));
+        FabricDefaultAttributeRegistry.register(NEKO,    NativeEntityFamily.createAttributes(LegacyRobotFamilies.NEKO));
+        FabricDefaultAttributeRegistry.register(VANILLA, NativeEntityFamily.createAttributes(LegacyRobotFamilies.VANILLA));
     } // register ()
 
     /**
@@ -111,37 +111,37 @@ public class LegacyEntities {
      */
     public static void registerNativeRobotFeature() {
         // BUNNY
-        LegacyRobotType.BUNNY
+        LegacyRobotFamilies.BUNNY
                 .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
 
         // BUNNY2
-        LegacyRobotType.BUNNY2
+        LegacyRobotFamilies.BUNNY2
                 .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY2_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
 
         // DRAGON
-        LegacyRobotType.DRAGON
+        LegacyRobotFamilies.DRAGON
                 .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.DRAGON_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
 
         // HONEY
-        LegacyRobotType.HONEY
+        LegacyRobotFamilies.HONEY
                 .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.HONEY_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
 
         // KITSUNE
-        LegacyRobotType.KITSUNE
+        LegacyRobotFamilies.KITSUNE
                 .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.KITSUNE_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
 
         // NEKO
-        LegacyRobotType.NEKO
+        LegacyRobotFamilies.NEKO
                 .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.NEKO_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
 
         // VANILLA
-        LegacyRobotType.VANILLA
+        LegacyRobotFamilies.VANILLA
                 .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.VANILLA_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
     } // registerNativeRobotFeature ()

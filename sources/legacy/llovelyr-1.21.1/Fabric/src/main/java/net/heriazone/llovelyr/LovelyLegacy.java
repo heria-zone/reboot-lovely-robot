@@ -7,7 +7,7 @@ import net.heriazone.lovelylib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.hzlib.api.services.*;
-import net.heriazone.lovelylib.source.legacy.LegacyRobotType;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
 
 /**
  * Main mod class for Legacy variant (Fabric loader).
@@ -53,7 +53,7 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
 
         // Register Fabric-specific features here
         LegacyConfigs.register();
-        LegacyRobotType.reloadFromConfig();
+        LegacyRobotFamilies.reloadFromConfig();
         LegacyEntities.registerNativeRobotFeature();
         LegacyGroups.register();
         LegacyItems.register();

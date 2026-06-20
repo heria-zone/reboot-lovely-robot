@@ -361,8 +361,8 @@ public class LegacyConfigs {
         net.heriazone.lovelylib.source.legacy.LegacyConfigs.Entities = new HashMap<>();
         //LegacyConfigs.Entities.clear();
 
-        //Legacy.LOGGER.warn("Loading variants '{}'", (long) LegacyRobotType.TYPES.stream().map(InternalEntityType::getKey).toList().size());
-        //for (String variant : LegacyRobotType.TYPES.stream().map(InternalEntityType::getKey).toList())
+        //Legacy.LOGGER.warn("Loading variants '{}'", (long) LegacyRobotFamilies.TYPES.stream().map(NativeEntityFamilyType::getKey).toList().size());
+        //for (String variant : LegacyRobotFamilies.TYPES.stream().map(NativeEntityFamilyType::getKey).toList())
         for (String variant : LovelyConstant.LEGACY_VARIANTS) {
 
             try {
