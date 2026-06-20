@@ -1,13 +1,11 @@
 package net.heriazone.hzlib.api.entity;
 
-import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
-import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
-import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
-import net.heriazone.hzlib.api.entity.variants.interfaces.IAnimatorVariant;
-import net.heriazone.hzlib.api.entity.variants.interfaces.IModelVariant;
-import net.heriazone.hzlib.api.entity.variants.interfaces.ITextureVariant;
+import net.heriazone.hzlib.api.entity.features.variants.*;
+import net.heriazone.hzlib.api.entity.variants.interfaces.*;
 import net.heriazone.hzlib.framework.entity.data.CombatData;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.ai.attributes.*;
+import net.minecraft.world.entity.animal.Animal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,273 +13,196 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * <p>Abstract base class for all entity type definitions in the HZLib ecosystem.<p>
+ * Root family descriptor for all HZLib-managed entity types.
  * <p>
- * <b>Architecture:</b> Single shared base for both robot types ({@code NativeEntityType}
- * in lovelylib) and monster types ({@code NativeEntityType} in monsters_girls). Provides
- * the feature composition pattern, combat stats configuration, and the
- * {@link #configureVariants()} hook for variant registration.
+ * <b>Architecture:</b> Each concrete instance represents one registered {@code EntityType<>}
+ * — its key, display name, base combat stats, and the full set of feature modules that
+ * govern its appearance and behaviour. Subclasses extend this to add domain-specific
+ * defaults and variant registration patterns.
  * <p>
- * <b>Design Decision:</b> Generic self-type parameter enables fluent builder pattern with
- * correct return types in subclasses. Feature system uses Class-keyed map for type-safe
- * retrieval without casting. Variant registration is delegated to subclasses via
- * {@link #configureVariants()} rather than abstract populate methods, allowing
- * string-keyed variant features ({@link TextureVariantFeature}, {@link ModelVariantFeature},
- * {@link AnimatorVariantFeature}) to be registered without enum coupling.
+ * <b>Feature composition:</b> Optional capabilities ({@link TextureVariantFeature},
+ * {@link ModelVariantFeature}, {@link AnimatorVariantFeature}, and any framework feature)
+ * are attached via {@link #withFeature} and retrieved via {@link #getFeature}. This avoids
+ * inheritance hierarchies for optional concerns.
  * <p>
- * <b>Variant System:</b> All variant resolution goes through the feature system.
- * Subclasses register variants in {@link #configureVariants()} using
- * {@link #withFeature(Class, Object)}. Entities resolve variants at runtime via
- * {@link #getTextureVariant(String, String)}, {@link #getModelVariant(String, String)},
- * and {@link #getAnimatorVariant(String, String)}.
+ * <b>Variant registration:</b> Subclasses declare their variants by overriding
+ * {@link #configureVariants()}, which is called during construction. The three standard
+ * appearance dimensions — texture, model, animator — each have a dedicated feature class.
  * <p>
- * <b>Thread Safety:</b> Not thread-safe. Feature map modifications must be synchronized
- * if accessed across threads.
+ * <b>Self-type parameter:</b> {@code T} enables the fluent builder methods
+ * ({@link #withFeature}, {@link #withCombatStats}) to return the concrete subtype,
+ * preserving method chaining without unchecked casts at call sites.
  *
- * @param <T> concrete entity type for fluent builder pattern
+ * @param <T> the concrete subtype, used for fluent builder return types
  */
 public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
 
-    // -- Identification Fields --
+    // -- Identity --
 
     protected final String key;
     protected final MutableComponent name;
 
-    // -- Data Container --
+    // -- Combat Data --
 
     /**
-     * <p>Base combat statistics for this entity type.<p>
-     * <p>
-     * <b>Architecture:</b> Contains HP, attack, speed, armor — the flat stats every
-     * entity needs for {@code createAttributes()}. No leveling, no experience.
-     * Robot-specific scaling (CombatLevelStats) lives in HZLib's RobotEntity tier.
+     * Base flat stats for this family — health, attack, speed, armor.
+     * Consumed by {@link NativeEntity#createAttributes} to set Minecraft entity attributes.
+     * Extended tiers may layer additional scaling on top via their own data containers.
      */
     protected final CombatData data;
 
-    // -- Feature System --
+    // -- Feature Map --
 
+    // Class-keyed so getFeature() returns the correct generic type without casting.
     private final Map<Class<?>, Object> features;
 
     // -- Constructor --
 
     /**
-     * Creates entity type with specified key, initializes combat data, and calls
-     * {@link #configureVariants()} to allow subclasses to register variant features.
+     * Initialises the family with the given key, creates its {@link CombatData},
+     * resolves the display name, and calls {@link #configureVariants()}.
      * <p>
-     * <b>State Impact:</b> {@link #configureVariants()} is called during construction.
-     * Subclass implementations must not depend on subclass-level state that hasn't
-     * been initialized yet.
+     * {@link #configureVariants()} fires during construction — subclass overrides
+     * must not reference subclass-level fields that have not yet been assigned.
      *
-     * @param key unique identifier for this entity type (e.g., {@code "bunny"}, {@code "mushroom_brown"})
+     * @param key unique registry identifier for this family
      * @throws NullPointerException if key is null
      */
     protected NativeEntityFamily(String key) {
-        this.key      = Objects.requireNonNull(key, "Entity type key cannot be null");
+        this.key      = Objects.requireNonNull(key, "Family key cannot be null");
         this.data     = new CombatData(key, "entity." + key);
         this.name     = createTranslation(key);
         this.features = new HashMap<>();
 
-        // Allow subclasses to register variant features (TextureVariantFeature, etc.)
+        // Variant features are registered here so the family is fully configured
+        // immediately after construction without a separate init call.
         configureVariants();
     } // Constructor: NativeEntityFamily ()
 
     // -- Abstract Methods --
 
     /**
-     * Creates the translatable display name for this entity type.
-     * <p>
-     * <b>Implementation:</b> Typically returns a translation component using the
-     * entity type key. Called during construction — must not depend on subclass state.
+     * Returns the translatable display name for this family.
+     * Called during construction — must not depend on subclass state.
      *
-     * @param key entity type key
-     * @return translatable text component for display
+     * @param key the family's registry key
+     * @return translatable text component for in-game display
      */
     protected abstract MutableComponent createTranslation(String key);
 
-    // -- Variant Configuration Hook --
+    // -- Variant Configuration --
 
     /**
-     * Registers variant features for this entity type.
+     * Override point for registering variant features at construction time.
      * <p>
-     * <b>Override contract:</b> Override to register {@link TextureVariantFeature},
-     * {@link ModelVariantFeature}, and {@link AnimatorVariantFeature} via
-     * {@link #withFeature(Class, Object)}. Called during construction.
-     * <p>
-     * <b>Robot pattern:</b>
-     * <pre>{@code
-     * @Override
-     * protected void configureVariants() {
-     *     withFeature(ModelVariantFeature.class, new ModelVariantFeature()
-     *         .withVariants(key, "default", "armed")
-     *         .withDefault(key, "default"));
-     *     withFeature(AnimatorVariantFeature.class, new AnimatorVariantFeature()
-     *         .withVariants(key, "default")
-     *         .withDefault(key, "default"));
-     *     // Texture variants registered separately via withColorPalette()
-     * }
-     * }</pre>
-     * <p>
-     * <b>Monster pattern:</b>
-     * <pre>{@code
-     * @Override
-     * protected void configureVariants() {
-     *     withFeature(TextureVariantFeature.class, new TextureVariantFeature()
-     *         .withVariants(key, "default", "tummy")
-     *         .withDefault(key, "default"));
-     *     withFeature(ModelVariantFeature.class, new ModelVariantFeature()
-     *         .withVariants(key, "default")
-     *         .withDefault(key, "default"));
-     *     withFeature(AnimatorVariantFeature.class, new AnimatorVariantFeature()
-     *         .withVariants(key, "default")
-     *         .withDefault(key, "default"));
-     * }
-     * }</pre>
+     * Use {@link #withFeature} to attach {@link TextureVariantFeature},
+     * {@link ModelVariantFeature}, and {@link AnimatorVariantFeature} as needed.
+     * The base implementation is a no-op — families with no appearance variants
+     * do not need to override this.
      */
     protected void configureVariants() {
-        // Default: no variants registered. Subclasses override to register features.
+        // No-op — override to register TextureVariantFeature, ModelVariantFeature, etc.
     } // configureVariants ()
 
-    // -- Public Accessors --
+    // -- Identity Accessors --
 
-    /**
-     * Returns the unique identifier for this entity type.
-     *
-     * @return entity type key
-     */
+    /** Returns the unique registry key for this family. */
     public String getKey() {
         return key;
     } // getKey ()
 
-    /**
-     * Returns the translatable display name for this entity type.
-     *
-     * @return translatable text component
-     */
+    /** Returns the translatable display name for this family. */
     public MutableComponent getName() {
         return name;
     } // getName ()
 
     /**
-     * Returns the base combat statistics container.
-     * <p>
-     * <b>Usage:</b> Read by {@code NativeEntity.createAttributes()} to set
-     * Minecraft entity attributes (MAX_HEALTH, ATTACK_DAMAGE, etc.).
-     *
-     * @return combat data with base HP, attack, speed, armor
+     * Returns the flat combat stats for this family.
+     * Read by {@link NativeEntity#createAttributes} to populate Minecraft entity attributes.
      */
     public CombatData getData() {
         return data;
     } // getData ()
 
-    // -- Variant Access Methods --
+    // -- Variant Accessors --
 
     /**
-     * Returns the texture variant for the specified entity key and variant key.
-     * <p>
-     * <b>Null safety:</b> Returns {@code null} if no {@link TextureVariantFeature}
-     * is registered or if the variant key is not found. Callers should handle null.
-     *
-     * @param entityKey  entity identifier for variant filtering
-     * @param variantKey specific variant key to retrieve (e.g., {@code "white"}, {@code "default"})
-     * @return texture variant if available, {@code null} otherwise
+     * Returns the texture variant registered under {@code variantKey} for {@code entityKey},
+     * or {@code null} if no {@link TextureVariantFeature} is present or the key is unknown.
      */
     public ITextureVariant getTextureVariant(String entityKey, String variantKey) {
         return getFeature(TextureVariantFeature.class)
-                .filter(feature -> feature.hasVariant(entityKey, variantKey))
-                .map(feature -> feature.getAvailableVariants(entityKey).stream()
+                .filter(f -> f.hasVariant(entityKey, variantKey))
+                .map(f -> f.getAvailableVariants(entityKey).stream()
                         .filter(v -> v.getKey().equals(variantKey))
                         .findFirst()
                         .orElse(null))
                 .orElse(null);
     } // getTextureVariant ()
 
-    /**
-     * Returns the default texture variant for the specified entity key.
-     *
-     * @param entityKey entity identifier
-     * @return default texture variant, or {@code null} if no variants configured
-     */
+    /** Returns the default texture variant for {@code entityKey}, or {@code null} if none is configured. */
     public ITextureVariant getDefaultTextureVariant(String entityKey) {
         return getFeature(TextureVariantFeature.class)
-                .map(feature -> feature.getDefaultVariant(entityKey))
+                .map(f -> f.getDefaultVariant(entityKey))
                 .orElse(null);
     } // getDefaultTextureVariant ()
 
     /**
-     * Returns the model variant for the specified entity key and variant key.
-     *
-     * @param entityKey  entity identifier
-     * @param variantKey specific variant key (e.g., {@code "default"}, {@code "armed"})
-     * @return model variant if available, {@code null} otherwise
+     * Returns the model variant registered under {@code variantKey} for {@code entityKey},
+     * or {@code null} if no {@link ModelVariantFeature} is present or the key is unknown.
      */
     public IModelVariant getModelVariant(String entityKey, String variantKey) {
         return getFeature(ModelVariantFeature.class)
-                .filter(feature -> feature.hasVariant(entityKey, variantKey))
-                .map(feature -> feature.getAvailableVariants(entityKey).stream()
+                .filter(f -> f.hasVariant(entityKey, variantKey))
+                .map(f -> f.getAvailableVariants(entityKey).stream()
                         .filter(v -> v.getKey().equals(variantKey))
                         .findFirst()
                         .orElse(null))
                 .orElse(null);
     } // getModelVariant ()
 
-    /**
-     * Returns the default model variant for the specified entity key.
-     *
-     * @param entityKey entity identifier
-     * @return default model variant, or {@code null} if no variants configured
-     */
+    /** Returns the default model variant for {@code entityKey}, or {@code null} if none is configured. */
     public IModelVariant getDefaultModelVariant(String entityKey) {
         return getFeature(ModelVariantFeature.class)
-                .map(feature -> feature.getDefaultVariant(entityKey))
+                .map(f -> f.getDefaultVariant(entityKey))
                 .orElse(null);
     } // getDefaultModelVariant ()
 
     /**
-     * Returns the animator variant for the specified entity key and variant key.
-     *
-     * @param entityKey  entity identifier
-     * @param variantKey specific variant key (e.g., {@code "default"})
-     * @return animator variant if available, {@code null} otherwise
+     * Returns the animator variant registered under {@code variantKey} for {@code entityKey},
+     * or {@code null} if no {@link AnimatorVariantFeature} is present or the key is unknown.
      */
     public IAnimatorVariant getAnimatorVariant(String entityKey, String variantKey) {
         return getFeature(AnimatorVariantFeature.class)
-                .filter(feature -> feature.hasVariant(entityKey, variantKey))
-                .map(feature -> feature.getAvailableVariants(entityKey).stream()
+                .filter(f -> f.hasVariant(entityKey, variantKey))
+                .map(f -> f.getAvailableVariants(entityKey).stream()
                         .filter(v -> v.getKey().equals(variantKey))
                         .findFirst()
                         .orElse(null))
                 .orElse(null);
     } // getAnimatorVariant ()
 
-    /**
-     * Returns the default animator variant for the specified entity key.
-     *
-     * @param entityKey entity identifier
-     * @return default animator variant, or {@code null} if no variants configured
-     */
+    /** Returns the default animator variant for {@code entityKey}, or {@code null} if none is configured. */
     public IAnimatorVariant getDefaultAnimatorVariant(String entityKey) {
         return getFeature(AnimatorVariantFeature.class)
-                .map(feature -> feature.getDefaultVariant(entityKey))
+                .map(f -> f.getDefaultVariant(entityKey))
                 .orElse(null);
     } // getDefaultAnimatorVariant ()
 
-    // -- Combat Stats Configuration --
+    // -- Combat Stats --
 
     /**
-     * Configures all base combat statistics in a single fluent call.
-     * <p>
-     * <b>Design Decision:</b> Bulk setter reduces boilerplate in entity type definitions.
-     * These are the flat base stats — no leveling, no scaling. Robot-specific stat
-     * scaling (CombatLevelStats) is handled in HZLib's RobotEntity tier.
+     * Sets all flat combat stats in a single fluent call.
+     * These are base values with no level scaling — extended tiers add scaling on top.
      *
-     * @param health    maximum health points
-     * @param attack    damage per attack
-     * @param speed     attack speed (attacks per second)
+     * @param health    maximum health
+     * @param attack    attack damage
+     * @param speed     attack speed
      * @param armor     armor points
-     * @param toughness armor toughness points
+     * @param toughness armor toughness
      * @param knockback knockback resistance (0.0–1.0)
      * @param moveSpeed movement speed multiplier
-     * @return this instance for method chaining
+     * @return this instance for chaining
      */
     @SuppressWarnings("unchecked")
     public T withCombatStats(float health, float attack, float speed,
@@ -299,20 +220,16 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
     // -- Feature System --
 
     /**
-     * Attaches a feature module to this entity type.
+     * Attaches a feature module, replacing any previously registered module of the same type.
      * <p>
-     * <b>Architecture:</b> Enables composition over inheritance for optional functionality.
-     * Features are stored by class type, allowing type-safe retrieval without casting.
-     * <p>
-     * <b>Examples:</b> {@link TextureVariantFeature}, {@link ModelVariantFeature},
-     * {@link AnimatorVariantFeature}, {@code LevelFeature}, {@code FoodFeature},
-     * {@code DropFeature}, {@code PickupFeature}.
+     * The feature map is Class-keyed so each feature type has at most one instance.
+     * Calling this twice with the same class overwrites the first — intentional for
+     * subclass overrides that refine a parent's default feature configuration.
      *
-     * @param <F>          feature type
-     * @param featureClass class object for the feature type
+     * @param <F>          the feature type
+     * @param featureClass class token used as the map key
      * @param feature      feature instance to attach
-     * @return this instance for method chaining
-     * @throws NullPointerException if featureClass or feature is null
+     * @return this instance for chaining
      */
     @SuppressWarnings("unchecked")
     public <F> T withFeature(Class<F> featureClass, F feature) {
@@ -323,15 +240,12 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
     } // withFeature ()
 
     /**
-     * Retrieves a feature module of the specified type.
-     * <p>
-     * <b>Type Safety:</b> Returns {@code Optional} with correct generic type,
-     * eliminating the need for casting at call sites.
+     * Returns the feature registered under {@code featureClass}, or empty if none is attached.
+     * The {@code Optional} carries the correct generic type — no cast needed at call sites.
      *
-     * @param <F>          feature type
-     * @param featureClass class object for the feature type
-     * @return {@code Optional} containing the feature if present, empty otherwise
-     * @throws NullPointerException if featureClass is null
+     * @param <F>          the feature type
+     * @param featureClass class token used as the map key
+     * @return the attached feature, or {@link Optional#empty()}
      */
     @SuppressWarnings("unchecked")
     public <F> Optional<F> getFeature(Class<F> featureClass) {
@@ -339,16 +253,52 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
         return Optional.ofNullable((F) features.get(featureClass));
     } // getFeature ()
 
-    /**
-     * Checks whether a feature module of the specified type is attached.
-     *
-     * @param featureClass class object for the feature type
-     * @return {@code true} if the feature is present, {@code false} otherwise
-     * @throws NullPointerException if featureClass is null
-     */
+    /** Returns {@code true} if a feature of the given type is attached. */
     public boolean hasFeature(Class<?> featureClass) {
         Objects.requireNonNull(featureClass, "Feature class cannot be null");
         return features.containsKey(featureClass);
     } // hasFeature ()
+
+    // -- Attribute Factory Methods --
+
+    /**
+     * Builds a finished {@link AttributeSupplier} from this family's {@link CombatData}.
+     * Used at entity type registration time when a completed supplier is required.
+     */
+    public static AttributeSupplier createAttributes(NativeEntityFamily<?> entity) {
+        return Animal.createMobAttributes()
+                .add(Attributes.MAX_HEALTH,          entity.getData().getMaxHealth())
+                .add(Attributes.ATTACK_DAMAGE,        entity.getData().getAttackDamage())
+                .add(Attributes.ATTACK_SPEED,         entity.getData().getAttackSpeed())
+                .add(Attributes.MOVEMENT_SPEED,       entity.getData().getMoveSpeed())
+                .add(Attributes.ARMOR,                entity.getData().getArmor())
+                .add(Attributes.ARMOR_TOUGHNESS,      entity.getData().getArmorToughness())
+                .add(Attributes.KNOCKBACK_RESISTANCE, entity.getData().getKnockbackResistance())
+                .build();
+    } // createAttributes ()
+
+    /**
+     * Returns an open {@link AttributeSupplier.Builder} for ground entities.
+     * Callers can add further attributes before calling {@code build()}.
+     */
+    public static AttributeSupplier.Builder createGroundAttributes(NativeEntityFamily<?> type) {
+        return Animal.createMobAttributes()
+                .add(Attributes.MAX_HEALTH,          type.getData().getMaxHealth())
+                .add(Attributes.ATTACK_DAMAGE,        type.getData().getAttackDamage())
+                .add(Attributes.ATTACK_SPEED,         type.getData().getAttackSpeed())
+                .add(Attributes.MOVEMENT_SPEED,       type.getData().getMoveSpeed())
+                .add(Attributes.ARMOR,                type.getData().getArmor())
+                .add(Attributes.ARMOR_TOUGHNESS,      type.getData().getArmorToughness())
+                .add(Attributes.KNOCKBACK_RESISTANCE, type.getData().getKnockbackResistance());
+    } // createGroundAttributes ()
+
+    /**
+     * Returns an open {@link AttributeSupplier.Builder} for flying entities.
+     * Extends {@link #createGroundAttributes} with {@code FLYING_SPEED} set to the
+     * family's movement speed value.
+     */
+    public static AttributeSupplier.Builder createFlyingAttributes(NativeEntityFamily<?> type) {
+        return createGroundAttributes(type).add(Attributes.FLYING_SPEED, type.getData().getMoveSpeed());
+    } // createFlyingAttributes ()
 
 } // Class: NativeEntityFamily
