@@ -2,7 +2,7 @@ package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  * <b>Design Decision:</b> Preserves GeckoLib integration patterns while extracting
  * color calculation and rendering logic to shared Common implementation.
  */
-public class DynamicColorLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class DynamicColorLayer<T extends NativeEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
@@ -110,7 +110,7 @@ public class DynamicColorLayer<T extends InternalEntity & GeoEntity> implements 
     /**
      * Creates health-based color gradient (delegated to Common layer).
      */
-    public static int healthGradientColor(InternalEntity entity) {
+    public static int healthGradientColor(NativeEntity entity) {
         return net.heriazone.hzlib.api.rendering.DynamicColorLayer.healthGradientColor(entity);
     } // healthGradientColor()
 

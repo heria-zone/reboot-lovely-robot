@@ -2,7 +2,7 @@ package net.heriazone.hzlib.api.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -18,7 +18,7 @@ import software.bernie.geckolib.renderer.GeoRenderer;
  * <b>Design Decision:</b> Preserves GeckoLib integration patterns while extracting
  * layer rendering logic to shared Common implementation.
  */
-public class BaseTextureLayer<T extends InternalEntity & GeoEntity> implements IInternalRenderLayer<T> {
+public class BaseTextureLayer<T extends NativeEntity & GeoEntity> implements IInternalRenderLayer<T> {
 
     // -- Fields --
 
