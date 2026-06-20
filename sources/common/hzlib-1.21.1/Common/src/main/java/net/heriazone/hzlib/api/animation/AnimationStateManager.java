@@ -1,6 +1,6 @@
 package net.heriazone.hzlib.api.animation;
 
-import net.heriazone.hzlib.api.entity.InternalEntity;
+import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
 
 import java.util.Random;
@@ -84,7 +84,7 @@ public class AnimationStateManager {
      * @param entity entity to check
      * @return true if attack animation should play
      */
-    public static boolean shouldPlayAttackAnimation(InternalEntity entity) {
+    public static boolean shouldPlayAttackAnimation(NativeEntity entity) {
         return entity.swinging;
     } // shouldPlayAttackAnimation ()
 
@@ -103,7 +103,7 @@ public class AnimationStateManager {
      * @param isMoving  whether the entity is currently moving
      * @return animation name that should be playing
      */
-    public static String getLocomotionAnimation(InternalEntity entity, boolean isMoving) {
+    public static String getLocomotionAnimation(NativeEntity entity, boolean isMoving) {
         AnimationProfile profile = resolveProfile(entity);
 
         // Highest priority: vehicle sitting
@@ -163,7 +163,7 @@ public class AnimationStateManager {
      * <b>Visibility:</b> Public to allow loader-specific {@code InternalAnimation} classes
      * to retrieve the profile for constructing GeckoLib controllers.
      */
-    public static AnimationProfile resolveProfilePublic(InternalEntity entity) {
+    public static AnimationProfile resolveProfilePublic(NativeEntity entity) {
         return resolveProfile(entity);
     } // resolveProfilePublic ()
 
@@ -189,7 +189,7 @@ public class AnimationStateManager {
      * default. If neither resolves, returns {@code null} and the fallback animation name
      * constants in {@link AnimationStateManager} apply.
      */
-    private static AnimationProfile resolveProfile(InternalEntity entity) {
+    private static AnimationProfile resolveProfile(NativeEntity entity) {
         if (entity.nativeEntity == null) return null;
 
         // Step 1: Try the current animator variant key directly in the global registry.

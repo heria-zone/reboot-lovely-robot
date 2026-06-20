@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
  * <b>Architecture:</b> The sequence definition ({@link AnimationSequence}) is stateless
  * and shared. This object holds the mutable runtime state for one entity instance
  * running that sequence. It lives on the entity (in {@code RobotEntity} or
- * {@code InternalEntity}) as a nullable field.
+ * {@code NativeEntity}) as a nullable field.
  * <p>
  * <b>Lifecycle:</b>
  * <ul>
