@@ -48,7 +48,8 @@ public class InternalAnimation {
                 AnimationStateManager.ControllerType.ATTACK.getName(),
                 AnimationStateManager.ATTACK_TRANSITION_TICKS, state -> {
             if (!AnimationStateManager.shouldPlayAttackAnimation(animatable)) {
-                state.getController().forceAnimationReset();
+                // Return STOP without forceAnimationReset — let GeckoLib finish the current
+                // swing naturally rather than aborting it mid-frame.
                 return PlayState.STOP;
             }
 

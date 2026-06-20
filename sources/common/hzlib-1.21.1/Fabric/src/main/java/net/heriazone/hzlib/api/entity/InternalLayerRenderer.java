@@ -93,41 +93,39 @@ public class InternalLayerRenderer<T extends InternalEntity & GeoEntity> extends
                                MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender,
                                float partialTick, int packedLight, int packedOverlay, int color) {
 
-        // Skip layer rendering if we're already rendering layers (prevent recursion from reRender calls)
+        // When this is a reRender call triggered by a layer (isRenderingLayers = true),
+        // the pose stack is already correctly scaled by the outer call — just render the
+        // geometry without touching the pose stack or iterating layers again.
         if (isRenderingLayers) {
             super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer,
                     isReRender, partialTick, packedLight, packedOverlay, color);
             return;
         }
 
-        // First, render the base model normally
+        float scale = animatable.getCurrentScale();
+        if (scale != 1.0f) {
+            poseStack.pushPose();
+            poseStack.scale(scale, scale, scale);
+        }
+
+        // Render the base model
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer,
                 isReRender, partialTick, packedLight, packedOverlay, color);
 
-        // Set flag to prevent recursion when layers call reRender
+        // Render overlay layers — reRender calls from layers re-enter actuallyRender,
+        // which hits the isRenderingLayers guard above and renders without recursing.
         isRenderingLayers = true;
-
         try {
-            // Then render additional layers on top (skip first layer as it's the base texture)
             for (int i = 1; i < renderLayers.size(); i++) {
                 IInternalRenderLayer<T> layer = renderLayers.get(i);
                 if (layer.shouldRender(animatable, partialTick)) {
-                    layer.render(
-                            poseStack,
-                            animatable,
-                            model,
-                            renderType,
-                            bufferSource,
-                            buffer,
-                            partialTick,
-                            packedLight,
-                            packedOverlay
-                    );
+                    layer.render(poseStack, animatable, model, renderType, bufferSource,
+                            buffer, partialTick, packedLight, packedOverlay);
                 }
             }
         } finally {
-            // Always reset flag
             isRenderingLayers = false;
+            if (scale != 1.0f) poseStack.popPose();
         }
     } // actuallyRender()
 

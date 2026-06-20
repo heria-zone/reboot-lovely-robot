@@ -44,6 +44,17 @@ public final class AnimationProfile {
     private final AnimationPool attack;
     private final AnimationPool hurt;
 
+    /**
+     * Playback speed multiplier for the hurt animation controller.
+     * <p>
+     * Values &lt; 1.0 slow the animation down; values &gt; 1.0 speed it up.
+     * Default is {@code 1.0} (no change). Set to {@code animLength / soundDuration}
+     * to make the hurt animation end exactly when the hurt sound ends.
+     * <p>
+     * Example: animation 1.04s, sound 1.36s → speed = 1.04 / 1.36 ≈ 0.765.
+     */
+    private final double hurtAnimationSpeed;
+
     // -- Base Layer --
 
     /** Optional parallel base pose animation (e.g., Gourdragora's {@code pose}). */
@@ -64,6 +75,7 @@ public final class AnimationProfile {
         this.ride   = builder.ride;
         this.attack = builder.attack;
         this.hurt   = builder.hurt;
+        this.hurtAnimationSpeed = builder.hurtAnimationSpeed;
         this.basePoseAnimation  = builder.basePoseAnimation;
         this.specialAnimations  = Collections.unmodifiableMap(new LinkedHashMap<>(builder.specialAnimations));
     } // Constructor: AnimationProfile ()
@@ -125,6 +137,17 @@ public final class AnimationProfile {
      * @return hurt pool, or {@code null} if not configured
      */
     public AnimationPool getHurt()   { return hurt;   } // getHurt ()
+
+    /**
+     * Returns the hurt animation playback speed multiplier.
+     * <p>
+     * Default {@code 1.0}. Set to {@code animLength / soundDuration} via
+     * {@link Builder#hurtSpeed(double)} to synchronise the animation end with the
+     * sound end when the sound is longer than the animation.
+     *
+     * @return speed multiplier (1.0 = normal speed)
+     */
+    public double getHurtAnimationSpeed() { return hurtAnimationSpeed; } // getHurtAnimationSpeed ()
 
     // -- Base Layer Accessor --
 
@@ -220,6 +243,7 @@ public final class AnimationProfile {
         private AnimationPool ride;
         private AnimationPool attack;
         private AnimationPool hurt;
+        private double hurtAnimationSpeed = 1.0;
         private String basePoseAnimation;
         private final Map<String, ISpecialAnimation> specialAnimations = new LinkedHashMap<>();
 
@@ -317,6 +341,25 @@ public final class AnimationProfile {
         /** Sets hurt to the provided pool directly. */
         public Builder hurt(AnimationPool pool)   { this.hurt   = pool; return this; }
 
+        /**
+         * Sets the hurt animation playback speed multiplier.
+         * <p>
+         * Use this to synchronise the hurt animation duration with the hurt sound duration:
+         * <pre>
+         *   speed = animationLength / soundDuration
+         *   e.g.  1.04s animation / 1.36s sound = 0.765
+         * </pre>
+         * The GeckoLib hurt controller will use {@code setAnimationSpeed(speed)},
+         * stretching or compressing the animation so it ends exactly when the sound ends.
+         *
+         * @param speed multiplier (&lt;1.0 slows down, &gt;1.0 speeds up, 1.0 = default)
+         * @return this builder
+         */
+        public Builder hurtSpeed(double speed) {
+            this.hurtAnimationSpeed = speed;
+            return this;
+        } // hurtSpeed ()
+
         // -- Base pose --
 
         /**
@@ -397,6 +440,7 @@ public final class AnimationProfile {
                 ", ride=" + ride +
                 ", attack=" + attack +
                 ", hurt=" + hurt +
+                ", hurtSpeed=" + hurtAnimationSpeed +
                 ", basePose=" + basePoseAnimation +
                 ", specials=" + specialAnimations.keySet() +
                 '}';

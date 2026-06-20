@@ -168,26 +168,60 @@ public class AnimationStateManager {
     } // resolveProfilePublic ()
 
     /**
-     * Resolves the {@link AnimationProfile} from the entity's current animator variant.
+     * Resolves the {@link AnimationProfile} from the entity's current animator variant key.
      * Returns {@code null} if no profile is configured (legacy fallback path).
+     * <p>
+     * <b>Resolution strategy:</b> The entity's {@code ANIMATOR_VARIANT} synced data holds
+     * the current animator key — set at spawn time by either:
+     * <ul>
+     *   <li>{@code AppearanceVariantFeature} entities (e.g. Gourdragora) —
+     *       set via {@code setAnimatorVariant(appearance.getAnimatorKey())}</li>
+     *   <li>{@code AnimatorVariantFeature} entities (e.g. Mushrooms) —
+     *       set via {@code applyBaseAttributes()} default, or biome init</li>
+     * </ul>
+     * In both cases the key points to a {@link StandardAnimatorVariant} in
+     * {@code VariantRegistries.ANIMATORS}. We look it up there directly — this works
+     * for both feature types without any branching on which feature is present.
+     * <p>
+     * <b>Fallback:</b> If the exact key isn't registered (e.g. {@code BiomeAppearanceFeature}
+     * set a texture key as the animator variant), we fall back to the default animator variant
+     * from the {@code AnimatorVariantFeature}, then try {@code AppearanceVariantFeature}'s
+     * default. If neither resolves, returns {@code null} and the fallback animation name
+     * constants in {@link AnimationStateManager} apply.
      */
     private static AnimationProfile resolveProfile(InternalEntity entity) {
         if (entity.nativeEntity == null) return null;
 
-        return entity.nativeEntity
+        // Step 1: Try the current animator variant key directly in the global registry.
+        // Works for both AppearanceVariantFeature and AnimatorVariantFeature entities.
+        String animatorKey = entity.getAnimatorVariant();
+        if (animatorKey != null && !animatorKey.isEmpty()) {
+            var found = net.heriazone.hzlib.api.entity.variants.VariantRegistries.ANIMATORS.get(animatorKey);
+            if (found.isPresent() && found.get() instanceof net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant sav
+                    && sav.hasAnimationProfile()) {
+                return sav.getAnimationProfile();
+            }
+        }
+
+        // Step 2: Fallback — animator key not in registry (e.g. texture key contamination).
+        // Try the default animator variant from AnimatorVariantFeature.
+        var animatorFeatureProfile = entity.nativeEntity
                 .getFeature(net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature.class)
-                .map(feature -> {
-                    String variantKey = entity.getAnimatorVariant();
-                    var variant = feature.getAvailableVariants(entity.nativeEntity.getKey())
-                            .stream()
-                            .filter(v -> v.getKey().equals(variantKey))
-                            .findFirst()
-                            .orElse(null);
-                    if (variant instanceof net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant sav) {
-                        return sav.getAnimationProfile();
-                    }
-                    return null;
-                })
+                .map(feature -> feature.getDefaultVariant(entity.nativeEntity.getKey()))
+                .filter(v -> v instanceof net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant)
+                .map(v -> ((net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant) v).getAnimationProfile())
+                .orElse(null);
+        if (animatorFeatureProfile != null) return animatorFeatureProfile;
+
+        // Step 3: Fallback — try the default appearance's animator key for AppearanceVariantFeature entities.
+        return entity.nativeEntity
+                .getFeature(net.heriazone.hzlib.api.entity.features.variants.AppearanceVariantFeature.class)
+                .map(feature -> feature.getDefaultVariant(entity.nativeEntity.getKey()))
+                .map(appearance -> net.heriazone.hzlib.api.entity.variants.VariantRegistries.ANIMATORS
+                        .get(appearance.getAnimatorKey())
+                        .filter(v -> v instanceof net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant)
+                        .map(v -> ((net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant) v).getAnimationProfile())
+                        .orElse(null))
                 .orElse(null);
     } // resolveProfile ()
 
