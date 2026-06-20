@@ -1,10 +1,17 @@
 package net.heriazone.hzlib.api.entity;
 
+import net.heriazone.hzlib.api.entity.features.FoodFeature;
+import net.heriazone.hzlib.api.entity.features.SizeVariantFeature;
+import net.heriazone.hzlib.api.entity.features.exchange.ExchangeFeature;
+import net.heriazone.hzlib.api.entity.features.exchange.ExchangeState;
+import net.heriazone.hzlib.api.entity.features.overlay.OverlayFeature;
+import net.heriazone.hzlib.api.entity.features.overlay.OverlaySlot;
 import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
 import net.heriazone.hzlib.api.entity.internal.InternalLogic;
 import net.heriazone.hzlib.api.entity.internal.InternalParticle;
+import net.heriazone.hzlib.api.entity.variants.VariantRegistries;
 import net.heriazone.hzlib.api.entity.variants.interfaces.IAnimatorVariant;
 import net.heriazone.hzlib.api.entity.variants.interfaces.IModelVariant;
 import net.heriazone.hzlib.api.entity.variants.interfaces.ITextureVariant;
@@ -38,6 +45,9 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -117,6 +127,58 @@ public abstract class InternalEntity extends TamableAnimal {
      */
     public InternalEntityType<?> nativeEntity;
 
+    // -- Exchange State --
+
+    /**
+     * <p>Per-entity runtime state for {@link ExchangeFeature}.<p>
+     * <p>
+     * <b>Architecture:</b> Holds per-player sequence buffers and per-rule cooldown
+     * expiry ticks. Stateless feature declaration lives on {@code nativeEntity};
+     * this object holds the mutable instance-level tracking.
+     * <p>
+     * <b>Lifecycle:</b> Created eagerly — always present, even if the entity type
+     * has no {@link ExchangeFeature} registered. This avoids null checks at interaction
+     * time and costs nothing at rest (both maps start empty).
+     */
+    protected final ExchangeState exchangeState = new ExchangeState();
+
+    // -- Overlay Slot State --
+
+    /**
+     * <p>Pre-declared synced data accessors for persistent overlay slots.<p>
+     * <p>
+     * <b>Why static pre-declaration:</b> Minecraft requires ALL {@code SynchedEntityData}
+     * accessors to be registered via {@link SynchedEntityData.Builder#define} inside
+     * {@link #defineSynchedData} — before the entity is fully constructed. Calling
+     * {@link SynchedEntityData#defineId} after {@code super()} returns causes
+     * {@link IllegalStateException} because the data map is locked at that point.
+     * <p>
+     * <b>Subclass responsibility:</b> Subclasses that use {@link OverlayFeature} must
+     * declare their own static pool (e.g., on {@code MonsterEntity}) and register each
+     * accessor in their {@code defineSynchedData} override. The pool is <em>not</em>
+     * declared here on {@code InternalEntity} to avoid shifting synced data IDs for
+     * robot entities (which do not yet use {@code OverlayFeature}).
+     * <p>
+     * {@link #registerOverlayData()} reads {@link #getOverlaySlotPool()} to map slot
+     * keys to pre-declared accessors at construction time.
+     */
+    private final Map<String, EntityDataAccessor<String>> overlaySlotAccessors = new HashMap<>();
+
+    /**
+     * Returns the ordered pool of pre-declared {@code SynchedEntityData<String>} accessors
+     * available for persistent overlay slots. The pool must be declared as static fields on
+     * the concrete subclass and registered in {@code defineSynchedData()}.
+     * <p>
+     * Override this in subclasses that declare overlay slots (e.g., {@code MonsterEntity}).
+     * The base implementation returns an empty list — overlay slots are silently skipped
+     * for entity classes that do not override this method.
+     *
+     * @return ordered list of pre-declared accessors; first persistent slot maps to index 0
+     */
+    protected List<EntityDataAccessor<String>> getOverlaySlotPool() {
+        return List.of();
+    } // getOverlaySlotPool ()
+
     // -- Combat State (shared by robots and monsters) --
 
     /**
@@ -149,7 +211,7 @@ public abstract class InternalEntity extends TamableAnimal {
      * Creates the entity. Subclasses must set {@link #nativeEntity} and call
      * {@link #applyBaseAttributes()} after construction.
      *
-     * @param entityType Minecraft entity type
+     * @param entityType Minecraft's entity type
      * @param world      world instance
      */
     protected InternalEntity(EntityType<? extends TamableAnimal> entityType, Level world) {
@@ -187,6 +249,97 @@ public abstract class InternalEntity extends TamableAnimal {
         itemEntity.setDefaultPickUpDelay();
         this.level().addFreshEntity(itemEntity);
     } // dropItemAtLocation ()
+
+    // -- Overlay Slot API --
+
+    /**
+     * Maps slot keys from this entity's {@link OverlayFeature} to the pre-declared
+     * {@link #OVERLAY_SLOT_POOL} accessors, then initialises each to its default value.
+     * <p>
+     * <b>Must be called</b> after {@link #nativeEntity} is set (constructor body, after
+     * {@code super()} returns). It does NOT call {@code defineId} — the accessors are
+     * already registered via {@link #defineSynchedData}. It only maps keys → pool entries
+     * and writes the default empty-string value.
+     * <p>
+     * Silently skips any persistent slots beyond the pool size — log a warning if this
+     * ever triggers so the pool can be extended.
+     */
+    protected void registerOverlayData() {
+        if (nativeEntity == null) return;
+        List<EntityDataAccessor<String>> pool = getOverlaySlotPool();
+        nativeEntity.getFeature(OverlayFeature.class).ifPresent(feature -> {
+            List<OverlaySlot> persistent = feature.getPersistentSlots();
+            for (int i = 0; i < persistent.size(); i++) {
+                if (i >= pool.size()) {
+                    System.err.println("[HZLib] WARNING: OverlayFeature on " + nativeEntity.getKey()
+                            + " declares " + persistent.size() + " persistent slots but pool only has "
+                            + pool.size() + ". Slot '" + persistent.get(i).getKey() + "' will not be synced.");
+                    break;
+                }
+                String key = persistent.get(i).getKey();
+                EntityDataAccessor<String> accessor = pool.get(i);
+                overlaySlotAccessors.put(key, accessor);
+                entityData.set(accessor, persistent.get(i).getDefault());
+            }
+        });
+    } // registerOverlayData ()
+
+    /**
+     * Returns the currently active texture path for a persistent overlay slot.
+     * <p>
+     * <b>Clients:</b> Called by the renderer every frame to resolve the texture.
+     * <b>Server:</b> Called by {@link #cycleOverlaySlot(String)} and interaction handlers.
+     * <p>
+     * Returns {@code ""} (no render pass) for unknown keys and for
+     * CONDITIONAL / ALWAYS slots (which have no persistent state).
+     *
+     * @param slotKey slot key constant (e.g., {@code MandrakeType.SLOT_HAIR})
+     * @return active texture path, or empty string
+     */
+    public String getOverlaySlot(String slotKey) {
+        EntityDataAccessor<String> accessor = overlaySlotAccessors.get(slotKey);
+        if (accessor == null) return "";
+        try { return entityData.get(accessor); }
+        catch (Exception ignored) { return ""; }
+    } // getOverlaySlot ()
+
+    /**
+     * Sets the active texture path for a persistent overlay slot.
+     * <p>
+     * <b>Call sites:</b>
+     * <ul>
+     *   <li>{@code initializeSpawnVariants} — sets RANDOM slots at spawn</li>
+     *   <li>Interaction handlers — advances INTERACTIVE slots on player tool use</li>
+     * </ul>
+     * Silently ignores unknown slot keys.
+     *
+     * @param slotKey     slot key constant
+     * @param texturePath new active texture path (empty string = no render pass)
+     */
+    public void setOverlaySlot(String slotKey, String texturePath) {
+        EntityDataAccessor<String> accessor = overlaySlotAccessors.get(slotKey);
+        if (accessor == null) return;
+        entityData.set(accessor, texturePath != null ? texturePath : "");
+    } // setOverlaySlot ()
+
+    /**
+     * Advances an INTERACTIVE overlay slot to the next texture in its pool, cycling at
+     * the end. Convenience wrapper combining {@link OverlaySlot#cycleNext(String)} with
+     * {@link #setOverlaySlot(String, String)}.
+     * <p>
+     * No-op if the slot key is unknown or the entity type has no {@link OverlayFeature}.
+     *
+     * @param slotKey slot key constant (e.g., {@code GourdragoraType.SLOT_CARVING})
+     */
+    public void cycleOverlaySlot(String slotKey) {
+        if (nativeEntity == null) return;
+        nativeEntity.getFeature(OverlayFeature.class).ifPresent(feature -> {
+            OverlaySlot slot = feature.getSlot(slotKey);
+            if (slot == null) return;
+            String current = getOverlaySlot(slotKey);
+            setOverlaySlot(slotKey, slot.cycleNext(current));
+        });
+    } // cycleOverlaySlot ()
 
     // -- Attribute Creation --
 
@@ -555,7 +708,10 @@ public abstract class InternalEntity extends TamableAnimal {
     public ResourceLocation getCurrentTexture() {
         if (nativeEntity == null) return null;
         ITextureVariant variant = nativeEntity.getTextureVariant(nativeEntity.getKey(), getTextureVariant());
-        return variant != null ? variant.getResource(nativeEntity.getKey()) : null;
+        if (variant != null) return variant.getResource(nativeEntity.getKey());
+        return VariantRegistries.TEXTURES.get(getTextureVariant())
+                .map(v -> v.getResource(getTextureVariant()))
+                .orElse(null);
     } // getCurrentTexture ()
 
     /**
@@ -565,7 +721,10 @@ public abstract class InternalEntity extends TamableAnimal {
     public ResourceLocation getCurrentModel() {
         if (nativeEntity == null) return null;
         IModelVariant variant = nativeEntity.getModelVariant(nativeEntity.getKey(), getModelVariant());
-        return variant != null ? variant.getResource(nativeEntity.getKey()) : null;
+        if (variant != null) return variant.getResource(nativeEntity.getKey());
+        return VariantRegistries.MODELS.get(getModelVariant())
+                .map(v -> v.getResource(getModelVariant()))
+                .orElse(null);
     } // getCurrentModel ()
 
     /**
@@ -575,8 +734,19 @@ public abstract class InternalEntity extends TamableAnimal {
     public ResourceLocation getCurrentAnimator() {
         if (nativeEntity == null) return null;
         IAnimatorVariant variant = nativeEntity.getAnimatorVariant(nativeEntity.getKey(), getAnimatorVariant());
-        return variant != null ? variant.getResource(nativeEntity.getKey()) : null;
+        if (variant != null) return variant.getResource(nativeEntity.getKey());
+        return VariantRegistries.ANIMATORS.get(getAnimatorVariant())
+                .map(v -> v.getResource(getAnimatorVariant()))
+                .orElse(null);
     } // getCurrentAnimator ()
+
+    public float getCurrentScale() {
+        if (nativeEntity == null || !nativeEntity.hasFeature(SizeVariantFeature.class)) return 1.0f;
+
+        return nativeEntity.getFeature(SizeVariantFeature.class)
+                .map(f -> f.getConfig(getModelVariant()).getScale())
+                .orElse(1.0f);
+    } // getCurrentScale ()
 
     // -- Variant Validation --
 
@@ -584,21 +754,21 @@ public abstract class InternalEntity extends TamableAnimal {
         if (nativeEntity == null || variantKey == null) return false;
         return nativeEntity.getFeature(TextureVariantFeature.class)
                 .map(f -> f.hasVariant(nativeEntity.getKey(), variantKey))
-                .orElse(false);
+                .orElseGet(() -> VariantRegistries.TEXTURES.contains(variantKey));
     } // isValidTextureVariant ()
 
     protected boolean isValidModelVariant(String variantKey) {
         if (nativeEntity == null || variantKey == null) return false;
         return nativeEntity.getFeature(ModelVariantFeature.class)
                 .map(f -> f.hasVariant(nativeEntity.getKey(), variantKey))
-                .orElse(false);
+                .orElseGet(() -> VariantRegistries.MODELS.contains(variantKey));
     } // isValidModelVariant ()
 
     protected boolean isValidAnimatorVariant(String variantKey) {
         if (nativeEntity == null || variantKey == null) return false;
         return nativeEntity.getFeature(AnimatorVariantFeature.class)
                 .map(f -> f.hasVariant(nativeEntity.getKey(), variantKey))
-                .orElse(false);
+                .orElseGet(() -> VariantRegistries.ANIMATORS.contains(variantKey));
     } // isValidAnimatorVariant ()
 
     // -- Navigation --
@@ -678,6 +848,14 @@ public abstract class InternalEntity extends TamableAnimal {
             IAnimatorVariant v = f.getRandomVariant(nativeEntity.getKey());
             if (v != null) setAnimatorVariant(v.getKey());
         });
+
+        // Seed RANDOM overlay slots — pick once at spawn, persist via SynchedEntityData.
+        // INTERACTIVE slots start at their declared default (index 0, typically empty string).
+        // CONDITIONAL / ALWAYS slots require no persistent state — skipped here.
+        nativeEntity.getFeature(net.heriazone.hzlib.api.entity.features.overlay.OverlayFeature.class)
+                .ifPresent(feature -> feature.getSlots().stream()
+                        .filter(s -> s.getMode() == net.heriazone.hzlib.api.entity.features.overlay.SlotMode.RANDOM)
+                        .forEach(s -> setOverlaySlot(s.getKey(), s.pickRandom())));
     } // initializeRandomVariants ()
 
     // -- NBT Serialization --
@@ -690,6 +868,19 @@ public abstract class InternalEntity extends TamableAnimal {
         nbt.putString("ModelVariant",      getModelVariant());
         nbt.putString("AnimatorVariant",   getAnimatorVariant());
         nbt.putBoolean("NotificationEnabled", isNotificationEnabled());
+
+        // Exchange cooldowns (sequence buffers are intentionally not persisted)
+        CompoundTag exchangeTag = new CompoundTag();
+        exchangeState.save(exchangeTag);
+        if (!exchangeTag.isEmpty()) nbt.put("ExchangeState", exchangeTag);
+
+        // Persistent overlay slots (RANDOM + INTERACTIVE only)
+        if (!overlaySlotAccessors.isEmpty()) {
+            CompoundTag overlayTag = new CompoundTag();
+            overlaySlotAccessors.keySet().forEach(key ->
+                    overlayTag.putString(key, getOverlaySlot(key)));
+            nbt.put("OverlaySlots", overlayTag);
+        }
     } // addAdditionalSaveData ()
 
     @Override
@@ -709,6 +900,17 @@ public abstract class InternalEntity extends TamableAnimal {
 
         if (nbt.contains("ModelVariant"))    setModelVariant(nbt.getString("ModelVariant"));
         if (nbt.contains("AnimatorVariant")) setAnimatorVariant(nbt.getString("AnimatorVariant"));
+
+        // Exchange cooldowns
+        if (nbt.contains("ExchangeState")) exchangeState.load(nbt.getCompound("ExchangeState"));
+
+        // Persistent overlay slots — restore into registered accessors.
+        // Falls back to the slot's declared default (first pool entry) for any key absent from
+        // the save (old-save entities that predate OverlayFeature, or a new slot was added).
+        if (nbt.contains("OverlaySlots")) {
+            CompoundTag overlayTag = nbt.getCompound("OverlaySlots");
+            overlayTag.getAllKeys().forEach(key -> setOverlaySlot(key, overlayTag.getString(key)));
+        }
     } // readAdditionalSaveData ()
 
     /**
@@ -754,18 +956,90 @@ public abstract class InternalEntity extends TamableAnimal {
     } // mobInteract ()
 
     /**
-     * Handles interactions common to all entity types (e.g., taming food).
-     * Override to add shared interaction logic before type-specific handling.
+     * Handles interactions common to all entity types.
+     * <p>
+     * <b>Final — do not override.</b> The exchange feature is guaranteed to run here
+     * before anything else. Subclasses add common interaction logic by overriding
+     * {@link #onCommonInteraction(Player, InteractionHand, ItemStack)} instead.
+     * <p>
+     * <b>Pipeline:</b>
+     * <ol>
+     *   <li>{@link ExchangeFeature} — evaluated first, always</li>
+     *   <li>{@link #onCommonInteraction} — subclass hook for taming food, etc.</li>
+     * </ol>
      */
-    protected InteractionResult handleCommonInteractions(Player player, InteractionHand hand, ItemStack stack) {
-        return InteractionResult.PASS;
+    protected final InteractionResult handleCommonInteractions(Player player, InteractionHand hand, ItemStack stack) {
+        // Exchange feature — always runs first, for every entity in every mod
+        InteractionResult exchangeResult = handleExchangeInteraction(player, stack);
+        if (exchangeResult != InteractionResult.PASS) return exchangeResult;
+
+        // Delegate to the subclass hook
+        return onCommonInteraction(player, hand, stack);
     } // handleCommonInteractions ()
+
+    /**
+     * Subclass hook for common interaction logic.
+     * <p>
+     * <b>Override this, not {@link #handleCommonInteractions}.</b> The exchange feature
+     * has already been evaluated by the time this method is called. Returning anything
+     * other than {@code PASS} short-circuits the interaction chain.
+     * <p>
+     * <b>Default behavior:</b> Handles taming via {@link FoodFeature}. If the entity
+     * type has a {@link FoodFeature} registered and the held item is a declared food,
+     * and the entity is not yet tamed, a taming attempt is made. The item is always
+     * consumed. Heart particles play on success; ash particles play on failure. Both
+     * particles and sounds are configurable via {@link FoodFeature.TamingFeedback}.
+     * <p>
+     * Robot entities are unaffected — {@code RobotEntity} has no {@link FoodFeature}
+     * and is tamed via {@code handleTame()} from item use, not right-click feeding.
+     *
+     * @param player interacting player
+     * @param hand   interaction hand
+     * @param stack  item the player is holding
+     * @return {@code PASS} to continue, or a consuming result to stop the chain
+     */
+    protected InteractionResult onCommonInteraction(Player player, InteractionHand hand, ItemStack stack) {
+        if (nativeEntity == null || level().isClientSide) return InteractionResult.PASS;
+
+        // Taming food — probabilistic, item always consumed, feedback played
+        nativeEntity.getFeature(FoodFeature.class).ifPresent(food -> {
+            if (!isTame() && food.isFood(stack)) {
+                boolean tamed = food.attemptTame(this, player, stack);
+                if (tamed) handleTame(player);
+            }
+        });
+
+        return InteractionResult.PASS;
+    } // onCommonInteraction ()
 
     /**
      * Handles entity-type-specific interactions.
      * Subclasses must implement (robot commands, monster feeding, etc.).
      */
     protected abstract InteractionResult handleSpecificInteractions(Player player, InteractionHand hand, ItemStack stack);
+
+    /**
+     * Handles item exchanges declared via {@link ExchangeFeature} on this entity's type.
+     * <p>
+     * <b>Architecture:</b> Called from {@link #handleCommonInteractions} before
+     * type-specific handling. Delegates to {@link ExchangeFeature#tryExchange} which
+     * owns all sequence buffer and cooldown logic.
+     * <p>
+     * <b>Server-only:</b> Returns {@code PASS} immediately on the client side.
+     *
+     * @param player interacting player
+     * @param stack  item the player is holding
+     * @return {@code SUCCESS} if an exchange fired, {@code CONSUME} if item was accepted
+     *         into a partial sequence, or {@code PASS} if no rule matched
+     */
+    protected InteractionResult handleExchangeInteraction(Player player, ItemStack stack) {
+        if (level().isClientSide) return InteractionResult.PASS;
+        if (nativeEntity == null)  return InteractionResult.PASS;
+
+        return nativeEntity.getFeature(ExchangeFeature.class)
+                .map(feature -> feature.tryExchange(this, player, stack, exchangeState))
+                .orElse(InteractionResult.PASS);
+    } // handleExchangeInteraction ()
 
     /**
      * Handles dye/item texture interaction. Override in robot entities to apply
@@ -791,11 +1065,17 @@ public abstract class InternalEntity extends TamableAnimal {
     } // canInteractWithItems ()
 
     /**
-     * Handles taming — sets ownership, spawns particles, plays sound, registers entity.
+     * Handles taming — sets ownership, shows message, registers entity.
      * <p>
      * <b>Architecture:</b> Generic taming flow shared by all tameable entity types.
      * Calls the abstract {@link #registerRobot()} hook so subclasses can register
      * in their respective registry systems.
+     * <p>
+     * <b>Visual/audio feedback:</b> Not played here — this base implementation is
+     * intentionally silent and particle-free so monster entities receive feedback
+     * only from {@link net.heriazone.hzlib.api.entity.features.FoodFeature.TamingFeedback},
+     * not from robot-specific effects. Robot-specific feedback (Poof particles, totem
+     * sound) is added by overriding this method in lovelylib's {@code RobotEntity}.
      * <p>
      * <b>Display:</b> Override {@link #displayTameMessage(Player)} to show a
      * mod-specific owner message after taming.
@@ -806,14 +1086,6 @@ public abstract class InternalEntity extends TamableAnimal {
         this.tame(player);
         this.setTame(true, false);
         this.setOrderedToSit(false);
-
-        // Spawn POOF particles (spawn effect)
-        InternalParticle.Poof(this);
-
-        // Play spawn sound — volume scales with entity size
-        float volume = (float) Math.max(0.5F, Math.min(2.0F, this.getBbWidth() * this.getBbHeight()));
-        this.level().playSound(null, this.blockPosition(),
-                SoundEvents.TOTEM_USE, SoundSource.NEUTRAL, volume, 1.2F);
 
         displayTameMessage(player);
         registerRobot();

@@ -44,6 +44,14 @@ public class VariantRegistries {
      */
     public static final VariantRegistry<IAnimatorVariant> ANIMATORS = new VariantRegistry<>(IAnimatorVariant.class);
 
+    /**
+     * Registry for entity appearances.
+     * <p>
+     * <b>Usage:</b> Register entity appearances during mod initialization.
+     * Used by entity types to resolve appearance resources.
+     */
+    public static final VariantRegistry<IAppearanceVariant> APPEARANCES = new VariantRegistry<>(IAppearanceVariant.class);
+
     // -- Private Constructor --
 
     /**

@@ -1,12 +1,15 @@
 package net.heriazone.hzlib.api.entity.features;
 
+import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementType;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.Heightmap;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>Manages spawn configuration for entity world generation.</p>
@@ -24,12 +27,22 @@ public class SpawnFeature {
 
     // -- Variables --
 
-    private final int weight;
-    private final int minGroupSize;
-    private final int maxGroupSize;
-    private final List<ResourceKey<Biome>> biomes;
+    private MobCategory category;
+    private int weight;
+    private int minGroupSize;
+    private int maxGroupSize;
+    private List<ResourceKey<Biome>> biomes;
+
+    private boolean hasPlacement;
+    private SpawnPlacementType placement;
+    private Heightmap.Types heightmap;
+    private SpawnPlacements.SpawnPredicate<? extends Mob> spawnPredicate;
 
     // -- Constructors --
+
+    public SpawnFeature() {} // Constructor: SpawnFeature ()
+
+    // -- Custom Methods --
 
     /**
      * Creates spawn feature with specified configuration.
@@ -44,8 +57,8 @@ public class SpawnFeature {
      * @param maxGroup maximum entities per spawn group (clamped to >= 0)
      * @param biomes biomes where entity can spawn (varargs)
      */
-    @SafeVarargs
-    public SpawnFeature(int weight, int minGroup, int maxGroup, ResourceKey<Biome>... biomes) {
+    public SpawnFeature withModifications(MobCategory category, int weight, int minGroup, int maxGroup, ResourceKey<Biome>... biomes) {
+        this.category = category;
         this.weight = Math.max(0, weight);
 
         // Ensure min <= max by swapping if necessary
@@ -58,9 +71,23 @@ public class SpawnFeature {
         this.biomes = biomes != null && biomes.length > 0
                 ? new ArrayList<>(Arrays.asList(biomes))
                 : new ArrayList<>();
-    } // Constructor: SpawnFeature ()
+
+        return this;
+    } // withModifications ()
+
+    public SpawnFeature withPlacements(SpawnPlacementType placement, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<? extends Mob> spawnPredicate) {
+        this.hasPlacement = true;
+        this.placement = placement;
+        this.heightmap = heightmap;
+        this.spawnPredicate = spawnPredicate;
+        return this;
+    } // withPlacements ()
 
     // -- Accessors --
+
+    public MobCategory getCategory() {
+        return this.category;
+    } // getCategory ()
 
     /**
      * Returns spawn weight.
@@ -107,5 +134,21 @@ public class SpawnFeature {
     public List<ResourceKey<Biome>> getBiomes() {
         return Collections.unmodifiableList(this.biomes);
     } // getBiomes ()
+
+    public boolean hasPlacement() {
+        return this.hasPlacement;
+    } // getPlacement ()
+
+    public SpawnPlacementType getPlacement() {
+        return this.placement;
+    } // getPlacement ()
+
+    public Heightmap.Types getHeightmap() {
+        return this.heightmap;
+    } // getHeightmap ()
+
+    public SpawnPlacements.SpawnPredicate<? extends Mob> getSpawnPredicate() {
+        return this.spawnPredicate;
+    } // getSpawnPredicate ()
 
 } // Class: SpawnFeature

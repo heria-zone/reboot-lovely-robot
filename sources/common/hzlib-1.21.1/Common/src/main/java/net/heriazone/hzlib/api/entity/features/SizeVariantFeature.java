@@ -6,7 +6,7 @@ import net.minecraft.world.entity.Pose;
 import java.util.*;
 
 /**
- * Carries per-size configuration for entities with size-based appearance variants.
+ * Carries per-size configuration for entities with size-based entity appearances.
  * <p>
  * <b>Architecture:</b> Attached to an entity type's feature set. The entity reads
  * its current {@code MODEL_VARIANT} key (e.g., {@code "mini"}, {@code "default"},
