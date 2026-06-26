@@ -76,13 +76,20 @@ Appearance is pure presentation. Changing a robot's color does not affect its co
 
 | Entity | Appearances | Mechanism |
 |---|---|---|
-| Any Robot | 16 dye colors (`white`, `orange`, `magenta`, ...) | `TextureVariantFeature` 16-color palette |
+| Any Robot | 16 dye colors (`white`, `orange`, `magenta`, ...) | Lane A — `TextureVariantFeature` 16-color palette |
 | Mandrake Flower | Hairstyle (straight, curly, short, long) | `OverlayFeature` RANDOM slot — chosen at spawn, persisted |
 | Gourdragora | Carving pattern (uncarved, smile, scary, star) | `OverlayFeature` INTERACTIVE slot — changed by player with shears |
 | Any Monster | Seasonal costume (Halloween, Christmas) | `OverlayFeature` CONDITIONAL slot — computed from real-world month |
-| Robot Bunny | Armed / unarmed model | `ModelVariantFeature` — two model states |
+| Robot Bunny | Armed / unarmed model | Lane A — `ModelVariantFeature` two model states |
+| Gourdragora Golden | Mini / Default / Big with matched texture per size | Lane B — `CompositeAppearanceFeature` fully-coupled bundle |
 
-**In code:** Appearances are resolved through `TextureVariantFeature` (color palette and texture swaps), `ModelVariantFeature` (model state), `AnimatorVariantFeature` (animation file), and `OverlayFeature` (layered overlay textures). None of these affect stats, AI, or entity identity.
+**In code:** Appearances are implemented through two mutually exclusive lanes:
+
+- **Lane A — Independent axes**: `TextureVariantFeature` (color palette and texture swaps), `ModelVariantFeature` (model state), `AnimatorVariantFeature` (animation file). Each axis varies independently — 16 colors × 2 model states = 32 combinations with only 18 declarations. Used by all robots and most monsters.
+
+- **Lane B — Composite**: `CompositeAppearanceFeature` bundles texture, model, animator, and optional hitbox/scale config into explicitly-named appearance entries. Used when the dimensions are fully coupled and no free combination is valid — Gourdragora (size × color) is the canonical example.
+
+`OverlayFeature` (layered overlay textures for hair, carvings, seasonal costumes) is orthogonal to both lanes and can be combined with either. None of these affect stats, AI, or entity identity.
 
 ---
 
@@ -126,6 +133,11 @@ These are **not duplicates**. They are distinct families registered by distinct 
 | GeckoLib animation factory | `NativeAnimation` | `net.heriazone.hzlib.api.entity` *(loader)* |
 | GeckoLib GeoModel base | `NativeModel<T>` | `net.heriazone.hzlib.api.entity` *(loader)* |
 | GeckoLib renderer base | `NativeRenderer<T>` | `net.heriazone.hzlib.api.entity` *(loader)* |
+| Lane A shared base | `AbstractVariantFeature<V>` | `net.heriazone.hzlib.api.entity.features.variants` |
+| Lane A — texture axis | `TextureVariantFeature` | `net.heriazone.hzlib.api.entity.features.variants` |
+| Lane A — model axis | `ModelVariantFeature` | `net.heriazone.hzlib.api.entity.features.variants` |
+| Lane A — animator axis | `AnimatorVariantFeature` | `net.heriazone.hzlib.api.entity.features.variants` |
+| Lane B — composite appearance | `CompositeAppearanceFeature` | `net.heriazone.hzlib.api.entity.features.variants` |
 
 ### LovelyLib (robot layer)
 
@@ -187,6 +199,8 @@ For orientation when reading older code, ADRs, or commit history that predates t
 | `SlimeType` | `SlimeFamily` |
 | `SpookType` | `SpookFamily` |
 | `WispType` | `WispFamily` |
+| `AppearanceVariantFeature` | `CompositeAppearanceFeature` |
+| `IAppearanceVariant` | `ICompositeAppearance` |
 
 ---
 
@@ -213,9 +227,14 @@ How a new entity goes from concept to code, following the terminology:
       e.g., MandrakeFamily.CHORUS, MandrakeFamily.FLOWER, MandrakeFamily.FRUCTUS
 
 5. Define Appearances (visual-only differences within a variant)
-   └─ TextureVariantFeature       — texture key palette
-   └─ ModelVariantFeature         — model state (e.g., armed/unarmed)
-   └─ OverlayFeature              — layered overlay slots (hair, carvings, costumes)
+   Lane A — independent axes (combinatorial, no explicit combinations needed):
+   └─ TextureVariantFeature        — texture key palette (e.g. 16 dye colors)
+   └─ ModelVariantFeature          — model state (e.g., armed/unarmed)
+   └─ AnimatorVariantFeature       — animation file
+   Lane B — composite (fully coupled, every combination declared explicitly):
+   └─ CompositeAppearanceFeature   — named bundles: texture + model + animator + optional size config
+   Both lanes — orthogonal overlay system:
+   └─ OverlayFeature               — layered overlay slots (hair, carvings, costumes)
 ```
 
 ---
