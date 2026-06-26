@@ -1,7 +1,7 @@
 # Sprint Planning - LovelyRobot Project (Updated)
 
 **Status**: Active
-**Last Updated**: 2026-06-20
+**Last Updated**: 2026-06-26
 **Project**: LovelyRobot Multi-Variant Minecraft Mod Ecosystem
 **Related Documents**:
 - [CURRENT_STATE.md](CURRENT_STATE.md) - Current implementation status
@@ -86,21 +86,36 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 - Multi-loader testing (Forge + Fabric + NeoForge)
 
 #### Sprint 09: Ecosystem Terminology & Rename System
-**Dates**: 2026-06-20 to 2026-07-04  
-**Story Points**: 44  
+**Dates**: 2026-06-20 to 2026-06-26  
+**Story Points**: 10 of 44 (Phase 1 complete; Phases 2–7 deferred)  
 **Theme**: Execute ADR_018 — rename all `Internal*` classes across the ecosystem to align with canonical Family / Variant / Appearance terminology  
 **Source ADR**: ADR_018  
-**Task File**: `docs/development/sprints/active/SPRINT_09_TASK.md`  
+**Task File**: `docs/development/sprints/archive/[COMPLETED]_SPRINT_09_Ecosystem_Terminology_Rename_Phase1_2026-06-26.md`  
 **Major Deliverables**:
-- `InternalEntity` → `NativeEntity` (HZLib Common)
-- `InternalEntityType<T>` → `NativeEntityFamily<T>` (HZLib Common)
-- `InternalLogic` → `EntityLogic`, `InternalParticle` → `EntityParticles` (HZLib Common)
-- `InternalAnimation` → `NativeAnimation`, `InternalModel` → `NativeModel`, `InternalLayerRenderer` → `NativeRenderer` (HZLib loaders)
-- `NativeEntityType` → `RobotFamily`, `LovelyRobotType` → `RobotFamilyRegistry`, `EntityVariant` → `RobotVariant` (LovelyLib Common)
-- `InternalAnimation` → `RobotAnimation` (LovelyLib loaders)
-- `LegacyRobotType` → `LegacyRobotFamilies`, `RebootRobotType` → `RebootRobotFamilies`, `TributeRobotType` → `TributeRobotFamilies` (LovelyLib registries)
-- `NativeEntityType<T>` → `MonstersFamily<T>` and all nine concrete `*Type` → `*Family` (Monsters & Girls)
-- Full build verification (0 errors across all projects) and runtime smoke test
+- `InternalEntity` → `NativeEntity` (HZLib Common) ✅
+- `InternalEntityType<T>` → `NativeEntityFamily<T>` (HZLib Common) ✅
+- `InternalLogic` → `EntityLogic`, `InternalParticle` → `EntityParticles` (HZLib Common) ✅
+- Common `InternalLayerRenderer<T>` → `LayerRenderPipeline<T>` (HZLib Common) ✅
+- HZLib loader renames, LovelyLib renames, Monsters & Girls renames — **deferred**
+
+#### Sprint 10: Monsters & Girls Feature Implementation
+**Dates**: 2026-06-20 to 2026-06-26  
+**Story Points**: 57  
+**Theme**: Belly system redesign, emissive layer standardisation, entity family registration fixes, new Fluffball variant, Puffball puff-jump, Snowball throwing, Molten campfire cooking, Gourdragora hunger watch + spawn weight, Mandrake Fructus ceiling planting  
+**Feature Notes**: `docs/development/notes/feature-implementations/MonsterGirls_Feature_Implementation_Notes.md`  
+**Task File**: `docs/development/sprints/archive/[COMPLETED]_SPRINT_10_Monsters_Girls_Feature_Implementation_2026-06-26.md`  
+**Major Deliverables**:
+- `BellyLevel` enum + `BellyFeature` — new HZLib feature replacing the old `HAS_BELLY` boolean ✅
+- `BELLY_LEVEL` int on `MonsterEntity` — 5-level progression (SLIM/CHUBBY/TUMMY/INFLATED/CHUNKY) ✅
+- Emissive texture standardisation — all emissives moved to `layer/` with `_emissive.png` suffix ✅
+- Wisp + Spook + Mushroom Warped — registration fixes, belly overlays, emissive ALWAYS slots ✅
+- Puffball emissive + autonomous puff-jump; Fluffball — new flying End mushroom variant ✅
+- Snowball Mushroom — `RangedAttackMob` + `RangedAttackGoal` throwing vanilla snowballs ✅
+- Mushroom Molten — campfire cooking (4 slots, `CampfireCookingRecipe`, `CookingItemLayer`) ✅
+- Gourdragora — spawn weight 40/40/20 (Mini/Default/Big) + pumpkin pie hunger-watch drop ✅
+- Mandrake Fructus — ceiling Glow Berry planting via `PlantDirection.UP` ✅
+- `RangedAttackFeature` in HZLib Common + `MandrakeSpitProjectile` (Chorus poison spit) ✅
+- Friendly-fire prevention — `NativeEntity.wantsToAttack()` + projectile same-owner check ✅
 
 ---
 
@@ -248,37 +263,72 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 
 ## Current Sprint
 
-### Sprint 09: Ecosystem Terminology & Rename System
-**Status**: 🔄 ACTIVE  
-**Dates**: 2026-06-20 to 2026-07-04  
-**Sprint Goal**: Execute ADR_018 — rename all `Internal*` classes across HZLib, LovelyLib, and Monsters & Girls to align with the canonical Family / Variant / Appearance terminology. Every class name must reflect its tier and role after this sprint.
-
-**Story Points**: 44 (7 phases)
-
-**Source ADR**: `docs/development/decisions/ADR_018_Ecosystem_Terminology_and_Rename_System.md`  
-**Task File**: `docs/development/sprints/active/SPRINT_09_TASK.md`  
-**Terminology Reference**: `docs/documentation/TERMINOLOGY.md`
-
-**Phase Overview**:
-- Phase 1 — HZLib Common (10 pts): `NativeEntity`, `NativeEntityFamily`, `EntityLogic`, `EntityParticles`, `LayerRenderPipeline`
-- Phase 2 — HZLib Loaders (8 pts): `NativeAnimation`, `NativeModel`, `NativeRenderer`
-- Phase 3 — LovelyLib Common (7 pts): `RobotFamily`, `RobotFamilyRegistry`, `RobotVariant`
-- Phase 4 — LovelyLib Loaders (3 pts): `RobotAnimation`
-- Phase 5 — LovelyLib Registries (3 pts): `LegacyRobotFamilies`, `RebootRobotFamilies`, `TributeRobotFamilies`
-- Phase 6 — Monsters & Girls (8 pts): `MonstersFamily`, nine concrete `*Family` classes
-- Phase 7 — Validation (5 pts): Full build + runtime smoke test
-
-**Known Risks**:
-- Partial rename breaks the build if phases are not followed in dependency order
-- Generic type bounds may be missed by IDE rename — verify with a search for old name after each phase
-
-**Mitigation**:
-- Execute phases in strict order (HZLib → LovelyLib → Monsters & Girls)
-- Verify 0 remaining references to old name before moving to the next phase
+> No active sprint. Sprint 09 and Sprint 10 were archived on 2026-06-26. Next sprint to be planned.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 10: Monsters & Girls Feature Implementation ✅
+**Status**: ✅ Completed  
+**Timeframe**: 2026-06-20 to 2026-06-26  
+**Completion Date**: 2026-06-26  
+**Sprint Type**: Feature Implementation
+
+**Sprint Goal**: Implement the full set of Monsters & Girls features: belly system redesign, emissive layer standardisation, entity family registration fixes, new Fluffball variant, Puffball puff-jump, Snowball throwing, Molten campfire cooking, Gourdragora hunger watch + spawn weight, Mandrake Fructus ceiling planting, and all required HZLib framework additions.
+
+**Story Points**: 57 (12 phases + 2 additional phases for ranged attack and friendly-fire)
+
+**Key Achievements**:
+- Emissive texture standardisation — all emissives moved to `layer/` folder with `_emissive.png` suffix
+- `BellyLevel` enum + `BellyFeature` — new HZLib feature replacing the old `HAS_BELLY` boolean
+- `BELLY_LEVEL` int on `MonsterEntity` — 5-level progression (SLIM/CHUBBY/TUMMY/INFLATED/CHUNKY)
+- `RenderConditions.bellyAtLeast()` predicate + `SizeVariantFeature.pickWeightedRandom()` method
+- `PlantDirection` enum + `PlantingFeature` ceiling scan for Fructus Cave Vine planting
+- Wisp, Spook, Mushroom Warped — registration fixes, belly overlays, emissive ALWAYS slots
+- Puffball emissive + autonomous puff-jump (JUMP_BOOST II + SLOW_FALLING, 200-tick cooldown)
+- Fluffball — new flying End mushroom variant (`MushroomFamily.FLUFFBALL`, `FlyTamableEntity`)
+- Snowball Mushroom — `RangedAttackMob` + `RangedAttackGoal` throwing vanilla snowballs with freeze + slow
+- Mushroom Crimson, Soul Wanderer, Molten — emissive wiring and texture path fixes
+- Molten Gal campfire cooking — 4 synced `ItemStack` slots, `CampfireCookingRecipe`, `CookingItemLayer`
+- Gourdragora — spawn weight 40/40/20 (Mini/Default/Big) + pumpkin pie hunger-watch drop
+- Mandrake Fructus — ceiling Glow Berry planting via `PlantDirection.UP`
+- `RangedAttackFeature` in HZLib Common — replaces per-entity key-check pattern
+- `MandrakeSpitProjectile` — Poison I (7s) + Nausea (5s), friendly-fire suppression
+- `NativeEntity.wantsToAttack()` override — same-owner tamed peers never targeted
+
+**Archive**: `docs/development/sprints/archive/[COMPLETED]_SPRINT_10_Monsters_Girls_Feature_Implementation_2026-06-26.md`
+
+---
+
+### Sprint 09: Ecosystem Terminology & Rename System ✅ (Phase 1 Complete)
+**Status**: ✅ Completed (Phase 1 — HZLib Common renames only)  
+**Timeframe**: 2026-06-20 to 2026-06-26  
+**Completion Date**: 2026-06-26  
+**Sprint Type**: Architecture / Refactoring
+
+**Sprint Goal**: Execute ADR_018 — rename all `Internal*` classes across HZLib, LovelyLib, and Monsters & Girls so every class name reflects its tier and role.
+
+**Story Points**: 10 of 44 completed (Phase 1 only; Phases 2–7 deferred)
+
+**Key Achievements**:
+- `InternalEntity` → `NativeEntity` (HZLib Common) — class, JavaDoc, footer comment
+- `InternalEntityType<T>` → `NativeEntityFamily<T>` (HZLib Common) — generic bounds updated across all dependents
+- `InternalLogic` → `EntityLogic` (HZLib Common) — all static call sites updated
+- `InternalParticle` → `EntityParticles` (HZLib Common) — all static call sites updated
+- Common `InternalLayerRenderer<T>` → `LayerRenderPipeline<T>` (HZLib Common) — distinct from loader-specific renderer
+
+**Deferred Work** (carry to next sprint):
+- Phase 2: HZLib loaders — `InternalAnimation` → `NativeAnimation`, `InternalModel` → `NativeModel`, `InternalLayerRenderer` → `NativeRenderer` (×3 loaders each)
+- Phase 3: LovelyLib Common — `NativeEntityType` → `RobotFamily`, `LovelyRobotType` → `RobotFamilyRegistry`, `EntityVariant` → `RobotVariant`
+- Phase 4: LovelyLib loaders — `InternalAnimation` → `RobotAnimation` (×3 loaders)
+- Phase 5: LovelyLib registries — `LegacyRobotType` → `LegacyRobotFamilies`, `RebootRobotType` → `RebootRobotFamilies`, `TributeRobotType` → `TributeRobotFamilies`
+- Phase 6: Monsters & Girls — `NativeEntityType<T>` → `MonstersFamily<T>` + nine concrete `*Type` → `*Family` classes
+- Phase 7: Full build verification + runtime smoke test
+
+**Archive**: `docs/development/sprints/archive/[COMPLETED]_SPRINT_09_Ecosystem_Terminology_Rename_Phase1_2026-06-26.md`
+
+---
 
 ### Sprint 08: InternalEntity Consolidation & OverlayFeature ✅
 **Status**: ✅ Completed  

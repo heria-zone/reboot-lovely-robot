@@ -1,12 +1,11 @@
 # CURRENT STATE - LovelyRobot Project
 
 **Status**: Active
-**Last Updated**: 2025-12-23
+**Last Updated**: 2026-06-26
 **Project**: LovelyRobot Multi-Variant Minecraft Mod
 **Related Documents**:
 - [SPRINT_PLANNING.md](SPRINT_PLANNING.md) - Sprint planning and tracking
-- [SPRINT_03_TASK.md](../development/sprints/active/SPRINT_03_TASK.md) - Current sprint tasks
-- [November 2025 Development Checklist](../development/tasks/November-2025-Development-Checklist.md) - Monthly goals
+- [Archived Sprints](../development/sprints/archive/) - Completed sprint records
 - [CHANGELOG.md](../../CHANGELOG.md) - Historical changes
 - [README.md](../../README.md) - Project overview
 
@@ -719,6 +718,99 @@ net.msymbios.llovelyr/
 
 ---
 
+## Implementation Status: HZLib Common (Sprint 09 — Phase 1 Complete)
+
+**Last Updated**: 2026-06-26  
+**Source ADR**: `docs/development/decisions/ADR_018_Ecosystem_Terminology_and_Rename_System.md`
+
+### Rename Status
+
+| Old Name | New Name | Location | Status |
+|---|---|---|---|
+| `InternalEntity` | `NativeEntity` | HZLib Common — `api/entity/` | ✅ Complete |
+| `InternalEntityType<T>` | `NativeEntityFamily<T>` | HZLib Common — `api/entity/` | ✅ Complete |
+| `InternalLogic` | `EntityLogic` | HZLib Common — `api/entity/internal/` | ✅ Complete |
+| `InternalParticle` | `EntityParticles` | HZLib Common — `api/entity/internal/` | ✅ Complete |
+| `InternalLayerRenderer<T>` (Common) | `LayerRenderPipeline<T>` | HZLib Common — `api/rendering/` | ✅ Complete |
+| `InternalAnimation` (HZLib loaders) | `NativeAnimation` | HZLib Fabric/Forge/NeoForge | ⏳ Deferred |
+| `InternalModel<T>` (HZLib loaders) | `NativeModel<T>` | HZLib Fabric/Forge/NeoForge | ⏳ Deferred |
+| `InternalLayerRenderer<T>` (loaders) | `NativeRenderer<T>` | HZLib Fabric/Forge/NeoForge | ⏳ Deferred |
+| `NativeEntityType` | `RobotFamily` | LovelyLib Common — `common/entity/` | ⏳ Deferred |
+| `LovelyRobotType` | `RobotFamilyRegistry` | LovelyLib Common — `common/entity/` | ⏳ Deferred |
+| `EntityVariant` | `RobotVariant` | LovelyLib Common — `common/entity/enums/` | ⏳ Deferred |
+| `InternalAnimation` (LovelyLib loaders) | `RobotAnimation` | LovelyLib Fabric/Forge/NeoForge | ⏳ Deferred |
+| `LegacyRobotType` | `LegacyRobotFamilies` | LovelyLib — `source/legacy/` | ⏳ Deferred |
+| `RebootRobotType` | `RebootRobotFamilies` | LovelyLib — `source/reboot/` | ⏳ Deferred |
+| `TributeRobotType` | `TributeRobotFamilies` | LovelyLib — `source/tribute/` | ⏳ Deferred |
+| `NativeEntityType<T>` (monsters) | `MonstersFamily<T>` | Monsters & Girls Common | ⏳ Deferred |
+| Nine `*Type` concrete classes | Nine `*Family` classes | Monsters & Girls Common — `entity/custom/` | ⏳ Deferred |
+
+**Deferred work**: Phases 2–7 (loader renames, LovelyLib, Monsters & Girls, validation) carry to the next rename sprint.
+
+---
+
+## Implementation Status: Monsters & Girls (Sprint 10 — Complete)
+
+**Last Updated**: 2026-06-26  
+**Feature Notes**: `docs/development/notes/feature-implementations/MonsterGirls_Feature_Implementation_Notes.md`
+
+### HZLib Framework Additions
+
+| Component | Status | Notes |
+|---|---|---|
+| `NativeEntity.getBellyLevel()` default hook | ✅ | Returns `0`; `MonsterEntity` overrides |
+| `RenderConditions.bellyAtLeast(int)` predicate | ✅ | Used in `OverlaySlot.conditional()` |
+| `BellyLevel` enum (SLIM/CHUBBY/TUMMY/INFLATED/CHUNKY) | ✅ | In `hzlib.api.entity.features` |
+| `BellyFeature` — max level cap + texture map per level | ✅ | Fluent builder pattern |
+| `SizeVariantFeature.spawnWeight` + `pickWeightedRandom()` | ✅ | Weighted random selection at spawn |
+| `PlantDirection` enum (DOWN/UP) + ceiling scan in `PlantingFeature` | ✅ | UP scans for solid ceiling, places below |
+| `RangedAttackFeature` — family-level ranged attack declaration | ✅ | Replaces per-entity key-check pattern |
+| `WildTamableEntity.registerGoals()` auto-wire for `RangedAttackFeature` | ✅ | No entity override needed |
+
+### MonsterEntity Changes
+
+| Component | Status | Notes |
+|---|---|---|
+| `HAS_BELLY` (Boolean) removed → `BELLY_LEVEL` (Integer) | ✅ | 5-level progression, clamped to `[0, 4]` |
+| `handleBellyProgression()` rewrite | ✅ | Apple consumes +1, feather -1 (no consume) |
+| NBT migration `HasBelly` → `BellyLevel` | ✅ | Old `HasBelly=true` → `BellyLevel=2` (TUMMY) |
+| Overlay slot pool size | ✅ | Pool size 2 sufficient (belly CONDITIONAL = stateless) |
+| `wantsToAttack()` override | ✅ | Same-owner tamed peers never targeted |
+
+### Emissive Texture Standardisation
+
+All emissive textures moved from `entity/` folders to `layer/` and unified to `_emissive.png` suffix.
+
+**Affected entities**: Wisp (×3), Spook (×3), Mushroom Crimson (×2), Molten, Puffball (×3 + Fluffball), Snowball, Soul Wanderer, Warped (×3), Globberie (×3).
+
+### Entity Family Status
+
+| Entity | Belly | Emissive | Notes |
+|---|---|---|---|
+| Wisp (Blue/Green/Yellow) | ✅ TUMMY cap | ✅ ALWAYS | Texture key fix applied |
+| Spook (Cream/Teal/Peach) | ✅ SLIM + TUMMY | ✅ ALWAYS | Peach has own emissive |
+| Mushroom Warped (Blue/Green) | ✅ CHUBBY + TUMMY | ✅ ALWAYS | Full registration added |
+| Mushroom Puffball (Default/Pale) | — | ✅ ALWAYS | Puff-jump autonomous mechanic |
+| Mushroom Fluffball | — | ✅ ALWAYS | New End flying variant |
+| Mushroom Snowball | — | ✅ ALWAYS | Throws vanilla snowballs; `RangedAttackFeature` |
+| Mushroom Crimson (Red/Pink) | — | ✅ ALWAYS | Textures moved from `entity/` |
+| Mushroom Soul Wanderer | — | ✅ ALWAYS | Texture moved from `entity/` |
+| Mushroom Molten | — | ✅ ALWAYS | Campfire cooking (4 slots) |
+| Gourdragora (Mini/Default/Big) | — | — | Spawn weight 40/40/20; pumpkin pie hunger-watch |
+| Mandrake Fructus | — | — | Ceiling Cave Vine planting |
+| Mandrake Chorus | — | — | Poison spit via `MandrakeSpitProjectile`; `RangedAttackFeature` |
+
+### New Projectile Types
+
+| Projectile | Entity Type | Renderer | Effects |
+|---|---|---|---|
+| `MushroomSnowball` | `MUSHROOM_SNOWBALL_PROJECTILE` | Vanilla snowball | Freeze + Slow (via EmanationFeature) |
+| `MandrakeSpitProjectile` | `MANDRAKE_CHORUS_SPIT` | `LlamaSpitRenderer` | Poison I (7s) + Nausea (5s) |
+
+Both projectiles include same-owner friendly-fire suppression.
+
+---
+
 ## Known Issues & Technical Debt
 
 ### Active Issues
@@ -796,6 +888,13 @@ net.msymbios.llovelyr/
 **Priority**: Low
 **Effort**: Medium
 **Plan**: Move shared assets to common directory
+
+#### ADR_018 Rename — Phases 2–7 Deferred
+**Area**: HZLib loaders, LovelyLib, Monsters & Girls
+**Issue**: Sprint 09 completed only Phase 1 (HZLib Common). Loader renames (`NativeAnimation`, `NativeModel`, `NativeRenderer`), LovelyLib renames (`RobotFamily`, `RobotFamilyRegistry`, `RobotVariant`, `RobotAnimation`, registry classes), and Monsters & Girls renames (`MonstersFamily`, nine concrete `*Family` classes) remain outstanding.
+**Priority**: High — terminology is inconsistent between HZLib Common (renamed) and all loaders/downstream libs (not yet renamed)
+**Effort**: High (34 story points across 14 tasks)
+**Plan**: Dedicate a focused sprint to complete Phases 2–7 following the strict phase order defined in the archived Sprint 09 task file
 
 #### Test Coverage
 **Area**: Automated testing
