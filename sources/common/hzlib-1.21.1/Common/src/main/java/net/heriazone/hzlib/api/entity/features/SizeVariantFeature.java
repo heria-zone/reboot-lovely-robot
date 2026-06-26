@@ -68,6 +68,41 @@ public class SizeVariantFeature {
     } // getConfig ()
 
     /**
+     * Selects a {@link SizeConfig} at random, weighted by each config's
+     * {@link SizeConfig#getSpawnWeight()} value.
+     * <p>
+     * <b>Algorithm:</b> Sums all weights (not required to equal {@code 1.0}),
+     * rolls a uniform float in {@code [0, total)}, then walks the insertion-ordered
+     * config map accumulating a cursor until the roll falls below the cursor.
+     * Insertion order is preserved via {@link java.util.LinkedHashMap} in the
+     * {@link Builder}, so the distribution is stable given the same declaration order.
+     * <p>
+     * <b>Declared weight examples:</b>
+     * <ul>
+     *   <li>{@code 0.4, 0.4, 0.2} → 40 % / 40 % / 20 %</li>
+     *   <li>{@code 40f, 40f, 20f} (normalized to 0.4, 0.4, 0.2 at build time)</li>
+     *   <li>{@code 1.0, 1.0, 1.0} → equal 33 % each</li>
+     * </ul>
+     * <p>
+     * <b>Fallback:</b> Returns {@link #defaultConfig} if the config map is empty or all
+     * weights are zero — never throws.
+     *
+     * @return randomly selected {@link SizeConfig} according to declared weights
+     */
+    public SizeConfig pickWeightedRandom() {
+        float total = 0f;
+        for (SizeConfig c : configs.values()) total += c.getSpawnWeight();
+        if (total <= 0f) return defaultConfig;
+        float roll   = java.util.concurrent.ThreadLocalRandom.current().nextFloat() * total;
+        float cursor = 0f;
+        for (SizeConfig config : configs.values()) {
+            cursor += config.getSpawnWeight();
+            if (roll < cursor) return config;
+        }
+        return defaultConfig;
+    } // pickWeightedRandom ()
+
+    /**
      * Returns the entity dimensions for the given size key and pose.
      * Convenience method combining {@link #getConfig(String)} and
      * {@link SizeConfig#getDimensions(Pose)}.
@@ -112,6 +147,8 @@ public class SizeVariantFeature {
 
         /**
          * Registers a size configuration under the given key.
+         * The {@code sizeKey} is stamped onto the config so it can be retrieved later
+         * via {@link SizeConfig#getSizeKey()} without string manipulation at call sites.
          *
          * @param sizeKey size variant key
          * @param config  configuration for that size
@@ -120,6 +157,7 @@ public class SizeVariantFeature {
         public Builder size(String sizeKey, SizeConfig config) {
             Objects.requireNonNull(sizeKey, "Size key cannot be null");
             Objects.requireNonNull(config, "Config cannot be null");
+            config.sizeKey = sizeKey; // stamp the map key onto the config
             configs.put(sizeKey, config);
             return this;
         } // size ()
@@ -178,6 +216,9 @@ public class SizeVariantFeature {
         private final float scale;
         private final Map<Pose, EntityDimensions> dimensions;
         private final EntityDimensions defaultDimensions;
+        private final float spawnWeight;
+        private String sizeKey   = ""; // the map key this config was registered under
+        private String sizeLabel = ""; // short size word, e.g. "mini", "default", "big"
 
         // Stat multipliers (1.0 = no change)
         private final float healthMultiplier;
@@ -193,6 +234,7 @@ public class SizeVariantFeature {
             this.scale              = builder.scale;
             this.dimensions         = Collections.unmodifiableMap(new EnumMap<>(builder.dimensions));
             this.defaultDimensions  = builder.defaultDimensions;
+            this.spawnWeight        = builder.spawnWeight;
             this.healthMultiplier   = builder.healthMultiplier;
             this.attackMultiplier   = builder.attackMultiplier;
             this.speedMultiplier    = builder.speedMultiplier;
@@ -211,12 +253,59 @@ public class SizeVariantFeature {
         public String getModelKey() { return modelKey; } // getModelKey ()
 
         /**
+         * Returns the map key under which this config was registered in
+         * {@link SizeVariantFeature} (e.g., {@code "gourdragora_girl_mini"}).
+         * <p>
+         * <b>Use case:</b> Entity spawn logic can derive the appearance variant key
+         * directly from this value without any string surgery — e.g.
+         * {@code nativeEntity.getKey() + "_" + sizeConfig.getSizeKey().substring(prefix.length())}
+         * is better expressed as {@code appFeature.getVariant(nativeEntity.getKey(), sizeConfig.getSizeKey())}.
+         * When the size key and model key share the same string (common case), this
+         * is identical to {@link #getModelKey()}.
+         *
+         * @return size map key, never null (empty string if not set via {@link Builder#size})
+         */
+        public String getSizeKey() { return sizeKey; } // getSizeKey ()
+
+        /**
+         * Returns the short size label declared via {@link Builder#sizeLabel(String)}.
+         * <p>
+         * <b>Purpose:</b> Provides a concise, family-agnostic identifier (e.g. {@code "mini"},
+         * {@code "default"}, {@code "big"}) that entity classes can append to any prefix to
+         * form an appearance variant key — with zero string surgery.
+         * <pre>{@code
+         * // Clean — no replace() calls:
+         * String appearanceKey = nativeEntity.getKey() + "_" + sizeConfig.getSizeLabel();
+         * }</pre>
+         *
+         * @return short size label (e.g. {@code "mini"}), empty string if not set
+         */
+        public String getSizeLabel() { return sizeLabel; } // getSizeLabel ()
+
+        /**
          * Returns the renderer scale factor.
          * {@code 1.0f} means no scaling. Values {@code > 1.0f} make the entity larger.
          *
          * @return scale factor
          */
         public float getScale() { return scale; } // getScale ()
+
+        /**
+         * Returns the spawn weight as a normalized probability in {@code [0.0, 1.0]}.
+         * <p>
+         * <b>Normalization contract:</b> Values declared via {@link Builder#spawnWeight(float)}
+         * are automatically normalized at build time — values already in {@code (0, 1]} are
+         * stored as-is; values {@code > 1} are divided by {@code 100} so that intuitive
+         * percentage notation (e.g. {@code 40f} → {@code 0.40}) works without any manual
+         * conversion at call sites.
+         * <p>
+         * {@code 0.6f} means this size is selected approximately 60 % of the time when all
+         * weights sum to {@code 1.0}. If the declared weights do not sum to exactly {@code 1.0}
+         * that is fine — {@link SizeVariantFeature#pickWeightedRandom()} normalizes on the fly.
+         *
+         * @return spawn weight in {@code (0.0, 1.0]}
+         */
+        public float getSpawnWeight() { return spawnWeight; } // getSpawnWeight ()
 
         /**
          * Returns the entity dimensions for the given pose.
@@ -306,8 +395,10 @@ public class SizeVariantFeature {
 
             private final String modelKey;
             private float scale = 1.0f;
+            private String sizeLabel = "";
             private final Map<Pose, EntityDimensions> dimensions = new EnumMap<>(Pose.class);
             private EntityDimensions defaultDimensions = EntityDimensions.scalable(0.6f, 1.0f);
+            private float spawnWeight        = 1.0f;
             private float healthMultiplier   = 1.0f;
             private float attackMultiplier   = 1.0f;
             private float speedMultiplier    = 1.0f;
@@ -318,11 +409,47 @@ public class SizeVariantFeature {
                 this.modelKey = Objects.requireNonNull(modelKey, "Model key cannot be null");
             } // Constructor: Builder ()
 
-            /** Sets the renderer scale factor. */
+            /**
+             * Sets the renderer scale factor. */
             public Builder scale(float scale) {
                 this.scale = scale;
                 return this;
             } // scale ()
+
+            /**
+             * Sets the short size label used for appearance variant key derivation.
+             * Keep this concise and family-agnostic (e.g. {@code "mini"}, {@code "default"},
+             * {@code "big"}) — entity classes append it to their own key prefix to form the
+             * full appearance variant key, with no string replacement needed.
+             *
+             * @param label short size identifier
+             * @return this builder
+             */
+            public Builder sizeLabel(String label) {
+                if (label != null) this.sizeLabel = label;
+                return this;
+            } // sizeLabel ()
+
+            /**
+             * Sets the spawn weight for weighted random size selection.
+             * <p>
+             * <b>Scale:</b> Accepts values in {@code (0, 1]} directly (e.g. {@code 0.4f} = 40 %)
+             * or values {@code > 1} which are automatically normalized by dividing by {@code 100}
+             * (e.g. {@code 40f} → {@code 0.40f}). This lets callers use either intuitive
+             * percentage notation or normalized fractions without manual conversion.
+             * <p>
+             * Weights do not need to sum to exactly {@code 1.0} — {@link SizeVariantFeature#pickWeightedRandom()}
+             * normalizes on the fly. Default is {@code 1.0f} (equal weight across all sizes).
+             *
+             * @param weight spawn weight in {@code (0, 1]} or as a percentage {@code > 1}
+             * @return this builder
+             */
+            public Builder spawnWeight(float weight) {
+                // Normalize percentage notation (>1) to [0,1] scale
+                float normalized = weight > 1.0f ? weight / 100.0f : weight;
+                this.spawnWeight = Math.max(0.001f, normalized); // floor at 0.001 to keep positive
+                return this;
+            } // spawnWeight ()
 
             /** Sets dimensions for a specific pose. */
             public Builder dimensions(Pose pose, EntityDimensions dims) {
@@ -360,7 +487,9 @@ public class SizeVariantFeature {
 
             /** Builds the size configuration. */
             public SizeConfig build() {
-                return new SizeConfig(this);
+                SizeConfig config = new SizeConfig(this);
+                config.sizeLabel = this.sizeLabel;
+                return config;
             } // build ()
 
         } // Class: Builder

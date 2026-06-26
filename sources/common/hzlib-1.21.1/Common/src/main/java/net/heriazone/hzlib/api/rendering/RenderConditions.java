@@ -102,4 +102,35 @@ public final class RenderConditions {
         return RenderConditions.<T>overlaySlotEmpty(slotKey).negate();
     } // overlaySlotActive ()
 
+    // -------------------------------------------------------------------------
+    // -- Belly level --
+    // -------------------------------------------------------------------------
+
+    /**
+     * Passes when the entity's belly level is greater than or equal to {@code minLevel}.
+     * <p>
+     * <b>Use case:</b> CONDITIONAL belly overlay slots — highest declared level listed
+     * first so the first-match-wins evaluation picks the most advanced belly texture.
+     * <pre>{@code
+     * OverlaySlot.conditional("belly",
+     *     OverlaySlot.entry("...tummy.png", RenderConditions.bellyAtLeast(2)),
+     *     OverlaySlot.entry("...slim.png",  RenderConditions.bellyAtLeast(1)))
+     * }</pre>
+     * <p>
+     * <b>Design:</b> Takes a raw {@code int} rather than a mod-specific {@code BellyLevel}
+     * enum so this predicate stays free of any mod dependency in HZLib.
+     * Callers in the monsters mod pass {@code BellyLevel.TUMMY.getLevel()} etc.
+     * <p>
+     * <b>Default behaviour:</b> Entities that do not override {@link NativeEntity#getBellyLevel()}
+     * always return {@code 0}, so {@code bellyAtLeast(1)} correctly evaluates to {@code false}
+     * for entities with no belly system.
+     *
+     * @param minLevel minimum belly level that satisfies this condition (inclusive)
+     * @param <T>      entity type
+     * @return predicate that passes when {@code entity.getBellyLevel() >= minLevel}
+     */
+    public static <T extends NativeEntity> Predicate<T> bellyAtLeast(int minLevel) {
+        return entity -> entity.getBellyLevel() >= minLevel;
+    } // bellyAtLeast ()
+
 } // Class: RenderConditions

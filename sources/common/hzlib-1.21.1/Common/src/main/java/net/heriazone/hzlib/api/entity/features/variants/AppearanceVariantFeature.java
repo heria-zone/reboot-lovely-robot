@@ -75,6 +75,24 @@ public class AppearanceVariantFeature implements IVariantFeature<IAppearanceVari
         return available.get(new Random().nextInt(available.size()));
     } // getRandomVariant ()
 
+    /**
+     * Returns the appearance variant registered under {@code variantKey} for
+     * {@code entityKey}, or {@code null} if the key is not registered or not available.
+     * <p>
+     * <b>Use case:</b> Weighted spawn selection in {@code GourdragoraEntity} — after
+     * {@link net.heriazone.hzlib.api.entity.features.SizeVariantFeature#pickWeightedRandom()}
+     * determines the desired size, this method retrieves the matching appearance composite
+     * by its derived key (e.g. {@code "gourdragora_golden_big"}).
+     *
+     * @param entityKey  entity type identifier
+     * @param variantKey appearance variant key to look up
+     * @return matching variant, or {@code null} if absent
+     */
+    public IAppearanceVariant getVariant(String entityKey, String variantKey) {
+        if (!hasVariant(entityKey, variantKey)) return null;
+        return VariantRegistries.APPEARANCES.get(variantKey).orElse(null);
+    } // getVariant ()
+
     @Override
     public boolean hasVariant(String entityKey, String variantKey) {
         Set<String> enabled = entityVariants.get(entityKey);

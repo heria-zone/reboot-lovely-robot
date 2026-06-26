@@ -17,17 +17,45 @@ import java.util.concurrent.ThreadLocalRandom;
  * If omitted, it inherits the feature-level {@code globalCooldown}. This allows one
  * mushroom species to plant more frequently than another without separate features.
  * <p>
+ * <b>Planting directions:</b> Each {@link PlantItem} can declare a {@link PlantDirection}
+ * ({@code DOWN} for floor planting, {@code UP} for ceiling planting). The entity-side
+ * {@code tryPlantAt()} reads this to decide which neighbour block to validate and where
+ * to place the plant. Default is {@link PlantDirection#DOWN} — existing behaviour unchanged.
+ * <p>
  * <b>Planting logic (entity-side):</b>
  * <ol>
  *   <li>Check enabled flag (from NBT)</li>
  *   <li>Check cooldown (from NBT)</li>
  *   <li>Try up to {@code maxAttempts} random blocks within {@code searchRadius}</li>
- *   <li>Each candidate: block beneath must be in {@code allowedBlocks}, block above must be air</li>
+ *   <li>DOWN: block beneath must be in {@code allowedBlocks}, candidate must be air</li>
+ *   <li>UP: block above must be in {@code allowedBlocks} (ceiling), candidate must be air</li>
  *   <li>If all attempts fail, try the block the entity is standing on</li>
  *   <li>Reset cooldown after attempting</li>
  * </ol>
  */
 public class PlantingFeature {
+
+    // =========================================================================
+    // PlantDirection — enum
+    // =========================================================================
+
+    /**
+     * Direction a {@link PlantItem} is placed relative to the candidate block.
+     * <p>
+     * <b>DOWN (default):</b> Classic floor planting — the block <em>below</em> the
+     * candidate must be a valid surface, and the candidate itself must be air.
+     * Example: mushrooms, cave fungi planted on soil.
+     * <p>
+     * <b>UP (ceiling):</b> Ceiling planting — the block <em>above</em> the candidate
+     * must be a valid ceiling block, and the candidate itself must be air.
+     * Example: Mandrake Fructus planting Cave Vines on the underside of stone ceilings.
+     */
+    public enum PlantDirection {
+        /** Plant grows upward from the floor — validate block below candidate. */
+        DOWN,
+        /** Plant hangs downward from the ceiling — validate block above candidate. */
+        UP
+    } // Enum: PlantDirection
 
     // -- Defaults --
 
@@ -154,6 +182,7 @@ public class PlantingFeature {
         private final Block plant;
         private final Set<Block> allowedBlocks;
         private final int cooldown; // -1 = inherit from PlantingFeature.globalCooldown
+        private final PlantDirection direction;
 
         // -- Constructor --
 
@@ -161,6 +190,7 @@ public class PlantingFeature {
             this.plant         = builder.plant;
             this.allowedBlocks = Collections.unmodifiableSet(new HashSet<>(builder.allowedBlocks));
             this.cooldown      = builder.cooldown;
+            this.direction     = builder.direction;
         } // Constructor: PlantItem ()
 
         // -- Accessors --
@@ -168,10 +198,32 @@ public class PlantingFeature {
         /** The block this entry places when planting. */
         public Block getPlant() { return plant; }
 
-        /** Returns true if the given block state is a valid surface for planting. */
+        /**
+         * Returns {@code true} if the given block state is a valid surface for
+         * {@link PlantDirection#DOWN} floor planting (block below the candidate).
+         */
         public boolean isValidSurface(BlockState state) {
             return allowedBlocks.contains(state.getBlock());
         } // isValidSurface ()
+
+        /**
+         * Returns {@code true} if the given block state is a valid ceiling block for
+         * {@link PlantDirection#UP} ceiling planting (block above the candidate).
+         * Reuses the same {@code allowedBlocks} set — callers declare allowed ceiling
+         * blocks via {@link EntryBuilder#allowedBlocks(Block...)} just as for floor planting.
+         */
+        public boolean isValidCeiling(BlockState state) {
+            return allowedBlocks.contains(state.getBlock());
+        } // isValidCeiling ()
+
+        /**
+         * Returns the planting direction for this entry.
+         * {@link PlantDirection#DOWN} places the plant on a floor surface (default).
+         * {@link PlantDirection#UP} places the plant hanging from a ceiling.
+         *
+         * @return planting direction, never null
+         */
+        public PlantDirection getDirection() { return direction; } // getDirection ()
 
         /**
          * Returns this entry's cooldown in ticks, or {@code -1} if it should
@@ -193,16 +245,33 @@ public class PlantingFeature {
             private final Block plant;
             private final Set<Block> allowedBlocks = new HashSet<>();
             private int cooldown = -1; // inherit by default
+            private PlantDirection direction = PlantDirection.DOWN; // floor planting by default
 
             private EntryBuilder(Block plant) {
                 this.plant = Objects.requireNonNull(plant, "Plant block cannot be null");
             } // Constructor: EntryBuilder ()
 
-            /** Declares valid surface blocks beneath the planting position. */
+            /** Declares valid surface blocks beneath the planting position (DOWN) or
+             *  valid ceiling blocks above it (UP). */
             public EntryBuilder allowedBlocks(Block... blocks) {
                 if (blocks != null) Collections.addAll(allowedBlocks, blocks);
                 return this;
             } // allowedBlocks ()
+
+            /**
+             * Sets the planting direction for this entry.
+             * <ul>
+             *   <li>{@link PlantDirection#DOWN} (default) — floor planting: validate block below candidate.</li>
+             *   <li>{@link PlantDirection#UP} — ceiling planting: validate block above candidate.</li>
+             * </ul>
+             *
+             * @param dir planting direction
+             * @return this builder
+             */
+            public EntryBuilder direction(PlantDirection dir) {
+                this.direction = Objects.requireNonNull(dir, "PlantDirection cannot be null");
+                return this;
+            } // direction ()
 
             /**
              * Sets a per-entry cooldown override (ticks).

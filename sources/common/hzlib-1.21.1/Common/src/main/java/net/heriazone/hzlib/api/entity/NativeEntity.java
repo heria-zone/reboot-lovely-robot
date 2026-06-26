@@ -261,6 +261,60 @@ public abstract class NativeEntity extends TamableAnimal {
         });
     } // cycleOverlaySlot ()
 
+    // -- Belly Level Hook --
+
+    /**
+     * Returns the entity's current belly level as an integer (0 = none / SLIM).
+     * <p>
+     * <b>Architecture:</b> Thin seam that lets {@link net.heriazone.hzlib.api.rendering.RenderConditions#bellyAtLeast}
+     * predicate on belly level without any mod-specific type reference entering HZLib.
+     * Override in mod entity classes that implement a belly progression system.
+     * The base implementation returns {@code 0} — entities with no belly system always
+     * evaluate as having the minimum level, so {@code bellyAtLeast(1)} correctly returns
+     * {@code false} for them.
+     *
+     * @return current belly level, 0 by default
+     */
+    public int getBellyLevel() {
+        return 0;
+    } // getBellyLevel ()
+
+    // -- Friendly Fire Prevention --
+
+    /**
+     * Prevents tamed entities from targeting their owner's other tamed companions.
+     * <p>
+     * <b>Architecture:</b> This single override covers every AI goal that calls
+     * {@code wantsToAttack()} internally — {@code NearestAttackableTargetGoal},
+     * {@code OwnerHurtTargetGoal}, and {@code HurtByTargetGoal} all route through
+     * this method when evaluating a candidate target. Returning {@code false} here
+     * is the targeting-side layer of the two-layer friendly fire prevention system;
+     * the projectile-side layer lives in each projectile's {@code onHitEntity()}.
+     * <p>
+     * <b>Rule:</b> If this entity is tamed, has a known owner, and the candidate target
+     * is also a {@link TamableAnimal} with the same owner UUID — return {@code false}.
+     * All other target candidates are evaluated normally by the parent implementation.
+     * <p>
+     * <b>Scope:</b> Only fires when {@code isTame()} is true — untamed entities are
+     * completely unaffected. The UUID equality check is O(1) and runs in the AI goal
+     * tick; negligible performance cost.
+     *
+     * @param target    candidate attack target being evaluated by an AI goal
+     * @param attacker  the entity that caused this entity to consider attacking
+     *                  (may differ from {@code target} for retaliation goals)
+     * @return {@code false} if target is a same-owner tamed peer, otherwise delegates
+     *         to {@link TamableAnimal#wantsToAttack(LivingEntity, LivingEntity)}
+     */
+    @Override
+    public boolean wantsToAttack(LivingEntity target, LivingEntity attacker) {
+        if (isTame() && getOwnerUUID() != null
+                && target instanceof TamableAnimal peer
+                && getOwnerUUID().equals(peer.getOwnerUUID())) {
+            return false; // same-owner companion — never attack
+        }
+        return super.wantsToAttack(target, attacker);
+    } // wantsToAttack ()
+
     // -- Attribute Initialization --
 
     /**
