@@ -7,12 +7,14 @@ import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.hzlib.api.entity.features.PickupFeature;
 import net.heriazone.hzlib.api.entity.internal.EntityLogic;
 import net.heriazone.hzlib.api.entity.internal.EntityParticles;
+import net.heriazone.hzlib.api.nbt.DataField;
 import net.heriazone.hzlib.framework.entity.data.CombatLevelStats;
 import net.heriazone.hzlib.framework.entity.data.EnchantmentStats;
 import net.heriazone.hzlib.framework.entity.data.ProtectionStats;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.heriazone.hzlib.utils.Utils;
 import net.heriazone.lovelylib.Lovely;
+import net.heriazone.lovelylib.common.entity.data.RobotFields;
 import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.lovelylib.utils.EntityDataHelper;
 import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
@@ -843,87 +845,119 @@ public abstract class RobotEntity extends NativeEntity {
         if (debug != null) EntityLogic.displayInfo(this, debug, true);
     } // displayExtra ()
 
+    // -- Data Pipeline Hooks --
+
+    /**
+     * Supplies live field values to {@link net.heriazone.hzlib.api.nbt.EntityDataSchema#writeTo}.
+     * <p>
+     * Dispatches on {@link RobotFields} constants by identity — no string keys here.
+     * Falls back to the field's declared default for any unrecognised handle.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <T> T provideFieldValue(DataField<T> field) {
+        if (field == RobotFields.LEVEL)        return (T) Integer.valueOf(getCurrentLevel());
+        if (field == RobotFields.EXP)          return (T) Integer.valueOf(getExp());
+        if (field == RobotFields.MAX_LEVEL)    return (T) Integer.valueOf(getMaxLevel());
+        if (field == RobotFields.FIRE_PROT)    return (T) Integer.valueOf(getFireProtection());
+        if (field == RobotFields.FALL_PROT)    return (T) Integer.valueOf(getFallProtection());
+        if (field == RobotFields.BLAST_PROT)   return (T) Integer.valueOf(getBlastProtection());
+        if (field == RobotFields.PROJ_PROT)    return (T) Integer.valueOf(getProjectileProtection());
+        if (field == RobotFields.AUTO_ATTACK)  return (T) Boolean.valueOf(getAutoAttack());
+        if (field == RobotFields.BASE_X)       return (T) Float.valueOf(getBaseX());
+        if (field == RobotFields.BASE_Y)       return (T) Float.valueOf(getBaseY());
+        if (field == RobotFields.BASE_Z)       return (T) Float.valueOf(getBaseZ());
+        if (field == RobotFields.SITTING)      return (T) Boolean.valueOf(isInSittingPose());
+        if (field == RobotFields.HEALTH)       return (T) Float.valueOf(getHealth());
+        if (field == RobotFields.STANDBY_TICKS)        return (T) Integer.valueOf(standbyTicks);
+        if (field == RobotFields.STANDBY_TARGET_TICKS) return (T) Integer.valueOf(standbyTargetTicks);
+        return field.getDefaultValue();
+    } // provideFieldValue ()
+
+    /**
+     * Applies values loaded by {@link net.heriazone.hzlib.api.nbt.EntityDataSchema#readFrom}
+     * to entity state.
+     * <p>
+     * For fields backed by {@code SynchedEntityData}, pushes the value into both the
+     * logical accessor and the synced register — NBT is authoritative on load, not
+     * the synced register which may hold a stale pre-load value.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <T> void consumeFieldValue(DataField<T> field, T value) {
+        if (field == RobotFields.LEVEL)      { setCurrentLevel((Integer) value);      return; }
+        if (field == RobotFields.EXP)        { setExp((Integer) value);               return; }
+        if (field == RobotFields.MAX_LEVEL)  { setMaxLevel((Integer) value);          return; }
+        if (field == RobotFields.FIRE_PROT)  { setFireProtection((Integer) value);    return; }
+        if (field == RobotFields.FALL_PROT)  { setFallProtection((Integer) value);    return; }
+        if (field == RobotFields.BLAST_PROT) { setBlastProtection((Integer) value);   return; }
+        if (field == RobotFields.PROJ_PROT)  { setProjectileProtection((Integer) value); return; }
+        if (field == RobotFields.AUTO_ATTACK){ setAutoAttack((Boolean) value);        return; }
+        if (field == RobotFields.BASE_X)     { setBaseX((Float) value);               return; }
+        if (field == RobotFields.BASE_Y)     { setBaseY((Float) value);               return; }
+        if (field == RobotFields.BASE_Z)     { setBaseZ((Float) value);               return; }
+        if (field == RobotFields.SITTING)    { setInSittingPose((Boolean) value);     return; }
+        if (field == RobotFields.HEALTH) {
+            float hp = (Float) value;
+            if (hp > 0f) {
+                setHealth(hp);
+                entityData.set(CURRENT_HEALTH, hp); // push into synced register
+            }
+            return;
+        }
+        if (field == RobotFields.STANDBY_TICKS)        { standbyTicks       = (Integer) value; return; }
+        if (field == RobotFields.STANDBY_TARGET_TICKS) { standbyTargetTicks = (Integer) value; return; }
+    } // consumeFieldValue ()
+
     // -- NBT Serialization --
 
+    /**
+     * Schema-driven save — all field I/O goes through
+     * {@link net.heriazone.hzlib.api.nbt.EntityDataSchema} via
+     * {@link #provideFieldValue}. No field key strings here.
+     * <p>
+     * Root-level synced fields (TextureVariant, State, OverlaySlots) and the
+     * EntityData compound are written by the {@code NativeEntity} base.
+     * The only robot-specific post-load work — {@link #recalculateAttributes},
+     * hitbox refresh, registry re-registration — is handled in
+     * {@link #readAdditionalSaveData}.
+     */
     @Override
     public void addAdditionalSaveData(CompoundTag nbt) {
-        super.addAdditionalSaveData(nbt);
-
-        // Level / experience
-        nbt.putInt("Level",    getCurrentLevel());
-        nbt.putInt("Exp",      getExp());
-        nbt.putInt("MaxLevel", getMaxLevel());
-
-        // Protection
-        nbt.putInt("FireProtection",       getFireProtection());
-        nbt.putInt("FallProtection",       getFallProtection());
-        nbt.putInt("BlastProtection",      getBlastProtection());
-        nbt.putInt("ProjectileProtection", getProjectileProtection());
-
-        // Robot state
-        nbt.putBoolean("AutoAttack",      getAutoAttack());
-        nbt.putFloat("BaseX",             getBaseX());
-        nbt.putFloat("BaseY",             getBaseY());
-        nbt.putFloat("BaseZ",             getBaseZ());
-        nbt.putBoolean("IsInSittingPose", isInSittingPose());
-        nbt.putFloat("CurrentHealth",     getHealth());
-
-        // Standby animation state
-        nbt.putInt("StandbyTicks",       this.standbyTicks);
-        nbt.putInt("StandbyTargetTicks", this.standbyTargetTicks);
+        super.addAdditionalSaveData(nbt); // NativeEntity writes root fields + EntityData via schema
     } // addAdditionalSaveData ()
 
+    /**
+     * Schema-driven load — field values are delivered via {@link #consumeFieldValue}.
+     * <p>
+     * Post-load work that cannot be expressed as a field value:
+     * <ul>
+     *   <li>{@link #recalculateAttributes()} — scales stats after level is restored</li>
+     *   <li>Standby timer guard — prevents immediate sitting on first load</li>
+     *   <li>Hitbox refresh — re-applies sitting pose dimensions on next tick</li>
+     *   <li>Registry re-registration — avoids spawn-limit race condition</li>
+     * </ul>
+     */
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt); // handles TextureVariant, ModelVariant, etc.
+        super.readAdditionalSaveData(nbt); // NativeEntity: migrate → root fields → overlays → schema read
 
-        // Level / experience
-        if (nbt.contains("Level"))    setCurrentLevel(nbt.getInt("Level"));
-        if (nbt.contains("Exp"))      setExp(nbt.getInt("Exp"));
-        if (nbt.contains("MaxLevel")) setMaxLevel(nbt.getInt("MaxLevel"));
-
-        // Protection
-        if (nbt.contains("FireProtection"))       setFireProtection(nbt.getInt("FireProtection"));
-        if (nbt.contains("FallProtection"))       setFallProtection(nbt.getInt("FallProtection"));
-        if (nbt.contains("BlastProtection"))      setBlastProtection(nbt.getInt("BlastProtection"));
-        if (nbt.contains("ProjectileProtection")) setProjectileProtection(nbt.getInt("ProjectileProtection"));
-
-        // Robot state
-        if (nbt.contains("AutoAttack"))      setAutoAttack(nbt.getBoolean("AutoAttack"));
-        if (nbt.contains("BaseX"))           setBaseX(nbt.getFloat("BaseX"));
-        if (nbt.contains("BaseY"))           setBaseY(nbt.getFloat("BaseY"));
-        if (nbt.contains("BaseZ"))           setBaseZ(nbt.getFloat("BaseZ"));
-        if (nbt.contains("IsInSittingPose")) setInSittingPose(nbt.getBoolean("IsInSittingPose"));
-
-        // Restore health
-        if (nbt.contains("CurrentHealth")) {
-            float savedHealth = nbt.getFloat("CurrentHealth");
-            if (savedHealth > 0) {
-                setHealth(savedHealth);
-                entityData.set(CURRENT_HEALTH, savedHealth);
-            }
-        }
-
-        // Recalculate attributes after loading — ensures stats are correct
+        // Recalculate attributes after level/protection values have been restored
         recalculateAttributes();
 
-        // Restore standby animation state
-        this.standbyTicks       = nbt.getInt("StandbyTicks");
-        this.standbyTargetTicks = nbt.getInt("StandbyTargetTicks");
-
-        // Prevent immediate sitting on first load if timers are both 0
-        if (!isInSittingPose() && this.standbyTicks == 0 && this.standbyTargetTicks == 0) {
-            this.standbyTicks = -1;
+        // Prevent immediate sit on first load if timers are both 0 (fresh spawn default)
+        if (!isInSittingPose() && standbyTicks == 0 && standbyTargetTicks == 0) {
+            standbyTicks = -1;
         }
 
-        // Refresh hitbox on next tick if sitting pose was restored
+        // Re-apply sitting hitbox on next server tick — refreshDimensions needs post-load world state
         if (isInSittingPose() && !this.level().isClientSide) {
             this.level().getServer().execute(() -> {
                 if (this.isAlive()) refreshDimensions();
             });
         }
 
-        // Register robot after loading to prevent race condition with spawn limit checks
+        // Re-register in owner registry after load to avoid spawn-limit race condition
         if (!this.level().isClientSide && this.isTame() && this.getOwnerUUID() != null) {
             ensureRegistered();
         }

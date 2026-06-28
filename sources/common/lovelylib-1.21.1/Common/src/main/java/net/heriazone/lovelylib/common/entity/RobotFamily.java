@@ -6,9 +6,15 @@ import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
 import net.heriazone.hzlib.api.entity.variants.VariantRegistries;
+import net.heriazone.hzlib.api.nbt.EntityDataSchema;
+import net.heriazone.hzlib.api.nbt.MigrationChain;
 import net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant;
 import net.heriazone.hzlib.framework.entity.variants.StandardModelVariant;
 import net.heriazone.hzlib.framework.entity.variants.StandardTextureVariant;
+import net.heriazone.lovelylib.common.entity.data.RobotFields;
+import net.heriazone.lovelylib.common.entity.data.migration.MigrationStep_V0_Fabric;
+import net.heriazone.lovelylib.common.entity.data.migration.MigrationStep_V0_Forge;
+import net.heriazone.lovelylib.common.entity.data.migration.MigrationStep_V1_1204;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
@@ -143,6 +149,49 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
                 .withVariants(key, defaultAnimKey)
                 .withDefault(key, defaultAnimKey));
     } // configureVariants ()
+
+    /**
+     * Declares the robot entity data schema and registers the three-step migration chain.
+     * <p>
+     * <b>Schema:</b> All {@link RobotFields} constants are registered in write order —
+     * the order they appear in the old flat-write block for readability parity.
+     * <p>
+     * <b>Migration chain (oldest first):</b>
+     * <ol>
+     *   <li>{@link MigrationStep_V0_Fabric} — Gen1-Fabric locale strings → stable keys</li>
+     *   <li>{@link MigrationStep_V0_Forge} — Gen1-Forge/Gen2 flat PascalCase → EntityData</li>
+     *   <li>{@link MigrationStep_V1_1204} — 1.20.4 flat int-ID format → EntityData</li>
+     * </ol>
+     * Each step is idempotent and skips if its target format is already present.
+     */
+    @Override
+    protected void configureSchema() {
+        schema = EntityDataSchema.builder()
+                .register(RobotFields.LEVEL)
+                .register(RobotFields.EXP)
+                .register(RobotFields.MAX_LEVEL)
+                .register(RobotFields.FIRE_PROT)
+                .register(RobotFields.FALL_PROT)
+                .register(RobotFields.BLAST_PROT)
+                .register(RobotFields.PROJ_PROT)
+                .register(RobotFields.AUTO_ATTACK)
+                .register(RobotFields.BASE_X)
+                .register(RobotFields.BASE_Y)
+                .register(RobotFields.BASE_Z)
+                .register(RobotFields.SITTING)
+                .register(RobotFields.HEALTH)
+                .register(RobotFields.STANDBY_TICKS)
+                .register(RobotFields.STANDBY_TARGET_TICKS)
+                .version("1.0.0")
+                .build();
+
+        migrationChain = MigrationChain.builder()
+                .addStep(new MigrationStep_V0_Fabric())
+                .addStep(new MigrationStep_V0_Forge())
+                .addStep(new MigrationStep_V1_1204())
+                .build();
+    } // configureSchema ()
+
 
     /**
      * Creates the translatable display name for this robot type.
