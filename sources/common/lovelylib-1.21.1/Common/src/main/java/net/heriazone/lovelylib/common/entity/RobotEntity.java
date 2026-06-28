@@ -1519,35 +1519,20 @@ public abstract class RobotEntity extends NativeEntity {
         return InteractionResult.PASS;
     } // handleSpecificInteractions ()
 
+    /**
+     * Resolves dye-to-variant via the family's {@link net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature}.
+     * <p>
+     * <b>Architecture:</b> Replaces the 16-branch if-chain. The family declares one rule per
+     * dye item in {@link RobotFamily#withColorPalette}; this method delegates the entire
+     * lookup to {@link #tryConditionalAppearance}, which builds an interaction context,
+     * evaluates rules first-match, and applies the resolved key. If no rule matches
+     * (e.g., a non-dye item reached this path), returns {@code false}.
+     */
     @Override
     protected boolean handleTexture(ItemStack stack, Player player) {
-        String oldVariant = getTextureVariant();
-        String entityKey = nativeEntity != null ? nativeEntity.getKey() : "";
-
-        if (stack.is(Items.WHITE_DYE))      setTextureVariant(entityKey + "_" + EntityTexture.WHITE.Name());
-        if (stack.is(Items.ORANGE_DYE))     setTextureVariant(entityKey + "_" + EntityTexture.ORANGE.Name());
-        if (stack.is(Items.MAGENTA_DYE))    setTextureVariant(entityKey + "_" + EntityTexture.MAGENTA.Name());
-        if (stack.is(Items.LIGHT_BLUE_DYE)) setTextureVariant(entityKey + "_" + EntityTexture.LIGHT_BLUE.Name());
-        if (stack.is(Items.YELLOW_DYE))     setTextureVariant(entityKey + "_" + EntityTexture.YELLOW.Name());
-        if (stack.is(Items.LIME_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.LIME.Name());
-        if (stack.is(Items.PINK_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.PINK.Name());
-        if (stack.is(Items.GRAY_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.GRAY.Name());
-        if (stack.is(Items.LIGHT_GRAY_DYE)) setTextureVariant(entityKey + "_" + EntityTexture.LIGHT_GRAY.Name());
-        if (stack.is(Items.CYAN_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.CYAN.Name());
-        if (stack.is(Items.PURPLE_DYE))     setTextureVariant(entityKey + "_" + EntityTexture.PURPLE.Name());
-        if (stack.is(Items.BLUE_DYE))       setTextureVariant(entityKey + "_" + EntityTexture.BLUE.Name());
-        if (stack.is(Items.BROWN_DYE))      setTextureVariant(entityKey + "_" + EntityTexture.BROWN.Name());
-        if (stack.is(Items.GREEN_DYE))      setTextureVariant(entityKey + "_" + EntityTexture.GREEN.Name());
-        if (stack.is(Items.RED_DYE))        setTextureVariant(entityKey + "_" + EntityTexture.RED.Name());
-        if (stack.is(Items.BLACK_DYE))      setTextureVariant(entityKey + "_" + EntityTexture.BLACK.Name());
-
-        if (!oldVariant.equals(getTextureVariant())) {
-            if (!player.getAbilities().instabuild) {
-                stack.shrink(1);
-                return true;
-            }
-        }
-        return false;
+        if (!tryConditionalAppearance(stack, player)) return false;
+        if (!player.getAbilities().instabuild) stack.shrink(1);
+        return true;
     } // handleTexture ()
 
     /**

@@ -2,9 +2,12 @@ package net.heriazone.lovelylib.common.entity;
 
 import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
+import net.heriazone.hzlib.api.entity.features.AppearanceConditions;
+import net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature;
 import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
+import net.minecraft.world.item.Items;
 import net.heriazone.hzlib.api.entity.variants.VariantRegistries;
 import net.heriazone.hzlib.api.nbt.EntityDataSchema;
 import net.heriazone.hzlib.api.nbt.MigrationChain;
@@ -223,31 +226,65 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
      * @param variant entity variant determining color texture paths
      * @return this instance for method chaining
      */
+    /**
+     * Registers the 16-color texture palette and a matching {@link ConditionalAppearanceFeature}
+     * with one dye-to-variant-key rule per color.
+     * <p>
+     * <b>Architecture:</b> The {@link ConditionalAppearanceFeature} is the single source of
+     * truth for dye → texture key resolution. {@link net.heriazone.lovelylib.common.entity.RobotEntity#handleTexture}
+     * delegates to {@link #tryConditionalAppearance}, which evaluates these rules first-match
+     * against an interaction context. The 16-branch if-chain is gone.
+     * <p>
+     * Both features must be registered together: {@link TextureVariantFeature} drives random
+     * spawn selection (Lane A); {@link ConditionalAppearanceFeature} drives interaction-time
+     * dye resolution. Neither is redundant.
+     *
+     * @param variant entity variant determining color texture paths
+     * @return this instance for method chaining
+     */
     public RobotFamily withColorPalette(RobotVariant variant) {
         String basePath = LovelyConstant.TEXTURE_ENTITY_PATH + variant.getName() + "/";
 
-        TextureVariantFeature feature = new TextureVariantFeature();
+        TextureVariantFeature textureFeature = new TextureVariantFeature();
+        ConditionalAppearanceFeature dyeFeature = ConditionalAppearanceFeature.builder()
+                .when(AppearanceConditions.heldItem(Items.WHITE_DYE),      key + "_" + EntityTexture.WHITE.Name())
+                .when(AppearanceConditions.heldItem(Items.ORANGE_DYE),     key + "_" + EntityTexture.ORANGE.Name())
+                .when(AppearanceConditions.heldItem(Items.MAGENTA_DYE),    key + "_" + EntityTexture.MAGENTA.Name())
+                .when(AppearanceConditions.heldItem(Items.LIGHT_BLUE_DYE), key + "_" + EntityTexture.LIGHT_BLUE.Name())
+                .when(AppearanceConditions.heldItem(Items.YELLOW_DYE),     key + "_" + EntityTexture.YELLOW.Name())
+                .when(AppearanceConditions.heldItem(Items.LIME_DYE),       key + "_" + EntityTexture.LIME.Name())
+                .when(AppearanceConditions.heldItem(Items.PINK_DYE),       key + "_" + EntityTexture.PINK.Name())
+                .when(AppearanceConditions.heldItem(Items.GRAY_DYE),       key + "_" + EntityTexture.GRAY.Name())
+                .when(AppearanceConditions.heldItem(Items.LIGHT_GRAY_DYE), key + "_" + EntityTexture.LIGHT_GRAY.Name())
+                .when(AppearanceConditions.heldItem(Items.CYAN_DYE),       key + "_" + EntityTexture.CYAN.Name())
+                .when(AppearanceConditions.heldItem(Items.PURPLE_DYE),     key + "_" + EntityTexture.PURPLE.Name())
+                .when(AppearanceConditions.heldItem(Items.BLUE_DYE),       key + "_" + EntityTexture.BLUE.Name())
+                .when(AppearanceConditions.heldItem(Items.BROWN_DYE),      key + "_" + EntityTexture.BROWN.Name())
+                .when(AppearanceConditions.heldItem(Items.GREEN_DYE),      key + "_" + EntityTexture.GREEN.Name())
+                .when(AppearanceConditions.heldItem(Items.RED_DYE),        key + "_" + EntityTexture.RED.Name())
+                .when(AppearanceConditions.heldItem(Items.BLACK_DYE),      key + "_" + EntityTexture.BLACK.Name())
+                .build();
 
         for (EntityTexture color : EntityTexture.VALUES) {
             if (color != EntityTexture.RANDOM) {
                 // Entity-specific key prevents global registry collisions between robot types.
                 // e.g., "bunny_white", "kitsune_magenta" — not just "white", "magenta".
-                String colorKey  = key + "_" + color.Name(); // "bunny_white", "bunny_orange", etc.
-                String colorId   = String.format("%02d", color.getId());
+                String colorKey = key + "_" + color.Name();
+                String colorId  = String.format("%02d", color.getId());
                 ResourceLocation path = LovelyIdentifier.getId(
                         basePath + variant.getName() + "_" + colorId + ".png");
 
-                // Register in the global variant registry with entity-specific key
                 net.heriazone.hzlib.api.entity.variants.VariantRegistries.TEXTURES.register(
                         new StandardTextureVariant(colorKey, color.Name(), path.toString(), color.getId())
                 );
 
-                feature.withVariant(key, colorKey);
+                textureFeature.withVariant(key, colorKey);
             }
         }
 
-        feature.withDefault(key, key + "_" + EntityTexture.WHITE.Name());
-        withFeature(TextureVariantFeature.class, feature);
+        textureFeature.withDefault(key, key + "_" + EntityTexture.WHITE.Name());
+        withFeature(TextureVariantFeature.class, textureFeature);
+        withFeature(ConditionalAppearanceFeature.class, dyeFeature);
 
         return this;
     } // withColorPalette ()
