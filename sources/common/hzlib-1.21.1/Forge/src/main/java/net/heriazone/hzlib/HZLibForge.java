@@ -1,5 +1,9 @@
 package net.heriazone.hzlib;
 
+import net.heriazone.hzlib.api.nbt.CompoundTagDataCompound;
+import net.heriazone.hzlib.api.nbt.McVersionProvider;
+import net.heriazone.hzlib.api.nbt.NbtAdapterFactory;
+import net.minecraft.SharedConstants;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -33,13 +37,15 @@ public class HZLibForge {
     
     public HZLibForge() {
         LOGGER.info("HZ Lib {} initializing for Forge", getClass().getPackage().getImplementationVersion());
-        
+
+        // Register NBT pipeline services synchronously — must complete before enqueueWork
+        // and before any entity is loaded during world join.
+        initializeLibraryServices();
+
         // Get the mod event bus
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        
-        // Register setup event
         modEventBus.addListener(this::onCommonSetup);
-        
+
         LOGGER.info("HZ Lib Forge constructor complete");
     }
     
@@ -57,8 +63,7 @@ public class HZLibForge {
         LOGGER.info("HZ Lib common setup phase starting");
         
         event.enqueueWork(() -> {
-            // Initialize core library services
-            initializeLibraryServices();
+            LOGGER.debug("HZ Lib Forge common setup work enqueued");
         });
         
         LOGGER.info("HZ Lib common setup phase complete");
@@ -67,15 +72,31 @@ public class HZLibForge {
     // -- Private Methods --
     
     /**
-     * Initializes core library services and utilities.
+     * Registers NBT pipeline services — {@link NbtAdapterFactory} and {@link McVersionProvider}.
      * <p>
-     * <b>Design Intent:</b> Establishes foundation services that other mods
-     * can rely upon, maintaining minimal footprint and clean initialization.
+     * Called in the constructor body (synchronous, before {@code enqueueWork}) so both
+     * registrations are complete before any entity is loaded during world join.
      */
     private void initializeLibraryServices() {
-        // Library initialization will be implemented in future sprints
-        // This provides the foundation structure for HZ Lib services
-        LOGGER.debug("Core library services initialized");
+        NbtAdapterFactory.register(new NbtAdapterFactory.Factory() {
+            @Override
+            public net.heriazone.hzlib.api.nbt.DataCompound wrap(Object nativeCompound) {
+                if (!(nativeCompound instanceof net.minecraft.nbt.CompoundTag tag)) {
+                    throw new IllegalArgumentException(
+                        "[HZLib] Expected CompoundTag, got: " + nativeCompound.getClass().getName());
+                }
+                return new CompoundTagDataCompound(tag);
+            }
+
+            @Override
+            public net.heriazone.hzlib.api.nbt.DataCompound createEmpty() {
+                return new CompoundTagDataCompound();
+            }
+        });
+
+        McVersionProvider.register(() -> SharedConstants.getCurrentVersion().getName());
+
+        LOGGER.debug("NBT pipeline services registered (Forge)");
     }
     
 } // Class: HZLibForge

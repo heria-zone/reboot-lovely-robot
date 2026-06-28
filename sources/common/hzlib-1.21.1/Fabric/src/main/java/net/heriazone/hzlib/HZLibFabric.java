@@ -1,6 +1,10 @@
 package net.heriazone.hzlib;
 
 import net.fabricmc.api.ModInitializer;
+import net.heriazone.hzlib.api.nbt.CompoundTagDataCompound;
+import net.heriazone.hzlib.api.nbt.McVersionProvider;
+import net.heriazone.hzlib.api.nbt.NbtAdapterFactory;
+import net.minecraft.SharedConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,15 +43,31 @@ public class HZLibFabric implements ModInitializer {
     // -- Private Methods --
     
     /**
-     * Initializes core library services and utilities.
+     * Registers NBT pipeline services — {@link NbtAdapterFactory} and {@link McVersionProvider}.
      * <p>
-     * <b>Design Intent:</b> Establishes foundation services that other mods
-     * can rely upon, maintaining minimal footprint and clean initialization.
+     * Called synchronously during {@code onInitialize}, before any entity is loaded or deserialized.
+     * Both registrations must precede any {@code DataCompound} usage downstream.
      */
     private void initializeLibraryServices() {
-        // Library initialization will be implemented in future sprints
-        // This provides the foundation structure for HZ Lib services
-        LOGGER.debug("Core library services initialized");
+        NbtAdapterFactory.register(new NbtAdapterFactory.Factory() {
+            @Override
+            public net.heriazone.hzlib.api.nbt.DataCompound wrap(Object nativeCompound) {
+                if (!(nativeCompound instanceof net.minecraft.nbt.CompoundTag tag)) {
+                    throw new IllegalArgumentException(
+                        "[HZLib] Expected CompoundTag, got: " + nativeCompound.getClass().getName());
+                }
+                return new CompoundTagDataCompound(tag);
+            }
+
+            @Override
+            public net.heriazone.hzlib.api.nbt.DataCompound createEmpty() {
+                return new CompoundTagDataCompound();
+            }
+        });
+
+        McVersionProvider.register(() -> SharedConstants.getCurrentVersion().getName());
+
+        LOGGER.debug("NBT pipeline services registered (Fabric)");
     }
     
 } // Class: HZLibFabric
