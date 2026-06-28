@@ -1,7 +1,7 @@
 # Sprint Planning - LovelyRobot Project (Updated)
 
 **Status**: Active
-**Last Updated**: 2026-06-26
+**Last Updated**: 2026-06-28
 **Project**: LovelyRobot Multi-Variant Minecraft Mod Ecosystem
 **Related Documents**:
 - [CURRENT_STATE.md](CURRENT_STATE.md) - Current implementation status
@@ -170,8 +170,8 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 ---
 
 ### Phase 3: Feature Completion (Q3 2026)
-**Duration**: 14 weeks (7 sprints)  
-**Target Story Points**: 155 points total
+**Duration**: 16 weeks (8 sprints)  
+**Target Story Points**: 215 points total
 
 #### Sprint 11: Entity Data Pipeline — ADR 019 Full Implementation
 **Dates**: 2026-06-27 to 2026-07-11  
@@ -194,6 +194,25 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 - Overlay RANDOM/INTERACTIVE slot NBT persistence fixed
 - `CombatStatsNBT`, `ProtectionStatsNBT`, `EnchantmentStatsNBT`, `EntityDataMigration` deleted
 - Full validation against 1.20.4 robot saves, Gen1 saves, and corrupt-field handling
+
+#### Sprint 12: Condition Framework & Appearance Architecture — ADR 020 & ADR 021 Full Implementation
+**Dates**: 2026-07-12 to 2026-07-25  
+**Story Points**: 60  
+**Theme**: Base `EntityCondition<C>` / `EntityContext` framework eliminating duplicated combinators and shared factory methods across Exchange, Emanation, and Appearance systems; `ConditionalAppearanceFeature` replacing `BiomeAppearanceFeature` and the hardcoded dye chain; `AbstractVariantFeature<V>` collapsing ~600 lines of duplication across the three independent-axis features; `CompositeAppearanceFeature` rename; formal two-lane appearance architecture with runtime mutual-exclusion enforcement  
+**Source ADRs**: ADR_020, ADR_021  
+**Task File**: `docs/development/sprints/active/SPRINT_12_TASK.md`  
+**Major Deliverables**:
+- `EntityCondition<C>`, `EntityContext`, `EntityConditions` — combinators and 11 shared factory methods defined exactly once in HZLib Common
+- `ExchangeCondition`, `ExchangeContext`, `ExchangeConditions` — refactored to extend base framework; call sites unchanged
+- `EmanationCondition`, `EmanationContext`, `EmanationConditions` — refactored to extend base framework; call sites unchanged
+- `AppearanceCondition`, `AppearanceContext`, `AppearanceConditions`, `WeightedAppearancePool`, `AppearanceRule` — full appearance condition type set
+- `ConditionalAppearanceFeature` with builder — unified spawn-time and interaction-time appearance resolution
+- `AbstractVariantFeature<V>` — shared base for `TextureVariantFeature`, `ModelVariantFeature`, `AnimatorVariantFeature`; each collapses to ~15 lines
+- `CompositeAppearanceFeature` (renamed from `AppearanceVariantFeature`) + `ICompositeAppearance` with `getSizeConfig()` default
+- `NativeEntity.initializeRandomVariants` — lane-check logic (Lane B / CompositeAppearanceFeature takes precedence; Lane A fallback); `seedOverlaySlots()` extracted
+- `BiomeAppearanceFeature.java` deleted
+- LovelyLib — 7 robot families wired with 16-dye `ConditionalAppearanceFeature`; `RobotEntity` dye chain replaced with `tryConditionalAppearance()`
+- Monsters & Girls — Gourdragora `SizeConfig` references wired into `ICompositeAppearance` entries; biome-selection overrides replaced
 
 #### Sprint 19-20: Core Robot Specializations (4 weeks)
 **Sprint 19 Dates**: 2026-06-23 to 2026-07-06 (Honey features)  
@@ -301,6 +320,31 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 - **Phase 4**: Full validation — 1.20.4 robot saves, Gen1 saves, overlay slot persistence, belly persistence, corrupt field handling, SynchedEntityData authority, McVersion field
 
 **Build dependency**: Phase 0 → Phase 1 → Phase 2 & 3 (parallel) → Phase 4. Do not begin Phase 2 before Phase 1 is complete and HZLib artifact is available.
+
+---
+
+## Next Sprint
+
+### Sprint 12: Condition Framework & Appearance Architecture — ADR 020 & ADR 021 📋
+**Status**: 📋 Planned  
+**Dates**: 2026-07-12 to 2026-07-25  
+**Story Points**: 60  
+**Theme**: Base condition/context framework (eliminates duplicated combinators and shared factory methods); `ConditionalAppearanceFeature` (replaces `BiomeAppearanceFeature` and hardcoded dye chain); `AbstractVariantFeature<V>` (collapses ~600 lines across three Lane A features); `CompositeAppearanceFeature` rename; two-lane appearance architecture with formal mutual-exclusion enforcement  
+**Source ADRs**: `docs/development/decisions/ADR_020_Conditional_Appearance_Feature.md`, `docs/development/decisions/ADR_021_Composite_Appearance_Feature.md`  
+**Task File**: `docs/development/sprints/active/SPRINT_12_TASK.md`
+
+**Sprint steps**:
+- **Step 1** (prerequisite): Create `EntityCondition<C>`, `EntityContext`, `EntityConditions` in new HZLib `conditions` package — must compile before anything else begins
+- **Step 2**: Migrate `Exchange*` and `Emanation*` condition types to extend the base framework — delete duplicated combinator bodies and shared method implementations; zero call-site changes
+- **Step 3**: Implement appearance types — `AppearanceCondition`, `AppearanceContext`, `AppearanceConditions`, `WeightedAppearancePool`, `AppearanceRule`, `ConditionalAppearanceFeature`; wire into `NativeEntity.initializeSpawnVariants`; delete `BiomeAppearanceFeature`
+- **Step 4** *(parallel with Step 5)*: Create `AbstractVariantFeature<V>`, simplify `TextureVariantFeature`, `ModelVariantFeature`, `AnimatorVariantFeature` to ~15 lines each
+- **Step 5** *(parallel with Step 4)*: Rename `AppearanceVariantFeature` → `CompositeAppearanceFeature`; rename `IAppearanceVariant` → `ICompositeAppearance`; add `getSizeConfig()` default method
+- **Step 6**: Update `NativeEntity.initializeRandomVariants` with lane-check logic; extract `seedOverlaySlots()`; add `hasLaneAFeatures()` guard
+- **Step 7** *(parallel with Step 8)*: LovelyLib — wire 16-dye `ConditionalAppearanceFeature` on all 7 robot families; replace dye chain in `RobotEntity` with `tryConditionalAppearance()`
+- **Step 8** *(parallel with Step 7)*: Monsters & Girls — wire `SizeConfig` into `ICompositeAppearance` entries on `GourdragoraFamily`; replace string-concatenation key construction; migrate any biome-selection overrides
+- **Step 9**: Validation — dye interaction, spawn-time biome selection, Lane B composite, composable conditions, weighted pool distribution, Lane A isolation, misconfiguration warning, call-site stability
+
+**Build dependency**: Step 1 → Step 2 → Step 3 → Step 4 & 5 (parallel) → Step 6 → Step 7 & 8 (parallel) → Step 9.
 
 ---
 
