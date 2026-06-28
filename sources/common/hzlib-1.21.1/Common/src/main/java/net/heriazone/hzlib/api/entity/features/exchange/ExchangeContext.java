@@ -1,33 +1,26 @@
 package net.heriazone.hzlib.api.entity.features.exchange;
 
-import net.minecraft.resources.ResourceKey;
+import net.heriazone.hzlib.api.entity.conditions.EntityContext;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
- * <p>Immutable snapshot of the world context at the moment an exchange is attempted.<p>
+ * Immutable snapshot of the world at the moment an exchange is attempted.
  * <p>
- * <b>Architecture:</b> Passed to every {@link ExchangeCondition} during rule evaluation.
- * Separates condition logic from entity internals — conditions only see what they need
- * and cannot mutate the entity. Collected once per interaction, reused across all rules
- * in the same evaluation pass.
+ * <b>Architecture:</b> Extends {@link EntityContext} — the four shared accessors
+ * ({@code getDimension}, {@code getBiome}, {@code getDayTime}, {@code isServerSide})
+ * are inherited. Only exchange-specific state lives here: the interacting player
+ * and the ownership check.
  * <p>
- * <b>Design Decision:</b> Plain data bag rather than an interface. Conditions are lambdas
- * that capture whatever they need from this context; there is no polymorphism required on
- * the context itself.
+ * Collected once per interaction and reused across all rules in the evaluation pass.
  */
-public final class ExchangeContext {
+public final class ExchangeContext extends EntityContext {
 
     // -- Fields --
 
-    private final TamableAnimal entity;
-    private final Player        player;
-    private final Level         level;
+    private final Player player;
 
     // -- Constructor --
 
@@ -36,91 +29,37 @@ public final class ExchangeContext {
      *
      * @param entity the entity being interacted with
      * @param player the player performing the interaction
-     * @throws NullPointerException if entity or player is null
      */
     public ExchangeContext(TamableAnimal entity, Player player) {
-        this.entity = Objects.requireNonNull(entity, "Entity cannot be null");
-        this.player = Objects.requireNonNull(player, "Player cannot be null");
-        this.level  = entity.level();
+        super(entity);
+        this.player = Objects.requireNonNull(player, "player must not be null");
     } // Constructor: ExchangeContext ()
 
-    // -- Accessors --
+    // -- Exchange-specific accessors --
 
     /**
-     * Returns the entity being interacted with.
-     *
-     * @return entity instance
+     * Returns the entity cast to {@link TamableAnimal}.
+     * <p>
+     * <i>Note:</i> Covariant convenience — base {@link #getEntity()} returns
+     * {@code LivingEntity}; exchange rules always deal with tameable entities.
      */
     public TamableAnimal getEntity() {
-        return entity;
+        return (TamableAnimal) super.getEntity();
     } // getEntity ()
 
-    /**
-     * Returns the player performing the interaction.
-     *
-     * @return player instance
-     */
+    /** Returns the player performing the interaction. */
     public Player getPlayer() {
         return player;
     } // getPlayer ()
 
     /**
-     * Returns the world the interaction is occurring in.
-     *
-     * @return level instance
-     */
-    public Level getLevel() {
-        return level;
-    } // getLevel ()
-
-    /**
-     * Returns the dimension key of the current world.
-     *
-     * @return dimension resource key
-     */
-    public ResourceKey<Level> getDimension() {
-        return level.dimension();
-    } // getDimension ()
-
-    /**
-     * Returns the biome key at the entity's current position, if available.
-     * <p>
-     * <b>Server-only:</b> Biome lookup via {@code getBiome()} is only available on
-     * {@code ServerLevel}. Returns {@link Optional#empty()} on the client side.
-     *
-     * @return biome key, or empty if not available
-     */
-    public Optional<ResourceKey<Biome>> getBiome() {
-        return level.getBiome(entity.blockPosition()).unwrapKey();
-    } // getBiome ()
-
-    /**
-     * Returns the time of day in ticks (0–23999).
-     *
-     * @return day time ticks
-     */
-    public long getDayTime() {
-        return level.getDayTime() % 24000L;
-    } // getDayTime ()
-
-    /**
-     * Returns whether the entity is tamed and owned by the interacting player.
-     *
-     * @return true if the entity is tamed by the player
+     * Returns {@code true} when the entity is tamed and owned by the interacting player.
      */
     public boolean isOwnedByPlayer() {
-        return entity.isTame()
-                && entity.getOwnerUUID() != null
-                && entity.getOwnerUUID().equals(player.getUUID());
+        TamableAnimal tamable = getEntity();
+        return tamable.isTame()
+                && tamable.getOwnerUUID() != null
+                && tamable.getOwnerUUID().equals(player.getUUID());
     } // isOwnedByPlayer ()
-
-    /**
-     * Returns whether the interaction is occurring on the server side.
-     *
-     * @return true if server side
-     */
-    public boolean isServerSide() {
-        return !level.isClientSide;
-    } // isServerSide ()
 
 } // Class: ExchangeContext

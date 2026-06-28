@@ -84,7 +84,12 @@ public final class ExchangeFeature {
             ExchangeCondition ownerCheck = ExchangeConditions.ownerOnly();
             for (ExchangeRule rule : builder.rules) {
                 ExchangeCondition existing = rule.getCondition();
-                ExchangeCondition combined = existing == null ? ownerCheck : ownerCheck.and(existing);
+                // and() returns EntityCondition<C> — wrap in an ExchangeCondition lambda
+                // rather than casting, since the lambda was not created as ExchangeCondition
+                // and the cast fails at runtime.
+                ExchangeCondition combined = existing == null
+                        ? ownerCheck
+                        : ctx -> ownerCheck.test(ctx) && existing.test(ctx);
                 // Rebuild the rule with the injected condition via a proxy wrapper
                 compiled.add(new ConditionOverrideRule(rule, combined));
             }

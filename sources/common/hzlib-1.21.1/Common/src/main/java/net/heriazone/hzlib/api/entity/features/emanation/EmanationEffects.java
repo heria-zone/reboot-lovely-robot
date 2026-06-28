@@ -72,7 +72,7 @@ public final class EmanationEffects {
         return ctx -> {
             if (ctx.target == null) return;
             float bonus = ctx.target.getMaxHealth() * fraction;
-            DamageSource source = ctx.level.damageSources().mobAttack(ctx.self);
+            DamageSource source = ctx.getLevel().damageSources().mobAttack(ctx.getEntity());
             ctx.target.hurt(source, bonus);
         };
     } // dealBonusDamage ()
@@ -107,12 +107,12 @@ public final class EmanationEffects {
 
     /** Applies a mob effect to the emanating entity herself. */
     public static EmanationEffect applyToSelf(Holder<MobEffect> effect, int durationTicks, int amplifier) {
-        return ctx -> ctx.self.addEffect(new MobEffectInstance(effect, durationTicks, amplifier));
+        return ctx -> ctx.getEntity().addEffect(new MobEffectInstance(effect, durationTicks, amplifier));
     } // applyToSelf ()
 
     /** Heals the entity by a flat amount, capped at her max health. */
     public static EmanationEffect healSelf(float amount) {
-        return ctx -> ctx.self.heal(amount);
+        return ctx -> ctx.getEntity().heal(amount);
     } // healSelf ()
 
     // -- Area of effect --
@@ -132,13 +132,13 @@ public final class EmanationEffects {
      */
     public static EmanationEffect aoe(float radius, EmanationEffect... effects) {
         return ctx -> {
-            List<LivingEntity> nearby = ctx.level.getEntitiesOfClass(
+            List<LivingEntity> nearby = ctx.getLevel().getEntitiesOfClass(
                     LivingEntity.class,
-                    ctx.self.getBoundingBox().inflate(radius),
-                    e -> e != ctx.self && e.isAlive()
+                    ctx.getEntity().getBoundingBox().inflate(radius),
+                    e -> e != ctx.getEntity() && e.isAlive()
             );
             for (LivingEntity entity : nearby) {
-                EmanationContext aoeCtx = EmanationContext.onAttack(ctx.self, entity);
+                EmanationContext aoeCtx = EmanationContext.onAttack(ctx.getEntity(), entity);
                 for (EmanationEffect effect : effects) {
                     effect.apply(aoeCtx);
                 }

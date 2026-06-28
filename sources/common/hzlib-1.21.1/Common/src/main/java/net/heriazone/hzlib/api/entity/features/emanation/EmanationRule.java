@@ -70,7 +70,7 @@ public final class EmanationRule {
 
         // Cooldown guard — only enforced for ON_THRESHOLD
         if (cooldownTicks > 0 && trigger == EmanationTrigger.ON_THRESHOLD) {
-            long currentTick = ctx.level.getGameTime();
+            long currentTick = ctx.getLevel().getGameTime();
             if (!state.isThresholdReady(currentTick)) return false;
             // Fire all effects
             for (EmanationEffect effect : effects) effect.apply(ctx);

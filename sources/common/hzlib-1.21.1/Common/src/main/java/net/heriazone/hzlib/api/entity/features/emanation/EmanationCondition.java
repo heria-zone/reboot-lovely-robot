@@ -1,37 +1,19 @@
 package net.heriazone.hzlib.api.entity.features.emanation;
 
+import net.heriazone.hzlib.api.entity.conditions.EntityCondition;
+
 /**
- * <p>Predicate that guards whether an {@link EmanationRule} fires in a given context.<p>
+ * Typed predicate for {@link EmanationRule} evaluation.
  * <p>
- * <b>Composition:</b> Conditions compose naturally via {@link #and}, {@link #or},
- * and {@link #negate}. Use {@link EmanationConditions} for common pre-built conditions.
+ * <b>Architecture:</b> Empty extension of {@link EntityCondition} — inherits
+ * {@code and/or/negate} combinators at zero cost. Use {@link EmanationConditions}
+ * for pre-built conditions or supply a lambda directly.
  * <p>
- * <b>Server-side only.</b> Conditions are evaluated on the server thread.
+ * <b>Server-side only.</b> Evaluated on the server thread at the trigger moment.
  */
 @FunctionalInterface
-public interface EmanationCondition {
+public interface EmanationCondition extends EntityCondition<EmanationContext> {
 
-    /**
-     * Tests whether this condition passes for the given emanation context.
-     *
-     * @param ctx immutable snapshot of the world at the emanation moment
-     * @return true if the rule should fire
-     */
-    boolean test(EmanationContext ctx);
-
-    /** Returns a condition that passes only when both this and {@code other} pass. */
-    default EmanationCondition and(EmanationCondition other) {
-        return ctx -> this.test(ctx) && other.test(ctx);
-    } // and ()
-
-    /** Returns a condition that passes when either this or {@code other} passes. */
-    default EmanationCondition or(EmanationCondition other) {
-        return ctx -> this.test(ctx) || other.test(ctx);
-    } // or ()
-
-    /** Returns a condition that passes when this condition does not. */
-    default EmanationCondition negate() {
-        return ctx -> !this.test(ctx);
-    } // negate ()
+    // Combinators and test() are inherited from EntityCondition<EmanationContext>.
 
 } // Interface: EmanationCondition

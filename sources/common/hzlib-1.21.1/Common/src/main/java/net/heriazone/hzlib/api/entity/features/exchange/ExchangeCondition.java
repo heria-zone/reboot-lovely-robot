@@ -1,59 +1,28 @@
 package net.heriazone.hzlib.api.entity.features.exchange;
 
+import net.heriazone.hzlib.api.entity.conditions.EntityCondition;
+import net.heriazone.hzlib.api.entity.conditions.EntityContext;
+
 /**
- * <p>Predicate that gates whether an {@link ExchangeRule} may fire.<p>
+ * Typed predicate for {@link ExchangeRule} evaluation.
  * <p>
- * <b>Architecture:</b> Functional interface so conditions can be expressed as lambdas.
- * Static factory methods on {@link ExchangeConditions} provide the common cases.
- * Conditions compose via {@link #and}, {@link #or}, and {@link #negate}.
- * <p>
- * <b>Evaluation:</b> Called server-side only, immediately before an exchange rule fires.
- * Implementations may safely access world state, biome, time, etc.
+ * <b>Architecture:</b> Empty extension of {@link EntityCondition} — inherits
+ * {@code and/or/negate} and the generic {@code test} signature at zero cost.
+ * Use {@link ExchangeConditions} for pre-built conditions or supply a lambda directly.
  * <p>
  * <b>Example:</b>
  * <pre>{@code
  * ExchangeConditions.inBiome(Biomes.FLOWER_FOREST)
  *     .and(ExchangeConditions.ownerOnly())
  * }</pre>
+ * <p>
+ * <b>Server-side only.</b> Evaluated immediately before a rule fires.
  */
 @FunctionalInterface
-public interface ExchangeCondition {
+public interface ExchangeCondition extends EntityCondition<ExchangeContext> {
 
-    /**
-     * Tests whether this condition is satisfied for the given context.
-     *
-     * @param ctx the interaction context
-     * @return true if the condition passes and the rule may proceed
-     */
-    boolean test(ExchangeContext ctx);
-
-    /**
-     * Returns a composed condition that requires both this and {@code other} to pass.
-     *
-     * @param other additional condition that must also pass
-     * @return composed AND condition
-     */
-    default ExchangeCondition and(ExchangeCondition other) {
-        return ctx -> this.test(ctx) && other.test(ctx);
-    } // and ()
-
-    /**
-     * Returns a composed condition that passes if either this or {@code other} passes.
-     *
-     * @param other alternative condition
-     * @return composed OR condition
-     */
-    default ExchangeCondition or(ExchangeCondition other) {
-        return ctx -> this.test(ctx) || other.test(ctx);
-    } // or ()
-
-    /**
-     * Returns a condition that inverts this condition's result.
-     *
-     * @return negated condition
-     */
-    default ExchangeCondition negate() {
-        return ctx -> !this.test(ctx);
-    } // negate ()
+    // Combinators and test() are inherited from EntityCondition<ExchangeContext>.
+    // This interface exists purely to provide the ExchangeContext-typed name used
+    // at all call sites — no body needed.
 
 } // Interface: ExchangeCondition
