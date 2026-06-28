@@ -9,54 +9,34 @@ import net.heriazone.hzlib.api.entity.variants.interfaces.*;
  * enabling centralized variant management while maintaining type safety through
  * separate registry instances per variant type.
  * <p>
- * <b>Design Decision:</b> Static registries simplify access patterns and ensure
- * single source of truth for variant registration across the entire application.
- * Each variant type has its own registry to prevent type confusion.
- * <p>
- * <b>Usage Pattern:</b> Register variants during initialization, then use throughout
- * application lifecycle for variant resolution and selection.
+ * <b>Two-lane architecture:</b> The three single-axis registries ({@code TEXTURES},
+ * {@code MODELS}, {@code ANIMATORS}) serve Lane A — independent combinatorial axes.
+ * {@code APPEARANCES} serves Lane B — fully-coupled composite entries. A family
+ * registers in one lane only; {@code NativeEntity} enforces this at runtime.
  */
 public class VariantRegistries {
 
     // -- Static Registry Instances --
 
-    /**
-     * Registry for texture variants.
-     * <p>
-     * <b>Usage:</b> Register texture variants during mod initialization.
-     * Used by entity types to resolve texture resources.
-     */
-    public static final VariantRegistry<ITextureVariant> TEXTURES = new VariantRegistry<>(ITextureVariant.class);
+    /** Lane A — texture palette variants (colors, seasonal swaps). */
+    public static final VariantRegistry<ITextureVariant>      TEXTURES    = new VariantRegistry<>(ITextureVariant.class);
+
+    /** Lane A — model state variants (default, armed, size). */
+    public static final VariantRegistry<IModelVariant>        MODELS      = new VariantRegistry<>(IModelVariant.class);
+
+    /** Lane A — animation file variants. */
+    public static final VariantRegistry<IAnimatorVariant>     ANIMATORS   = new VariantRegistry<>(IAnimatorVariant.class);
 
     /**
-     * Registry for model variants.
+     * Lane B — composite appearance bundles (texture + model + animator + optional size).
      * <p>
-     * <b>Usage:</b> Register model variants during mod initialization.
-     * Used by entity types to resolve model resources.
+     * Previously typed as {@code IAppearanceVariant}; updated to {@link ICompositeAppearance}
+     * following the Terminology alignment in ADR 021.
      */
-    public static final VariantRegistry<IModelVariant> MODELS = new VariantRegistry<>(IModelVariant.class);
-
-    /**
-     * Registry for animator variants.
-     * <p>
-     * <b>Usage:</b> Register animator variants during mod initialization.
-     * Used by entity types to resolve animator resources.
-     */
-    public static final VariantRegistry<IAnimatorVariant> ANIMATORS = new VariantRegistry<>(IAnimatorVariant.class);
-
-    /**
-     * Registry for entity appearances.
-     * <p>
-     * <b>Usage:</b> Register entity appearances during mod initialization.
-     * Used by entity types to resolve appearance resources.
-     */
-    public static final VariantRegistry<IAppearanceVariant> APPEARANCES = new VariantRegistry<>(IAppearanceVariant.class);
+    public static final VariantRegistry<ICompositeAppearance> APPEARANCES = new VariantRegistry<>(ICompositeAppearance.class);
 
     // -- Private Constructor --
 
-    /**
-     * Prevents instantiation of utility class.
-     */
     private VariantRegistries() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     } // Constructor: VariantRegistries ()

@@ -1,16 +1,18 @@
 package net.heriazone.hzlib.framework.entity.variants;
 
-import net.heriazone.hzlib.api.entity.variants.interfaces.IAppearanceVariant;
+import net.heriazone.hzlib.api.entity.variants.interfaces.ICompositeAppearance;
 
 /**
- * <p>Standard implementation of {@link IAppearanceVariant}.<p>
+ * Standard implementation of {@link ICompositeAppearance}.
  * <p>
- * <b>Key design:</b> The composite key is the appearance identity.
- * Texture, model, and animator keys are declared independently — model
- * and animator are typically shared across color families for the same size,
- * while texture is color-specific.
+ * <b>Key design:</b> The composite key is the appearance identity. Texture, model,
+ * and animator keys are declared independently — model and animator are typically
+ * shared across color families for the same size, while texture is color-specific.
+ * <p>
+ * {@link #getSizeConfig()} returns {@link java.util.Optional#empty()} — override or
+ * use for size-coupled appearances that carry a {@link net.heriazone.hzlib.api.entity.features.SizeVariantFeature.SizeConfig}.
  */
-public class StandardAppearanceVariant implements IAppearanceVariant {
+public class StandardAppearanceVariant implements ICompositeAppearance {
 
     // -- Fields --
 
@@ -24,9 +26,9 @@ public class StandardAppearanceVariant implements IAppearanceVariant {
     // -- Constructor --
 
     /**
-     * Creates a new entity appearance.
+     * Creates a new composite appearance.
      *
-     * @param key         unique identifier for this entity appearance
+     * @param key         unique identifier for this appearance
      * @param display     human-readable display name
      * @param textureKey  texture variant key
      * @param modelKey    model variant key
@@ -44,43 +46,17 @@ public class StandardAppearanceVariant implements IAppearanceVariant {
         this.priority = priority;
     } // Constructor: StandardAppearanceVariant ()
 
-    // -- IAppearanceVariant --
+    // -- ICompositeAppearance --
 
-    @Override
-    public String getTextureKey() {
-        return textureKey;
-    } // getTextureKey ()
-
-    @Override
-    public String getModelKey() {
-        return modelKey;
-    } // getModelKey ()
-
-    @Override
-    public String getAnimatorKey() {
-        return animatorKey;
-    } // getAnimatorKey ()
+    @Override public String getTextureKey()  { return textureKey;  }
+    @Override public String getModelKey()    { return modelKey;    }
+    @Override public String getAnimatorKey() { return animatorKey; }
 
     // -- IVariant --
 
-    @Override
-    public String getKey() {
-        return key;
-    } // getKey ()
-
-    @Override
-    public String getDisplay() {
-        return display;
-    } // getDisplay ()
-
-    @Override
-    public int getPriority() {
-        return priority;
-    } // getPriority ()
-
-    @Override
-    public boolean isAvailable(String entityKey) {
-        return true;
-    } // isAvailable ()
+    @Override public String  getKey()                    { return key;      }
+    @Override public String  getDisplay()                { return display;  }
+    @Override public int     getPriority()               { return priority; }
+    @Override public boolean isAvailable(String entity)  { return true;     }
 
 } // Class: StandardAppearanceVariant
