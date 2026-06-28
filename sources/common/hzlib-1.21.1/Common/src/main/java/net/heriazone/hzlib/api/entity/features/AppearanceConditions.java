@@ -93,7 +93,7 @@ public final class AppearanceConditions {
      * @param probability chance of passing; 0.0 = never, 1.0 = always
      */
     public static AppearanceCondition chance(float probability) {
-        return ctx -> EntityConditions.<AppearanceCondition>chance(probability).test(ctx);
+        return ctx -> EntityConditions.<AppearanceContext>chance(probability).test(ctx);
     } // chance ()
 
     // -- Appearance-specific --
