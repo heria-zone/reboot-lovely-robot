@@ -93,17 +93,17 @@ public final class MigrationStep_V0_Fabric implements MigrationStep {
         root.putInt("TextureID", colorId);
 
         // Rename snake_case keys to PascalCase equivalents
-        renameKey(root, "level",                  "Level");
-        renameKey(root, "max_level",              "MaxLevel");
-        renameKey(root, "exp",                    "Exp");
-        renameKey(root, "auto_attack",            "AutoAttack");
-        renameKey(root, "fire_protection",        "FireProtection");
-        renameKey(root, "fall_protection",        "FallProtection");
-        renameKey(root, "blast_protection",       "BlastProtection");
-        renameKey(root, "projectile_protection",  "ProjectileProtection");
-        renameKey(root, "base_x",                 "BaseX");
-        renameKey(root, "base_y",                 "BaseY");
-        renameKey(root, "base_z",                 "BaseZ");
+        renameKey    (root, "level",                  "Level");
+        renameKey    (root, "max_level",              "MaxLevel");
+        renameKey    (root, "exp",                    "Exp");
+        renameBoolKey(root, "auto_attack",            "AutoAttack");
+        renameKey    (root, "fire_protection",        "FireProtection");
+        renameKey    (root, "fall_protection",        "FallProtection");
+        renameKey    (root, "blast_protection",       "BlastProtection");
+        renameKey    (root, "projectile_protection",  "ProjectileProtection");
+        renameFloatKey(root, "base_x",                "BaseX");
+        renameFloatKey(root, "base_y",                "BaseY");
+        renameFloatKey(root, "base_z",                "BaseZ");
 
         // Remove consumed Fabric keys
         root.remove("type");
@@ -114,21 +114,37 @@ public final class MigrationStep_V0_Fabric implements MigrationStep {
 
     // -- Private Helpers --
 
+    /**
+     * Moves a field from one key name to another, inferring its type from the
+     * DataCompound presence flags. Called only when we know the key exists
+     * ({@code root.has(from)} already verified by caller).
+     * <p>
+     * Gen1-Fabric stored integers and booleans; strings were only used for
+     * {@code "type"} and {@code "custom_name"}, both handled separately.
+     * All numeric fields are safely treated as INT here.
+     */
     private static void renameKey(DataCompound root, String from, String to) {
-        if (!root.has(from) || root.has(to)) return; // skip if source absent or target already set
-        // INT rename
-        int intVal = root.getInt(from, Integer.MIN_VALUE);
-        if (intVal != Integer.MIN_VALUE) { root.putInt(to, intVal); root.remove(from); return; }
-        // BOOLEAN rename
-        // has() + getBoolean — no sentinel; check type by trying int first (getBoolean returns false for missing)
-        // Use keys() presence check already done above; attempt boolean
-        String strVal = root.getString(from, null);
-        if (strVal == null) {
-            root.putBoolean(to, root.getBoolean(from, false));
-        } else {
-            root.putString(to, strVal);
-        }
+        if (!root.has(from) || root.has(to)) return;
+        // All Gen1-Fabric numeric fields are ints; booleans use the same storage slot
+        // putInt / getInt covers both (boolean stored as 1/0 in NBT byte tag under CompoundTag).
+        // For fields we know are boolean (auto_attack), getBoolean is used explicitly in the
+        // caller loop below, but we keep a safe int-copy path here as the general case.
+        root.putInt(to, root.getInt(from, 0));
         root.remove(from);
     } // renameKey ()
+
+    /** Explicitly renames a boolean field, preserving its semantic type. */
+    private static void renameBoolKey(DataCompound root, String from, String to) {
+        if (!root.has(from) || root.has(to)) return;
+        root.putBoolean(to, root.getBoolean(from, false));
+        root.remove(from);
+    } // renameBoolKey ()
+
+    /** Explicitly renames a float field. */
+    private static void renameFloatKey(DataCompound root, String from, String to) {
+        if (!root.has(from) || root.has(to)) return;
+        root.putFloat(to, root.getFloat(from, 0f));
+        root.remove(from);
+    } // renameFloatKey ()
 
 } // Class: MigrationStep_V0_Fabric
