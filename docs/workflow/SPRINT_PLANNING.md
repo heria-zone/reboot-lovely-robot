@@ -170,8 +170,30 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 ---
 
 ### Phase 3: Feature Completion (Q3 2026)
-**Duration**: 12 weeks (6 sprints)  
-**Target Story Points**: 84 points total (14 pts/sprint)
+**Duration**: 14 weeks (7 sprints)  
+**Target Story Points**: 155 points total
+
+#### Sprint 11: Entity Data Pipeline — ADR 019 Full Implementation
+**Dates**: 2026-06-27 to 2026-07-11  
+**Story Points**: 71  
+**Theme**: Five-layer NBT persistence pipeline — MC-version-agnostic `DataCompound` abstraction, typed `DataField<T>` handles with no string literals at call sites, `EntityDataSchema` schema-driven serialisation, `MigrationChain` covering all published save formats, `SynchedEntityData` protocol on load, overlay slot NBT persistence fix  
+**Source ADR**: ADR_019  
+**Task File**: `docs/development/sprints/active/SPRINT_11_TASK.md`  
+**Major Deliverables**:
+- `DataCompound` interface + `NbtAdapterFactory` — zero MC imports in HZLib Common NBT pipeline
+- `CompoundTagDataCompound` 1.21.1 implementation with correct UUID storage
+- `DataField<T>` typed handles — string keys encapsulated, compile-time safe at all call sites
+- `EntityDataSchema` builder + `MigrationChain` runner — schema-driven write/read, single migration authority
+- `MigrationStep_V0_Fabric` — Gen1-Fabric locale strings → stable keys (complete lookup table)
+- `MigrationStep_V0_Forge` — Gen1-Forge / Gen2 flat → `EntityData` compound
+- `MigrationStep_V1_1204` — 1.20.4 flat int IDs → string keys, full field mapping
+- `MigrationStep_V1_MG` — belly/texture ID disambiguation, `ModelID`/`AnimatorID` int → string
+- `RobotFields.java` — all robot `DataField<T>` constants in one place
+- `RobotFamily.configureSchema()` — schema declaration via field handles
+- `NativeEntity` save/load fully pipeline-driven — no `CompoundTag` usage below entry point
+- Overlay RANDOM/INTERACTIVE slot NBT persistence fixed
+- `CombatStatsNBT`, `ProtectionStatsNBT`, `EnchantmentStatsNBT`, `EntityDataMigration` deleted
+- Full validation against 1.20.4 robot saves, Gen1 saves, and corrupt-field handling
 
 #### Sprint 19-20: Core Robot Specializations (4 weeks)
 **Sprint 19 Dates**: 2026-06-23 to 2026-07-06 (Honey features)  
@@ -263,7 +285,22 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 
 ## Current Sprint
 
-> No active sprint. Sprint 09 and Sprint 10 were archived on 2026-06-26. Next sprint to be planned.
+### Sprint 11: Entity Data Pipeline — ADR 019 Full Implementation 🔄
+**Status**: 🔄 Active  
+**Dates**: 2026-06-27 to 2026-07-11  
+**Story Points**: 71 (with M&G phase deferrable to Sprint 12 if schedule pressure)  
+**Theme**: Five-layer NBT persistence pipeline — `DataCompound`, typed `DataField<T>` handles, `EntityDataSchema`, `MigrationChain`, full published-save migration coverage  
+**Source ADR**: `docs/development/decisions/ADR_019_Entity_Data_Pipeline.md`  
+**Task File**: `docs/development/sprints/active/SPRINT_11_TASK.md`
+
+**Sprint phases**:
+- **Phase 0** (prerequisite): `DataCompound` interface + `NbtAdapterFactory` + `CompoundTagDataCompound` for 1.21.1 — must publish HZLib snapshot before Phase 1 begins
+- **Phase 1**: Pipeline core in HZLib Common — `DataType`, `DataField<T>`, `EntityDataSchema`, `MigrationStep`/`MigrationChain`, full `NativeEntity` save/load wiring, overlay slot NBT fix, delete superseded NBT classes
+- **Phase 2**: LovelyLib robot schema — `RobotFields` constants, `RobotFamily.configureSchema()`, three migration steps (V0_Fabric, V0_Forge, V1_1204), remove flat-write overrides from `RobotEntity`, delete `EntityDataMigration`
+- **Phase 3** *(can slip to Sprint 12)*: Monsters & Girls schema — `MonsterFields`, `MigrationStep_V1_MG` with belly/texture ID disambiguation, `baseTextureCount` per family
+- **Phase 4**: Full validation — 1.20.4 robot saves, Gen1 saves, overlay slot persistence, belly persistence, corrupt field handling, SynchedEntityData authority, McVersion field
+
+**Build dependency**: Phase 0 → Phase 1 → Phase 2 & 3 (parallel) → Phase 4. Do not begin Phase 2 before Phase 1 is complete and HZLib artifact is available.
 
 ---
 

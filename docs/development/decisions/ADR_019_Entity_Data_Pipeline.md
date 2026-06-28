@@ -198,7 +198,7 @@ bypass the schema system entirely.
 
 ```
   ┌────────────────────────────────────────────────────────┐
-  │  Layer 0 — HzCompound / NbtAdapter                     │
+  │  Layer 0 — DataCompound / NbtAdapter                     │
   │  Pure Java interface. MC-version impl per source set.  │
   │  ONLY point of contact with MC NBT API.                │
   ├────────────────────────────────────────────────────────┤
@@ -208,11 +208,11 @@ bypass the schema system entirely.
   ├────────────────────────────────────────────────────────┤
   │  Layer 2 — EntityDataSchema                            │
   │  Ordered list of DataField<T>. Write/read via          │
-  │  HzCompound. Validates on read.                        │
+  │  DataCompound. Validates on read.                        │
   ├────────────────────────────────────────────────────────┤
   │  Layer 3 — MigrationChain                              │
   │  Sole authority over format migration.                 │
-  │  Works exclusively with HzCompound.                    │
+  │  Works exclusively with DataCompound.                    │
   ├────────────────────────────────────────────────────────┤
   │  Layer 4 — NativeEntity save/load                      │
   │  Entry point for MC-native CompoundTag. Wraps          │
@@ -222,7 +222,7 @@ bypass the schema system entirely.
 
 ---
 
-### Layer 0 — `HzCompound` and `NbtAdapter`
+### Layer 0 — `DataCompound` and `NbtAdapter`
 
 #### Why
 
@@ -234,7 +234,7 @@ Common that imports `net.minecraft.nbt.*` is bound to exactly one MC version and
 The solution is a pure-Java wrapper interface that all higher layers use. MC-version-specific
 implementations live in version-scoped source sets — not in HZLib Common.
 
-#### `HzCompound` — the interface (HZLib Common, zero MC imports)
+#### `DataCompound` — the interface (HZLib Common, zero MC imports)
 
 ```java
 package hzlib.common.nbt;
@@ -244,9 +244,9 @@ import java.util.UUID;
 
 /**
  * Version-agnostic compound NBT wrapper.
- * All HZLib pipeline code operates on HzCompound — never on MC-native tag types.
+ * All HZLib pipeline code operates on DataCompound — never on MC-native tag types.
  */
-public interface HzCompound {
+public interface DataCompound {
 
     // Primitives
     void    putInt(String key, int value);
@@ -263,9 +263,9 @@ public interface HzCompound {
     UUID getUUID(String key);         // returns null if absent
 
     // Nesting
-    HzCompound getOrCreate(String key);
-    HzCompound getCompound(String key); // returns empty compound if absent
-    void       put(String key, HzCompound value);
+    DataCompound getOrCreate(String key);
+    DataCompound getCompound(String key); // returns empty compound if absent
+    void       put(String key, DataCompound value);
 
     // Introspection
     boolean     has(String key);
@@ -282,7 +282,7 @@ package hzlib.common.nbt;
 
 /**
  * Registered once during mod initialisation by the MC-version-specific module.
- * The factory converts MC-native compound tag objects into HzCompound wrappers.
+ * The factory converts MC-native compound tag objects into DataCompound wrappers.
  */
 public final class NbtAdapterFactory {
 
@@ -291,18 +291,18 @@ public final class NbtAdapterFactory {
     public static void register(Factory factory) { instance = factory; }
 
     /** Wraps a MC-native compound tag. The tag object is cast internally. */
-    public static HzCompound wrap(Object nativeCompound) {
+    public static DataCompound wrap(Object nativeCompound) {
         return instance.wrap(nativeCompound);
     }
 
     /** Creates a new empty compound. */
-    public static HzCompound createEmpty() {
+    public static DataCompound createEmpty() {
         return instance.createEmpty();
     }
 
     public interface Factory {
-        HzCompound wrap(Object nativeCompound);
-        HzCompound createEmpty();
+        DataCompound wrap(Object nativeCompound);
+        DataCompound createEmpty();
     }
 }
 ```
@@ -315,10 +315,10 @@ Each supported MC version provides one implementation class in its scoped source
 
 ```
 sources/
-  mc-1.21.1/   CompoundTagHzCompound.java    — uses tag.putInt(), tag.putUUID(), tag.contains()
-  mc-1.16.5/   NbtCompoundHzCompound.java    — uses tag.putInt(), UUID via two longs
-  mc-1.12.2/   NBTTagCompoundHzCompound.java — uses tag.setInteger(), tag.hasKey()
-  mc-1.7.10/   NBTTagCompoundHzCompound.java — uses srg-mapped method names via Forge
+  mc-1.21.1/   CompoundTagDataCompound.java    — uses tag.putInt(), tag.putUUID(), tag.contains()
+  mc-1.16.5/   NbtCompoundDataCompound.java    — uses tag.putInt(), UUID via two longs
+  mc-1.12.2/   NBTTagCompoundDataCompound.java — uses tag.setInteger(), tag.hasKey()
+  mc-1.7.10/   NBTTagCompoundDataCompound.java — uses srg-mapped method names via Forge
 ```
 
 UUID handling by version:
@@ -329,7 +329,7 @@ UUID handling by version:
 | 1.16–1.17        | Two longs: `key + "Most"`, `key + "Least"`       |
 | 1.7.10–1.12.2    | Same two-long format via `setLong`/`getLong`     |
 
-The `HzCompound.putUUID()` / `getUUID()` methods abstract this — callers never branch on MC version.
+The `DataCompound.putUUID()` / `getUUID()` methods abstract this — callers never branch on MC version.
 
 ---
 
@@ -360,8 +360,8 @@ public final class DataField<T> {
     public static <T> DataField<T> of(
             String key, DataType<T> type, T defaultValue, Predicate<T> validator) { ... }
 
-    T readFrom(HzCompound compound) { ... }
-    void writeTo(HzCompound compound, T value) { ... }
+    T readFrom(DataCompound compound) { ... }
+    void writeTo(DataCompound compound, T value) { ... }
     public String getKey() { return key; }
 }
 ```
@@ -380,11 +380,11 @@ public enum DataType<T> {
     FLOAT(Float.class),
     BOOLEAN(Boolean.class),
     STRING(String.class),
-    UUID(UUID.class);   // NEW — delegates to HzCompound.putUUID/getUUID
+    UUID(UUID.class);   // NEW — delegates to DataCompound.putUUID/getUUID
 }
 ```
 
-`DataType.UUID` is handled by `HzCompound`, which internally uses the version-appropriate storage method.
+`DataType.UUID` is handled by `DataCompound`, which internally uses the version-appropriate storage method.
 No caller branches on MC version to persist a UUID.
 
 #### Field handle declarations (LovelyLib Common example — `RobotFields.java`)
@@ -481,7 +481,7 @@ safe to reference. Instance fields assigned in the subclass constructor are not 
 
 **All migration logic lives in `MigrationStep` implementations. `DataField<T>` has no migrator field.**
 
-A `MigrationStep` receives and returns `HzCompound`. It can read any field combination it needs for its
+A `MigrationStep` receives and returns `DataCompound`. It can read any field combination it needs for its
 transformation — cross-field migration (e.g. belly/texture disambiguation) is a natural fit.
 
 ```java
@@ -495,7 +495,7 @@ public interface MigrationStep {
      * Input is the full root compound (not just EntityData) so cross-field
      * access (e.g. family-declared baseTextureCount alongside TextureID) is possible.
      */
-    HzCompound migrate(HzCompound root);
+    DataCompound migrate(DataCompound root);
 }
 ```
 
@@ -525,7 +525,7 @@ static {
 }
 
 @Override
-public HzCompound migrate(HzCompound root) {
+public DataCompound migrate(DataCompound root) {
     String localeType = root.getString("type", "");
     String stableKey = LOCALE_TO_STABLE_KEY.getOrDefault(localeType, localeType);
     if (!LOCALE_TO_STABLE_KEY.containsKey(localeType)) {
@@ -580,17 +580,17 @@ MC API.
 ```
 readAdditionalSaveData(CompoundTag rootTag)          ← MC-native type, entry point only
    │
-   └── HzCompound root = NbtAdapterFactory.wrap(rootTag)   ← ONLY wrap here; no MC types below
+   └── DataCompound root = NbtAdapterFactory.wrap(rootTag)   ← ONLY wrap here; no MC types below
           │
           ▼
-   Stage 1: Format detection (operates on HzCompound)
+   Stage 1: Format detection (operates on DataCompound)
           ├── Has EntityData.SchemaVersion AND EntityData.McVersion?  → Stage 3 (current)
           ├── Has EntityData.SchemaVersion only (no McVersion)?        → Stage 2 (pre-McVersion)
           ├── Has EntityData compound without SchemaVersion?            → Stage 2 (Gen3 partial)
           └── Has flat Gen1/Gen2 keys (Level, Exp, TextureID, etc.)?   → Stage 2 (legacy)
           │
           ▼
-   Stage 2: MigrationChain (each step: HzCompound → HzCompound)
+   Stage 2: MigrationChain (each step: DataCompound → DataCompound)
           ├── V0_Fabric   → locale type string → TextureVariant stable key; snake_case → PascalCase
           ├── V0_Forge    → flat PascalCase → EntityData compound; write SchemaVersion + McVersion
           ├── V1_1204     → TextureID (int) → TextureVariant (string); flat → EntityData compound
@@ -614,7 +614,7 @@ readAdditionalSaveData(CompoundTag rootTag)          ← MC-native type, entry p
 ```
 
 **Key rule**: `CompoundTag` (MC-native) is touched only at the method entry point. Everything from
-format detection through schema read operates exclusively on `HzCompound`.
+format detection through schema read operates exclusively on `DataCompound`.
 
 ---
 
@@ -625,7 +625,7 @@ format detection through schema read operates exclusively on `HzCompound`.
 @Override
 public void addAdditionalSaveData(CompoundTag rootTag) {
     super.addAdditionalSaveData(rootTag);                    // vanilla entity fields
-    HzCompound root = NbtAdapterFactory.wrap(rootTag);       // wrap immediately
+    DataCompound root = NbtAdapterFactory.wrap(rootTag);       // wrap immediately
 
     // Root-level synced fields: read from SynchedEntityData → write to NBT
     root.putString("TextureVariant",  entityData.get(TEXTURE_VARIANT_ACCESSOR));
@@ -635,12 +635,12 @@ public void addAdditionalSaveData(CompoundTag rootTag) {
     root.putBoolean("Notification",   entityData.get(NOTIFICATION_ACCESSOR));
 
     // Overlay slots
-    HzCompound overlayNbt = NbtAdapterFactory.createEmpty();
+    DataCompound overlayNbt = NbtAdapterFactory.createEmpty();
     overlaySlotAccessors.forEach((key, acc) -> overlayNbt.putString(key, entityData.get(acc)));
     root.put("OverlaySlots", overlayNbt);
 
     // EntityData compound — schema-driven, no field names in this method
-    HzCompound entityDataNbt = root.getOrCreate("EntityData");
+    DataCompound entityDataNbt = root.getOrCreate("EntityData");
     entityDataNbt.putString("SchemaVersion", schema.getVersion());
     entityDataNbt.putString("McVersion",     McVersionProvider.current());
     schema.writeTo(entityDataNbt, this);                     // entity provides values by DataField<T>
@@ -717,8 +717,8 @@ The migration steps in this ADR cover published mod save formats: Gen1-Fabric (1
 published mod and therefore no live save data to migrate. They are **out of scope for the migration
 steps** in this ADR.
 
-However, the `HzCompound` / `NbtAdapterFactory` architecture (Layer 0) is what makes those versions
-viable in the future. When a 1.12.2 or 1.7.10 port is built, it provides one `NBTTagCompoundHzCompound`
+However, the `DataCompound` / `NbtAdapterFactory` architecture (Layer 0) is what makes those versions
+viable in the future. When a 1.12.2 or 1.7.10 port is built, it provides one `NBTTagCompoundDataCompound`
 implementation and registers it via `NbtAdapterFactory`. All HZLib Common and LovelyLib Common
 pipeline code then operates on those versions without modification. No new migration logic is needed
 unless the mod itself was previously published on those versions with a legacy save format.
@@ -734,8 +734,8 @@ unless the mod itself was previously published on those versions with a legacy s
   else.
 - **No string literals at call sites**: compile-time type safety. Mismatched field references fail at
   compile time, not at runtime with a silent default value.
-- **MC-version isolation**: `HzCompound` is the only point of contact with the MC NBT API. Porting to a
-  new MC version means writing one `HzCompound` implementation — HZLib Common is untouched.
+- **MC-version isolation**: `DataCompound` is the only point of contact with the MC NBT API. Porting to a
+  new MC version means writing one `DataCompound` implementation — HZLib Common is untouched.
 - **Single migration authority**: `MigrationChain` is the only place migration logic lives. The removal
   of `DataField.migrator` eliminates the ambiguity about where format transforms belong.
 - **Automatic migration for new entities**: entities loaded through the pipeline pick up migration for
@@ -746,14 +746,14 @@ unless the mod itself was previously published on those versions with a legacy s
   before the entity ticks, eliminating stale-value bugs.
 - **Overlay slot persistence fixed**: the gap where RANDOM/INTERACTIVE slots were lost on world reload is
   closed by the `OverlaySlots` compound.
-- **UUID persistence version-safe**: `DataType.UUID` delegates to `HzCompound`, which selects the
+- **UUID persistence version-safe**: `DataType.UUID` delegates to `DataCompound`, which selects the
   correct storage strategy per MC version.
 - **Extensible by downstream mods**: Monsters & Girls, Tribute, Legacy, Reboot each extend the base
   `EntityDataSchema` with their own `DataField<T>` constants — no changes to HZLib Common required.
 
 ### Negative / Trade-offs
 
-- **Added abstraction layer**: `HzCompound` wraps the native compound. One wrapper allocation per
+- **Added abstraction layer**: `DataCompound` wraps the native compound. One wrapper allocation per
   save/load call. Negligible at the scale of entity NBT operations but worth documenting.
 - **Schema must be declared via `configureSchema()`**: schemas cannot be declared inline in the family
   constructor body due to Java construction order. Subclasses must use the `configureSchema()` override
@@ -774,7 +774,7 @@ unless the mod itself was previously published on those versions with a legacy s
   save time. If it returns a hardcoded constant that is not updated between ports, the `McVersion` field
   in saved data will be wrong. It must be implemented as a runtime lookup, not a constant.
 - **`NbtAdapterFactory` not registered at load**: if the MC-version module fails to register the factory
-  (e.g. wrong mod init order), all `HzCompound` operations throw. Registration must happen in the
+  (e.g. wrong mod init order), all `DataCompound` operations throw. Registration must happen in the
   earliest mod init hook before any entity is loaded.
 
 ---
@@ -810,7 +810,7 @@ entities.
 `SynchedEntityData` and `addAdditionalSaveData` in 1.21.1. There is no native equivalent for entity
 persistence.
 
-### D — Use MC-version-specific HZLib builds instead of `HzCompound`
+### D — Use MC-version-specific HZLib builds instead of `DataCompound`
 
 Ship a separate HZLib Common jar per MC version. Each version's HZLib directly uses `CompoundTag` (or
 `NBTTagCompound`), eliminating the wrapper layer.
@@ -833,17 +833,17 @@ stronger guarantee than runtime validation.
 
 ## Implementation Plan
 
-### Phase 0 — `HzCompound` / `NbtAdapterFactory` (HZLib Common + MC-version modules)
+### Phase 0 — `DataCompound` / `NbtAdapterFactory` (HZLib Common + MC-version modules)
 
 This phase must complete before all others. No higher-layer code can compile against HZLib Common until
-`HzCompound` exists.
+`DataCompound` exists.
 
-1. Define `HzCompound` interface in HZLib Common (`hzlib.common.nbt`)
+1. Define `DataCompound` interface in HZLib Common (`hzlib.common.nbt`)
 2. Define `NbtAdapterFactory` in HZLib Common
 3. Define `McVersionProvider` interface in HZLib Common (returns current MC version string)
-4. Implement `CompoundTagHzCompound` in the 1.21.1 source set
+4. Implement `CompoundTagDataCompound` in the 1.21.1 source set
 5. Register factory and version provider in the 1.21.1 mod initialiser
-6. Write unit tests for `CompoundTagHzCompound` against the `HzCompound` contract
+6. Write unit tests for `CompoundTagDataCompound` against the `DataCompound` contract
 
 **Build dependency note**: HZLib Common (Phase 0) must publish a snapshot before LovelyLib (Phase 2)
 can begin. LovelyLib cannot import `DataField<T>` or `EntityDataSchema` until the HZLib artifact is
@@ -854,14 +854,14 @@ available. Do not begin Phase 2 work in parallel with Phase 0.
 Depends on: Phase 0 complete.
 
 1. Define `DataType<T>` enum with `INT`, `FLOAT`, `BOOLEAN`, `STRING`, `UUID`
-2. Define `DataField<T>` (no migrator field) with `readFrom(HzCompound)` / `writeTo(HzCompound, T)`
+2. Define `DataField<T>` (no migrator field) with `readFrom(DataCompound)` / `writeTo(DataCompound, T)`
 3. Define `EntityDataSchema` builder — `.register(DataField<?>)` + `.version(String)`
-4. Define `MigrationStep` interface (input/output `HzCompound`)
+4. Define `MigrationStep` interface (input/output `DataCompound`)
 5. Implement `MigrationChain` runner with format detection (Stage 1 logic)
 6. Define `FieldValueProvider` and `FieldValueConsumer` interfaces (typed on `DataField<T>`)
 7. Wire `NativeEntity.addAdditionalSaveData` / `readAdditionalSaveData` to the full pipeline:
    - wrap rootTag → detect format → migrate if needed → push synced fields → read schema
-8. Fix overlay slot NBT gap in `NativeEntity` using `HzCompound`
+8. Fix overlay slot NBT gap in `NativeEntity` using `DataCompound`
 9. Delete `CombatStatsNBT`, `ProtectionStatsNBT`, `EnchantmentStatsNBT` (superseded)
 
 ### Phase 2 — LovelyLib (robot schema and migrations)
@@ -902,7 +902,7 @@ Depends on: Phase 1 complete.
 ### Phase 5 — Additional MC version ports (future, as needed)
 
 When a new MC version port is initiated:
-1. Implement `*HzCompound` for that version's NBT class in the version-specific source set
+1. Implement `*DataCompound` for that version's NBT class in the version-specific source set
 2. Register factory and version provider in that version's mod initialiser
 3. No changes to HZLib Common, LovelyLib Common, or any migration step are required
 
@@ -911,9 +911,9 @@ When a new MC version port is initiated:
 ## Related Documents
 
 - `docs/development/notes/Pre_Publish_Checklist_Notes.md` — item 11
-- `sources/common/hzlib-1.21.1/.../nbt/HzCompound.java` — to be created (Phase 0)
+- `sources/common/hzlib-1.21.1/.../nbt/DataCompound.java` — to be created (Phase 0)
 - `sources/common/hzlib-1.21.1/.../nbt/NbtAdapterFactory.java` — to be created (Phase 0)
-- `sources/mc-1.21.1/.../nbt/CompoundTagHzCompound.java` — to be created (Phase 0)
+- `sources/mc-1.21.1/.../nbt/CompoundTagDataCompound.java` — to be created (Phase 0)
 - `sources/common/hzlib-1.21.1/.../data/EntityData.java` — existing partial structure (superseded)
 - `sources/common/lovelylib-1.21.1/.../data/EntityDataMigration.java` — migration stub (superseded)
 - `sources/common/lovelylib-1.21.1/.../data/migration/MigrationStep_V0_Fabric.java` — to be created
