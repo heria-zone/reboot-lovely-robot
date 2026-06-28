@@ -62,8 +62,9 @@ import java.util.Objects;
  *       {@link NativeEntityFamily}</li>
  *   <li>Combat mode and auto-heal lifecycle — wary timer, heal timer, model
  *       variant toggling between default and armed states</li>
- *   <li>Spawn variant initialisation — random and biome-aware selection via
- *       {@link #initializeSpawnVariants}</li>
+ *   <li>Spawn variant initialisation — conditional or random selection via
+ *       {@link #initializeSpawnVariants}; {@link net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature}
+ *       is checked first and falls through to random if absent</li>
  *   <li>Persistent overlay slot state — maps {@link OverlayFeature} RANDOM and
  *       INTERACTIVE slots to {@code SynchedEntityData} accessors declared by
  *       the concrete subclass</li>
@@ -744,11 +745,30 @@ public abstract class NativeEntity extends TamableAnimal {
     /**
      * Selects spawn-time variants with access to world context.
      * <p>
-     * Default delegates to {@link #initializeRandomVariants()}. Override to make
-     * selection context-aware — biome, dimension, spawn reason, etc.
+     * Checks {@link net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature}
+     * first — if the family declares one, builds an {@link net.heriazone.hzlib.api.entity.features.AppearanceContext}
+     * from the spawn world and reason, resolves a variant key, and applies it.
+     * Falls through to {@link #initializeRandomVariants()} when no feature is registered
+     * or the feature resolves to null (no rule matched, no default set).
      */
     protected void initializeSpawnVariants(ServerLevelAccessor world, MobSpawnType reason) {
-        initializeRandomVariants();
+        if (nativeEntity == null) { initializeRandomVariants(); return; }
+
+        nativeEntity.getFeature(net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature.class)
+                .ifPresentOrElse(feature -> {
+                    net.heriazone.hzlib.api.entity.features.AppearanceContext ctx =
+                            net.heriazone.hzlib.api.entity.features.AppearanceContext
+                                    .forSpawn(this, world, blockPosition(), reason);
+                    String key = feature.resolve(ctx);
+                    if (key != null) {
+                        setTextureVariant(key);
+                        // Seed overlay slots — ConditionalAppearanceFeature only drives texture;
+                        // model/animator/overlays still use the random initialisation path
+                        seedOverlaySlots();
+                    } else {
+                        initializeRandomVariants();
+                    }
+                }, this::initializeRandomVariants);
     } // initializeSpawnVariants ()
 
     /**
@@ -761,6 +781,32 @@ public abstract class NativeEntity extends TamableAnimal {
     protected void initializeRandomVariants() {
         if (nativeEntity == null) return;
 
+        // -- Lane B: Composite (all dimensions fully coupled) --
+        java.util.Optional<net.heriazone.hzlib.api.entity.features.variants.CompositeAppearanceFeature>
+                compositeOpt = nativeEntity.getFeature(
+                        net.heriazone.hzlib.api.entity.features.variants.CompositeAppearanceFeature.class);
+
+        if (compositeOpt.isPresent()) {
+            // Warn on misconfiguration — both lanes declared on the same family
+            if (hasLaneAFeatures()) {
+                org.slf4j.LoggerFactory.getLogger(NativeEntity.class).warn(
+                        "[HZLib] Family '{}' declares both CompositeAppearanceFeature and " +
+                        "independent axis features. CompositeAppearanceFeature takes precedence.",
+                        nativeEntity.getKey());
+            }
+            net.heriazone.hzlib.api.entity.variants.interfaces.ICompositeAppearance appearance =
+                    compositeOpt.get().getRandomVariant(nativeEntity.getKey());
+            if (appearance != null) {
+                setTextureVariant(appearance.getTextureKey());
+                setModelVariant(appearance.getModelKey());
+                setAnimatorVariant(appearance.getAnimatorKey());
+                appearance.getSizeConfig().ifPresent(sc -> sc.applyTo(this));
+            }
+            seedOverlaySlots();
+            return; // Lane B handled — skip Lane A entirely
+        }
+
+        // -- Lane A: Independent axes (fallback when no composite feature) --
         nativeEntity.getFeature(TextureVariantFeature.class).ifPresent(f -> {
             ITextureVariant v = f.getRandomVariant(nativeEntity.getKey());
             if (v != null) setTextureVariant(v.getKey());
@@ -776,12 +822,59 @@ public abstract class NativeEntity extends TamableAnimal {
             if (v != null) setAnimatorVariant(v.getKey());
         });
 
-        // Seed RANDOM overlay slots once at spawn — persisted via SynchedEntityData
+        seedOverlaySlots();
+    } // initializeRandomVariants ()
+
+    /** Returns {@code true} when the family has at least one Lane A independent-axis feature. */
+    private boolean hasLaneAFeatures() {
+        return nativeEntity.getFeature(TextureVariantFeature.class).isPresent()
+                || nativeEntity.getFeature(ModelVariantFeature.class).isPresent()
+                || nativeEntity.getFeature(AnimatorVariantFeature.class).isPresent();
+    } // hasLaneAFeatures ()
+
+    /**
+     * Seeds all RANDOM {@link net.heriazone.hzlib.api.entity.features.overlay.OverlayFeature}
+     * slots with a fresh random pick.
+     * <p>
+     * Called from both {@link #initializeRandomVariants()} and the
+     * {@link net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature} path in
+     * {@link #initializeSpawnVariants} — extracted so neither path duplicates the seeding logic.
+     * INTERACTIVE slots start at their declared default; CONDITIONAL and ALWAYS slots carry no
+     * persistent state and are skipped.
+     */
+    protected void seedOverlaySlots() {
+        if (nativeEntity == null) return;
         nativeEntity.getFeature(net.heriazone.hzlib.api.entity.features.overlay.OverlayFeature.class)
                 .ifPresent(feature -> feature.getSlots().stream()
                         .filter(s -> s.getMode() == net.heriazone.hzlib.api.entity.features.overlay.SlotMode.RANDOM)
                         .forEach(s -> setOverlaySlot(s.getKey(), s.pickRandom())));
-    } // initializeRandomVariants ()
+    } // seedOverlaySlots ()
+
+    /**
+     * Attempts to resolve an appearance variant key from the family's
+     * {@link net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature}
+     * using an interaction-time context, and applies it if resolved.
+     * <p>
+     * <b>Use case:</b> Replaces hardcoded dye-item chains in entity interaction handlers.
+     * The caller shrinks the held item stack only when this returns {@code true}.
+     *
+     * @param heldItem item the player is holding
+     * @param player   interacting player
+     * @return {@code true} if a variant key was resolved and applied
+     */
+    protected boolean tryConditionalAppearance(ItemStack heldItem, Player player) {
+        if (nativeEntity == null) return false;
+        return nativeEntity.getFeature(
+                net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature.class)
+                .map(feature -> {
+                    net.heriazone.hzlib.api.entity.features.AppearanceContext ctx =
+                            net.heriazone.hzlib.api.entity.features.AppearanceContext
+                                    .forInteraction(this, level(), blockPosition(), player, heldItem);
+                    String key = feature.resolve(ctx);
+                    if (key != null) { setTextureVariant(key); return true; }
+                    return false;
+                }).orElse(false);
+    } // tryConditionalAppearance ()
 
     // -- NBT Serialization --
 
