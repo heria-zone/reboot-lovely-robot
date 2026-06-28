@@ -2,6 +2,8 @@ package net.heriazone.hzlib.api.entity;
 
 import net.heriazone.hzlib.api.entity.features.variants.*;
 import net.heriazone.hzlib.api.entity.variants.interfaces.*;
+import net.heriazone.hzlib.api.nbt.EntityDataSchema;
+import net.heriazone.hzlib.api.nbt.MigrationChain;
 import net.heriazone.hzlib.framework.entity.data.CombatData;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.ai.attributes.*;
@@ -51,7 +53,19 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
      */
     protected final CombatData data;
 
-    // -- Feature Map --
+    // -- Data Pipeline --
+
+    /**
+     * Schema governing this family's entity data fields — declared by {@link #configureSchema()},
+     * used by {@code NativeEntity} save/load pipeline. Null until {@link #configureSchema()} runs.
+     */
+    protected EntityDataSchema schema;
+
+    /**
+     * Migration chain applied when loading legacy saves for this family.
+     * Null until {@link #configureSchema()} runs; defaults to {@link MigrationChain#empty()}.
+     */
+    protected MigrationChain migrationChain;
 
     // Class-keyed so getFeature() returns the correct generic type without casting.
     private final Map<Class<?>, Object> features;
@@ -77,6 +91,11 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
         // Variant features are registered here so the family is fully configured
         // immediately after construction without a separate init call.
         configureVariants();
+
+        // Schema and migration chain are configured after variants — safe to reference
+        // static DataField constants declared in subclasses at this point.
+        configureSchema();
+        if (migrationChain == null) migrationChain = MigrationChain.empty();
     } // Constructor: NativeEntityFamily ()
 
     // -- Abstract Methods --
@@ -93,6 +112,33 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
     // -- Variant Configuration --
 
     /**
+     * Override point for declaring the entity data schema and migration chain.
+     * <p>
+     * <b>When it runs:</b> Called from the constructor after {@link #configureVariants()},
+     * so static {@link net.heriazone.hzlib.api.nbt.DataField} constants are safe to
+     * reference. Do not reference subclass <em>instance</em> fields assigned after
+     * {@code super()} — they have not yet been set.
+     * <p>
+     * <b>Typical implementation:</b>
+     * <pre>{@code
+     * protected void configureSchema() {
+     *     schema = EntityDataSchema.builder()
+     *         .register(RobotFields.LEVEL)
+     *         .register(RobotFields.EXP)
+     *         .version("1.0.0")
+     *         .build();
+     *     migrationChain = MigrationChain.builder()
+     *         .addStep(new MigrationStep_V0_Fabric())
+     *         .build();
+     * }
+     * }</pre>
+     * Families with no persisted fields and no legacy saves do not need to override this.
+     */
+    protected void configureSchema() {
+        // No-op — override to declare schema and migration chain
+    } // configureSchema ()
+
+    /**
      * Override point for registering variant features at construction time.
      * <p>
      * Use {@link #withFeature} to attach {@link TextureVariantFeature},
@@ -103,6 +149,22 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
     protected void configureVariants() {
         // No-op — override to register TextureVariantFeature, ModelVariantFeature, etc.
     } // configureVariants ()
+
+    // -- Schema / Migration Accessors --
+
+    /**
+     * Returns the entity data schema declared by {@link #configureSchema()}.
+     * Returns {@code null} if the family declared no schema — the entity save path
+     * skips the {@code EntityData} compound write when this is null.
+     */
+    public EntityDataSchema getSchema() { return schema; } // getSchema ()
+
+    /**
+     * Returns the migration chain for this family. Never null after construction —
+     * defaults to {@link MigrationChain#empty()} when {@link #configureSchema()}
+     * does not assign one.
+     */
+    public MigrationChain getMigrationChain() { return migrationChain; } // getMigrationChain ()
 
     // -- Identity Accessors --
 

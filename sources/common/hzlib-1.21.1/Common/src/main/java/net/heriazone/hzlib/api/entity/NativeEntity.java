@@ -13,6 +13,9 @@ import net.heriazone.hzlib.api.entity.variants.VariantRegistries;
 import net.heriazone.hzlib.api.entity.variants.interfaces.IAnimatorVariant;
 import net.heriazone.hzlib.api.entity.variants.interfaces.IModelVariant;
 import net.heriazone.hzlib.api.entity.variants.interfaces.ITextureVariant;
+import net.heriazone.hzlib.api.nbt.DataCompound;
+import net.heriazone.hzlib.api.nbt.MigrationChain;
+import net.heriazone.hzlib.api.nbt.NbtAdapterFactory;
 import net.heriazone.hzlib.framework.entity.data.CombatData;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.heriazone.hzlib.utils.Utils;
@@ -782,68 +785,173 @@ public abstract class NativeEntity extends TamableAnimal {
 
     // -- NBT Serialization --
 
+    /**
+     * Writes root-level synced fields and, if a schema is declared on the family,
+     * the {@code "EntityData"} compound driven by that schema.
+     * <p>
+     * <b>Layer contract:</b> {@code CompoundTag} is touched only here at the entry
+     * point. Everything below operates on {@link DataCompound} — no MC-native tag
+     * types appear in the pipeline.
+     * <p>
+     * <b>Root-level fields:</b> Written directly from their {@code SynchedEntityData}
+     * accessors. These must be at root so the migration chain can detect format version
+     * before it reads the {@code EntityData} sub-compound.
+     * <p>
+     * <b>EntityData compound:</b> Written by {@link net.heriazone.hzlib.api.nbt.EntityDataSchema#writeTo}
+     * if the family declares a schema. The entity provides values via
+     * {@link #provideFieldValue} — no field key strings at call sites.
+     */
     @Override
     public void addAdditionalSaveData(CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putInt("StateId",                 getCurrentStateID());
-        nbt.putString("TextureVariant",       getTextureVariant());
-        nbt.putString("ModelVariant",         getModelVariant());
-        nbt.putString("AnimatorVariant",      getAnimatorVariant());
-        nbt.putBoolean("NotificationEnabled", isNotificationEnabled());
 
-        // Sequence buffers are transient — only cooldown expiry ticks are worth persisting
-        CompoundTag exchangeTag = new CompoundTag();
-        exchangeState.save(exchangeTag);
-        if (!exchangeTag.isEmpty()) nbt.put("ExchangeState", exchangeTag);
+        // Wrap immediately — only this line touches CompoundTag
+        DataCompound root = NbtAdapterFactory.wrap(nbt);
 
-        // RANDOM and INTERACTIVE slots carry persistent state; CONDITIONAL and ALWAYS do not
+        // Root-level synced fields: SynchedEntityData is authoritative at runtime
+        root.putInt    ("StateId",             getCurrentStateID());
+        root.putString ("TextureVariant",      getTextureVariant());
+        root.putString ("ModelVariant",        getModelVariant());
+        root.putString ("AnimatorVariant",     getAnimatorVariant());
+        root.putBoolean("NotificationEnabled", isNotificationEnabled());
+
+        // Exchange cooldowns — sequence buffers are transient
+        DataCompound exchangeCompound = NbtAdapterFactory.createEmpty();
+        exchangeState.save(nbt); // ExchangeState still uses CompoundTag internally; bridge via nbt
+        // (full DataCompound migration for ExchangeState deferred to Phase 2 — not a published field)
+
+        // OverlaySlots — RANDOM and INTERACTIVE slots carry persistent state
         if (!overlaySlotAccessors.isEmpty()) {
-            CompoundTag overlayTag = new CompoundTag();
+            DataCompound overlayCompound = NbtAdapterFactory.createEmpty();
             overlaySlotAccessors.keySet().forEach(key ->
-                    overlayTag.putString(key, getOverlaySlot(key)));
-            nbt.put("OverlaySlots", overlayTag);
+                    overlayCompound.putString(key, getOverlaySlot(key)));
+            root.put("OverlaySlots", overlayCompound);
+        }
+
+        // EntityData compound — schema-driven, no field key strings in this method
+        if (nativeEntity != null && nativeEntity.getSchema() != null) {
+            DataCompound entityData = root.getOrCreate("EntityData");
+            nativeEntity.getSchema().writeTo(entityData, this::provideFieldValue);
         }
     } // addAdditionalSaveData ()
 
+    /**
+     * Loads root-level synced fields and schema-declared fields, running the family's
+     * {@link MigrationChain} first if the format is not current.
+     * <p>
+     * <b>Five-stage read pipeline (ADR 019):</b>
+     * <ol>
+     *   <li>Wrap — convert MC-native tag to {@link DataCompound}</li>
+     *   <li>Migrate — {@link MigrationChain#migrate} upgrades legacy format if needed</li>
+     *   <li>Root synced fields — push into {@code SynchedEntityData} (NBT is authoritative on load)</li>
+     *   <li>OverlaySlots — restore persistent slot state into their accessors</li>
+     *   <li>EntityData — schema reads fields and delivers typed values to {@link #consumeFieldValue}</li>
+     * </ol>
+     * <b>{@code SynchedEntityData} protocol:</b> Stage 3 pushes values from NBT into the
+     * synced accessors before the entity ticks. The register may hold stale pre-load
+     * values — always use the NBT value, not the current accessor value, as the source.
+     */
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
 
-        if (nbt.contains("StateId"))             setCurrentState(nbt.getInt("StateId"));
-        if (nbt.contains("NotificationEnabled")) setNotificationEnabled(nbt.getBoolean("NotificationEnabled"));
+        // Stage 1: wrap — only this line touches CompoundTag
+        DataCompound root = NbtAdapterFactory.wrap(nbt);
 
-        // Prefer the string key; fall back to int migration for saves predating the string system
-        if (nbt.contains("TextureVariant")) {
-            setTextureVariant(nbt.getString("TextureVariant"));
-        } else if (nbt.contains("TextureID")) {
-            migrateTextureId(nbt.getInt("TextureID"));
+        // Stage 2: migration — upgrades legacy format to current before schema read
+        if (nativeEntity != null) {
+            root = nativeEntity.getMigrationChain().migrate(root);
         }
 
-        if (nbt.contains("ModelVariant"))    setModelVariant(nbt.getString("ModelVariant"));
-        if (nbt.contains("AnimatorVariant")) setAnimatorVariant(nbt.getString("AnimatorVariant"));
+        // Stage 3: push root-level fields into SynchedEntityData
+        // NBT is authoritative on load — do not read from entityData register here
+        if (root.has("StateId"))             setCurrentState(root.getInt("StateId", EntityState.Follow.getId()));
+        if (root.has("NotificationEnabled")) setNotificationEnabled(root.getBoolean("NotificationEnabled", true));
 
+        if (root.has("TextureVariant")) {
+            setTextureVariant(root.getString("TextureVariant", "default"));
+        } else if (root.has("TextureID")) {
+            // Legacy int migration — handled by MigrationChain in Phase 2; fallback guard here
+            migrateTextureId(root.getInt("TextureID", 0));
+        }
+
+        if (root.has("ModelVariant"))    setModelVariant(root.getString("ModelVariant", "default"));
+        if (root.has("AnimatorVariant")) setAnimatorVariant(root.getString("AnimatorVariant", "default"));
+
+        // ExchangeState — still uses CompoundTag bridge (full migration deferred to Phase 2)
         if (nbt.contains("ExchangeState")) exchangeState.load(nbt.getCompound("ExchangeState"));
 
-        // Missing keys fall back to the slot's declared default — safe for old saves
-        if (nbt.contains("OverlaySlots")) {
-            CompoundTag overlayTag = nbt.getCompound("OverlaySlots");
-            overlayTag.getAllKeys().forEach(key -> setOverlaySlot(key, overlayTag.getString(key)));
+        // Stage 4: overlay slots — restore RANDOM/INTERACTIVE slot state into their accessors
+        if (root.hasCompound("OverlaySlots")) {
+            DataCompound overlayCompound = root.getCompound("OverlaySlots");
+            overlayCompound.keys().forEach(key -> setOverlaySlot(key, overlayCompound.getString(key, "")));
+        }
+
+        // Stage 5: EntityData compound — schema read delivers typed values to consumeFieldValue
+        if (nativeEntity != null && nativeEntity.getSchema() != null
+                && root.hasCompound("EntityData")) {
+            nativeEntity.getSchema().readFrom(root.getCompound("EntityData"), this::consumeFieldValue);
         }
     } // readAdditionalSaveData ()
 
     /**
-     * Migrates a legacy int-based {@code TextureID} to a string variant key.
-     * Called once on first load of saves predating the string variant system.
+     * Returns the current value of {@code field} from this entity's live state.
      * <p>
-     * The base implementation falls back to {@code "default"}. Override in
-     * subclasses that maintain a color palette to perform the proper int-to-key
-     * mapping.
+     * Called by {@link net.heriazone.hzlib.api.nbt.EntityDataSchema#writeTo} once per
+     * registered field. Override in subclasses that declare a schema to return the
+     * correct live value for each field handle. The base returns the field's default
+     * value — entities with no schema do not need to override this.
+     * <p>
+     * <b>No string keys:</b> match on the field constant identity, not the key string.
+     * <pre>{@code
+     * protected <T> T provideFieldValue(DataField<T> field) {
+     *     if (field == RobotFields.LEVEL)   return field.getType().getType().cast(getCurrentLevel());
+     *     if (field == RobotFields.EXP)     return field.getType().getType().cast(getExp());
+     *     return super.provideFieldValue(field);
+     * }
+     * }</pre>
+     *
+     * @param <T>   the field's value type
+     * @param field typed handle identifying which field to provide
+     * @return current live value for the field; must not be null
+     */
+    protected <T> T provideFieldValue(net.heriazone.hzlib.api.nbt.DataField<T> field) {
+        return field.getDefaultValue();
+    } // provideFieldValue ()
+
+    /**
+     * Applies a value loaded from NBT to this entity's state.
+     * <p>
+     * Called by {@link net.heriazone.hzlib.api.nbt.EntityDataSchema#readFrom} once per
+     * registered field. Override in subclasses that declare a schema. For fields that
+     * also have a {@code SynchedEntityData} accessor, push the value there too —
+     * NBT is authoritative on load, not the synced register.
+     * <p>
+     * The base implementation is a no-op — entities with no schema do not need to
+     * override this.
+     *
+     * @param <T>   the field's value type
+     * @param field typed handle identifying which field was loaded
+     * @param value validated value read from NBT (never null; invalid values use field default)
+     */
+    protected <T> void consumeFieldValue(net.heriazone.hzlib.api.nbt.DataField<T> field, T value) {
+        // No-op — override in subclasses that declare a schema
+    } // consumeFieldValue ()
+
+    /**
+     * Migrates a legacy int-based {@code TextureID} to a string variant key.
+     * <p>
+     * Only reached on first load of saves that predate both the string variant system
+     * and the {@link MigrationChain}. The chain (Phase 2) will handle this properly
+     * for published formats — this guard exists for direct int-key loads that slip
+     * past the chain. The base falls back to {@code "default"}; override in subclasses
+     * that maintain a color palette.
+     *
+     * @param oldTextureId legacy int texture ID (0–15)
      */
     protected void migrateTextureId(int oldTextureId) {
         setTextureVariant("default");
     } // migrateTextureId ()
-
-    // -- Sound System --
 
     // Base overrides are no-ops — subclasses wire in their sounds via SoundFeature
     // or by overriding these methods directly.
