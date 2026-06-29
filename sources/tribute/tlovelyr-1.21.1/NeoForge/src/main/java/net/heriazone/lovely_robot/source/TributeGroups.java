@@ -25,32 +25,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class TributeGroups extends InternalGroups {
 
-    // -- Variables --
-
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = createRegister(Tribute.MODID);
-
-    /**
-     * Default creative tab for Tribute variant items.
-     * <p>
-     * <b>Contents:</b> Robot cores, spawn eggs, and related items.
-     */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> DEFAULT_TAB = CREATIVE_MODE_TABS.register(
-            LovelyConstant.DEFAULT_TAB,
-            () -> createTabBuilder(
-                    TributeIdentifier.getTabTranslation(LovelyConstant.DEFAULT_TAB),
-                    () -> new ItemStack(TributeItems.ROBOT_CORE.get())
-            )
-                    .displayItems((parameters, output) -> {
-                        output.accept(TributeItems.ROBOT_CORE.get());
-                        output.accept(TributeItems.BUNNY_SPAWN.get());
-                        output.accept(TributeItems.BUNNY2_SPAWN.get());
-                        output.accept(TributeItems.HONEY_SPAWN.get());
-                        output.accept(TributeItems.VANILLA_SPAWN.get());
-                    })
-                    .build()
-    );
-
-    // -- Registration Methods --
+    // -- Methods --
 
     /**
      * Registers creative tabs with NeoForge event bus.
@@ -60,7 +35,6 @@ public class TributeGroups extends InternalGroups {
      * @param eventBus the mod event bus
      */
     public static void register(IEventBus eventBus) {
-        CREATIVE_MODE_TABS.register(eventBus);
         Tribute.LOGGER.info("Registering CreativeTabs: " + Tribute.MODID);
     } // register()
 
@@ -74,6 +48,7 @@ public class TributeGroups extends InternalGroups {
      */
     public static void registerItems(IEventBus eventBus) {
         eventBus.addListener(TributeGroups::addSpawnEggs);
+        eventBus.addListener(TributeGroups::allItems);
     } // registerItems ()
 
     /**
@@ -85,12 +60,19 @@ public class TributeGroups extends InternalGroups {
      * @param event the tab contents building event
      */
     private static void addSpawnEggs(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(TributeItems.BUNNY_SPAWN);
             event.accept(TributeItems.BUNNY2_SPAWN);
             event.accept(TributeItems.HONEY_SPAWN);
             event.accept(TributeItems.VANILLA_SPAWN);
         }
     } // addSpawnEggs ()
+
+    /**
+     * Adds all items to mod's default creative tab.
+     */
+    private static void allItems(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) event.accept(TributeItems.ROBOT_CORE);
+    } // allItems()
 
 } // Class: TributeGroups
