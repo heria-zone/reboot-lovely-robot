@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "lovelylib:item/bunny3/bunny3_16"
+  },
+  "overrides": [
+    { "predicate": {"variant": 0.15}, "model": "lovelylib:item/bunny3/bunny3_03" },
+    { "predicate": {"variant": 0.21}, "model": "lovelylib:item/bunny3/bunny3_04" },
+    { "predicate": {"variant": 0.27}, "model": "lovelylib:item/bunny3/bunny3_05" },
+    { "predicate": {"variant": 0.33}, "model": "lovelylib:item/bunny3/bunny3_06" },
+    { "predicate": {"variant": 0.57}, "model": "lovelylib:item/bunny3/bunny3_10" },
+    { "predicate": {"variant": 0.93}, "model": "lovelylib:item/bunny3/bunny3_16" }
+  ]
+}
