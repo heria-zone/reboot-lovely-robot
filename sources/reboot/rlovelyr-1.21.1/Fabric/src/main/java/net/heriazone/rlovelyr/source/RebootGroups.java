@@ -58,6 +58,7 @@ public class RebootGroups extends InternalGroups {
     private static void addSpawnEggs(FabricItemGroupEntries entries) {
         entries.accept(RebootItems.BUNNY_SPAWN);
         entries.accept(RebootItems.BUNNY2_SPAWN);
+        entries.accept(RebootItems.BUNNY3_SPAWN);
         entries.accept(RebootItems.DRAGON_SPAWN);
         entries.accept(RebootItems.HONEY_SPAWN);
         entries.accept(RebootItems.KITSUNE_SPAWN);
@@ -72,6 +73,7 @@ public class RebootGroups extends InternalGroups {
         entries.accept(RebootItems.ROBOT_CORE);
         entries.accept(RebootItems.BUNNY_SPAWN);
         entries.accept(RebootItems.BUNNY2_SPAWN);
+        entries.accept(RebootItems.BUNNY3_SPAWN);
         entries.accept(RebootItems.DRAGON_SPAWN);
         entries.accept(RebootItems.HONEY_SPAWN);
         entries.accept(RebootItems.KITSUNE_SPAWN);

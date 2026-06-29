@@ -37,6 +37,7 @@ public class RebootEntities {
 
     public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, RebootRobotFamilies.BUNNY);
     public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, RebootRobotFamilies.BUNNY2);
+    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY3 = registerRobot(LovelyConstant.VARIANT_BUNNY3, RebootRobotFamilies.BUNNY3);
     public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, RebootRobotFamilies.DRAGON);
     public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, RebootRobotFamilies.HONEY);
     public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, RebootRobotFamilies.KITSUNE);
@@ -86,6 +87,7 @@ public class RebootEntities {
     public static void registerAttribute(EntityAttributeCreationEvent event) {
         event.put(BUNNY.get(),   NativeEntityFamily.createAttributes(RebootRobotFamilies.BUNNY));
         event.put(BUNNY2.get(),  NativeEntityFamily.createAttributes(RebootRobotFamilies.BUNNY2));
+        event.put(BUNNY3.get(),  NativeEntityFamily.createAttributes(RebootRobotFamilies.BUNNY3));
         event.put(DRAGON.get(),  NativeEntityFamily.createAttributes(RebootRobotFamilies.DRAGON));
         event.put(HONEY.get(),   NativeEntityFamily.createAttributes(RebootRobotFamilies.HONEY));
         event.put(KITSUNE.get(), NativeEntityFamily.createAttributes(RebootRobotFamilies.KITSUNE));
@@ -101,6 +103,7 @@ public class RebootEntities {
     public static void registerRender(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(BUNNY.get(), BunnyRenderer::new);
         event.registerEntityRenderer(BUNNY2.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(BUNNY3.get(), NativeRobotRenderer::new);
         event.registerEntityRenderer(DRAGON.get(), NativeRobotRenderer::new);
         event.registerEntityRenderer(HONEY.get(), NativeRobotRenderer::new);
         event.registerEntityRenderer(KITSUNE.get(), KitsuneRenderer::new);
@@ -138,6 +141,11 @@ public class RebootEntities {
         // BUNNY2
         RebootRobotFamilies.BUNNY2
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.BUNNY2_SPAWN.get()))
+                .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
+
+        // BUNNY3
+        RebootRobotFamilies.BUNNY3
+                .withFeature(PickupFeature.class, new PickupFeature(RebootItems.BUNNY3_SPAWN.get()))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE.get()));
 
         // DRAGON

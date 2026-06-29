@@ -31,6 +31,7 @@ public class RebootItems extends InternalItems {
     // SPAWNS
     public static final Item BUNNY_SPAWN = registerItem(LovelyConstant.BUNNY_SPAWN, RebootEntities.BUNNY, Rarity.RARE, 1);
     public static final Item BUNNY2_SPAWN = registerItem(LovelyConstant.BUNNY2_SPAWN, RebootEntities.BUNNY2, Rarity.RARE, 1);
+    public static final Item BUNNY3_SPAWN = registerItem(LovelyConstant.BUNNY3_SPAWN, RebootEntities.BUNNY3, Rarity.RARE, 1);
     public static final Item DRAGON_SPAWN = registerItem(LovelyConstant.DRAGON_SPAWN, RebootEntities.DRAGON, Rarity.RARE, 1);
     public static final Item HONEY_SPAWN = registerItem(LovelyConstant.HONEY_SPAWN, RebootEntities.HONEY, Rarity.RARE, 1);
     public static final Item KITSUNE_SPAWN = registerItem(LovelyConstant.KITSUNE_SPAWN, RebootEntities.KITSUNE, Rarity.RARE, 1);
@@ -91,6 +92,7 @@ public class RebootItems extends InternalItems {
     public static void registerModel() {
         registerModel(RebootItems.BUNNY_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         registerModel(RebootItems.BUNNY2_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+        registerModel(RebootItems.BUNNY3_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         registerModel(RebootItems.DRAGON_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         registerModel(RebootItems.HONEY_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         registerModel(RebootItems.KITSUNE_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);

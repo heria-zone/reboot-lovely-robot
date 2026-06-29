@@ -44,6 +44,7 @@ public class RebootGroups extends InternalGroups {
                         output.accept(RebootItems.ROBOT_CORE.get());
                         output.accept(RebootItems.BUNNY_SPAWN.get());
                         output.accept(RebootItems.BUNNY2_SPAWN.get());
+                        output.accept(RebootItems.BUNNY3_SPAWN.get());
                         output.accept(RebootItems.DRAGON_SPAWN.get());
                         output.accept(RebootItems.HONEY_SPAWN.get());
                         output.accept(RebootItems.KITSUNE_SPAWN.get());
@@ -91,6 +92,7 @@ public class RebootGroups extends InternalGroups {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(RebootItems.BUNNY_SPAWN);
             event.accept(RebootItems.BUNNY2_SPAWN);
+            event.accept(RebootItems.BUNNY3_SPAWN);
             event.accept(RebootItems.DRAGON_SPAWN);
             event.accept(RebootItems.HONEY_SPAWN);
             event.accept(RebootItems.KITSUNE_SPAWN);

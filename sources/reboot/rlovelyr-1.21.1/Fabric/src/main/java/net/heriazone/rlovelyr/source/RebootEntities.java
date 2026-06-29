@@ -35,6 +35,7 @@ public class RebootEntities {
 
     public static final EntityType<NativeRobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, RebootRobotFamilies.BUNNY);
     public static final EntityType<NativeRobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, RebootRobotFamilies.BUNNY2);
+    public static final EntityType<NativeRobotEntity> BUNNY3 = registerRobot(LovelyConstant.VARIANT_BUNNY3, RebootRobotFamilies.BUNNY3);
     public static final EntityType<NativeRobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, RebootRobotFamilies.DRAGON);
     public static final EntityType<NativeRobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, RebootRobotFamilies.HONEY);
     public static final EntityType<NativeRobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, RebootRobotFamilies.KITSUNE);
@@ -69,6 +70,7 @@ public class RebootEntities {
     public static void register() {
         FabricDefaultAttributeRegistry.register(BUNNY,   NativeEntityFamily.createAttributes(RebootRobotFamilies.BUNNY));
         FabricDefaultAttributeRegistry.register(BUNNY2,  NativeEntityFamily.createAttributes(RebootRobotFamilies.BUNNY2));
+        FabricDefaultAttributeRegistry.register(BUNNY3,  NativeEntityFamily.createAttributes(RebootRobotFamilies.BUNNY3));
         FabricDefaultAttributeRegistry.register(DRAGON,  NativeEntityFamily.createAttributes(RebootRobotFamilies.DRAGON));
         FabricDefaultAttributeRegistry.register(HONEY,   NativeEntityFamily.createAttributes(RebootRobotFamilies.HONEY));
         FabricDefaultAttributeRegistry.register(KITSUNE, NativeEntityFamily.createAttributes(RebootRobotFamilies.KITSUNE));
@@ -82,6 +84,7 @@ public class RebootEntities {
     public static void registerRender() {
         EntityRendererRegistry.register(BUNNY, BunnyRenderer::new);
         EntityRendererRegistry.register(BUNNY2, NativeRobotRenderer::new);
+        EntityRendererRegistry.register(BUNNY3, NativeRobotRenderer::new);
         EntityRendererRegistry.register(DRAGON, NativeRobotRenderer::new);
         EntityRendererRegistry.register(HONEY, NativeRobotRenderer::new);
         EntityRendererRegistry.register(KITSUNE, KitsuneRenderer::new);
@@ -122,6 +125,11 @@ public class RebootEntities {
         // BUNNY2
         RebootRobotFamilies.BUNNY2
                 .withFeature(PickupFeature.class, new PickupFeature(RebootItems.BUNNY2_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE));
+
+        // BUNNY3
+        RebootRobotFamilies.BUNNY3
+                .withFeature(PickupFeature.class, new PickupFeature(RebootItems.BUNNY3_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(RebootItems.ROBOT_CORE));
 
         // DRAGON
