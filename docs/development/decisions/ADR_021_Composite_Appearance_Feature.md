@@ -1,6 +1,6 @@
 # ADR 021: Two-Lane Appearance Architecture & CompositeAppearanceFeature
 
-**Status**: Proposed  
+**Status**: Completed  
 **Date**: 2026-06-25  
 **Decision Makers**: Project Lead  
 **Scope**: HZLib Common — `api/entity/features/variants`  

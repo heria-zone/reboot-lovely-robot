@@ -1,6 +1,6 @@
 # ADR 020: Condition & Context Framework + ConditionalAppearanceFeature
 
-**Status**: Proposed  
+**Status**: Completed  
 **Date**: 2026-06-25  
 **Decision Makers**: Project Lead  
 **Scope**: HZLib Common — base condition/context infrastructure + unified appearance selection  
