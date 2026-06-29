@@ -1,6 +1,7 @@
 package net.heriazone.lovelylib.common.entity;
 
 import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
+import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.hzlib.api.animation.AnimationProfile;
 import net.heriazone.hzlib.api.animation.LoopBehavior;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
@@ -129,6 +130,36 @@ public class RobotFamilyRegistry {
 
         // Apply color palette
         robotType.withColorPalette(variant);
+
+        // Attach shared animation profile — all robots use the same animation file
+        robotType.withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE);
+
+        // Add to registry
+        TYPES.add(robotType);
+
+        return robotType;
+    } // create ()
+
+    /**
+     * Creates robot type with specified variant and a restricted color palette.
+     * <p>
+     * <b>Design Decision:</b> Used for robot types that only support a subset of the
+     * 16-dye palette (e.g., Bunny3 with 5 pastel colors). Passes the color list to
+     * {@link RobotFamily#withColorPalette(RobotVariant, java.util.List)} so that only
+     * active textures are registered and only active dyes trigger appearance changes.
+     * <p>
+     * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
+     *
+     * @param variant entity variant determining resource paths
+     * @param colors  ordered list of active colors — must not be empty, must not contain RANDOM
+     * @return configured RobotFamily instance
+     */
+    protected static RobotFamily create(RobotVariant variant, java.util.List<EntityTexture> colors) {
+        // Create robot type
+        RobotFamily robotType = new RobotFamily(variant.getName(), variant);
+
+        // Apply restricted color palette
+        robotType.withColorPalette(variant, colors);
 
         // Attach shared animation profile — all robots use the same animation file
         robotType.withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE);

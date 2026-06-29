@@ -40,7 +40,10 @@ public enum RobotVariant {
     Neko(5, LovelyConstant.VARIANT_NEKO),
 
     /** General-purpose companion with belt pouch and patrol abilities. */
-    Vanilla(6, LovelyConstant.VARIANT_VANILLA);
+    Vanilla(6, LovelyConstant.VARIANT_VANILLA),
+
+    /** Third-generation bunny with improved all-round stats and a 5-color pastel palette. */
+    Bunny3(7, LovelyConstant.VARIANT_BUNNY3);
 
     // -- Deserialization Cache --
 

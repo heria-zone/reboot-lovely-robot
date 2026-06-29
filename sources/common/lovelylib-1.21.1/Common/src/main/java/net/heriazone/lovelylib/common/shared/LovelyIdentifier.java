@@ -78,6 +78,7 @@ public class LovelyIdentifier extends InternalIdentifier {
         return switch (variant) {
             case Bunny -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY);
             case Bunny2 -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY2);
+            case Bunny3 -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY3);
             case Dragon -> getVariantTranslation(LovelyConstant.VARIANT_DRAGON);
             case Honey -> getVariantTranslation(LovelyConstant.VARIANT_HONEY);
             case Kitsune -> getVariantTranslation(LovelyConstant.VARIANT_KITSUNE);

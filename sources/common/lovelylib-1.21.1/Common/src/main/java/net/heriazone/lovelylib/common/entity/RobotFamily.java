@@ -210,30 +210,11 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
     // -- Color Palette System --
 
     /**
-     * Registers the 16-color texture palette for this robot type using string-keyed
-     * {@link TextureVariantFeature}.
-     * <p>
-     * <b>Architecture:</b> Migrated from the old int-based {@code Map<EntityTexture, ResourceLocation>}
-     * system to the new string-keyed variant feature system (ADR_012). The 16 color keys
-     * ({@code "white"}, {@code "orange"}, etc.) match the {@link EntityTexture} enum's
-     * {@link EntityTexture#Name()} values.
-     * <p>
-     * <b>Texture path pattern:</b> {@code textures/entity/{variant}/{variant}_{colorId:02d}.png}
-     * — unchanged from the old system, only the lookup key changes.
-     * <p>
-     * <b>Called by:</b> {@code RobotFamilyRegistry.create()} after construction.
-     *
-     * @param variant entity variant determining color texture paths
-     * @return this instance for method chaining
-     */
-    /**
-     * Registers the 16-color texture palette and a matching {@link ConditionalAppearanceFeature}
+     * Registers the full 16-color texture palette and a matching {@link ConditionalAppearanceFeature}
      * with one dye-to-variant-key rule per color.
      * <p>
-     * <b>Architecture:</b> The {@link ConditionalAppearanceFeature} is the single source of
-     * truth for dye → texture key resolution. {@link net.heriazone.lovelylib.common.entity.RobotEntity#handleTexture}
-     * delegates to {@link #tryConditionalAppearance}, which evaluates these rules first-match
-     * against an interaction context. The 16-branch if-chain is gone.
+     * <b>Architecture:</b> Delegates to {@link #withColorPalette(RobotVariant, java.util.List)}
+     * with all 16 non-RANDOM colors. Use the overload directly when a restricted palette is needed.
      * <p>
      * Both features must be registered together: {@link TextureVariantFeature} drives random
      * spawn selection (Lane A); {@link ConditionalAppearanceFeature} drives interaction-time
@@ -243,46 +224,79 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
      * @return this instance for method chaining
      */
     public RobotFamily withColorPalette(RobotVariant variant) {
+        // Delegate to the full 16-color set, excluding RANDOM.
+        java.util.List<EntityTexture> allColors = EntityTexture.VALUES.stream()
+                .filter(c -> c != EntityTexture.RANDOM)
+                .collect(java.util.stream.Collectors.toList());
+        return withColorPalette(variant, allColors);
+    } // withColorPalette ()
+
+    /**
+     * Registers a restricted color palette for this robot type.
+     * <p>
+     * <b>Architecture:</b> Identical to {@link #withColorPalette(RobotVariant)} but only
+     * registers texture variants and dye-reaction rules for the provided subset of colors.
+     * Intended for robot types (e.g., Bunny3) whose texture sheets cover fewer than all
+     * 16 dye colors. Dyes outside the subset produce no visual change at interaction time.
+     * <p>
+     * <b>Default texture:</b> Falls back to the first color in the provided list rather
+     * than {@code WHITE}, since {@code WHITE} may not be in the restricted set.
+     *
+     * @param variant entity variant determining texture path prefix
+     * @param colors  ordered list of active colors — must not be empty, must not contain RANDOM
+     * @return this instance for method chaining
+     */
+    public RobotFamily withColorPalette(RobotVariant variant, java.util.List<EntityTexture> colors) {
         String basePath = LovelyConstant.TEXTURE_ENTITY_PATH + variant.getName() + "/";
 
+        // Build dye-condition map for quick Item → EntityTexture lookup.
+        java.util.Map<EntityTexture, net.minecraft.world.item.Item> dyeItems = new java.util.EnumMap<>(EntityTexture.class);
+        dyeItems.put(EntityTexture.WHITE,      Items.WHITE_DYE);
+        dyeItems.put(EntityTexture.ORANGE,     Items.ORANGE_DYE);
+        dyeItems.put(EntityTexture.MAGENTA,    Items.MAGENTA_DYE);
+        dyeItems.put(EntityTexture.LIGHT_BLUE, Items.LIGHT_BLUE_DYE);
+        dyeItems.put(EntityTexture.YELLOW,     Items.YELLOW_DYE);
+        dyeItems.put(EntityTexture.LIME,       Items.LIME_DYE);
+        dyeItems.put(EntityTexture.PINK,       Items.PINK_DYE);
+        dyeItems.put(EntityTexture.GRAY,       Items.GRAY_DYE);
+        dyeItems.put(EntityTexture.LIGHT_GRAY, Items.LIGHT_GRAY_DYE);
+        dyeItems.put(EntityTexture.CYAN,       Items.CYAN_DYE);
+        dyeItems.put(EntityTexture.PURPLE,     Items.PURPLE_DYE);
+        dyeItems.put(EntityTexture.BLUE,       Items.BLUE_DYE);
+        dyeItems.put(EntityTexture.BROWN,      Items.BROWN_DYE);
+        dyeItems.put(EntityTexture.GREEN,      Items.GREEN_DYE);
+        dyeItems.put(EntityTexture.RED,        Items.RED_DYE);
+        dyeItems.put(EntityTexture.BLACK,      Items.BLACK_DYE);
+
         TextureVariantFeature textureFeature = new TextureVariantFeature();
-        ConditionalAppearanceFeature dyeFeature = ConditionalAppearanceFeature.builder()
-                .when(AppearanceConditions.heldItem(Items.WHITE_DYE),      key + "_" + EntityTexture.WHITE.Name())
-                .when(AppearanceConditions.heldItem(Items.ORANGE_DYE),     key + "_" + EntityTexture.ORANGE.Name())
-                .when(AppearanceConditions.heldItem(Items.MAGENTA_DYE),    key + "_" + EntityTexture.MAGENTA.Name())
-                .when(AppearanceConditions.heldItem(Items.LIGHT_BLUE_DYE), key + "_" + EntityTexture.LIGHT_BLUE.Name())
-                .when(AppearanceConditions.heldItem(Items.YELLOW_DYE),     key + "_" + EntityTexture.YELLOW.Name())
-                .when(AppearanceConditions.heldItem(Items.LIME_DYE),       key + "_" + EntityTexture.LIME.Name())
-                .when(AppearanceConditions.heldItem(Items.PINK_DYE),       key + "_" + EntityTexture.PINK.Name())
-                .when(AppearanceConditions.heldItem(Items.GRAY_DYE),       key + "_" + EntityTexture.GRAY.Name())
-                .when(AppearanceConditions.heldItem(Items.LIGHT_GRAY_DYE), key + "_" + EntityTexture.LIGHT_GRAY.Name())
-                .when(AppearanceConditions.heldItem(Items.CYAN_DYE),       key + "_" + EntityTexture.CYAN.Name())
-                .when(AppearanceConditions.heldItem(Items.PURPLE_DYE),     key + "_" + EntityTexture.PURPLE.Name())
-                .when(AppearanceConditions.heldItem(Items.BLUE_DYE),       key + "_" + EntityTexture.BLUE.Name())
-                .when(AppearanceConditions.heldItem(Items.BROWN_DYE),      key + "_" + EntityTexture.BROWN.Name())
-                .when(AppearanceConditions.heldItem(Items.GREEN_DYE),      key + "_" + EntityTexture.GREEN.Name())
-                .when(AppearanceConditions.heldItem(Items.RED_DYE),        key + "_" + EntityTexture.RED.Name())
-                .when(AppearanceConditions.heldItem(Items.BLACK_DYE),      key + "_" + EntityTexture.BLACK.Name())
-                .build();
 
-        for (EntityTexture color : EntityTexture.VALUES) {
-            if (color != EntityTexture.RANDOM) {
-                // Entity-specific key prevents global registry collisions between robot types.
-                // e.g., "bunny_white", "kitsune_magenta" — not just "white", "magenta".
-                String colorKey = key + "_" + color.Name();
-                String colorId  = String.format("%02d", color.getId());
-                ResourceLocation path = LovelyIdentifier.getId(
-                        basePath + variant.getName() + "_" + colorId + ".png");
-
-                net.heriazone.hzlib.api.entity.variants.VariantRegistries.TEXTURES.register(
-                        new StandardTextureVariant(colorKey, color.Name(), path.toString(), color.getId())
-                );
-
-                textureFeature.withVariant(key, colorKey);
+        ConditionalAppearanceFeature.Builder dyeBuilder = ConditionalAppearanceFeature.builder();
+        for (EntityTexture color : colors) {
+            net.minecraft.world.item.Item dyeItem = dyeItems.get(color);
+            if (dyeItem != null) {
+                dyeBuilder.when(AppearanceConditions.heldItem(dyeItem), key + "_" + color.Name());
             }
         }
+        ConditionalAppearanceFeature dyeFeature = dyeBuilder.build();
 
-        textureFeature.withDefault(key, key + "_" + EntityTexture.WHITE.Name());
+        for (EntityTexture color : colors) {
+            // Entity-specific key prevents global registry collisions between robot types.
+            // e.g., "bunny3_light_blue", "bunny3_yellow" — not just "light_blue".
+            String colorKey = key + "_" + color.Name();
+            String colorId  = String.format("%02d", color.getId());
+            ResourceLocation path = LovelyIdentifier.getId(
+                    basePath + variant.getName() + "_" + colorId + ".png");
+
+            net.heriazone.hzlib.api.entity.variants.VariantRegistries.TEXTURES.register(
+                    new StandardTextureVariant(colorKey, color.Name(), path.toString(), color.getId())
+            );
+
+            textureFeature.withVariant(key, colorKey);
+        }
+
+        // Default falls back to first active color — WHITE may not exist in restricted palettes.
+        String defaultColorKey = key + "_" + colors.get(0).Name();
+        textureFeature.withDefault(key, defaultColorKey);
         withFeature(TextureVariantFeature.class, textureFeature);
         withFeature(ConditionalAppearanceFeature.class, dyeFeature);
 

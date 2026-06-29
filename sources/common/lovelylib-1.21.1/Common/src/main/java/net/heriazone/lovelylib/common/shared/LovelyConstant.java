@@ -14,6 +14,7 @@ public class LovelyConstant {
     // SPAWN
     public static final String BUNNY_SPAWN = "bunny_spawn";
     public static final String BUNNY2_SPAWN = "bunny2_spawn";
+    public static final String BUNNY3_SPAWN = "bunny3_spawn";
     public static final String DRAGON_SPAWN = "dragon_spawn";
     public static final String HONEY_SPAWN = "honey_spawn";
     public static final String KITSUNE_SPAWN = "kitsune_spawn";
@@ -25,6 +26,7 @@ public class LovelyConstant {
 
     public static final String VARIANT_BUNNY = "bunny";
     public static final String VARIANT_BUNNY2 = "bunny2";
+    public static final String VARIANT_BUNNY3 = "bunny3";
     public static final String VARIANT_DRAGON = "dragon";
     public static final String VARIANT_HONEY = "honey";
     public static final String VARIANT_KITSUNE = "kitsune";
@@ -145,7 +147,7 @@ public class LovelyConstant {
     // -- Robot Variant Arrays --
 
     public static final String[] ALL_VARIANTS = { // TODO: Remove
-            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_DRAGON,
+            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_BUNNY3, VARIANT_DRAGON,
             VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
     };
 
@@ -155,12 +157,12 @@ public class LovelyConstant {
     };
 
     public static final String[] LEGACY_VARIANTS = {
-            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_DRAGON,
+            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_BUNNY3, VARIANT_DRAGON,
             VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
     };
 
     public static final String[] REBOOT_VARIANTS = {
-            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_DRAGON,
+            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_BUNNY3, VARIANT_DRAGON,
             VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
     };
 
