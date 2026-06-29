@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "lovelylib:item/bunny/bunny06"
+    "layer0": "lovely_robot:item/bunny/bunny06"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "lovelylib:item/honey/honey04"
+    "layer0": "lovely_robot:item/honey/honey04"
   }
 }
