@@ -47,6 +47,21 @@ public class LegacyRobotFamilies extends RobotFamilyRegistry {
     public static final RobotFamily BUNNY2 = create(RobotVariant.Bunny2);
 
     /**
+     * BUNNY3 robot type - third-generation bunny with restricted 5-color pastel palette.
+     * <p>
+     * <b>Characteristics:</b> Incremental stat improvement over Bunny2. Available colors:
+     * light_blue, yellow, lime, pink, purple. Configured via Bunny3MaxLevel, Bunny3BaseHp, etc.
+     */
+    public static final java.util.List<EntityTexture> BUNNY3_COLORS = java.util.List.of(
+            EntityTexture.LIGHT_BLUE,
+            EntityTexture.YELLOW,
+            EntityTexture.LIME,
+            EntityTexture.PINK,
+            EntityTexture.PURPLE
+    );
+    public static final RobotFamily BUNNY3 = create(RobotVariant.Bunny3, BUNNY3_COLORS);
+
+    /**
      * DRAGON robot type - enhanced combat capabilities.
      * <p>
      * <b>Characteristics:</b> High health and damage, knockback resistance 0.5F,
@@ -148,6 +163,26 @@ public class LegacyRobotFamilies extends RobotFamilyRegistry {
                                 bunny2.baseHp,
                                 bunny2.baseAttack,
                                 bunny2.baseDefense,
+                                new LinearAttributeStrategy()
+                        ))
+                .withFeature(EnchantmentFeature.class, defaultEnchantment)
+                .withFeature(ProtectionFeature.class, defaultProtection);
+
+        // Configure BUNNY3
+        SharedConfigs.EntityConfigData bunny3 = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY3);
+        BUNNY3.withCombatStats(bunny3.baseHp,
+                        bunny3.baseAttack,
+                        bunny3.attackSpeed,
+                        bunny3.baseDefense,
+                        bunny3.baseToughness,
+                        0F,
+                        bunny3.movementSpeed)
+                .withFeature(LevelFeature.class, new LevelFeature(bunny3.maxLevel, defaultExpStrategy))
+                .withFeature(CombatLevelFeature.class,
+                        new CombatLevelFeature(
+                                bunny3.baseHp,
+                                bunny3.baseAttack,
+                                bunny3.baseDefense,
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
