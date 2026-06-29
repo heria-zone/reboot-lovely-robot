@@ -1,25 +1,13 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "lovelylib:item/vanilla/vanilla00"
+    "layer0": "lovely_robot:item/vanilla/vanilla06"
   },
   "overrides": [
-    { "predicate": {"variant": 0}, "model": "lovelylib:item/vanilla/vanilla00" },
-    { "predicate": {"variant": 1}, "model": "lovelylib:item/vanilla/vanilla01" },
-    { "predicate": {"variant": 2}, "model": "lovelylib:item/vanilla/vanilla02" },
-    { "predicate": {"variant": 3}, "model": "lovelylib:item/vanilla/vanilla03" },
-    { "predicate": {"variant": 4}, "model": "lovelylib:item/vanilla/vanilla04" },
-    { "predicate": {"variant": 5}, "model": "lovelylib:item/vanilla/vanilla05" },
-    { "predicate": {"variant": 6}, "model": "lovelylib:item/vanilla/vanilla06" },
-    { "predicate": {"variant": 7}, "model": "lovelylib:item/vanilla/vanilla07" },
-    { "predicate": {"variant": 8}, "model": "lovelylib:item/vanilla/vanilla08" },
-    { "predicate": {"variant": 9}, "model": "lovelylib:item/vanilla/vanilla09" },
-    { "predicate": {"variant": 10}, "model": "lovelylib:item/vanilla/vanilla10" },
+    { "predicate": {"variant": 4},  "model": "lovelylib:item/vanilla/vanilla04" },
+    { "predicate": {"variant": 6},  "model": "lovely_robot:item/vanilla/vanilla06" },
     { "predicate": {"variant": 11}, "model": "lovelylib:item/vanilla/vanilla11" },
-    { "predicate": {"variant": 12}, "model": "lovelylib:item/vanilla/vanilla12" },
-    { "predicate": {"variant": 13}, "model": "lovelylib:item/vanilla/vanilla13" },
-    { "predicate": {"variant": 14}, "model": "lovelylib:item/vanilla/vanilla14" },
     { "predicate": {"variant": 15}, "model": "lovelylib:item/vanilla/vanilla15" },
-    { "predicate": {"variant": 16}, "model": "lovelylib:item/vanilla/vanilla16" }
+    { "predicate": {"variant": 16},  "model": "lovely_robot:item/vanilla/vanilla06" }
   ]
 }
