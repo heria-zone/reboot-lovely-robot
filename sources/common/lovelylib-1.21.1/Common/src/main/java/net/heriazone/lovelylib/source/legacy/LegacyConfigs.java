@@ -37,6 +37,17 @@ public class LegacyConfigs {
                 0.36F
         ));
 
+        // BUNNY3 - Third-generation bunny, incremental improvement over Bunny2
+        Default.put(LovelyConstant.VARIANT_BUNNY3, new SharedConfigs.EntityConfigData(
+                200,
+                28,
+                7,
+                1.9F,
+                6,
+                0F,
+                0.35F
+        ));
+
         // DRAGON - Tank with high HP and toughness
         Default.put(LovelyConstant.VARIANT_DRAGON, new SharedConfigs.EntityConfigData(
                 200,

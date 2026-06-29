@@ -135,6 +135,15 @@ public class SharedConfigs {
         public static int Bunny2BaseDefense = 4;
         public static float Bunny2BaseToughness = 0F;
 
+        // BUNNY2
+        public static int Bunny3MaxLevel = 200;
+        public static float Bunny3AttackSpeed = 1.9F;
+        public static float Bunny3MovementSpeed = 0.37F;
+        public static int Bunny3BaseHp = 28;
+        public static int Bunny3BaseAttack = 7;
+        public static int Bunny3BaseDefense = 6;
+        public static float Bunny3BaseToughness = 0F;
+
         // DRAGON
         public static int DragonMaxLevel = 200;
         public static float DragonAttackSpeed = 1.5F;

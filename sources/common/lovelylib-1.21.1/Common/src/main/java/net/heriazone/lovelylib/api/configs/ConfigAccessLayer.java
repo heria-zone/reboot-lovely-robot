@@ -170,6 +170,16 @@ public class ConfigAccessLayer {
                 SharedConfigs.Common.Bunny2BaseToughness,
                 SharedConfigs.Common.Bunny2MovementSpeed
             );
+
+            case LovelyConstant.VARIANT_BUNNY3 -> new SharedConfigs.EntityConfigData(
+                    SharedConfigs.Common.Bunny3MaxLevel,
+                    SharedConfigs.Common.Bunny3BaseHp,
+                    SharedConfigs.Common.Bunny3BaseAttack,
+                    SharedConfigs.Common.Bunny3AttackSpeed,
+                    SharedConfigs.Common.Bunny3BaseDefense,
+                    SharedConfigs.Common.Bunny3BaseToughness,
+                    SharedConfigs.Common.Bunny3MovementSpeed
+            );
             
             case LovelyConstant.VARIANT_DRAGON -> new SharedConfigs.EntityConfigData(
                 SharedConfigs.Common.DragonMaxLevel,
