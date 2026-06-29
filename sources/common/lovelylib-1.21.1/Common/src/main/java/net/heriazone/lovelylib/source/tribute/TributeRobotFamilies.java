@@ -7,6 +7,7 @@ import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.RobotFamilyRegistry;
 import net.heriazone.lovelylib.common.entity.RobotFamily;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
+import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
@@ -30,6 +31,58 @@ import net.heriazone.hzlib.framework.entity.protection.LevelBasedProtectionStrat
  */
 public class TributeRobotFamilies extends RobotFamilyRegistry {
 
+    // -- Restricted Color Palettes --
+
+    /**
+     * BUNNY palette — pink, yellow, purple, blue, red (5 colors).
+     * <p>
+     * Faithful recreation colors from the original LovelyRobot mod.
+     * Default random spawn color: pink (06).
+     */
+    public static final java.util.List<EntityTexture> BUNNY_COLORS = java.util.List.of(
+            EntityTexture.PINK,
+            EntityTexture.YELLOW,
+            EntityTexture.PURPLE,
+            EntityTexture.BLUE,
+            EntityTexture.RED
+    );
+
+    /**
+     * BUNNY2 palette — pink, blue (2 colors).
+     * <p>
+     * Original Bunny2 color scheme from the original LovelyRobot mod.
+     * Default random spawn color: pink (06).
+     */
+    public static final java.util.List<EntityTexture> BUNNY2_COLORS = java.util.List.of(
+            EntityTexture.PINK,
+            EntityTexture.BLUE
+    );
+
+    /**
+     * HONEY palette — yellow, blue, pink (3 colors).
+     * <p>
+     * Original Honey color scheme from the original LovelyRobot mod.
+     * Default random spawn color: yellow (04).
+     */
+    public static final java.util.List<EntityTexture> HONEY_COLORS = java.util.List.of(
+            EntityTexture.YELLOW,
+            EntityTexture.BLUE,
+            EntityTexture.PINK
+    );
+
+    /**
+     * VANILLA palette — pink, yellow, blue, black (4 colors).
+     * <p>
+     * Original Vanilla color scheme from the original LovelyRobot mod.
+     * Default random spawn color: pink (06).
+     */
+    public static final java.util.List<EntityTexture> VANILLA_COLORS = java.util.List.of(
+            EntityTexture.PINK,
+            EntityTexture.YELLOW,
+            EntityTexture.BLUE,
+            EntityTexture.BLACK
+    );
+
     // -- Robot Types --
 
     /**
@@ -38,7 +91,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via BunnyMaxLevel, BunnyBaseHp, etc.
      */
-    public static final RobotFamily BUNNY = create(RobotVariant.Bunny);
+    public static final RobotFamily BUNNY = create(RobotVariant.Bunny, BUNNY_COLORS);
 
     /**
      * BUNNY2 robot type - alternative bunny design.
@@ -46,7 +99,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via Bunny2MaxLevel, Bunny2BaseHp, etc.
      */
-    public static final RobotFamily BUNNY2 = create(RobotVariant.Bunny2);
+    public static final RobotFamily BUNNY2 = create(RobotVariant.Bunny2, BUNNY2_COLORS);
 
     /**
      * HONEY robot type - support-oriented companion.
@@ -54,7 +107,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      * <b>Characteristics:</b> Lower combat stats, default XP progression.
      * Configured via HoneyMaxLevel, HoneyBaseHp, etc.
      */
-    public static final RobotFamily HONEY = create(RobotVariant.Honey);
+    public static final RobotFamily HONEY = create(RobotVariant.Honey, HONEY_COLORS);
 
     /**
      * VANILLA robot type - general-purpose companion.
@@ -62,7 +115,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via VanillaMaxLevel, VanillaBaseHp, etc.
      */
-    public static final RobotFamily VANILLA = create(RobotVariant.Vanilla);
+    public static final RobotFamily VANILLA = create(RobotVariant.Vanilla, VANILLA_COLORS);
 
     // -- Config Reload --
 
