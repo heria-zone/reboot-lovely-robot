@@ -44,6 +44,7 @@ public class LegacyGroups extends InternalGroups {
                         output.accept(LegacyItems.ROBOT_CORE.get());
                         output.accept(LegacyItems.BUNNY_SPAWN.get());
                         output.accept(LegacyItems.BUNNY2_SPAWN.get());
+                        output.accept(LegacyItems.BUNNY3_SPAWN.get());
                         output.accept(LegacyItems.DRAGON_SPAWN.get());
                         output.accept(LegacyItems.HONEY_SPAWN.get());
                         output.accept(LegacyItems.KITSUNE_SPAWN.get());
@@ -91,6 +92,7 @@ public class LegacyGroups extends InternalGroups {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
             event.accept(LegacyItems.BUNNY_SPAWN);
             event.accept(LegacyItems.BUNNY2_SPAWN);
+            event.accept(LegacyItems.BUNNY3_SPAWN);
             event.accept(LegacyItems.DRAGON_SPAWN);
             event.accept(LegacyItems.HONEY_SPAWN);
             event.accept(LegacyItems.KITSUNE_SPAWN);

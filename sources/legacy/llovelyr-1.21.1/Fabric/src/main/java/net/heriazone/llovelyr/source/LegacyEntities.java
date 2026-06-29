@@ -31,6 +31,7 @@ public class LegacyEntities {
 
     public static final EntityType<NativeRobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotFamilies.BUNNY);
     public static final EntityType<NativeRobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotFamilies.BUNNY2);
+    public static final EntityType<NativeRobotEntity> BUNNY3 = registerRobot(LovelyConstant.VARIANT_BUNNY3, LegacyRobotFamilies.BUNNY3);
     public static final EntityType<NativeRobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotFamilies.DRAGON);
     public static final EntityType<NativeRobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotFamilies.HONEY);
     public static final EntityType<NativeRobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotFamilies.KITSUNE);
@@ -65,6 +66,7 @@ public class LegacyEntities {
     public static void register() {
         FabricDefaultAttributeRegistry.register(BUNNY,   NativeEntityFamily.createAttributes(LegacyRobotFamilies.BUNNY));
         FabricDefaultAttributeRegistry.register(BUNNY2,  NativeEntityFamily.createAttributes(LegacyRobotFamilies.BUNNY2));
+        FabricDefaultAttributeRegistry.register(BUNNY3,  NativeEntityFamily.createAttributes(LegacyRobotFamilies.BUNNY3));
         FabricDefaultAttributeRegistry.register(DRAGON,  NativeEntityFamily.createAttributes(LegacyRobotFamilies.DRAGON));
         FabricDefaultAttributeRegistry.register(HONEY,   NativeEntityFamily.createAttributes(LegacyRobotFamilies.HONEY));
         FabricDefaultAttributeRegistry.register(KITSUNE, NativeEntityFamily.createAttributes(LegacyRobotFamilies.KITSUNE));
@@ -78,6 +80,7 @@ public class LegacyEntities {
     public static void registerRender() {
         EntityRendererRegistry.register(BUNNY, BunnyRenderer::new);
         EntityRendererRegistry.register(BUNNY2, NativeRobotRenderer::new);
+        EntityRendererRegistry.register(BUNNY3, NativeRobotRenderer::new);
         EntityRendererRegistry.register(DRAGON, NativeRobotRenderer::new);
         EntityRendererRegistry.register(HONEY, NativeRobotRenderer::new);
         EntityRendererRegistry.register(KITSUNE, KitsuneRenderer::new);
@@ -118,6 +121,11 @@ public class LegacyEntities {
         // BUNNY2
         LegacyRobotFamilies.BUNNY2
                 .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY2_SPAWN))
+                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
+
+        // BUNNY3
+        LegacyRobotFamilies.BUNNY3
+                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY3_SPAWN))
                 .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
 
         // DRAGON

@@ -31,6 +31,7 @@ public class LegacyItems extends InternalItems {
     // SPAWNS
     public static final Item BUNNY_SPAWN = registerItem(LovelyConstant.BUNNY_SPAWN, LegacyEntities.BUNNY, Rarity.RARE, 1);
     public static final Item BUNNY2_SPAWN = registerItem(LovelyConstant.BUNNY2_SPAWN, LegacyEntities.BUNNY2, Rarity.RARE, 1);
+    public static final Item BUNNY3_SPAWN = registerItem(LovelyConstant.BUNNY3_SPAWN, LegacyEntities.BUNNY3, Rarity.RARE, 1);
     public static final Item DRAGON_SPAWN = registerItem(LovelyConstant.DRAGON_SPAWN, LegacyEntities.DRAGON, Rarity.RARE, 1);
     public static final Item HONEY_SPAWN = registerItem(LovelyConstant.HONEY_SPAWN, LegacyEntities.HONEY, Rarity.RARE, 1);
     public static final Item KITSUNE_SPAWN = registerItem(LovelyConstant.KITSUNE_SPAWN, LegacyEntities.KITSUNE, Rarity.RARE, 1);
@@ -91,6 +92,7 @@ public class LegacyItems extends InternalItems {
     public static void registerModel() {
         registerModel(LegacyItems.BUNNY_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         registerModel(LegacyItems.BUNNY2_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+        registerModel(LegacyItems.BUNNY3_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         registerModel(LegacyItems.DRAGON_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         registerModel(LegacyItems.HONEY_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
         registerModel(LegacyItems.KITSUNE_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);

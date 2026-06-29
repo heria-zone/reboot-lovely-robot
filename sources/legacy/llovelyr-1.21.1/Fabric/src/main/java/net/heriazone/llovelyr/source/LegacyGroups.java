@@ -58,6 +58,7 @@ public class LegacyGroups extends InternalGroups {
     private static void addSpawnEggs(FabricItemGroupEntries entries) {
         entries.accept(LegacyItems.BUNNY_SPAWN);
         entries.accept(LegacyItems.BUNNY2_SPAWN);
+        entries.accept(LegacyItems.BUNNY3_SPAWN);
         entries.accept(LegacyItems.DRAGON_SPAWN);
         entries.accept(LegacyItems.HONEY_SPAWN);
         entries.accept(LegacyItems.KITSUNE_SPAWN);
@@ -72,6 +73,7 @@ public class LegacyGroups extends InternalGroups {
         entries.accept(LegacyItems.ROBOT_CORE);
         entries.accept(LegacyItems.BUNNY_SPAWN);
         entries.accept(LegacyItems.BUNNY2_SPAWN);
+        entries.accept(LegacyItems.BUNNY3_SPAWN);
         entries.accept(LegacyItems.DRAGON_SPAWN);
         entries.accept(LegacyItems.HONEY_SPAWN);
         entries.accept(LegacyItems.KITSUNE_SPAWN);
