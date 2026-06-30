@@ -730,20 +730,38 @@ public abstract class RobotEntity extends NativeEntity {
     // -- Display / Notification --
 
     /**
-     * Handles robot taming — adds Poof particles and totem sound on top of the
-     * base ownership/registration flow.
+     * Handles robot taming — delegates tame effects to {@link #onTameEffect(Player)},
+     * then completes ownership and registration via the base class.
      * <p>
-     * <b>Architecture:</b> Robot-specific taming feedback lives here, not in
-     * {@link net.heriazone.hzlib.api.entity.NativeEntity#handleTame} — that base
-     * method is intentionally silent so monster entities don't receive robot effects.
-     * <p>
-     * <b>Sound:</b> Volume scales with entity dimensions to feel proportional
-     * across robot sizes.
+     * <b>Architecture:</b> Tame feedback is extracted into {@link #onTameEffect} so
+     * subclasses (e.g., Tribute) can override just the visual/audio presentation
+     * without duplicating the ownership and registry logic in
+     * {@link net.heriazone.hzlib.api.entity.NativeEntity#handleTame}.
      *
      * @param player the player taming this robot
      */
     @Override
     public void handleTame(Player player) {
+        onTameEffect(player);
+        // Ownership, sit, display message, registry
+        super.handleTame(player);
+    } // handleTame ()
+
+    /**
+     * Spawns the tame feedback effect (particles and/or sound) for this robot.
+     * <p>
+     * <b>Default behaviour:</b> {@link EntityParticles#Poof Poof} particles +
+     * {@link net.minecraft.sounds.SoundEvents#TOTEM_USE TOTEM_USE} sound scaled by
+     * entity dimensions.
+     * <p>
+     * <b>Override point:</b> Subclasses that require different feedback (e.g.,
+     * Tribute robots using {@link EntityParticles#Heart Heart} particles with no sound)
+     * override only this method — the ownership and registry flow in
+     * {@link #handleTame(Player)} is unaffected.
+     *
+     * @param player the player taming this robot
+     */
+    protected void onTameEffect(Player player) {
         // Poof particles — robot materialization effect
         EntityParticles.Poof(this);
 
@@ -751,10 +769,7 @@ public abstract class RobotEntity extends NativeEntity {
         float volume = (float) Math.max(0.5F, Math.min(2.0F, this.getBbWidth() * this.getBbHeight()));
         this.level().playSound(null, this.blockPosition(),
                 SoundEvents.TOTEM_USE, net.minecraft.sounds.SoundSource.NEUTRAL, volume, 1.2F);
-
-        // Ownership, sit, display message, registry
-        super.handleTame(player);
-    } // handleTame ()
+    } // onTameEffect ()
 
     /**
      * Displays the owner name to the player after taming.
