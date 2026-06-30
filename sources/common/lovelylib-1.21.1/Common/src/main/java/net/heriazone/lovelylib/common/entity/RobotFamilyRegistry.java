@@ -170,4 +170,35 @@ public class RobotFamilyRegistry {
         return robotType;
     } // create ()
 
+    /**
+     * Creates robot type with a restricted color palette resolved from a custom namespace.
+     * <p>
+     * <b>Design Decision:</b> Allows a downstream mod (e.g., Tribute with namespace
+     * {@code "lovely_robot"}) to register its own texture variants that point to resources
+     * in its own namespace rather than {@code lovelylib:}. Delegates to
+     * {@link RobotFamily#withColorPalette(RobotVariant, java.util.List, String)}.
+     * <p>
+     * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
+     *
+     * @param variant   entity variant determining resource paths
+     * @param colors    ordered list of active colors — must not be empty, must not contain RANDOM
+     * @param namespace mod namespace for texture {@link net.minecraft.resources.ResourceLocation}s
+     * @return configured RobotFamily instance
+     */
+    protected static RobotFamily create(RobotVariant variant, java.util.List<EntityTexture> colors, String namespace) {
+        // Create robot type
+        RobotFamily robotType = new RobotFamily(variant.getName(), variant);
+
+        // Apply restricted color palette with custom namespace
+        robotType.withColorPalette(variant, colors, namespace);
+
+        // Attach shared animation profile — all robots use the same animation file
+        robotType.withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE);
+
+        // Add to registry
+        TYPES.add(robotType);
+
+        return robotType;
+    } // create ()
+
 } // Class: RobotFamilyRegistry

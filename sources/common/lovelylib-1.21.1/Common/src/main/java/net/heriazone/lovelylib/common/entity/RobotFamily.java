@@ -247,7 +247,52 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
      * @return this instance for method chaining
      */
     public RobotFamily withColorPalette(RobotVariant variant, java.util.List<EntityTexture> colors) {
+        return withColorPaletteInternal(variant, colors, LovelyIdentifier.MODID());
+    } // withColorPalette ()
+
+    /**
+     * Registers a restricted color palette with textures resolved from a custom namespace.
+     * <p>
+     * <b>Architecture:</b> Allows a mod (e.g., {@code lovely_robot} / Tribute) to register
+     * its own texture variants that point to resources in its own namespace rather than
+     * {@code lovelylib:}. The variant registry keys are prefixed with the entity key to avoid
+     * collisions with the standard lovelylib registrations for the same variant/color pair.
+     * <p>
+     * <b>Texture path pattern:</b>
+     * {@code {namespace}:textures/entity/{variantName}/{variantName}_{id:02d}.png}
+     * <p>
+     * <b>Example:</b> Tribute Bunny pink →
+     * {@code lovely_robot:textures/entity/bunny/bunny_06.png}
+     *
+     * @param variant    entity variant determining texture path prefix
+     * @param colors     ordered list of active colors — must not be empty, must not contain RANDOM
+     * @param namespace  mod namespace to use for texture {@link ResourceLocation}s (e.g. {@code "lovely_robot"})
+     * @return this instance for method chaining
+     */
+    public RobotFamily withColorPalette(RobotVariant variant, java.util.List<EntityTexture> colors, String namespace) {
+        return withColorPaletteInternal(variant, colors, namespace);
+    } // withColorPalette ()
+
+    /**
+     * Internal implementation shared by all {@code withColorPalette} overloads.
+     * <p>
+     * <b>Registry key strategy:</b> When {@code namespace} differs from
+     * {@link LovelyIdentifier#MODID}, variant keys are prefixed with the namespace
+     * to prevent collisions — e.g., {@code "t_bunny_pink"} vs {@code "bunny_pink"}.
+     * Same-namespace registrations keep the standard key format for backward compatibility.
+     *
+     * @param variant   entity variant
+     * @param colors    active colors
+     * @param namespace texture resource namespace
+     * @return this instance for method chaining
+     */
+    private RobotFamily withColorPaletteInternal(RobotVariant variant, java.util.List<EntityTexture> colors, String namespace) {
         String basePath = LovelyConstant.TEXTURE_ENTITY_PATH + variant.getName() + "/";
+
+        // Namespace-based key prefix prevents registry collisions when the same
+        // variant/color is registered by both lovelylib and a downstream mod.
+        boolean useNamespacePrefix = !namespace.equals(LovelyIdentifier.MODID());
+        String keyPrefix = useNamespacePrefix ? namespace.replace(':', '_') + "_" : "";
 
         // Build dye-condition map for quick Item → EntityTexture lookup.
         java.util.Map<EntityTexture, net.minecraft.world.item.Item> dyeItems = new java.util.EnumMap<>(EntityTexture.class);
@@ -274,18 +319,18 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
         for (EntityTexture color : colors) {
             net.minecraft.world.item.Item dyeItem = dyeItems.get(color);
             if (dyeItem != null) {
-                dyeBuilder.when(AppearanceConditions.heldItem(dyeItem), key + "_" + color.Name());
+                dyeBuilder.when(AppearanceConditions.heldItem(dyeItem), keyPrefix + key + "_" + color.Name());
             }
         }
         ConditionalAppearanceFeature dyeFeature = dyeBuilder.build();
 
         for (EntityTexture color : colors) {
             // Entity-specific key prevents global registry collisions between robot types.
-            // e.g., "bunny3_light_blue", "bunny3_yellow" — not just "light_blue".
-            String colorKey = key + "_" + color.Name();
+            // Namespace prefix additionally prevents collisions across mods for the same type+color.
+            String colorKey = keyPrefix + key + "_" + color.Name();
             String colorId  = String.format("%02d", color.getId());
-            ResourceLocation path = LovelyIdentifier.getId(
-                    basePath + variant.getName() + "_" + colorId + ".png");
+            ResourceLocation path = ResourceLocation.fromNamespaceAndPath(
+                    namespace, basePath + variant.getName() + "_" + colorId + ".png");
 
             net.heriazone.hzlib.api.entity.variants.VariantRegistries.TEXTURES.register(
                     new StandardTextureVariant(colorKey, color.Name(), path.toString(), color.getId())
@@ -295,13 +340,13 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
         }
 
         // Default falls back to first active color — WHITE may not exist in restricted palettes.
-        String defaultColorKey = key + "_" + colors.get(0).Name();
+        String defaultColorKey = keyPrefix + key + "_" + colors.get(0).Name();
         textureFeature.withDefault(key, defaultColorKey);
         withFeature(TextureVariantFeature.class, textureFeature);
         withFeature(ConditionalAppearanceFeature.class, dyeFeature);
 
         return this;
-    } // withColorPalette ()
+    } // withColorPaletteInternal ()
 
     /**
      * Generates a random color key from the registered color palette.

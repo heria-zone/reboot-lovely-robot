@@ -91,7 +91,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via BunnyMaxLevel, BunnyBaseHp, etc.
      */
-    public static final RobotFamily BUNNY = create(RobotVariant.Bunny, BUNNY_COLORS);
+    public static final RobotFamily BUNNY   = create(RobotVariant.Bunny,   BUNNY_COLORS,   "lovely_robot");
 
     /**
      * BUNNY2 robot type - alternative bunny design.
@@ -99,7 +99,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via Bunny2MaxLevel, Bunny2BaseHp, etc.
      */
-    public static final RobotFamily BUNNY2 = create(RobotVariant.Bunny2, BUNNY2_COLORS);
+    public static final RobotFamily BUNNY2  = create(RobotVariant.Bunny2,  BUNNY2_COLORS,  "lovely_robot");
 
     /**
      * HONEY robot type - support-oriented companion.
@@ -107,7 +107,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      * <b>Characteristics:</b> Lower combat stats, default XP progression.
      * Configured via HoneyMaxLevel, HoneyBaseHp, etc.
      */
-    public static final RobotFamily HONEY = create(RobotVariant.Honey, HONEY_COLORS);
+    public static final RobotFamily HONEY   = create(RobotVariant.Honey,   HONEY_COLORS,   "lovely_robot");
 
     /**
      * VANILLA robot type - general-purpose companion.
@@ -115,7 +115,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      * <b>Characteristics:</b> Balanced stats, default XP progression.
      * Configured via VanillaMaxLevel, VanillaBaseHp, etc.
      */
-    public static final RobotFamily VANILLA = create(RobotVariant.Vanilla, VANILLA_COLORS);
+    public static final RobotFamily VANILLA = create(RobotVariant.Vanilla, VANILLA_COLORS, "lovely_robot");
 
     // -- Config Reload --
 
