@@ -3,7 +3,7 @@ package net.heriazone.lovely_robot.source;
 import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.lovely_robot.Tribute;
 import net.heriazone.lovely_robot.TributeIdentifier;
-import net.heriazone.lovelylib.api.entity.features.PickupFeature;
+import net.heriazone.hzlib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
@@ -34,10 +34,10 @@ public class TributeEntities {
 
     // -- Entity Type Definitions --
 
-    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, TributeRobotFamilies.BUNNY);
-    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, TributeRobotFamilies.BUNNY2);
-    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, TributeRobotFamilies.HONEY);
-    public static final DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotFamilies.VANILLA);
+    public static final DeferredHolder<EntityType<?>, EntityType<TributeRobotEntity>> BUNNY   = registerRobot(LovelyConstant.VARIANT_BUNNY,   TributeRobotFamilies.BUNNY);
+    public static final DeferredHolder<EntityType<?>, EntityType<TributeRobotEntity>> BUNNY2  = registerRobot(LovelyConstant.VARIANT_BUNNY2,  TributeRobotFamilies.BUNNY2);
+    public static final DeferredHolder<EntityType<?>, EntityType<TributeRobotEntity>> HONEY   = registerRobot(LovelyConstant.VARIANT_HONEY,   TributeRobotFamilies.HONEY);
+    public static final DeferredHolder<EntityType<?>, EntityType<TributeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotFamilies.VANILLA);
 
     // -- Registration Methods --
 
@@ -54,9 +54,9 @@ public class TributeEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static DeferredHolder<EntityType<?>, EntityType<NativeRobotEntity>> registerRobot(String name, RobotFamily robotType) {
+    private static DeferredHolder<EntityType<?>, EntityType<TributeRobotEntity>> registerRobot(String name, RobotFamily robotType) {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
-                        (EntityType<NativeRobotEntity> type, Level level) -> new NativeRobotEntity(type, level, robotType), MobCategory.CREATURE)
+                        (EntityType<TributeRobotEntity> type, Level level) -> new TributeRobotEntity(type, level, robotType), MobCategory.CREATURE)
                 .sized(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT)
                 .build(TributeIdentifier.getId(name).toString()));
     } // registerRobot()

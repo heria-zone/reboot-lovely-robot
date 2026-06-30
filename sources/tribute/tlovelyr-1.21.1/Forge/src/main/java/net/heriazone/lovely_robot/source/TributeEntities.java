@@ -3,13 +3,12 @@ package net.heriazone.lovely_robot.source;
 import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.lovely_robot.Tribute;
 import net.heriazone.lovely_robot.TributeIdentifier;
-import net.heriazone.lovelylib.api.entity.features.PickupFeature;
+import net.heriazone.hzlib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
-import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
-import net.minecraft.world.entity.EntityType;
+import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -36,10 +35,10 @@ public class TributeEntities {
 
     // -- Entity Type Definitions --
 
-    public static final RegistryObject<EntityType<NativeRobotEntity>> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, TributeRobotFamilies.BUNNY);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, TributeRobotFamilies.BUNNY2);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, TributeRobotFamilies.HONEY);
-    public static final RegistryObject<EntityType<NativeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotFamilies.VANILLA);
+    public static final RegistryObject<EntityType<TributeRobotEntity>> BUNNY   = registerRobot(LovelyConstant.VARIANT_BUNNY,   TributeRobotFamilies.BUNNY);
+    public static final RegistryObject<EntityType<TributeRobotEntity>> BUNNY2  = registerRobot(LovelyConstant.VARIANT_BUNNY2,  TributeRobotFamilies.BUNNY2);
+    public static final RegistryObject<EntityType<TributeRobotEntity>> HONEY   = registerRobot(LovelyConstant.VARIANT_HONEY,   TributeRobotFamilies.HONEY);
+    public static final RegistryObject<EntityType<TributeRobotEntity>> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotFamilies.VANILLA);
 
     // -- Registration Methods --
 
@@ -56,9 +55,9 @@ public class TributeEntities {
      * @param robotType robot configuration data
      * @return registered entity type
      */
-    private static RegistryObject<EntityType<NativeRobotEntity>> registerRobot(String name, RobotFamily robotType) {
+    private static RegistryObject<EntityType<TributeRobotEntity>> registerRobot(String name, RobotFamily robotType) {
         return ENTITY_TYPES.register(name, () -> EntityType.Builder.of(
-                        (EntityType<NativeRobotEntity> type, Level level) -> new NativeRobotEntity(type, level, robotType), MobCategory.CREATURE)
+                        (EntityType<TributeRobotEntity> type, Level level) -> new TributeRobotEntity(type, level, robotType), MobCategory.CREATURE)
                 .sized(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT)
                 .build(TributeIdentifier.getId(name).toString()));
     } // registerRobot()
