@@ -1,5 +1,8 @@
 package net.heriazone.lovelylib.common.entity;
 
+import net.heriazone.hzlib.api.animation.AnimationProfile;
+import net.heriazone.hzlib.api.animation.LoopBehavior;
+import net.heriazone.hzlib.api.animation.AnimationPool;
 import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.hzlib.api.entity.features.AppearanceConditions;
@@ -7,6 +10,7 @@ import net.heriazone.hzlib.api.entity.features.ConditionalAppearanceFeature;
 import net.heriazone.hzlib.api.entity.features.variants.AnimatorVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.ModelVariantFeature;
 import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
+import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.minecraft.world.item.Items;
 import net.heriazone.hzlib.api.entity.variants.VariantRegistries;
 import net.heriazone.hzlib.api.nbt.EntityDataSchema;
@@ -14,6 +18,7 @@ import net.heriazone.hzlib.api.nbt.MigrationChain;
 import net.heriazone.hzlib.framework.entity.variants.StandardAnimatorVariant;
 import net.heriazone.hzlib.framework.entity.variants.StandardModelVariant;
 import net.heriazone.hzlib.framework.entity.variants.StandardTextureVariant;
+import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.data.RobotFields;
 import net.heriazone.lovelylib.common.entity.data.migration.MigrationStep_V0_Fabric;
 import net.heriazone.lovelylib.common.entity.data.migration.MigrationStep_V0_Forge;
@@ -52,6 +57,79 @@ import java.util.Random;
  * {@code InternalEntity.readAdditionalSaveData()}.
  */
 public class RobotFamily extends NativeEntityFamily<RobotFamily> {
+
+    // -- Shared Animation Profiles --
+
+    /**
+     * Base animation profile shared by all Legacy and Reboot robot families.
+     * <p>
+     * <b>Architecture:</b> Passed directly into the {@link StandardAnimatorVariant}
+     * constructor in {@link #configureVariants()} so that
+     * {@code AnimationStateManager.resolveProfile()} finds it via the global
+     * {@code VariantRegistries.ANIMATORS} lookup (Step 1). Previously the profile
+     * was only attached as a family feature, which Step 1 never checks — making
+     * the entire profile-aware animation path dead for robots (root missing-wire, ADR 022).
+     * <p>
+     * <b>Attack behavior:</b> Uses {@link LoopBehavior#INTERRUPT} — maps to GeckoLib's
+     * {@code override_previous_animation: true}, ensuring the attack animation cuts
+     * through the locomotion controller mid-swing.
+     * <p>
+     * Subclasses that need a different profile (e.g. Tribute) override
+     * {@link #buildAnimatorProfile()} instead of modifying this constant.
+     */
+    protected static final AnimationProfile ROBOT_BASE_PROFILE = AnimationProfile.builder()
+            .idle("idle")    // plays when stationary in any NON-Standby state (Follow, Defense, etc.)
+            .walk("walk")
+            .rest("rest")
+            .sit("sit")
+            .attack(pool -> pool.add("attack", LoopBehavior.INTERRUPT))
+            // Idle slot 1: REST (stand-at-ease pose) — activates when in Standby and not floor-sitting.
+            // The !isInSittingPose() guard does double duty:
+            //   1. Normal operation: prevents rest from overriding sit after the threshold is crossed.
+            //   2. World-reload race: on the first render frame, STATE may still read its default
+            //      (Follow) before the SynchedEntityData packet arrives — so the Standby check
+            //      alone cannot be trusted. isInSittingPose() (also synced) resolves the tie:
+            //      if the robot was floor-sitting when saved, IS_IN_SITTING_POSE arrives in the
+            //      same packet batch as STATE; this slot's condition correctly stays false.
+            .idleSlot(AnimationPool.single("rest"),
+                    entity -> entity.getCurrentState() == EntityState.Standby,
+                    1,
+                    0)
+            // Idle slot 2: SIT (floor-sit pose) — activates after delay, OR immediately on reload
+            // when IS_IN_SITTING_POSE is already true.
+            // The OR on isInSittingPose() breaks the first-frame STATE race: if the robot was
+            // floor-sitting when saved, IS_IN_SITTING_POSE=true arrives with the data packet and
+            // this condition wins even before STATE is restored to Standby, guaranteeing "sit"
+            // plays on the very first frame rather than falling through to "idle".
+            .idleSlot(AnimationPool.single("sit"),
+                    entity -> entity.getCurrentState() == EntityState.Standby
+                           || entity.isInSittingPose(),
+                    2,
+                    SharedConfigs.Common.StandbyToSitDelayMin)
+            .build();
+
+    /**
+     * Animation profile for Tribute robot families.
+     * <p>
+     * <b>Intentional omissions:</b> No idle slots. Tribute robots hold the {@code "rest"}
+     * stand-at-ease pose indefinitely while in Standby — faithfully reproducing the original
+     * LovelyRobot behaviour where robots never transition to the floor-sit pose.
+     * <p>
+     * <b>Naming note:</b> {@code "rest"} is the upright awaiting-orders animation.
+     * Tribute uses it as the sole Standby idle because the original mod had no floor-sit state.
+     * <p>
+     * <b>Vehicle behaviour:</b> {@code .sit("rest")} is intentional — the vehicle branch in
+     * {@code AnimationStateManager.getLocomotionAnimation()} checks the sit pool first when
+     * riding. Pointing it at {@code "rest"} ensures Tribute robots play the upright
+     * stand-at-ease animation while seated in a vehicle rather than the floor-sit pose,
+     * which would look wrong on a mount or boat.
+     */
+    protected static final AnimationProfile TRIBUTE_PROFILE = AnimationProfile.builder()
+            .idle("idle")
+            .walk("walk")
+            .sit("rest")
+            .attack(pool -> pool.add("attack", LoopBehavior.INTERRUPT))
+            .build();
 
     // -- Fields --
 
@@ -94,7 +172,11 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
      * <b>Animator variants:</b> {@code "{key}_default"} only — all robots share one
      * animation file ({@code default.animation.json}). Registered as a
      * {@link StandardAnimatorVariant} in
-     * {@link net.heriazone.hzlib.api.entity.variants.VariantRegistries#ANIMATORS}.
+     * {@link net.heriazone.hzlib.api.entity.variants.VariantRegistries#ANIMATORS},
+     * with the {@link AnimationProfile} supplied by {@link #buildAnimatorProfile()} passed
+     * directly into the constructor. This is the wire that allows
+     * {@code AnimationStateManager.resolveProfile()} Step 1 to find the profile via the
+     * global animator registry lookup — closing the root missing-wire from ADR 022.
      * <p>
      * <b>Path patterns (matching backup populateModels/populateAnimators):</b>
      * <ul>
@@ -137,13 +219,18 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
 
         // -- Animator Variants --
         // All robots share one animation file — register once per key.
+        // The AnimationProfile is passed into the StandardAnimatorVariant constructor so that
+        // AnimationStateManager.resolveProfile() Step 1 finds it via VariantRegistries.ANIMATORS.
+        // Without this, resolveProfile() returns null for every robot and the entire profile-aware
+        // animation path is dead — the root missing-wire identified in ADR 022 Change C.
         String defaultAnimKey = key + "_default";
 
-        net.heriazone.hzlib.api.entity.variants.VariantRegistries.ANIMATORS.register(
+        VariantRegistries.ANIMATORS.register(
                 new StandardAnimatorVariant(
                         defaultAnimKey,
                         defaultAnimKey,
                         LovelyIdentifier.getId("animations/" + LovelyConstant.ANIM_DEFAULT + ".animation.json").toString(),
+                        buildAnimatorProfile(),   // <-- wire closed here
                         0
                 )
         );
@@ -152,6 +239,25 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
                 .withVariants(key, defaultAnimKey)
                 .withDefault(key, defaultAnimKey));
     } // configureVariants ()
+
+    /**
+     * Returns the {@link AnimationProfile} to embed in this family's
+     * {@link StandardAnimatorVariant} registration.
+     * <p>
+     * <b>Design Decision:</b> Override point rather than constructor parameter — keeps the
+     * profile choice in the subclass declaration alongside all other family configuration,
+     * without requiring callers ({@link RobotFamilyRegistry#create}) to thread a profile
+     * argument through every factory overload.
+     * <p>
+     * The base implementation returns {@link #ROBOT_BASE_PROFILE}, which is correct for
+     * all Legacy and Reboot families. {@code TributeRobotFamilies} overrides this to return
+     * {@link #TRIBUTE_PROFILE} (no rest/sit slots — faithful to the original mod behaviour).
+     *
+     * @return animation profile for the animator variant; never {@code null}
+     */
+    protected AnimationProfile buildAnimatorProfile() {
+        return ROBOT_BASE_PROFILE;
+    } // buildAnimatorProfile ()
 
     /**
      * Declares the robot entity data schema and registers the three-step migration chain.
@@ -183,6 +289,7 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
                 .register(RobotFields.BASE_Z)
                 .register(RobotFields.SITTING)
                 .register(RobotFields.HEALTH)
+                .register(RobotFields.IDLE_STATIONARY_TICKS)
                 .register(RobotFields.STANDBY_TICKS)
                 .register(RobotFields.STANDBY_TARGET_TICKS)
                 .version("1.0.0")

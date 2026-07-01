@@ -17,7 +17,8 @@ import java.util.EnumSet;
  * Tribute defense goal — returns robot to its saved base coordinates.
  * <p>
  * <b>Architecture:</b> Faithful translation of the original LovelyRobot
- * {@code EntityAIBunnyFollowPoint} into the 1.21.1 goal API.
+ * {@code AiBaseDefenseGoal} (1.16.5 archive, itself a port of
+ * {@code EntityAIBunnyFollowPoint}) into the 1.21.1 goal API.
  * Intentionally does not implement the Legacy/Reboot PATROL→GUARD cycle
  * ({@link AiBaseDefenseGoal}) — that state machine is a Legacy/Reboot feature
  * (ADR 022 Change F, Tribute Isolation note).
@@ -25,15 +26,15 @@ import java.util.EnumSet;
  * <b>Activation:</b> Active in {@link EntityState#Defense} when the robot is not
  * ordered to sit and is farther from base than {@code minDistance}.
  * <p>
- * <b>Navigation:</b> Recalculates the path to base every 10 ticks. When the
- * distance to base exceeds {@code warpDistance} and navigation cannot find a path,
- * teleports the robot to the nearest valid adjacent block (5×5 scan from original).
+ * <b>Navigation contract:</b> {@code moveTo()} is called unconditionally every
+ * 10 ticks (matching the original). The path is not gated behind a boolean return —
+ * gating caused a dead zone where a failed path inside {@code warpDistance} left
+ * the robot stationary. Beyond {@code warpDistance} the robot teleports instead.
  * <p>
- * <b>Look control:</b> Keeps the robot's head facing base during travel.
- * <p>
- * <b>Why not {@link AiBaseDefenseGoal}:</b> Its PATROL→GUARD state machine with
- * scan patterns and 30–45 s cycles is a Legacy/Reboot feature. Tribute gets
- * point-return only, matching original mod behavior.
+ * <b>Goal exit:</b> {@code canContinueToUse()} checks {@code navigation.isDone()}
+ * first — when pathfinding finishes (arrived or gave up), the goal exits cleanly
+ * and {@code canUse()} re-evaluates on the next tick. This matches the original
+ * and prevents the lock-in-place bug where a dead path kept the goal alive.
  */
 public class AiTributeReturnToBaseGoal extends Goal {
 
@@ -87,12 +88,18 @@ public class AiTributeReturnToBaseGoal extends Goal {
     } // canUse ()
 
     /**
-     * Continues as long as the robot remains in Defense state and not sitting.
-     * Distance threshold is re-checked in {@link #tick()} so canContinueToUse
-     * stays lean.
+     * Continues as long as the robot is in Defense state, not sitting, and the
+     * path is not yet complete.
+     * <p>
+     * <b>Origin:</b> The original {@code AiBaseDefenseGoal} checks
+     * {@code navigation.isDone()} first — when pathfinding finishes (arrived or
+     * gave up), the goal exits cleanly and {@code canUse()} re-evaluates on the
+     * next tick. Without this check, a dead path leaves the goal running but doing
+     * nothing, locking the robot in place.
      */
     @Override
     public boolean canContinueToUse() {
+        if (navigation.isDone()) return false;
         if (entity.getCurrentState() != EntityState.Defense) return false;
         return !entity.isOrderedToSit();
     } // canContinueToUse ()
@@ -120,14 +127,16 @@ public class AiTributeReturnToBaseGoal extends Goal {
     /**
      * Updates the goal each tick.
      * <p>
-     * Keeps the robot's head facing base, then every 10 ticks recalculates the
-     * path. If the robot is beyond {@code warpDistance} and navigation fails,
-     * attempts a teleport using a 5×5 floor scan — the same heuristic used in
-     * the original {@code EntityAIBunnyFollowPoint}.
+     * Keeps the robot's head facing base. Every 10 ticks, if not leashed or
+     * riding, moves toward base. If beyond {@code warpDistance}, teleports instead.
+     * <p>
+     * <b>Origin:</b> The original {@code AiBaseDefenseGoal} calls
+     * {@code navigation.moveTo()} unconditionally — it does not gate movement
+     * behind a boolean return value. Gating caused a dead zone where a failed
+     * path inside {@code warpDistance} left the robot stationary with no recovery.
      */
     @Override
     public void tick() {
-        // Keep head aimed at base while traveling
         entity.getLookControl().setLookAt(
                 entity.getBaseX(), entity.getBaseY(), entity.getBaseZ(),
                 10.0F, (float) entity.getMaxHeadXRot());
@@ -135,14 +144,15 @@ public class AiTributeReturnToBaseGoal extends Goal {
         if (--recalcCountdown > 0) return;
         recalcCountdown = 10;
 
+        if (entity.isLeashed() || entity.isPassenger()) return;
+
         double distSq = entity.distanceToSqr(
                 entity.getBaseX(), entity.getBaseY(), entity.getBaseZ());
 
-        boolean pathOk = navigation.moveTo(
-                entity.getBaseX(), entity.getBaseY(), entity.getBaseZ(), speed);
-
-        if (!pathOk && distSq >= (double) (warpDistance * warpDistance)) {
+        if (distSq >= (double) (warpDistance * warpDistance)) {
             tryTeleportToBase();
+        } else {
+            navigation.moveTo(entity.getBaseX(), entity.getBaseY(), entity.getBaseZ(), speed);
         }
     } // tick ()
 

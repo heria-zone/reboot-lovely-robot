@@ -83,20 +83,49 @@ public final class RobotFields {
     public static final DataField<Float> HEALTH =
             DataField.of("CurrentHealth", DataType.FLOAT, 20f, v -> v > 0f);
 
-    // -- Standby Animation State --
+    // -- Idle Animation State --
+
+    /**
+     * Ticks the entity has been stationary since entering or remaining in Standby.
+     * <p>
+     * <b>Purpose:</b> Persisted so {@code AnimationStateManager.resolveIdleSlot()}
+     * correctly resolves the active idle animation (rest vs sit) on the first tick
+     * after a world reload — without waiting for the sit-delay threshold to elapse
+     * again. A robot left in the sit pose before the world was closed will resume
+     * the sit animation immediately on next load rather than resetting to rest.
+     * <p>
+     * <b>Lifecycle:</b> Incremented every tick the entity is stationary and not
+     * in a vehicle ({@code NativeEntity.tickIdleCounter()}). Reset to zero when the
+     * entity moves or the state transitions away from Standby
+     * ({@code NativeEntity.onStateChanged()}).
+     */
+    public static final DataField<Integer> IDLE_STATIONARY_TICKS =
+            DataField.of("IdleStationaryTicks", DataType.INT, 0, v -> v >= 0);
+
+    // -- Standby Animation State (deprecated — retained for save compatibility) --
 
     /**
      * Ticks spent stationary since entering standby. Restored so the sit-down
      * timer continues from where it left off after a world reload rather than
      * restarting from zero (which would cause an immediate pose reset visible to the player).
+     *
+     * @deprecated ADR 022 Change D — the {@link IdleSlot} system replaces this timer.
+     *     This field is retained as a load-only NBT entry so existing saves do not produce
+     *     schema errors. It is read but never written after migration.
      */
+    @Deprecated
     public static final DataField<Integer> STANDBY_TICKS =
             DataField.of("StandbyTicks", DataType.INT, 0);
 
     /**
      * Randomised tick threshold at which the robot transitions from REST to SIT.
      * Restored alongside {@link #STANDBY_TICKS} for the same reason.
+     *
+     * @deprecated ADR 022 Change D — replaced by the sit slot's
+     *     {@code activationThresholdTicks} ({@code SharedConfigs.Common.StandbyToSitDelayMin}).
+     *     Retained as a load-only NBT entry for save compatibility.
      */
+    @Deprecated
     public static final DataField<Integer> STANDBY_TARGET_TICKS =
             DataField.of("StandbyTargetTicks", DataType.INT, 0);
 

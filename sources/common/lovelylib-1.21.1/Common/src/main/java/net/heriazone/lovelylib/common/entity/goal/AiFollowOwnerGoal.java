@@ -120,8 +120,6 @@ public class AiFollowOwnerGoal extends Goal {
     public boolean canContinueToUse() {
         // Stop if state changes
         if (entity.getCurrentState() != EntityState.Follow) return false;
-
-        if (this.navigation.isDone()) return false;
         if (entity.isOrderedToSit()) return false;
 
         // Check distance - use appropriate threshold based on combat state
@@ -283,15 +281,21 @@ public class AiFollowOwnerGoal extends Goal {
         }
 
         // Throttle collision checks for performance
+        // Throttle the expensive avoidance *calculation*, but always return a fresh
+        // owner position. Returning a cached position during cooldown was the root
+        // cause of the stale-position bug — the robot would navigate to where the
+        // owner was several ticks ago rather than where they are now.
         if (collisionCheckCooldown > 0) {
             collisionCheckCooldown--;
-            return cachedTargetPosition; // Use cached position
+            // Re-apply the previously computed avoidance offset to the current owner
+            // position so navigation stays fresh even while the avoidance is throttled.
+            Vec3 cachedOffset = cachedTargetPosition.subtract(this.owner.position());
+            return ownerPosition.add(cachedOffset);
         }
 
-        // Reset cooldown
+        // Reset cooldown and recompute avoidance from scratch
         collisionCheckCooldown = SharedConfigs.Common.CollisionCheckInterval;
 
-        // Calculate new position with collision avoidance
         cachedTargetPosition = applyCollisionAvoidance(ownerPosition);
         return cachedTargetPosition;
     } // calculateTargetPositionWithPrediction ()

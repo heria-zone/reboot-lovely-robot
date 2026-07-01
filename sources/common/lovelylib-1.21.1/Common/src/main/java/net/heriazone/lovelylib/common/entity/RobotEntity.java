@@ -1,6 +1,7 @@
 package net.heriazone.lovelylib.common.entity;
 
 import net.heriazone.hzlib.api.entity.NativeEntity;
+import net.heriazone.hzlib.api.animation.IdleSlot;
 import net.heriazone.hzlib.api.entity.data.ExperienceTracker;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
@@ -99,20 +100,6 @@ public abstract class RobotEntity extends NativeEntity {
     // -- Variables --
 
     protected boolean canWander = false;
-
-    // -- Standby Animation State --
-
-    /**
-     * Ticks spent stationary in standby mode. Counts toward {@link #standbyTargetTicks}.
-     * Reset to -1 on first load to prevent immediate sitting.
-     */
-    private int standbyTicks = 0;
-
-    /**
-     * Random tick threshold before transitioning from REST to SIT pose.
-     * Randomized between {@code StandbyToSitDelayMin} and {@code StandbyToSitDelayMax}.
-     */
-    private int standbyTargetTicks = 0;
 
     // -- Entity Data Accessors (robot-specific) --
 
@@ -306,11 +293,13 @@ public abstract class RobotEntity extends NativeEntity {
     // NOTIFICATION — delegates to InternalEntity.isNotificationEnabled()
 
     /** @deprecated Use {@link #isNotificationEnabled()} from NativeEntity instead. */
+    @Deprecated
     public boolean getNotification() {
         return isNotificationEnabled();
     } // getNotification ()
 
     /** @deprecated Use {@link #setNotificationEnabled(boolean)} from NativeEntity instead. */
+    @Deprecated
     public void setNotification(boolean value) {
         setNotificationEnabled(value);
     } // setNotification ()
@@ -365,7 +354,7 @@ public abstract class RobotEntity extends NativeEntity {
     public void tick() {
         super.tick();
 
-        handleStandbyAnimation();
+        tickIdleCounter();
         handleCombatMode();
         handleAutoHeal();
         handleHealthSync();
@@ -884,8 +873,9 @@ public abstract class RobotEntity extends NativeEntity {
         if (field == RobotFields.BASE_Z)       return (T) Float.valueOf(getBaseZ());
         if (field == RobotFields.SITTING)      return (T) Boolean.valueOf(isInSittingPose());
         if (field == RobotFields.HEALTH)       return (T) Float.valueOf(getHealth());
-        if (field == RobotFields.STANDBY_TICKS)        return (T) Integer.valueOf(standbyTicks);
-        if (field == RobotFields.STANDBY_TARGET_TICKS) return (T) Integer.valueOf(standbyTargetTicks);
+        if (field == RobotFields.IDLE_STATIONARY_TICKS) return (T) Integer.valueOf(getIdleStationaryTicks());
+        if (field == RobotFields.STANDBY_TICKS)        return (T) Integer.valueOf(0);
+        if (field == RobotFields.STANDBY_TARGET_TICKS) return (T) Integer.valueOf(0);
         return field.getDefaultValue();
     } // provideFieldValue ()
 
@@ -920,8 +910,12 @@ public abstract class RobotEntity extends NativeEntity {
             }
             return;
         }
-        if (field == RobotFields.STANDBY_TICKS)        { standbyTicks       = (Integer) value; return; }
-        if (field == RobotFields.STANDBY_TARGET_TICKS) { standbyTargetTicks = (Integer) value; return; }
+        if (field == RobotFields.IDLE_STATIONARY_TICKS) {
+            setIdleStationaryTicks((Integer) value);
+            return;
+        }
+        if (field == RobotFields.STANDBY_TICKS)        { /* load-only — field removed, silently discard */ return; }
+        if (field == RobotFields.STANDBY_TARGET_TICKS) { /* load-only — field removed, silently discard */ return; }
     } // consumeFieldValue ()
 
     // -- NBT Serialization --
@@ -960,10 +954,8 @@ public abstract class RobotEntity extends NativeEntity {
         // Recalculate attributes after level/protection values have been restored
         recalculateAttributes();
 
-        // Prevent immediate sit on first load if timers are both 0 (fresh spawn default)
-        if (!isInSittingPose() && standbyTicks == 0 && standbyTargetTicks == 0) {
-            standbyTicks = -1;
-        }
+        // Prevent immediate sit on first load — the IdleSlot system handles transitions
+        // from the first tick; no standby timer state to check (fields removed in ADR 022 Change E).
 
         // Re-apply sitting hitbox on next server tick — refreshDimensions needs post-load world state
         if (isInSittingPose() && !this.level().isClientSide) {
@@ -1047,46 +1039,60 @@ public abstract class RobotEntity extends NativeEntity {
      * standby mode. Hitbox refresh is called only on state transitions.
      */
     /**
-     * Manages standby animation transitions between REST and SIT poses.
+     * Reacts to idle-slot transitions driven by {@code AnimationStateManager.resolveIdleSlot()}.
      * <p>
-     * <b>State Flow:</b>
-     * <ul>
-     *   <li>Enter Standby → REST animation, timer starts, random target set</li>
-     *   <li>Timer reaches random threshold → SIT animation, hitbox shrinks</li>
-     *   <li>Start moving → WALK animation, timer resets, hitbox restores</li>
-     *   <li>Stop moving → REST animation, timer restarts with new random target</li>
-     *   <li>Exit Standby → IDLE animation, timer resets, hitbox restores</li>
-     * </ul>
+     * <b>Sit transition:</b> When the winning slot changes to or from a pool named {@code "sit"},
+     * updates {@code IS_IN_SITTING_POSE} and calls {@code refreshDimensions()} so the hitbox
+     * shrinks/restores in sync with the animation.
      * <p>
-     * <b>Performance:</b> Runs every tick but only performs calculations when in
-     * standby mode. Hitbox refresh is called only on state transitions.
+     * <b>Naming note:</b> {@code "rest"} is the upright stand-at-ease animation (no hitbox change).
+     * {@code "sit"} is the floor-sit animation that requires the smaller hitbox. The field
+     * {@code IS_IN_SITTING_POSE} correctly tracks whether the robot is physically sitting on
+     * the floor.
+     *
+     * @param previousSlot the slot that was winning on the previous tick, or {@code null}
+     * @param newSlot      the slot that is now winning, or {@code null}
      */
-    protected void handleStandbyAnimation() {
-        if (getCurrentState() == EntityState.Standby) {
-            boolean isMoving = this.getDeltaMovement().lengthSqr() > 0.0001;
-
-            if (!isMoving) {
-                // Set random target on first tick or when target is 0
-                if (standbyTargetTicks == 0) {
-                    standbyTargetTicks = SharedConfigs.Common.StandbyToSitDelayMin +
-                            this.random.nextInt(SharedConfigs.Common.StandbyToSitDelayMax - SharedConfigs.Common.StandbyToSitDelayMin + 1);
-                }
-
-                standbyTicks++;
-
-                if (standbyTicks >= standbyTargetTicks && !isInSittingPose()) {
-                    enterSittingPose();
-                }
-            } else {
-                if (isInSittingPose()) exitSittingPose();
-                standbyTicks = 0;
-                standbyTargetTicks = 0;
-            }
-        } else {
-            if (isInSittingPose()) exitSittingPose();
-            standbyTicks = 0;
-            standbyTargetTicks = 0;
+    @Override
+    public void onIdleSlotChanged(IdleSlot previousSlot, IdleSlot newSlot) {
+        boolean nowSitting = isSitSlot(newSlot);
+        boolean wasSitting = isSitSlot(previousSlot);
+        if (nowSitting && !wasSitting) {
+            setInSittingPose(true);
+            refreshDimensions();
+        } else if (!nowSitting && wasSitting) {
+            setInSittingPose(false);
+            refreshDimensions();
         }
+    } // onIdleSlotChanged ()
+
+    /**
+     * Returns {@code true} when the slot's pool contains the {@code "sit"} animation.
+     * <p>
+     * The {@code "sit"} animation is the floor-sit pose — the one that physically lowers
+     * the robot to the ground and requires the smaller hitbox tracked by
+     * {@code IS_IN_SITTING_POSE}. The upright stand-at-ease animation is {@code "rest"}
+     * and does not change the hitbox.
+     */
+    private static boolean isSitSlot(IdleSlot slot) {
+        if (slot == null) return false;
+        return slot.getPool().getAnimations().stream()
+                .anyMatch(a -> "sit".equals(a.getName()));
+    } // isSitSlot ()
+
+    /**
+     * Legacy standby animation handler — replaced by the {@link IdleSlot} system.
+     * <p>
+     * The sit/rest transition is now driven declaratively by the idle slots declared on
+     * {@code ROBOT_BASE_PROFILE} and the {@code idleStationaryTicks} counter on
+     * {@code NativeEntity}. The hitbox update is handled by {@link #onIdleSlotChanged}.
+     * This method is retained as a no-op so subclass overrides do not break at compile time.
+     *
+     * @deprecated ADR 022 Change D — no longer called from {@link #tick()}.
+     */
+    @Deprecated
+    protected void handleStandbyAnimation() {
+        // No-op — replaced by IdleSlot system and onIdleSlotChanged().
     } // handleStandbyAnimation ()
 
     /**

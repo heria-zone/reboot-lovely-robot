@@ -3,8 +3,8 @@ package net.heriazone.lovelylib.common.entity;
 import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.hzlib.api.animation.AnimationProfile;
-import net.heriazone.hzlib.api.animation.LoopBehavior;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
+import net.heriazone.lovelylib.source.tribute.TributeRobotFamily;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,27 +37,6 @@ public class RobotFamilyRegistry {
      * rendering setup, or bulk operations.
      */
     public static final List<RobotFamily> TYPES = new ArrayList<>();
-
-    // -- Shared Animation Profile --
-
-    /**
-     * Shared animation profile for all robot types.
-     * <p>
-     * <b>Architecture:</b> All 7 robot types share one animation file with the same
-     * five animation names. A single profile instance is registered on every robot type
-     * via {@code withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE)}.
-     * <p>
-     * <b>Attack behavior:</b> The attack animation uses {@link LoopBehavior#INTERRUPT}
-     * which maps to GeckoLib's {@code override_previous_animation: true}, ensuring the
-     * attack animation overrides the locomotion controller mid-swing.
-     */
-    public static final AnimationProfile ROBOT_ANIMATION_PROFILE = AnimationProfile.builder()
-            .idle("idle")
-            .walk("walk")
-            .rest("rest")
-            .sit("sit")
-            .attack(pool -> pool.add("attack", LoopBehavior.INTERRUPT))
-            .build();
 
     // -- Helper Methods --
 
@@ -105,7 +84,7 @@ public class RobotFamilyRegistry {
         robotType.withColorPalette(variant);
 
         // Attach shared animation profile — all robots use the same animation file
-        robotType.withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE);
+        robotType.withFeature(AnimationProfile.class, RobotFamily.ROBOT_BASE_PROFILE);
 
         // Add to registry
         TYPES.add(robotType);
@@ -132,7 +111,7 @@ public class RobotFamilyRegistry {
         robotType.withColorPalette(variant);
 
         // Attach shared animation profile — all robots use the same animation file
-        robotType.withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE);
+        robotType.withFeature(AnimationProfile.class, RobotFamily.ROBOT_BASE_PROFILE);
 
         // Add to registry
         TYPES.add(robotType);
@@ -162,7 +141,7 @@ public class RobotFamilyRegistry {
         robotType.withColorPalette(variant, colors);
 
         // Attach shared animation profile — all robots use the same animation file
-        robotType.withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE);
+        robotType.withFeature(AnimationProfile.class, RobotFamily.ROBOT_BASE_PROFILE);
 
         // Add to registry
         TYPES.add(robotType);
@@ -193,12 +172,37 @@ public class RobotFamilyRegistry {
         robotType.withColorPalette(variant, colors, namespace);
 
         // Attach shared animation profile — all robots use the same animation file
-        robotType.withFeature(AnimationProfile.class, ROBOT_ANIMATION_PROFILE);
+        robotType.withFeature(AnimationProfile.class, RobotFamily.ROBOT_BASE_PROFILE);
 
         // Add to registry
         TYPES.add(robotType);
 
         return robotType;
     } // create ()
+
+    /**
+     * Creates a Tribute robot type with a restricted color palette resolved from a custom namespace.
+     * <p>
+     * <b>Architecture:</b> Instantiates {@link net.heriazone.lovelylib.source.tribute.TributeRobotFamily}
+     * instead of the base {@link RobotFamily} so that {@link RobotFamily#buildAnimatorProfile()}
+     * returns {@link RobotFamily#TRIBUTE_PROFILE} (no rest/sit slots) during
+     * {@link RobotFamily#configureVariants()}. This is required because
+     * {@code configureVariants()} fires from {@code super()} — the profile must be
+     * determined by the subtype before the constructor body runs.
+     * <p>
+     * <b>State Impact:</b> Adds created robot type to TYPES list for iteration.
+     *
+     * @param variant   entity variant determining resource paths
+     * @param colors    ordered list of active colors — must not be empty, must not contain RANDOM
+     * @param namespace mod namespace for texture {@link net.minecraft.resources.ResourceLocation}s
+     * @return configured {@link net.heriazone.lovelylib.source.tribute.TributeRobotFamily} instance
+     */
+    protected static RobotFamily createTribute(RobotVariant variant, java.util.List<EntityTexture> colors, String namespace) {
+        RobotFamily robotType = new TributeRobotFamily(variant.getName(), variant);
+        robotType.withColorPalette(variant, colors, namespace);
+        robotType.withFeature(AnimationProfile.class, RobotFamily.TRIBUTE_PROFILE);
+        TYPES.add(robotType);
+        return robotType;
+    } // createTribute ()
 
 } // Class: RobotFamilyRegistry
