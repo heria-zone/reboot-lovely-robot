@@ -1,5 +1,6 @@
 package net.heriazone.hzlib.api.entity;
 
+import net.heriazone.hzlib.api.animation.IdleSlot;
 import net.heriazone.hzlib.api.entity.features.FoodFeature;
 import net.heriazone.hzlib.api.entity.features.SizeVariantFeature;
 import net.heriazone.hzlib.api.entity.features.exchange.ExchangeFeature;
@@ -100,6 +101,19 @@ public abstract class NativeEntity extends TamableAnimal {
     /** Active animator variant key — controls which animation file the renderer loads. */
     protected static final EntityDataAccessor<String> ANIMATOR_VARIANT = SynchedEntityData.defineId(NativeEntity.class, EntityDataSerializers.STRING);
 
+    /**
+     * Ticks this entity has been stationary (not moving and not in a vehicle).
+     * <p>
+     * <b>Why synced:</b> {@code AnimationStateManager.resolveIdleSlot()} is evaluated
+     * inside the GeckoLib locomotion controller, which runs <em>client-side</em> in the
+     * render loop. The counter must therefore be broadcast from the server so the client
+     * can evaluate idle-slot thresholds correctly.  Without sync the client always sees
+     * {@code 0} and never advances past the lowest-threshold slot (rest), regardless of
+     * how long the robot has actually been idle.
+     */
+    protected static final EntityDataAccessor<Integer> IDLE_STATIONARY_TICKS =
+            SynchedEntityData.defineId(NativeEntity.class, EntityDataSerializers.INT);
+
     // -- Family Reference --
 
     /**
@@ -135,18 +149,109 @@ public abstract class NativeEntity extends TamableAnimal {
      */
     private final Map<String, EntityDataAccessor<String>> overlaySlotAccessors = new HashMap<>();
 
+    // -- Idle Stationary Counter --
+
     /**
-     * Returns the ordered pool of pre-declared accessors available for persistent
-     * overlay slots. Index 0 maps to the first persistent slot, index 1 to the second,
-     * and so on.
-     * <p>
-     * Override in subclasses that declare {@link OverlayFeature} slots. The base
-     * implementation returns an empty list — overlay slots are silently skipped for
-     * subclasses that do not override.
+     * Tracks the currently-winning {@link IdleSlot} so {@code AnimationStateManager}
+     * can detect slot transitions and fire {@link #onIdleSlotChanged}.
+     * {@code null} when no slot is active (entity is moving or profile has no slots).
      */
-    protected List<EntityDataAccessor<String>> getOverlaySlotPool() {
-        return List.of();
-    } // getOverlaySlotPool ()
+    private IdleSlot currentIdleSlot = null;
+
+    /**
+     * Returns the number of consecutive ticks this entity has been stationary.
+     *
+     * @return tick count; always ≥ 0
+     */
+    public int getIdleStationaryTicks() {
+        try { return entityData.get(IDLE_STATIONARY_TICKS); }
+        catch (Exception ignored) { return 0; }
+    } // getIdleStationaryTicks ()
+
+    /**
+     * Resets the idle stationary counter to zero.
+     * Called when the entity starts moving or enters a vehicle.
+     */
+    public void resetIdleStationaryTicks() {
+        entityData.set(IDLE_STATIONARY_TICKS, 0);
+    } // resetIdleStationaryTicks ()
+
+    /**
+     * Sets the idle stationary counter directly.
+     * <p>
+     * <b>Usage:</b> Called by the NBT load path ({@code consumeFieldValue}) to
+     * restore the persisted counter so {@code AnimationStateManager.resolveIdleSlot()}
+     * immediately resolves the correct idle animation (rest vs sit) on the first tick
+     * after a world reload — without waiting for the threshold to be reached again.
+     * <p>
+     * Values are clamped to {@code [0, Integer.MAX_VALUE]} — negative values are
+     * discarded to avoid corrupting the monotone assumption used by the threshold
+     * comparison in {@code resolveIdleSlot()}.
+     *
+     * @param ticks persisted tick count; negative values are silently clamped to 0
+     */
+    public void setIdleStationaryTicks(int ticks) {
+        entityData.set(IDLE_STATIONARY_TICKS, Math.max(0, ticks));
+    } // setIdleStationaryTicks ()
+
+    /**
+     * Returns the currently-winning idle slot, or {@code null} if no slot is active.
+     * Used by {@code AnimationStateManager.resolveIdleSlot()} to detect transitions.
+     *
+     * @return current idle slot, or {@code null}
+     */
+    public IdleSlot getCurrentIdleSlot() {
+        return currentIdleSlot;
+    } // getCurrentIdleSlot ()
+
+    /**
+     * Updates the tracked winning idle slot.
+     * Called by {@code AnimationStateManager.resolveIdleSlot()} before firing
+     * {@link #onIdleSlotChanged}.
+     *
+     * @param slot the new winning slot, or {@code null}
+     */
+    public void setCurrentIdleSlot(IdleSlot slot) {
+        this.currentIdleSlot = slot;
+    } // setCurrentIdleSlot ()
+
+    /**
+     * Advances the idle stationary counter by one tick, or resets it if the entity
+     * is moving or riding a vehicle.
+     * <p>
+     * <b>When to call:</b> Invoke once per server tick from the entity's {@code tick()}
+     * override. {@code RobotEntity.tick()} calls this via {@link #tickIdleCounter()}.
+     * <p>
+     * The movement threshold {@code 0.0001} matches the value used in
+     * {@code AnimationStateManager.getLocomotionAnimation()} for the {@code isMoving}
+     * check, ensuring the counter and the animation state are always in sync.
+     */
+    protected void tickIdleCounter() {
+        boolean isMovingNow = getDeltaMovement().lengthSqr() > 0.0001 || getVehicle() != null;
+        if (isMovingNow) {
+            entityData.set(IDLE_STATIONARY_TICKS, 0);
+        } else {
+            int current = getIdleStationaryTicks();
+            entityData.set(IDLE_STATIONARY_TICKS, current + 1);
+        }
+    } // tickIdleCounter ()
+
+    /**
+     * Hook called by {@code AnimationStateManager.resolveIdleSlot()} when the winning
+     * {@link IdleSlot} changes between ticks.
+     * <p>
+     * <b>Base implementation:</b> No-op. Override in entity subclasses that must react
+     * to idle-tier transitions — for example, {@code RobotEntity} overrides this to
+     * update {@code IS_IN_SITTING_POSE} and call {@code refreshDimensions()} when the
+     * sit slot activates or deactivates.
+     *
+     * @param previousSlot the slot that was winning on the previous tick, or {@code null}
+     *                     if no slot was active
+     * @param newSlot      the slot that is now winning, or {@code null} if no slot matches
+     */
+    public void onIdleSlotChanged(IdleSlot previousSlot, IdleSlot newSlot) {
+        // No-op in base — override in subclasses that need to react to idle-tier transitions.
+    } // onIdleSlotChanged ()
 
     // -- Combat State --
 
@@ -190,6 +295,19 @@ public abstract class NativeEntity extends TamableAnimal {
     } // dropItemAtLocation ()
 
     // -- Overlay Slot API --
+
+    /**
+     * Returns the ordered pool of pre-declared accessors available for persistent
+     * overlay slots. Index 0 maps to the first persistent slot, index 1 to the second,
+     * and so on.
+     * <p>
+     * Override in subclasses that declare {@link OverlayFeature} slots. The base
+     * implementation returns an empty list — overlay slots are silently skipped for
+     * subclasses that do not override.
+     */
+    protected List<EntityDataAccessor<String>> getOverlaySlotPool() {
+        return List.of();
+    } // getOverlaySlotPool ()
 
     /**
      * Maps {@link OverlayFeature} slot keys to the pre-declared
@@ -514,11 +632,12 @@ public abstract class NativeEntity extends TamableAnimal {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(STATE,              EntityState.Follow.getId());
-        builder.define(TEXTURE_VARIANT,    "default");
-        builder.define(MODEL_VARIANT,      "default");
-        builder.define(ANIMATOR_VARIANT,   "default");
-        builder.define(NOTIFICATION_ENABLED, true);
+        builder.define(STATE,                  EntityState.Follow.getId());
+        builder.define(TEXTURE_VARIANT,        "default");
+        builder.define(MODEL_VARIANT,          "default");
+        builder.define(ANIMATOR_VARIANT,       "default");
+        builder.define(NOTIFICATION_ENABLED,   true);
+        builder.define(IDLE_STATIONARY_TICKS,  0);
     } // defineSynchedData ()
 
     // -- State Accessors --
@@ -564,6 +683,13 @@ public abstract class NativeEntity extends TamableAnimal {
             case Follow -> {
                 setOrderedToSit(false);
                 setInSittingPose(false);
+                // Reset the idle counter so the entity does not skip directly to
+                // rest/sit on re-entry to Standby after a brief Follow stint.
+                resetIdleStationaryTicks();
+            }
+            case Defense -> {
+                // Reset so the next Standby entry starts the idle ramp from zero.
+                resetIdleStationaryTicks();
             }
             default -> {}
         }

@@ -44,6 +44,16 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
     protected final String key;
     protected final MutableComponent name;
 
+    // -- Animation --
+
+    /**
+     * Name of the head bone used by {@code NativeModel.setCustomAnimations()} for
+     * look-direction tracking. Defaults to {@code "head"}, which covers every existing
+     * family without any migration — only families whose {@code .geo.json} uses a
+     * different bone name need to call {@link #headBone(String)}.
+     */
+    private String headBoneName = "head";
+
     // -- Combat Data --
 
     /**
@@ -172,6 +182,37 @@ public abstract class NativeEntityFamily<T extends NativeEntityFamily<T>> {
     public String getKey() {
         return key;
     } // getKey ()
+
+    // -- Animation Accessors --
+
+    /**
+     * Returns the head bone name used for look-direction tracking in
+     * {@code NativeModel.setCustomAnimations()}. Defaults to {@code "head"}.
+     *
+     * @return bone name as declared in the family's {@code .geo.json}; never {@code null}
+     */
+    public String getHeadBoneName() {
+        return headBoneName;
+    } // getHeadBoneName ()
+
+    /**
+     * Sets the head bone name for look-direction tracking.
+     * <p>
+     * Only needed when a family's {@code .geo.json} uses a bone name other than
+     * {@code "head"}. All existing families implicitly use the default — zero migration.
+     *
+     * @param boneName exact bone name as declared in the {@code .geo.json} file
+     * @return this instance for chaining
+     * @throws IllegalArgumentException if {@code boneName} is null or blank
+     */
+    @SuppressWarnings("unchecked")
+    public T headBone(String boneName) {
+        if (boneName == null || boneName.isBlank()) {
+            throw new IllegalArgumentException("headBoneName must not be null or blank");
+        }
+        this.headBoneName = boneName;
+        return (T) this;
+    } // headBone ()
 
     /** Returns the translatable display name for this family. */
     public MutableComponent getName() {
