@@ -12,15 +12,18 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 /**
  * Composable layer-based renderer for Kitsune variant.
  * <p>
- * <b>Architecture:</b> Uses KitsuneModel for tail visibility logic while maintaining
- * layer composition for visual effects. Kitsune-specific mode indicator textures.
+ * <b>Architecture:</b> Uses {@link NativeRobotModel} for model resolution while
+ * maintaining layer composition for visual effects. Tail bone visibility is now
+ * handled declaratively by {@code BoneVisibilityFeature} evaluated in
+ * {@code NativeModel.setCustomAnimations()} — no model subclass needed.
+ * Kitsune-specific mode indicator textures.
  */
 public class KitsuneRenderer extends NativeRenderer<NativeRobotEntity> {
 
     // -- Constructor --
 
     public KitsuneRenderer(EntityRendererProvider.Context context) {
-        super(context, new KitsuneModel(), SharedConfigs.Client.ShadowRadius);
+        super(context, new NativeRobotModel(), SharedConfigs.Client.ShadowRadius);
 
         // Layer stack: Base texture → Health collar → Kitsune-specific headphone overlay
         addLayer(new BaseTextureLayer<>(this));

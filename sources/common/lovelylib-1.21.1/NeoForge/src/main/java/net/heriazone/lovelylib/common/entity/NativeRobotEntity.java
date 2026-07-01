@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.lovelylib.hzlib.api.entity.RobotAnimation;
+import net.heriazone.hzlib.api.entity.NativeAnimation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -37,8 +37,8 @@ public class NativeRobotEntity extends RobotEntity implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegister) {
-        controllerRegister.add(RobotAnimation.locomotionAnimation(this));
-        controllerRegister.add(RobotAnimation.attackAnimation(this));
+        controllerRegister.add(NativeAnimation.locomotionAnimation(this));
+        controllerRegister.add(NativeAnimation.attackAnimation(this));
     } // registerControllers ()
 
     @Override
