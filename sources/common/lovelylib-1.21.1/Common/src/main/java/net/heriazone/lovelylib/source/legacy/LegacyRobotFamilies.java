@@ -7,9 +7,11 @@ import net.heriazone.lovelylib.common.entity.RobotFamily;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
 import net.heriazone.lovelylib.common.entity.enums.*;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.hzlib.api.entity.features.BoneVisibilityFeature;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
 import net.heriazone.hzlib.framework.entity.protection.LevelBasedProtectionStrategy;
+import net.heriazone.lovelylib.common.entity.features.BoneVisibilityConditions;
 
 /**
  * <p>Registry of native robot types with config-driven values.<p>
@@ -246,7 +248,22 @@ public class LegacyRobotFamilies extends RobotFamilyRegistry {
                                 new LinearAttributeStrategy()
                         ))
                 .withFeature(EnchantmentFeature.class, defaultEnchantment)
-                .withFeature(ProtectionFeature.class, defaultProtection);
+                .withFeature(ProtectionFeature.class, defaultProtection)
+                // Tail visibility — single base tail only.
+                // Multi-tail level-unlock progression is disabled until tail assets are finalised.
+                // tail0 is always visible; tail01–tail09 are permanently hidden.
+                .withFeature(BoneVisibilityFeature.class, BoneVisibilityFeature.builder()
+                        .showWhen("tail0",  entity -> true)
+                        .hideWhen("tail01", entity -> true)
+                        .hideWhen("tail02", entity -> true)
+                        .hideWhen("tail03", entity -> true)
+                        .hideWhen("tail04", entity -> true)
+                        .hideWhen("tail05", entity -> true)
+                        .hideWhen("tail06", entity -> true)
+                        .hideWhen("tail07", entity -> true)
+                        .hideWhen("tail08", entity -> true)
+                        .hideWhen("tail09", entity -> true)
+                        .build());
 
         // Configure NEKO
         SharedConfigs.EntityConfigData neko = LegacyConfigs.getEntityConfig(LovelyConstant.VARIANT_NEKO);
