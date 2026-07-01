@@ -92,10 +92,10 @@ public class TributeEntities {
      * @param event entity renderers registration event
      */
     public static void registerRender(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(BUNNY.get(), BunnyRenderer::new);
-        event.registerEntityRenderer(BUNNY2.get(), NativeRobotRenderer::new);
-        event.registerEntityRenderer(HONEY.get(), NativeRobotRenderer::new);
-        event.registerEntityRenderer(VANILLA.get(), NativeRobotRenderer::new);
+        event.registerEntityRenderer(BUNNY.get(),    TributeRobotRenderer::new);
+        event.registerEntityRenderer(BUNNY2.get(),   TributeRobotRenderer::new);
+        event.registerEntityRenderer(HONEY.get(),    TributeRobotRenderer::new);
+        event.registerEntityRenderer(VANILLA.get(),  TributeRobotRenderer::new);
     } // registerRender()
 
     /**

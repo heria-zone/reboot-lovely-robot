@@ -73,10 +73,10 @@ public class TributeEntities {
      * Registers entity renderers on client side.
      */
     public static void registerRender() {
-        EntityRendererRegistry.register(BUNNY, BunnyRenderer::new);
-        EntityRendererRegistry.register(BUNNY2, NativeRobotRenderer::new);
-        EntityRendererRegistry.register(HONEY, NativeRobotRenderer::new);
-        EntityRendererRegistry.register(VANILLA, NativeRobotRenderer::new);
+        EntityRendererRegistry.register(BUNNY,    TributeRobotRenderer::new);
+        EntityRendererRegistry.register(BUNNY2,   TributeRobotRenderer::new);
+        EntityRendererRegistry.register(HONEY,    TributeRobotRenderer::new);
+        EntityRendererRegistry.register(VANILLA,  TributeRobotRenderer::new);
     } // registerRender ()
 
     /**
