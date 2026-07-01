@@ -1,7 +1,7 @@
 # Pre-Publish Checklist — Lovely Recreations
 
 **Status**: Active — Working Notes  
-**Last Updated**: 2026-06-25  
+**Last Updated**: 2026-07-01  
 **Scope**: Features and fixes needed before the initial public release of Tribute, Legacy, and Reboot  
 **Related Sprint**: Post-Sprint 10 / Pre-Release
 
@@ -53,62 +53,103 @@ Before adding new types, this is what exists today:
 
 ---
 
-### 2. Animation Improvements — LovelyLib on top of HZLib
+### 2. Animation System Unification
 
-**What**: LovelyLib should fully adopt the HZLib animation system as its foundation, then extend it with robot-specific capabilities that HZLib intentionally does not cover.
+**What**: Fully unify the animation pipeline under HZLib. LovelyLib registers family
+descriptors and conditions; HZLib drives all bone manipulation, idle slot evaluation,
+and bone visibility. Eliminate nine architectural smells found by the pre-publish audit.
 
-**Design intent — two separate concerns**:
+**Audit**: `docs/development/notes/Animation_Architecture_Audit.md`
 
-**A — LovelyLib extensions over HZLib (robot-specific, not HZLib's responsibility)**:
-- **Named bone pass-through**: allow the family declaration to specify a bone name for the head (and other special bones). The animation layer reads this at runtime and drives that bone independently (e.g. head tracking toward the owner or a look target). HZLib has `BoneTransformations` and `TailAnimationUtils` as utilities but does not wire them to a family-level config — LovelyLib needs to do this.
-- **Tail animation system**: Kitsune and any future tailed family need tail bones animated separately from the body. LovelyLib should declare a tail bone config on the family descriptor (bone name(s), oscillation parameters) and drive it through a dedicated animation step that HZLib does not provide.
+**Root cause of all smells**: `RobotFamily.configureVariants()` never attaches an
+`AnimationProfile` to the `StandardAnimatorVariant` registration. Because of this, the
+entire profile-aware path in `AnimationStateManager` is dead for every robot. All robots
+fall back to the hardcoded `isInSittingPose()` branch — the source of the standby flicker
+(item 3). Items 2 and 3 are the same problem.
 
-**B — HZLib animation system improvement (benefits all mods, not just LovelyLib)**:
-- **Conditional idle animation slots**: extend the HZLib animation state machine to support multiple idle-state animations declared on the family, each with a condition and an optional time threshold. The system evaluates conditions in priority order each tick and plays the first one that passes. Example family declaration:
-  ```
-  idleSlot: play "idle_stand"  → condition: always            (priority 0 — fallback)
-  idleSlot: play "idle_sit"    → condition: stationary for ≥ N ticks (priority 1)
-  idleSlot: play "idle_look"   → condition: owner nearby, random 5%/tick (priority 2)
-  ```
-  The system picks the highest-priority slot whose condition is met, transitions once, and holds until the condition breaks — no per-entity timer code needed.
-- **This is the intended long-term replacement for the standby REST→SIT bespoke timer in `RobotEntity`** (item 3). Once this system exists, the `handleStandbyAnimation()` tick counter and all its logic get deleted and replaced by a two-line family declaration: `idle_stand` always, `idle_sit` after N ticks stationary. Item 3 is a short-term patch; this is the proper fix.
-- The standby case is the primary driver for this feature but the system is general — any family can declare its own idle variation logic without touching entity code.
+**Six changes (see ADR 022 for full specification):**
 
-**Current state**:
-- HZLib has `BoneTransformations.java` and `TailAnimationUtils.java` as low-level utilities but nothing wires them to a family descriptor
-- LovelyLib has `BoneTransformations`, `TailAnimationUtils`, `EntityAnimation`, `EntityAnimator` enums and the standby tick logic in `RobotEntity` — all ad-hoc, nothing declarative
-- No conditional idle slot system exists anywhere in the stack
+**A — `BoneVisibilityFeature` in HZLib** (new feature on `NativeEntityFamily`):
+Declarative per-frame bone hiding/showing via `BoneCondition` lambdas. Evaluated inside
+`NativeModel.setCustomAnimations()` — no reflection, no model subclasses.
+Covers: Kitsune progressive tail unlock, Sentry wing-bone conflict (dragon/honey forms),
+any future conditional bone.
 
-**What to do**:
-- Design the conditional animation slot API in HZLib first (needs its own ADR — architectural impact is broad)
-- Add `headBone` and `tailBones` config fields to `RobotFamily` in LovelyLib
-- Wire `BoneTransformations` / `TailAnimationUtils` to read from those fields in the animation step
+**B — `headBoneName` on `NativeEntityFamily`**:
+`NativeModel.setCustomAnimations()` reads bone name from the family. Closes the
+hardcoded `"head"` string in `NativeModel`.
 
-**Location**: `sources/common/hzlib-1.21.1/` (conditional slot system) + `sources/common/lovelylib-1.21.1/Common/.../animation/` (bone config + tail system)
+**C — `AnimationProfile` attached to every `RobotFamily` variant (root fix)**:
+Every `StandardAnimatorVariant` registration in `RobotFamily.configureVariants()` must
+include a profile. Without this, the entire profile-aware code path is dead for robots.
+
+**D — `IdleSlot` + `IdleCondition` in HZLib + `idleStationaryTicks` on `NativeEntity`**:
+Extends `AnimationProfile` with timed conditional idle slots. `NativeEntity` maintains
+a non-synced `idleStationaryTicks` counter. `AnimationStateManager.resolveIdleSlot()`
+evaluates slots in priority order — the winning slot is structurally stable, eliminating
+the flicker. `handleStandbyAnimation()` and its two timer fields are deleted entirely.
+Tribute families declare no sit slot — they never show rest or sit anywhere, including
+in vehicles (vehicle path updated to return `IDLE` when no sit/ride pool declared).
+
+**E — Delete dead code across LovelyLib (all 3 loaders)**:
+- `RobotAnimation.java` — duplicates `NativeAnimation`; deleted, callers updated to `NativeAnimation`
+- `KitsuneModel.java` — only existed to call tail reflection; replaced by `BoneVisibilityFeature`
+- `EntityAnimation.java`, `EntityModel.java`, `EntityVariantModel.java` — pre-profile dead enums
+- `lovelylib/Common/.../api/animation/BoneTransformations.java` — dead duplicate of HZLib version
+- `TailAnimationUtils.configureTailVisibility()` — reflection removed; logic moves to `BoneVisibilityConditions`
+
+**F — Item 8 (Tribute AI goals)**: See item 8 below.
+
+**Current state (smells confirmed by audit)**:
+- `TailAnimationUtils.configureTailVisibility()` uses Java reflection to call `getBone`/`setHidden` through the loader boundary
+- `RobotFamily.configureVariants()` registers `StandardAnimatorVariant` with no profile — all robots are on the dead fallback path
+- `RobotAnimation` duplicates `NativeAnimation` across 3 loaders; should not exist
+- `KitsuneModel` subclass exists only because bone visibility had no declarative home
+- `EntityAnimation`, `EntityModel`, `EntityVariantModel` enums are unreferenced dead code
+- `lovelylib/Common/BoneTransformations.java` is an unreferenced duplicate of the HZLib version
+
+**What to do** (20-step ordered plan in ADR):
+1. Add `BoneCondition`, `BoneRule`, `BoneVisibilityFeature` to HZLib
+2. Update `NativeModel.setCustomAnimations()` to evaluate feature + read head bone name
+3. Add `headBoneName` field to `NativeEntityFamily`
+4. Add `IdleCondition`, `IdleSlot` to HZLib animation package
+5. Add `idleSlots` + `idleSlot()` builder to `AnimationProfile`
+6. Add `idleStationaryTicks` counter to `NativeEntity.tick()`
+7. Update `AnimationStateManager.getLocomotionAnimation()` — idle slot path + vehicle fallback fix
+8. Add `onIdleSlotChanged()` hook to `NativeEntity`; override in `RobotEntity` for hitbox sync
+9. Build `ROBOT_BASE_PROFILE` with idle slots; attach in `RobotFamily.configureVariants()`
+10. Build `TRIBUTE_PROFILE` (no sit/rest/idle-slots); attach in `TributeRobotFamilies`
+11. Declare `BoneVisibilityFeature` on Kitsune family (replaces `TailAnimationUtils` reflection)
+12. Declare `BoneVisibilityFeature` on Sentry family (wing-bone conflict — when Sentry is built)
+13. Delete `handleStandbyAnimation()` + timer fields from `RobotEntity`; mark schema fields `@Deprecated`
+14. Delete `RobotAnimation.java`; update `registerControllers()` to use `NativeAnimation`
+15. Delete `KitsuneModel.java`; update Kitsune renderer registration to `NativeRobotModel`
+16. Delete `TailAnimationUtils` reflection method + `TailVisibilityConfig`
+17. Delete `lovelylib/Common/BoneTransformations.java`
+18. Delete `EntityAnimation.java`, `EntityModel.java`, `EntityVariantModel.java`
+19. Add `AiTributeReturnToBaseGoal` class
+20. Override `registerGoals()` in `TributeRobotEntity` (all loaders)
+
+**ADR**: `docs/development/decisions/ADR_022_Animation_System_Unification.md`
+
+**Locations**:
+- HZLib: `sources/common/hzlib-1.21.1/Common/.../animation/` (new types) + `NativeEntity.java` + `NativeModel.java`
+- LovelyLib Common: `RobotFamily.java`, `RobotEntity.java`, new `BoneVisibilityConditions.java`, new `AiTributeReturnToBaseGoal.java`
+- LovelyLib Loaders: delete `RobotAnimation.java`, `KitsuneModel.java`; update `registerControllers()`
 
 ---
 
 ### 3. Fix: Standby Mode Animation Flicker
 
-**What**: When a robot enters standby mode, the idle animation flickers between the `stand` and `rest` states.
+**Status**: Subsumed by item 2. See `docs/development/decisions/ADR_022_Animation_System_Unification.md` — Change C (attach `AnimationProfile`) and Change D (idle slot system) together eliminate the flicker structurally. There is no short-term patch; implement item 2 in full.
 
-**Relationship to item 2**: The conditional idle slot system in item 2B is the proper architectural replacement for the bespoke standby timer. Once that system is built, `handleStandbyAnimation()` and its tick counter get deleted entirely — the REST→SIT transition becomes a two-line family declaration. **This item (3) is only the short-term patch** to make the behaviour correct while item 2B is being designed and built.
-
-**Current state**: `handleStandbyAnimation()` in `RobotEntity.java` manages the REST → SIT transition using a tick counter called from `aiStep()`. The flicker suggests the animation state is being set incorrectly — two possible root causes to investigate before touching anything:
-
-1. **State written every tick instead of on transition**: the animation state (REST/SIT) may be set unconditionally on every tick rather than only when it *changes*. Guard it so the animation trigger fires once on state entry, not on every tick the entity remains in that state.
-
-2. **`aiStep` server-only timing mismatch**: `aiStep()` only runs on the server. If `handleStandbyAnimation()` drives animation state from inside `aiStep()`, the state change is server-authoritative while the animation renderer runs client-side — the client may not receive the update at the right frame, causing the flicker. Check whether this call should live in a tick method that runs on both sides, or whether the resulting state needs to be synced to the client explicitly.
-
-**Reference fix**: The same issue was solved in Monsters & Girls — check how `AnimationStateManager` guards state transitions there (Sprint 10 context).
-
-**What to do**:
-- Confirm which tick method `handleStandbyAnimation()` is called from and whether it runs client-side, server-side, or both
-- If the `aiStep` mismatch is the cause, move the call or sync the resulting animation state
-- If it is a re-write-every-tick issue, add a transition guard
-- Once item 2B (conditional idle slots) is implemented, delete `handleStandbyAnimation()` entirely and replace with a family-level declaration
-
-**Location**: `sources/common/lovelylib-1.21.1/Common/.../entity/RobotEntity.java` — `handleStandbyAnimation()`
+**Root cause (confirmed by audit)**: `RobotFamily.configureVariants()` registers
+`StandardAnimatorVariant` with no `AnimationProfile`, so `AnimationStateManager.resolveProfile()`
+returns `null` for every robot. The system falls back to the `isInSittingPose()` branch which is
+driven server-side by `handleStandbyAnimation()` via `SynchedEntityData`. Packet lag between the
+server setting `IS_IN_SITTING_POSE` and the client reading it in the GeckoLib controller tick causes
+the flicker. Once an `AnimationProfile` is attached (item 2, Change C), the entire `isInSittingPose()`
+path is bypassed. Once idle slots are active (item 2, Change D), `handleStandbyAnimation()` is deleted.
 
 ---
 
@@ -197,17 +238,29 @@ Before adding new types, this is what exists today:
 
 ### 8. Tribute — AI Goals (Wolf-Like Behaviour)
 
-**What**: Tribute robots should behave similarly to the original LovelyRobot wolf-inspired AI, including patrol.
+**What**: Tribute robots should behave similarly to the original LovelyRobot wolf-inspired AI.
 
-**Current state**: LovelyLib provides `AiBaseDefenseGoal`, `AiFollowOwnerGoal`, `AiAutoAttackGoal`, `AiConditionalWanderGoal`. No patrol goal exists anywhere in the 1.21.1 codebase.
+**Current state**: `TributeRobotEntity` inherits `registerGoals()` from `RobotEntity`, which
+gives it the full Legacy/Reboot goal set including `AiBaseDefenseGoal` (the PATROL→GUARD state
+machine with scan patterns). The original mod had no patrol cycle — base defense was simply
+"navigate back to `BASE_X/Y/Z`". The original wander used vanilla `EntityAIWanderAvoidWater`
+with no owner-stationary detection. `AiPatrolGoal` does not exist in the original source
+(`temp/original/`) and should not be created.
 
-**What to do**:
-- Implement an `AiPatrolGoal` that mimics vanilla wolf patrol behaviour (scan around owner's last position, return to owner if they move too far)
-- Wire `AiPatrolGoal` specifically to Tribute robot entities — it should not affect Legacy or Reboot
-- Reference the original LovelyRobot source (archive) for the exact patrol parameters and distances
-- Consider whether patrol replaces or supplements `AiBaseDefenseGoal` for Tribute
+**What to do** (covered by ADR 022, Change F):
+- Add `AiTributeReturnToBaseGoal` — direct translation of original `EntityAIBunnyFollowPoint`:
+  activates in `Defense` state, paths to `BASE_X/Y/Z`, teleports on pathfinding failure past
+  warp range. No patrol cycle, no scan patterns.
+- Override `registerGoals()` in `TributeRobotEntity` (all three loaders):
+  - Uses `AiTributeReturnToBaseGoal` instead of `AiBaseDefenseGoal`
+  - Uses vanilla `WaterAvoidingRandomStrollGoal` instead of `AiConditionalWanderGoal`
+  - All other goals (`AiFollowOwnerGoal`, look goals, target selectors) unchanged
+- This override is part of item 2's step 19–20 in the implementation order.
 
-**Location**: `sources/common/lovelylib-1.21.1/Common/.../entity/goal/` (new goal class) + Tribute entity registration
+**ADR**: `docs/development/decisions/ADR_022_Animation_System_Unification.md` — Change F
+
+**Location**: `sources/common/lovelylib-1.21.1/Common/.../entity/goal/AiTributeReturnToBaseGoal.java`
++ all three loader copies of `TributeRobotEntity.java`
 
 ---
 
@@ -290,16 +343,15 @@ Before adding new types, this is what exists today:
 
 | # | Item | Scope | Blocking? |
 |---|------|-------|-----------|
-| 3 | Standby flicker fix | LovelyLib | Yes — visual bug visible immediately |
+| 2+3 | Animation system unification (ADR 022) | HZLib + LovelyLib | Yes — flicker visible immediately; profile missing means animation system is broken for all robots |
 | 10 | Spawn item tooltip | LovelyLib | Yes — first thing players check |
 | 9 | Tribute original textures audit | Tribute | Yes — correctness requirement |
-| 8 | Tribute AI goals (patrol) | Tribute | No — polish |
+| 8 | Tribute AI goals (ADR 022, Change F) | Tribute | No — part of item 2 implementation steps 19–20 |
 | 6 | Collar conditional visibility | LovelyLib | No — polish |
 | 4 | Bunny3 → Legacy | Legacy | No — content |
 | 5 | Hyperion, Empyrium, Prime + Bunny3 → Reboot | Reboot | No — content |
 | 7 | Three wrenches | All mods | No — ecosystem feature |
 | 1 | ConditionalAppearanceFeature | HZLib | No — replaces dye system + biome selection |
-| 2 | Animation improvements | LovelyLib | No — post-launch polish |
 | 11 | Data pipeline / EntityDataSchema | HZLib + LovelyLib | No — requires ADR first |
 | 12 | Two-lane appearance architecture + CompositeAppearanceFeature | HZLib | No — requires ADR first |
 
@@ -308,6 +360,8 @@ Before adding new types, this is what exists today:
 ## Notes
 
 - Item 1 (ConditionalAppearanceFeature) has its ADR: `docs/development/decisions/ADR_020_Conditional_Appearance_Feature.md`. It also covers the base condition/context framework (absorbs former ADR 021) and closes item 9 (Tribute texture audit).
+- **Items 2 and 3 are the same problem**, fully resolved by `docs/development/decisions/ADR_022_Animation_System_Unification.md`. The root cause: `RobotFamily.configureVariants()` never attaches an `AnimationProfile` — all nine animation smells trace back to this missing wire. The ADR specifies six changes (A–F) and a 20-step implementation order. The audit findings are preserved in `docs/development/notes/Animation_Architecture_Audit.md`.
+- **Item 8 (Tribute AI goals)** is covered by ADR 022 Change F. The original mod had no `AiPatrolGoal` — "patrol" was point-return via `EntityAIBunnyFollowPoint`, now `AiTributeReturnToBaseGoal`. Item 8 is steps 19–20 of the item 2 implementation order.
 - Item 11 (Data Pipeline) has its ADR: `docs/development/decisions/ADR_019_Entity_Data_Pipeline.md`.
 - Item 12 (Two-lane appearance + CompositeAppearanceFeature) has its ADR: `docs/development/decisions/ADR_021_Composite_Appearance_Feature.md`. It also introduces `AbstractVariantFeature` eliminating ~600 lines of duplication across the three independent-axis features, and renames `AppearanceVariantFeature` to `CompositeAppearanceFeature`.
 - Items 4 and 5 both require Bunny3 — implement the shared `RobotVariant.Bunny3` entry once and reuse it across Legacy and Reboot.
