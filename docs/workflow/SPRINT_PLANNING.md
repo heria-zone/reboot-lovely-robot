@@ -1,7 +1,7 @@
 # Sprint Planning - LovelyRobot Project (Updated)
 
 **Status**: Active
-**Last Updated**: 2026-06-28
+**Last Updated**: 2026-07-01
 **Project**: LovelyRobot Multi-Variant Minecraft Mod Ecosystem
 **Related Documents**:
 - [CURRENT_STATE.md](CURRENT_STATE.md) - Current implementation status
@@ -214,6 +214,25 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 - LovelyLib — 7 robot families wired with 16-dye `ConditionalAppearanceFeature`; `RobotEntity` dye chain replaced with `tryConditionalAppearance()`
 - Monsters & Girls — Gourdragora `SizeConfig` references wired into `ICompositeAppearance` entries; biome-selection overrides replaced
 
+#### Sprint 13: Animation System Unification — ADR 022 Full Implementation
+**Dates**: 2026-07-26 to 2026-08-08  
+**Story Points**: 50  
+**Theme**: Close the root animation missing-wire (no `AnimationProfile` on robot variants); eliminate standby flicker with declarative `IdleSlot` system; replace reflection-based bone visibility with `BoneVisibilityFeature`; delete pre-profile dead code across three loaders; implement Tribute AI goals  
+**Source ADR**: ADR_022  
+**Task File**: `docs/development/sprints/active/SPRINT_13_TASK.md`  
+**Prerequisite**: Sprint 12 complete  
+**Major Deliverables**:
+- `BoneCondition` + `BoneRule` + `BoneVisibilityFeature` — new HZLib Common feature; evaluated in `NativeModel.setCustomAnimations()` each frame; no reflection; no GeckoLib imports in Common
+- `headBoneName` field on `NativeEntityFamily` — `NativeModel.resolveHeadBoneName()` reads from family; hardcoded `"head"` eliminated
+- `IdleCondition` + `IdleSlot` — new HZLib Common animation types; `idleStationaryTicks` counter on `NativeEntity`; `resolveIdleSlot()` in `AnimationStateManager`; stable threshold eliminates flicker
+- `ROBOT_BASE_PROFILE` with idle slots attached in `RobotFamily.configureVariants()` — profile-aware path activated for all robots; `handleStandbyAnimation()` deleted
+- `TRIBUTE_PROFILE` (no rest/sit/idle-slots) on Tribute families — Tribute behavior faithful to original
+- `BoneVisibilityConditions` utility + `BoneVisibilityFeature` declared on KITSUNE family — tail visibility via lambdas, `TailAnimationUtils` reflection deleted
+- `AiTributeReturnToBaseGoal` + `TributeRobotEntity.registerGoals()` override (×3 loaders) — Pre-Publish Checklist item 8
+- `RobotAnimation.java` deleted (×3 loaders), `KitsuneModel.java` deleted (×3 loaders)
+- Dead enums deleted: `EntityAnimation`, `EntityModel`, `EntityVariantModel`, lovelylib `BoneTransformations`
+- All 9 architectural smells from `Animation_Architecture_Audit.md` resolved
+
 #### Sprint 19-20: Core Robot Specializations (4 weeks)
 **Sprint 19 Dates**: 2026-06-23 to 2026-07-06 (Honey features)  
 **Sprint 20 Dates**: 2026-07-07 to 2026-07-20 (Bunny features)  
@@ -345,6 +364,29 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 - **Step 9**: Validation — dye interaction, spawn-time biome selection, Lane B composite, composable conditions, weighted pool distribution, Lane A isolation, misconfiguration warning, call-site stability
 
 **Build dependency**: Step 1 → Step 2 → Step 3 → Step 4 & 5 (parallel) → Step 6 → Step 7 & 8 (parallel) → Step 9.
+
+---
+
+## Upcoming Sprints
+
+### Sprint 13: Animation System Unification — ADR 022 Full Implementation 📋
+**Status**: 📋 Planned  
+**Dates**: 2026-07-26 to 2026-08-08  
+**Story Points**: 50  
+**Theme**: Close the root missing-wire gap (`AnimationProfile` never attached to robot variants); eliminate standby flicker via declarative `IdleSlot` system; replace reflection-based bone visibility with first-class `BoneVisibilityFeature`; delete all pre-profile-era dead code across three loaders; implement Tribute AI goals (Pre-Publish Checklist items 2, 3, 8)  
+**Source ADR**: `docs/development/decisions/ADR_022_Animation_System_Unification.md`  
+**Task File**: `docs/development/sprints/active/SPRINT_13_TASK.md`  
+**Prerequisite**: Sprint 12 complete (`AnimationProfile` builder must accept `idleSlots`)
+
+**Sprint changes**:
+- **Change A** — `BoneVisibilityFeature` in HZLib Common: new `BoneCondition` / `BoneRule` / `BoneVisibilityFeature` types; `NativeModel.setCustomAnimations()` evaluates rules each frame — no reflection, no subclassing
+- **Change B** — Head bone name on `NativeEntityFamily`: `headBoneName` field + fluent setter; `NativeModel.resolveHeadBoneName()` reads from family descriptor; eliminates hardcoded `"head"` string
+- **Change C** — `AnimationProfile` on all robot variants (root fix): `ROBOT_BASE_PROFILE` attached in `RobotFamily.configureVariants()`; `TRIBUTE_PROFILE` (no rest/sit/idle-slots) on Tribute families; `AnimationStateManager.resolveProfile()` returns non-null for every robot
+- **Change D** — `IdleSlot` system + `idleStationaryTicks`: `IdleCondition` + `IdleSlot` in HZLib Common; `idleStationaryTicks` counter on `NativeEntity` replaces `standbyTicks`; `AnimationStateManager.resolveIdleSlot()` with stable threshold comparison; `onIdleSlotChanged()` hook drives `IS_IN_SITTING_POSE` update; `handleStandbyAnimation()` deleted
+- **Change E** — Cleanup: delete `RobotAnimation.java` (×3 loaders), `KitsuneModel.java` (×3 loaders), `EntityAnimation.java`, `EntityModel.java`, `EntityVariantModel.java`, lovelylib `BoneTransformations.java`, `TailAnimationUtils.configureTailVisibility()` reflection method
+- **Change F** — `BoneVisibilityConditions` utility + `BoneVisibilityFeature` on KITSUNE family; `AiTributeReturnToBaseGoal` (original `BunnyFollowPoint` equivalent); `TributeRobotEntity.registerGoals()` override (all 3 loaders)
+
+**Build dependency**: Change A–B (new HZLib types) → Change D (IdleSlot types + AnimationStateManager wiring) → Change C (profiles + idle-slot declarations) → Change F (LovelyLib wiring) → Change E (deletions) → Validation.
 
 ---
 
