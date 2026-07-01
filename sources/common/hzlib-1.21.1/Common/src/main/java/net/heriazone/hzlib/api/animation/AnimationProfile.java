@@ -2,6 +2,7 @@ package net.heriazone.hzlib.api.animation;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.Collections;
 
 /**
  * Declares the complete animation configuration for one animator variant.
@@ -44,6 +45,22 @@ public final class AnimationProfile {
     private final AnimationPool attack;
     private final AnimationPool hurt;
 
+    // -- Idle Slots --
+
+    /**
+     * Ordered list of conditional idle animation tiers.
+     * <p>
+     * <b>Architecture:</b> When non-empty, {@code AnimationStateManager.resolveIdleSlot()}
+     * sorts these by priority descending and returns the pool of the first slot whose
+     * condition passes and whose activation threshold is met. This replaces the
+     * {@code handleStandbyAnimation()} tick-driven timer in {@code RobotEntity} (ADR 022 Change D).
+     * <p>
+     * When empty, the legacy {@code isInSittingPose()} branch in
+     * {@code AnimationStateManager.getLocomotionAnimation()} remains active for backward
+     * compatibility with entities that have not yet declared idle slots.
+     */
+    private final List<IdleSlot> idleSlots;
+
     /**
      * Playback speed multiplier for the hurt animation controller.
      * <p>
@@ -78,6 +95,7 @@ public final class AnimationProfile {
         this.hurtAnimationSpeed = builder.hurtAnimationSpeed;
         this.basePoseAnimation  = builder.basePoseAnimation;
         this.specialAnimations  = Collections.unmodifiableMap(new LinkedHashMap<>(builder.specialAnimations));
+        this.idleSlots          = Collections.unmodifiableList(new ArrayList<>(builder.idleSlots));
     } // Constructor: AnimationProfile ()
 
     // -- Locomotion Slot Accessors --
@@ -148,6 +166,19 @@ public final class AnimationProfile {
      * @return speed multiplier (1.0 = normal speed)
      */
     public double getHurtAnimationSpeed() { return hurtAnimationSpeed; } // getHurtAnimationSpeed ()
+
+    // -- Idle Slots Accessor --
+
+    /**
+     * Returns the ordered list of conditional idle animation tiers.
+     * <p>
+     * When non-empty, {@code AnimationStateManager.resolveIdleSlot()} uses this list
+     * instead of the legacy {@code isInSittingPose()} branch to determine which idle
+     * animation to play. Empty list = legacy path active (backward compatible).
+     *
+     * @return immutable list of idle slots; never {@code null}
+     */
+    public List<IdleSlot> getIdleSlots() { return idleSlots; } // getIdleSlots ()
 
     // -- Base Layer Accessor --
 
@@ -246,6 +277,7 @@ public final class AnimationProfile {
         private double hurtAnimationSpeed = 1.0;
         private String basePoseAnimation;
         private final Map<String, ISpecialAnimation> specialAnimations = new LinkedHashMap<>();
+        private final List<IdleSlot> idleSlots = new ArrayList<>();
 
         private Builder() {} // Constructor: Builder ()
 
@@ -416,6 +448,35 @@ public final class AnimationProfile {
             config.accept(b);
             return special(triggerName, b.build());
         } // special ()
+
+        // -- Idle Slots --
+
+        /**
+         * Declares one conditional idle animation tier.
+         * <p>
+         * <b>Evaluation:</b> {@code AnimationStateManager.resolveIdleSlot()} sorts slots
+         * by priority descending and returns the first slot whose condition passes and whose
+         * activation threshold is met. Slots with higher priority override slots with lower
+         * priority when both conditions are satisfied simultaneously.
+         * <p>
+         * <b>Guaranteed fallback:</b> The {@code idle} pool declared via {@link #idle(String)}
+         * always acts as priority-0 fallback. Declare at least one {@code idleSlot} call plus
+         * the {@code .idle()} shorthand to get the full tiered-idle behaviour.
+         *
+         * @param pool                     animation pool to play when this slot wins
+         * @param condition                predicate evaluated each tick; must be allocation-free
+         * @param priority                 evaluation order — higher = evaluated first (use 0 for fallback)
+         * @param activationThresholdTicks minimum {@code idleStationaryTicks} before activation;
+         *                                 {@code 0} activates immediately when condition passes
+         * @return this builder for chaining
+         */
+        public Builder idleSlot(AnimationPool pool, IdleCondition condition,
+                                int priority, int activationThresholdTicks) {
+            Objects.requireNonNull(pool,      "IdleSlot pool must not be null");
+            Objects.requireNonNull(condition, "IdleSlot condition must not be null");
+            idleSlots.add(new IdleSlot(pool, condition, priority, activationThresholdTicks));
+            return this;
+        } // idleSlot ()
 
         /**
          * Builds the animation profile.

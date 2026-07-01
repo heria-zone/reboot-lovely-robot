@@ -3,6 +3,8 @@ package net.heriazone.hzlib.api.animation;
 import net.heriazone.hzlib.api.entity.NativeEntity;
 import net.heriazone.hzlib.framework.entity.enums.EntityState;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -93,29 +95,58 @@ public class AnimationStateManager {
     /**
      * Determines the appropriate locomotion animation name for the current entity state.
      * <p>
-     * <b>Priority chain:</b> vehicle riding → moving → standby sitting → standby resting → idle.
+     * <b>Priority chain:</b>
+     * <ol>
+     *   <li>Vehicle riding → ride pool, then sit pool, then {@code IDLE} (not {@code SIT}).
+     *       Falling back to {@code IDLE} (not the {@code SIT} constant) ensures families
+     *       without a sit pool — such as Tribute robots — show {@code idle} while riding
+     *       rather than hardcoding a {@code sit} animation they don't have.</li>
+     *   <li>Moving → walk pool, then {@code WALK} constant.</li>
+     *   <li>Idle-slot path — active when the profile declares at least one
+     *       {@link IdleSlot}: evaluates slots by priority and threshold via
+     *       {@link #resolveIdleSlot}.</li>
+     *   <li>Legacy sitting-pose branch — active when no idle slots are declared.
+     *       Preserved for backward compatibility with entities that have not yet
+     *       migrated to idle slots.</li>
+     *   <li>Idle pool / {@code IDLE} constant — always the final fallback.</li>
+     * </ol>
      * <p>
-     * <b>Profile-aware:</b> If the entity has an {@link AnimationProfile} on its current
-     * animator variant, the profile's pools are consulted. Falls back to standard name
-     * constants when no profile is present or when a slot is empty.
+     * <b>Profile-aware:</b> If the entity's current animator variant carries an
+     * {@link AnimationProfile}, its pools are consulted. Falls back to string constants
+     * when no profile is present.
      *
-     * @param entity    entity to check
-     * @param isMoving  whether the entity is currently moving
-     * @return animation name that should be playing
+     * @param entity   entity to check
+     * @param isMoving whether the entity is currently moving
+     * @return animation name that should be playing; never {@code null}
      */
     public static String getLocomotionAnimation(NativeEntity entity, boolean isMoving) {
         AnimationProfile profile = resolveProfile(entity);
 
-        // Highest priority: vehicle sitting
+        // Priority 1: vehicle riding.
+        // Falls back to IDLE (not SIT) when neither ride nor sit pool is declared —
+        // families without a sit pool (e.g. Tribute) should show idle while riding.
         if (entity.getVehicle() != null) {
-            return selectFromSlot(profile != null ? profile.getRide() : null,
-                    selectFromSlot(profile != null ? profile.getSit() : null, SIT));
+            if (profile != null) {
+                String ride = selectFromSlot(profile.getRide(), null);
+                if (ride != null) return ride;
+                String sit = selectFromSlot(profile.getSit(), null);
+                if (sit != null) return sit;
+            }
+            return IDLE;
         }
 
+        // Priority 2: walking.
         if (isMoving) {
             return selectFromSlot(profile != null ? profile.getWalk() : null, WALK);
         }
 
+        // Priority 3: idle-slot path — only active when the profile declares slots.
+        if (profile != null && !profile.getIdleSlots().isEmpty()) {
+            return resolveIdleSlot(entity, profile);
+        }
+
+        // Priority 4: legacy sitting-pose branch — active when no idle slots declared.
+        // Preserved for backward compatibility with entities not yet using idle slots.
         if (entity.getCurrentState() == EntityState.Standby) {
             if (entity.isInSittingPose()) {
                 return selectFromSlot(profile != null ? profile.getSit() : null, SIT);
@@ -124,8 +155,58 @@ public class AnimationStateManager {
             }
         }
 
+        // Final fallback: idle pool.
         return selectFromSlot(profile != null ? profile.getIdle() : null, IDLE);
     } // getLocomotionAnimation ()
+
+    /**
+     * Evaluates the declared {@link IdleSlot} list and returns the animation name of the
+     * winning slot, calling {@link NativeEntity#onIdleSlotChanged} when the winner changes.
+     * <p>
+     * <b>Evaluation:</b> Slots are sorted by priority descending. The first slot whose
+     * {@link IdleCondition} passes AND whose {@link IdleSlot#getActivationThresholdTicks()}
+     * is satisfied wins.
+     * <p>
+     * <b>Stability guarantee:</b> {@code idleStationaryTicks} grows monotonically while
+     * the entity is idle. The threshold comparison {@code >= N} is stable once crossed —
+     * the same slot wins on every controller tick until the entity moves, eliminating the
+     * flicker from the old two-clock desync in {@code handleStandbyAnimation()}.
+     * <p>
+     * <b>Slot-change hook:</b> When the winning slot differs from the previous call,
+     * {@link NativeEntity#onIdleSlotChanged} is invoked so the entity can update
+     * {@code IS_IN_SITTING_POSE} or refresh its hitbox.
+     *
+     * @param entity  the entity being animated
+     * @param profile the entity's resolved animation profile (guaranteed non-null with slots)
+     * @return animation name from the winning slot's pool, or {@code IDLE} as fallback
+     */
+    private static String resolveIdleSlot(NativeEntity entity, AnimationProfile profile) {
+        List<IdleSlot> sorted = profile.getIdleSlots().stream()
+                .sorted(Comparator.comparingInt(IdleSlot::getPriority).reversed())
+                .toList();
+
+        IdleSlot winner = null;
+        for (IdleSlot slot : sorted) {
+            if (slot.getCondition().test(entity)
+                    && entity.getIdleStationaryTicks() >= slot.getActivationThresholdTicks()) {
+                winner = slot;
+                break;
+            }
+        }
+
+        // Fire hook when the winning slot changes.
+        IdleSlot previous = entity.getCurrentIdleSlot();
+        if (previous != winner) {
+            entity.setCurrentIdleSlot(winner);
+            entity.onIdleSlotChanged(previous, winner);
+        }
+
+        if (winner != null) {
+            String name = selectFromSlot(winner.getPool(), null);
+            return name != null ? name : IDLE;
+        }
+        return selectFromSlot(profile.getIdle(), IDLE);
+    } // resolveIdleSlot ()
 
     // -- Transition Logic --
 
