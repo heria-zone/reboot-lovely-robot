@@ -34,6 +34,7 @@ public class RebootItems extends InternalItems {
     // -- Static Items --
 
     public static final Item ROBOT_CORE = registerCoreItem(LovelyConstant.ROBOT_CORE, Rarity.UNCOMMON, 1);
+    public static final Item ROBOT_CORE_ALDARIAN = registerCoreItem(LovelyConstant.ROBOT_CORE_ALDARIAN, Rarity.EPIC, 1);
 
     // -- Registration --
 

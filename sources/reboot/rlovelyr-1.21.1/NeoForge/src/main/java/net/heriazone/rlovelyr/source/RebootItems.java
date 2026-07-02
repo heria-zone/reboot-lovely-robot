@@ -44,6 +44,10 @@ public class RebootItems extends InternalItems {
         ITEMS.register(LovelyConstant.ROBOT_CORE,
             () -> new LovelyCoreItem(new Item.Properties().rarity(Rarity.UNCOMMON).fireResistant().stacksTo(1)));
 
+    public static final DeferredItem<Item> ROBOT_CORE_ALDARIAN =
+        ITEMS.register(LovelyConstant.ROBOT_CORE_ALDARIAN,
+            () -> new LovelyCoreItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant().stacksTo(1)));
+
     // -- Registration --
 
     public static void register(IEventBus eventBus) {
