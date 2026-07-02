@@ -2,6 +2,7 @@ package net.heriazone.rlovelyr;
 
 import net.heriazone.hzlib.api.services.NeoForgeServices;
 import net.heriazone.hzlib.api.services.Services;
+import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.source.reboot.RebootRobotFamilies;
 import net.heriazone.rlovelyr.source.*;
 import net.neoforged.bus.api.IEventBus;
@@ -48,6 +49,10 @@ public class LovelyReboot {
      * @param modContainer mod container for configuration registration
      */
     public LovelyReboot(IEventBus modEventBus, ModContainer modContainer) {
+        // Registry must be sealed before any DeferredRegister supplier fires.
+        Lovely.onInitialize();
+        RebootRobotFamilies.initialize();
+
         // Initialize platform services first
         Services.setInstance(new NeoForgeServices());
 

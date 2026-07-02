@@ -1,7 +1,7 @@
 package net.heriazone.rlovelyr;
 
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.framework.common.InternalIdentifier;
 import net.minecraft.network.chat.MutableComponent;
@@ -54,27 +54,6 @@ public class RebootIdentifier extends InternalIdentifier {
     public static MutableComponent getMessageTranslation(final String key) {
         return getTranslation("msg.", key);
     } // getMessageTranslation ()
-
-    /**
-     * Creates translation component for entity variant enum.
-     * <p>
-     * <b>Usage:</b> Provides localized variant names for UI display.
-     *
-     * @param variant entity variant to translate
-     * @return translatable component for variant name
-     */
-    public static MutableComponent getTranslation(RobotVariant variant) {
-        return switch (variant) {
-            case Bunny -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY);
-            case Bunny2 -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY2);
-            case Dragon -> getVariantTranslation(LovelyConstant.VARIANT_DRAGON);
-            case Honey -> getVariantTranslation(LovelyConstant.VARIANT_HONEY);
-            case Kitsune -> getVariantTranslation(LovelyConstant.VARIANT_KITSUNE);
-            case Neko -> getVariantTranslation(LovelyConstant.VARIANT_NEKO);
-            case Vanilla -> getVariantTranslation(LovelyConstant.VARIANT_VANILLA);
-            default -> getVariantTranslation(LovelyConstant.VARIANT_VANILLA);
-        };
-    } // getTranslation ()
 
     /**
      * Creates translation component for texture enum.

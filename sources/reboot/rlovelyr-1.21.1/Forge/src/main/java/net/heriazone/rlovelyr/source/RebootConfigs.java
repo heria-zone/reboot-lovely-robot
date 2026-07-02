@@ -337,7 +337,7 @@ public class RebootConfigs {
         BUILDER.push("Entity");
 
         // Generate configuration entries for all variants dynamically
-        for (String variant : LovelyConstant.REBOOT_VARIANTS) {
+        for (String variant : net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry.getVariantKeysForMod(net.heriazone.lovelylib.common.entity.definition.ModTarget.REBOOT)) {
             BUILDER.push(variant);
 
             // Generate integer configuration entries
@@ -595,7 +595,7 @@ public class RebootConfigs {
         ConfigAccessLayer.clearCaches();
         
         // Load dynamic entity configurations from Forge config
-        for (String variant : LovelyConstant.REBOOT_VARIANTS) {
+        for (String variant : net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry.getVariantKeysForMod(net.heriazone.lovelylib.common.entity.definition.ModTarget.REBOOT)) {
             // Load integer configurations
             for (String configType : ConfigKeyGenerator.INT_CONFIG_TYPES) {
                 String key = ConfigKeyGenerator.generateKey(variant, configType);
@@ -624,7 +624,7 @@ public class RebootConfigs {
         
         // Populate RebootConfigs.Entities HashMap using ConfigAccessLayer
         net.heriazone.lovelylib.source.reboot.RebootConfigs.Entities.clear();
-        for (String variant : LovelyConstant.REBOOT_VARIANTS) {
+        for (String variant : net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry.getVariantKeysForMod(net.heriazone.lovelylib.common.entity.definition.ModTarget.REBOOT)) {
             SharedConfigs.EntityConfigData entityConfig = ConfigAccessLayer.getEntityConfig(variant);
             net.heriazone.lovelylib.source.reboot.RebootConfigs.Entities.put(variant, entityConfig);
         }

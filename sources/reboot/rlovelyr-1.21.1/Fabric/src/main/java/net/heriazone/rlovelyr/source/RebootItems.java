@@ -2,6 +2,10 @@ package net.heriazone.rlovelyr.source;
 
 import net.heriazone.rlovelyr.Reboot;
 import net.heriazone.rlovelyr.RebootIdentifier;
+import net.heriazone.lovelylib.common.entity.definition.ModTarget;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.common.entity.definition.RobotEntityDefinition;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.items.LovelyCoreItem;
 import net.heriazone.lovelylib.common.items.LovelySpawnItem;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
@@ -11,93 +15,68 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 /**
- * Centralizes item registration for Reboot variant robots.
+ * Centralizes item registration for Reboot variant robots (Fabric).
  * <p>
- * <b>Architecture:</b> Uses Fabric's direct Registry system to register items
- * during mod initialization. Separates robot cores from spawn items while
- * maintaining consistent registration flow.
- * <p>
- * <b>Item Categories:</b> Robot cores (crafting materials) and spawn eggs
- * (entity summoning) with NBT-based customization support.
+ * <b>Architecture:</b> Registry-driven map replaces 8 named static fields.
+ * Mirrors LegacyItems Fabric — only namespace (RebootIdentifier) differs.
  */
 public class RebootItems extends InternalItems {
 
-    // -- Variables --
+    // -- State --
 
-    // MISCELLANEOUS
-    public static final Item ROBOT_CORE = registerItem(LovelyConstant.ROBOT_CORE, Rarity.UNCOMMON, 1);
+    private static final Map<RobotVariant, Item> spawnItems = new HashMap<>();
 
-    // SPAWNS
-    public static final Item BUNNY_SPAWN = registerItem(LovelyConstant.BUNNY_SPAWN, RebootEntities.BUNNY, Rarity.RARE, 1);
-    public static final Item BUNNY2_SPAWN = registerItem(LovelyConstant.BUNNY2_SPAWN, RebootEntities.BUNNY2, Rarity.RARE, 1);
-    public static final Item BUNNY3_SPAWN = registerItem(LovelyConstant.BUNNY3_SPAWN, RebootEntities.BUNNY3, Rarity.RARE, 1);
-    public static final Item DRAGON_SPAWN = registerItem(LovelyConstant.DRAGON_SPAWN, RebootEntities.DRAGON, Rarity.RARE, 1);
-    public static final Item HONEY_SPAWN = registerItem(LovelyConstant.HONEY_SPAWN, RebootEntities.HONEY, Rarity.RARE, 1);
-    public static final Item KITSUNE_SPAWN = registerItem(LovelyConstant.KITSUNE_SPAWN, RebootEntities.KITSUNE, Rarity.RARE, 1);
-    public static final Item NEKO_SPAWN = registerItem(LovelyConstant.NEKO_SPAWN, RebootEntities.NEKO, Rarity.RARE, 1);
-    public static final Item VANILLA_SPAWN = registerItem(LovelyConstant.VANILLA_SPAWN, RebootEntities.VANILLA, Rarity.RARE, 1);
+    // -- Static Items --
 
-    // -- Methods --
+    public static final Item ROBOT_CORE = registerCoreItem(LovelyConstant.ROBOT_CORE, Rarity.UNCOMMON, 1);
 
-    /**
-     * Registers robot core item with specified properties.
-     * <p>
-     * <b>Usage:</b> For crafting materials and robot storage items.
-     *
-     * @param name the registry name
-     * @param rarity the item rarity level
-     * @param stack the maximum stack size
-     * @return the registered item instance
-     */
-    private static Item registerItem(String name, Rarity rarity, int stack) {
-        return register(RebootIdentifier.getId(name), new LovelyCoreItem(new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
-    } // registerItem()
+    // -- Registration --
 
-    /**
-     * Registers spawn egg item for robot entity.
-     * <p>
-     * <b>NBT Support:</b> Spawn eggs can store robot customization data (color,
-     * level, name) which transfers to spawned entity.
-     *
-     * @param name the registry name
-     * @param mob the entity type
-     * @param rarity the item rarity level
-     * @param stack the maximum stack size
-     * @return the registered spawn egg instance
-     */
-    private static Item registerItem(String name, EntityType<? extends Mob> mob, Rarity rarity, int stack) {
-        return register(RebootIdentifier.getId(name), new LovelySpawnItem(mob, new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
-    } // registerItem()
-
-    /**
-     * Registers items and adds them to creative tabs.
-     * <p>
-     * <b>Timing:</b> Must be called during mod initialization.
-     */
     public static void register() {
+        registerAll();
         Reboot.LOGGER.info("Registering Items: " + Reboot.MODID);
     } // register()
 
-    /**
-     * Registers client-side model predicates for dynamic item appearance.
-     * <p>
-     * <b>Architecture:</b> Enables NBT-based model switching for robot color
-     * variants. Each spawn egg can display different textures based on stored
-     * color value in item NBT.
-     * <p>
-     * <b>Timing:</b> Must be called during client initialization after items
-     * are registered.
-     */
+    private static void registerAll() {
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.REBOOT)) {
+            Item item = registerSpawnItem(def.getSpawnItemKey(),
+                RebootEntities.getEntityType(def.getVariant()), Rarity.RARE, 1);
+            spawnItems.put(def.getVariant(), item);
+        }
+    } // registerAll()
+
+    // -- Access --
+
+    public static Item getSpawnItem(RobotVariant variant) {
+        return Objects.requireNonNull(spawnItems.get(variant),
+            "No spawn item registered for Reboot variant: " + variant);
+    } // getSpawnItem()
+
+    // -- Client --
+
     public static void registerModel() {
-        registerModel(RebootItems.BUNNY_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-        registerModel(RebootItems.BUNNY2_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-        registerModel(RebootItems.BUNNY3_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-        registerModel(RebootItems.DRAGON_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-        registerModel(RebootItems.HONEY_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-        registerModel(RebootItems.KITSUNE_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-        registerModel(RebootItems.NEKO_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-        registerModel(RebootItems.VANILLA_SPAWN, LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.REBOOT)) {
+            registerModel(getSpawnItem(def.getVariant()),
+                LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+        }
     } // registerModel()
+
+    // -- Helpers --
+
+    private static Item registerCoreItem(String name, Rarity rarity, int stack) {
+        return register(RebootIdentifier.getId(name),
+            new LovelyCoreItem(new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
+    } // registerCoreItem()
+
+    private static Item registerSpawnItem(String name, EntityType<? extends Mob> mob,
+                                          Rarity rarity, int stack) {
+        return register(RebootIdentifier.getId(name),
+            new LovelySpawnItem(mob, new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
+    } // registerSpawnItem()
 
 } // Class: RebootItems

@@ -3,6 +3,8 @@ package net.heriazone.rlovelyr.source;
 import net.heriazone.rlovelyr.Reboot;
 import net.heriazone.lovelylib.common.configs.ConfigBounds;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
+import net.heriazone.lovelylib.common.entity.definition.ModTarget;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.configs.ConfigProvider;
 import net.heriazone.hzlib.api.configs.SimpleConfig;
@@ -239,7 +241,7 @@ public class RebootConfigs {
 
         provider.push("Entity");
 
-        for (String variant : LovelyConstant.REBOOT_VARIANTS) {
+        for (String variant : RobotDefinitionRegistry.getVariantKeysForMod(ModTarget.REBOOT)) {
             provider.push(variant);
             provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
                     .define(variant + "-" + LovelyConstant.CONFIG_MAX_LEVEL, getDefaultMaxLevel(variant));
@@ -363,9 +365,8 @@ public class RebootConfigs {
         net.heriazone.lovelylib.source.reboot.RebootConfigs.Entities = new HashMap<>();
         //RebootConfigs.Entities.clear();
 
-        //Reboot.LOGGER.warn("Loading variants '{}'", (long) RebootRobotFamilies.TYPES.stream().map(RobotFamily::getKey).toList().size());
         //for (String variant : RebootRobotFamilies.TYPES.stream().map(RobotFamily::getKey).toList())
-        for (String variant : LovelyConstant.REBOOT_VARIANTS) {
+        for (String variant : RobotDefinitionRegistry.getVariantKeysForMod(ModTarget.REBOOT)) {
 
             try {
                 // Create and validate EntityConfigData

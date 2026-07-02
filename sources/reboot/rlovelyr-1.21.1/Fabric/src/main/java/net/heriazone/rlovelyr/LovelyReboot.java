@@ -2,6 +2,7 @@ package net.heriazone.rlovelyr;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
+import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
 import net.heriazone.hzlib.api.services.FabricServices;
 import net.heriazone.hzlib.api.services.Services;
@@ -43,6 +44,10 @@ public class LovelyReboot implements ModInitializer, ClientModInitializer {
      */
     @Override
     public void onInitialize() {
+        // Registry must be sealed before any registration call below.
+        Lovely.onInitialize();
+        RebootRobotFamilies.initialize();
+
         // Initialize platform services first
         Services.setInstance(new FabricServices());
         //Reboot.LOGGER.info("Initializing Lovely Reboot for Fabric");
@@ -53,11 +58,11 @@ public class LovelyReboot implements ModInitializer, ClientModInitializer {
         // Register Fabric-specific features here
         RebootConfigs.register();
         RebootRobotFamilies.reloadFromConfig();
-        RebootEntities.registerNativeRobotFeature();
         RebootGroups.register();
+        RebootEntities.register();
         RebootItems.register();
         RebootEvents.register();
-        RebootEntities.register();
+        RebootEntities.registerNativeRobotFeature();
         RebootRecipes.register();
         LovelyCommandArguments.register();
 

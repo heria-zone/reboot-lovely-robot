@@ -2,6 +2,7 @@ package net.heriazone.rlovelyr;
 
 import net.heriazone.hzlib.api.services.ForgeServices;
 import net.heriazone.hzlib.api.services.Services;
+import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.source.reboot.RebootRobotFamilies;
 import net.heriazone.rlovelyr.source.*;
 import net.minecraftforge.common.MinecraftForge;
@@ -35,6 +36,10 @@ public class LovelyReboot {
      */
     public LovelyReboot(FMLJavaModLoadingContext context) {
         IEventBus events = context.getModEventBus();
+
+        // Registry must be sealed before any DeferredRegister supplier fires.
+        Lovely.onInitialize();
+        RebootRobotFamilies.initialize();
 
         // Initialize platform services first
         Services.setInstance(new ForgeServices());

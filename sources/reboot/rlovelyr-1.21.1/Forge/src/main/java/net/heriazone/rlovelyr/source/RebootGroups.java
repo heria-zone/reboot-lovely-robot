@@ -2,6 +2,9 @@ package net.heriazone.rlovelyr.source;
 
 import net.heriazone.rlovelyr.Reboot;
 import net.heriazone.rlovelyr.RebootIdentifier;
+import net.heriazone.lovelylib.common.entity.definition.ModTarget;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.common.entity.definition.RobotEntityDefinition;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.groups.InternalGroups;
 import net.minecraft.world.item.CreativeModeTab;
@@ -13,92 +16,48 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 /**
- * Manages creative mode tabs for Reboot variant items.
+ * Creative tab management for Reboot variant items (Forge).
  * <p>
- * <b>Architecture:</b> Uses Forge's DeferredRegister for creative tabs,
- * organizing items into logical groups for creative inventory browsing.
- * Extends InternalGroups for consistent tab creation patterns.
- * <p>
- * <b>Tab Organization:</b> Default tab contains all Reboot variant robots
- * and related items with localized titles. Spawn eggs also appear in vanilla
- * spawn eggs tab for discoverability.
+ * <b>Architecture:</b> Mirrors LegacyGroups Forge — only modid and
+ * ModTarget.REBOOT differ. Registry-driven loops keep both tabs in sync.
  */
 public class RebootGroups extends InternalGroups {
 
-    // -- Variables --
+    // -- State --
 
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = createRegister(Reboot.MODID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
+        createRegister(Reboot.MODID);
 
-    /**
-     * Default creative tab for Reboot variant items.
-     * <p>
-     * <b>Contents:</b> Robot cores, spawn eggs, and related items.
-     */
-    public static final RegistryObject<CreativeModeTab> DEFAULT_TAB = CREATIVE_MODE_TABS.register(
-            LovelyConstant.DEFAULT_TAB,
+    public static final RegistryObject<CreativeModeTab> DEFAULT_TAB =
+        CREATIVE_MODE_TABS.register(LovelyConstant.DEFAULT_TAB,
             () -> createTabBuilder(
                     RebootIdentifier.getTabTranslation(LovelyConstant.DEFAULT_TAB),
-                    () -> new ItemStack(RebootItems.ROBOT_CORE.get())
-            )
-                    .displayItems((parameters, output) -> {
-                        output.accept(RebootItems.ROBOT_CORE.get());
-                        output.accept(RebootItems.BUNNY_SPAWN.get());
-                        output.accept(RebootItems.BUNNY2_SPAWN.get());
-                        output.accept(RebootItems.BUNNY3_SPAWN.get());
-                        output.accept(RebootItems.DRAGON_SPAWN.get());
-                        output.accept(RebootItems.HONEY_SPAWN.get());
-                        output.accept(RebootItems.KITSUNE_SPAWN.get());
-                        output.accept(RebootItems.NEKO_SPAWN.get());
-                        output.accept(RebootItems.VANILLA_SPAWN.get());
-                    })
-                    .build()
-    );
+                    () -> new ItemStack(RebootItems.ROBOT_CORE.get()))
+                .displayItems((params, output) -> {
+                    output.accept(RebootItems.ROBOT_CORE.get());
+                    for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.REBOOT)) {
+                        output.accept(RebootItems.getSpawnItem(def.getVariant()).get());
+                    }
+                })
+                .build());
 
-    // -- Registration Methods --
+    // -- Registration --
 
-    /**
-     * Registers creative tabs with Forge event bus.
-     * <p>
-     * <b>Timing:</b> Must be called during mod construction before registry events fire.
-     *
-     * @param eventBus the mod event bus
-     */
     public static void register(IEventBus eventBus) {
         CREATIVE_MODE_TABS.register(eventBus);
         Reboot.LOGGER.info("Registering CreativeTabs: " + Reboot.MODID);
     } // register()
 
-    /**
-     * Registers spawn eggs to vanilla creative tabs.
-     * <p>
-     * <b>Cross-Tab Population:</b> Adds Reboot spawn eggs to vanilla spawn eggs
-     * tab for better discoverability alongside vanilla mob eggs.
-     *
-     * @param eventBus the mod event bus
-     */
     public static void registerItems(IEventBus eventBus) {
         eventBus.addListener(RebootGroups::addSpawnEggs);
-    } // registerItems ()
+    } // registerItems()
 
-    /**
-     * Adds spawn eggs to vanilla spawn eggs creative tab.
-     * <p>
-     * <b>Event Handler:</b> Listens for BuildCreativeModeTabContentsEvent to
-     * populate vanilla tabs with mod items.
-     *
-     * @param event the tab contents building event
-     */
     private static void addSpawnEggs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
-            event.accept(RebootItems.BUNNY_SPAWN);
-            event.accept(RebootItems.BUNNY2_SPAWN);
-            event.accept(RebootItems.BUNNY3_SPAWN);
-            event.accept(RebootItems.DRAGON_SPAWN);
-            event.accept(RebootItems.HONEY_SPAWN);
-            event.accept(RebootItems.KITSUNE_SPAWN);
-            event.accept(RebootItems.NEKO_SPAWN);
-            event.accept(RebootItems.VANILLA_SPAWN);
+            for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.REBOOT)) {
+                event.accept(RebootItems.getSpawnItem(def.getVariant()));
+            }
         }
-    } // addSpawnEggs ()
+    } // addSpawnEggs()
 
 } // Class: RebootGroups
