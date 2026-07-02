@@ -11,27 +11,10 @@ public class LovelyConstant {
     // GENERAL
     public static final String ROBOT_CORE = "robot_core";
 
-    // SPAWN
-    public static final String BUNNY_SPAWN = "bunny_spawn";
-    public static final String BUNNY2_SPAWN = "bunny2_spawn";
-    public static final String BUNNY3_SPAWN = "bunny3_spawn";
-    public static final String DRAGON_SPAWN = "dragon_spawn";
-    public static final String HONEY_SPAWN = "honey_spawn";
-    public static final String KITSUNE_SPAWN = "kitsune_spawn";
-    public static final String NEKO_SPAWN = "neko_spawn";
-    public static final String VANILLA_SPAWN = "vanilla_spawn";
+    // Spawn item key suffix — registry name is built as variant.getName() + "_spawn".
+    // LovelyConstant.{VARIANT}_SPAWN string constants are removed; use
+    // RobotDefinitionRegistry.get(variant).getSpawnItemKey() instead.
     public static final String ITEM_TAG_VARIANT = "variant";
-
-    // -- Entities --
-
-    public static final String VARIANT_BUNNY = "bunny";
-    public static final String VARIANT_BUNNY2 = "bunny2";
-    public static final String VARIANT_BUNNY3 = "bunny3";
-    public static final String VARIANT_DRAGON = "dragon";
-    public static final String VARIANT_HONEY = "honey";
-    public static final String VARIANT_KITSUNE = "kitsune";
-    public static final String VARIANT_NEKO = "neko";
-    public static final String VARIANT_VANILLA = "vanilla";
 
     // -- Stats --
 
@@ -146,24 +129,13 @@ public class LovelyConstant {
 
     // -- Robot Variant Arrays --
 
-    public static final String[] ALL_VARIANTS = { // TODO: Remove
-            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_BUNNY3, VARIANT_DRAGON,
-            VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
-    };
-
+    // LEGACY_VARIANTS, REBOOT_VARIANTS, and ALL_VARIANTS removed — use
+    // RobotDefinitionRegistry.getVariantKeysForMod(ModTarget.LEGACY/REBOOT) instead.
+    // TRIBUTE_VARIANTS is retained: Tribute has a fixed roster and is explicitly
+    // excluded from RobotDefinitionRegistry. Its config loop reads this array directly.
     public static final String[] TRIBUTE_VARIANTS = {
-            VARIANT_BUNNY, VARIANT_BUNNY2,
-            VARIANT_HONEY, VARIANT_VANILLA
-    };
-
-    public static final String[] LEGACY_VARIANTS = {
-            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_BUNNY3, VARIANT_DRAGON,
-            VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
-    };
-
-    public static final String[] REBOOT_VARIANTS = {
-            VARIANT_BUNNY, VARIANT_BUNNY2, VARIANT_BUNNY3, VARIANT_DRAGON,
-            VARIANT_HONEY, VARIANT_KITSUNE, VARIANT_NEKO, VARIANT_VANILLA
+            "bunny", "bunny2",
+            "honey", "vanilla"
     };
 
 } // Class: LovelyConstant

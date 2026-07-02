@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.common.entity;
 
-import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
 import net.heriazone.hzlib.api.animation.AnimationProfile;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;

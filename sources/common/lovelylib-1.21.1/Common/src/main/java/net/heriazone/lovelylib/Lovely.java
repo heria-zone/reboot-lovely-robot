@@ -1,80 +1,75 @@
 package net.heriazone.lovelylib;
 
 import net.heriazone.hzlib.framework.utils.Version;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.source.SharedRobotDefinitions;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotDefinitions;
+import net.heriazone.lovelylib.source.reboot.RebootRobotDefinitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>Main Lovely Lib class providing robot entity management and AI systems.</p>
+ * Main entry point for lovelylib — robot entity management and AI systems.
  * <p>
- * <b>Architecture:</b> Serves as the entry point for robot functionality across
- * all supported mod loaders. Provides a consistent API for robot entity creation,
- * management, and AI behavior that works on Fabric, Forge, and NeoForge platforms.
- * <p>
- * <b>Usage:</b> Initialize the library by calling {@link #initialize()} during your
- * mod's initialization phase. Access robot management features through the static
- * methods provided by this class.
- * 
- * @author MSymbios
- * @version 1.0.0
- * @since 1.21.1
+ * <b>Architecture:</b> Provides a loader-agnostic initialization contract via
+ * onInitialize(). Every loader entry point (Forge constructor, Fabric onInitialize,
+ * NeoForge constructor) calls this as its very first statement, before any
+ * DeferredRegister or event-bus wiring, to guarantee RobotDefinitionRegistry is
+ * sealed before the first deferred supplier fires.
  */
 public class Lovely {
 
     // -- Constants --
-    
-    /**
-     * Library version for runtime identification and compatibility checks.
-     */
-    public static final String VERSION = "1.0.0";
 
+    public static final String  VERSION      = "1.0.0";
     public static final Version DATA_VERSION = new Version("1.0.0");
-    
-    /**
-     * Library identifier used across all loaders and configurations.
-     */
-    public static final String MODID = "lovelylib";
-    
-    /**
-     * Shared logger instance for consistent logging across all loaders.
-     */
-    public static final Logger LOGGER = LoggerFactory.getLogger("Lovely Lib");
+    public static final String  MODID        = "lovelylib";
+    public static final Logger  LOGGER       = LoggerFactory.getLogger("Lovely Lib");
 
-    // -- Initialization State --
-    
+    // -- State --
+
     private static boolean initialized = false;
 
     // -- Public Methods --
 
     /**
-     * Initialize the Lovely Lib functionality across all supported loaders.
+     * Registers all robot entity definitions and seals RobotDefinitionRegistry.
      * <p>
-     * <b>Thread Safety:</b> Safe to call multiple times, initialization occurs only once.
-     * <b>Timing:</b> Should be called during mod initialization phase.
+     * <b>Timing:</b> Must be the very first call in every loader entry point,
+     * before Items.register(eventBus), Entities.register(eventBus), or any
+     * equivalent Fabric registry call. On Forge/NeoForge, DeferredRegister
+     * defers supplier resolution to RegisterEvent — but LegacyRobotFamilies
+     * (initialized in Phase 2) must have already run before those suppliers fire.
      * <p>
-     * <b>Initialization Sequence:</b>
-     * 1. Validate initialization state
-     * 2. Initialize robot entity registry
-     * 3. Set up AI behavior systems
-     * 4. Register robot management components
-     * 5. Mark as initialized
+     * <b>Idempotent:</b> Safe to call multiple times; initialization runs only once.
+     * This prevents issues if two loaders share a classloader in test environments.
      */
-    public static void initialize() {
+    public static void onInitialize() {
         if (initialized) {
-            LOGGER.warn("Lovely Lib already initialized, skipping duplicate initialization");
+            LOGGER.warn("Lovely Lib already initialized, skipping duplicate call");
             return;
         }
 
         LOGGER.info("Initializing Lovely Lib version {}", VERSION);
 
-        // TODO: Initialize robot entity registry
-        // TODO: Set up AI behavior systems
-        // TODO: Register robot types (Vanilla, Honey, Bunny, Bunny2)
-        // TODO: Initialize robot management components
+        SharedRobotDefinitions.register();
+        LegacyRobotDefinitions.register();
+        RebootRobotDefinitions.register();
+        RobotDefinitionRegistry.seal();
 
         initialized = true;
-        LOGGER.info("Lovely Lib initialization complete");
-    } // initialize ()
+        LOGGER.info("Lovely Lib initialization complete — {} definitions registered",
+            RobotDefinitionRegistry.getAll().size());
+    } // onInitialize()
+
+    /**
+     * @deprecated Use onInitialize(). This stub remains to avoid breaking any
+     *             call sites from before Sprint 14 until they are migrated.
+     */
+    @Deprecated
+    public static void initialize() {
+        onInitialize();
+    } // initialize()
 
     /**
      * Get the current library version for runtime checks and logging.

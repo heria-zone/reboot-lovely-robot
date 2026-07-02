@@ -1,6 +1,8 @@
 package net.heriazone.lovelylib.common.shared;
 
 import net.heriazone.lovelylib.Lovely;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.entity.enums.*;
 import net.heriazone.hzlib.framework.common.InternalIdentifier;
 import net.minecraft.network.chat.MutableComponent;
@@ -67,25 +69,20 @@ public class LovelyIdentifier extends InternalIdentifier {
     } // getMessageTranslation ()
 
     /**
-     * Creates translation component for entity variant enum.
+     * Creates translation component for entity variant.
      * <p>
-     * <b>Usage:</b> Provides localized variant names for UI display.
+     * Registry-driven: any registered variant resolves correctly.
+     * Falls back to Vanilla only for genuinely unknown variants — a programmer
+     * error that seal() would already have caught at startup.
      *
      * @param variant entity variant to translate
      * @return translatable component for variant name
      */
     public static MutableComponent getTranslation(RobotVariant variant) {
-        return switch (variant) {
-            case Bunny -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY);
-            case Bunny2 -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY2);
-            case Bunny3 -> getVariantTranslation(LovelyConstant.VARIANT_BUNNY3);
-            case Dragon -> getVariantTranslation(LovelyConstant.VARIANT_DRAGON);
-            case Honey -> getVariantTranslation(LovelyConstant.VARIANT_HONEY);
-            case Kitsune -> getVariantTranslation(LovelyConstant.VARIANT_KITSUNE);
-            case Neko -> getVariantTranslation(LovelyConstant.VARIANT_NEKO);
-            case Vanilla -> getVariantTranslation(LovelyConstant.VARIANT_VANILLA);
-            default -> getVariantTranslation(LovelyConstant.VARIANT_VANILLA);
-        };
+        if (RobotDefinitionRegistry.isRegistered(variant)) {
+            return getVariantTranslation(RobotDefinitionRegistry.getVariantKey(variant));
+        }
+        return getVariantTranslation(RobotVariant.Vanilla.getName());
     } // getTranslation ()
 
     /**

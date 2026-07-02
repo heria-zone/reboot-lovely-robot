@@ -11,6 +11,7 @@ import net.heriazone.lovelylib.api.entity.features.*;
 import net.heriazone.lovelylib.api.registry.*;
 import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.*;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.heriazone.hzlib.api.entity.NativeEntity;

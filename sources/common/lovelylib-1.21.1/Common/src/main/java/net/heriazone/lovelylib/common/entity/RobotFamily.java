@@ -24,7 +24,7 @@ import net.heriazone.lovelylib.common.entity.data.migration.MigrationStep_V0_Fab
 import net.heriazone.lovelylib.common.entity.data.migration.MigrationStep_V0_Forge;
 import net.heriazone.lovelylib.common.entity.data.migration.MigrationStep_V1_1204;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.shared.LovelyIdentifier;
 import net.minecraft.network.chat.MutableComponent;

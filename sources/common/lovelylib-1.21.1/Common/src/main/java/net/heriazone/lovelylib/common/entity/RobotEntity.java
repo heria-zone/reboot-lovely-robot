@@ -16,7 +16,7 @@ import net.heriazone.hzlib.framework.entity.enums.EntityState;
 import net.heriazone.hzlib.utils.Utils;
 import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.common.entity.data.RobotFields;
-import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.utils.EntityDataHelper;
 import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
 import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
