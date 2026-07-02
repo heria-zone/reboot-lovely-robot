@@ -1,6 +1,7 @@
 package net.heriazone.llovelyr;
 
 import net.heriazone.llovelyr.source.*;
+import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
 import net.heriazone.hzlib.api.services.*;
 import net.minecraftforge.common.MinecraftForge;
@@ -34,6 +35,10 @@ public class LovelyLegacy {
      */
     public LovelyLegacy(FMLJavaModLoadingContext context) {
         IEventBus events = context.getModEventBus();
+
+        // Registry must be sealed before any DeferredRegister supplier fires.
+        Lovely.onInitialize();
+        LegacyRobotFamilies.initialize();
 
         // Initialize platform services first
         Services.setInstance(new ForgeServices());

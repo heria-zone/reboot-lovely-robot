@@ -1,157 +1,122 @@
 package net.heriazone.llovelyr.source;
 
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.*;
-import net.heriazone.lovelylib.api.entity.features.PickupFeature;
-import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
-import net.heriazone.lovelylib.common.shared.LovelyConstant;
-import net.heriazone.lovelylib.common.configs.SharedConfigs;
-import net.heriazone.lovelylib.common.entity.*;
-import net.heriazone.llovelyr.LegacyIdentifier;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.heriazone.hzlib.api.entity.NativeEntityFamily;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.heriazone.hzlib.api.entity.features.PickupFeature;
+import net.heriazone.lovelylib.common.configs.SharedConfigs;
+import net.heriazone.lovelylib.common.entity.NativeRobotEntity;
+import net.heriazone.lovelylib.common.entity.NativeRobotRenderer;
+import net.heriazone.lovelylib.common.entity.RobotFamily;
+import net.heriazone.lovelylib.common.entity.definition.ModTarget;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.common.entity.definition.RobotEntityDefinition;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
+import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
+import net.heriazone.llovelyr.LegacyIdentifier;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.entity.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
- * Registry for NativeRobotEntity Legacy entity types (Fabric).
+ * Registry for Legacy entity types (Fabric).
  * <p>
- * <b>Architecture:</b> Manages entity type registration, attribute creation,
- * and renderer binding for all robot variants in the Legacy mod.
+ * <b>Architecture:</b> Registry-driven map replaces 8 named static fields.
+ * Adding a new Legacy entity requires no change here — the loop over
+ * RobotDefinitionRegistry.getForMod(LEGACY) picks it up automatically.
  * <p>
- * <b>Registered Entities:</b>
- * - Vanilla: Basic robot type
- * - Bunny2: Bunny-themed robot variant
+ * <b>Renderer dispatch:</b> usesNativeRenderer() branches between
+ * NativeRobotRenderer and the RendererFactory stored in the definition.
+ * This avoids per-variant if-blocks in registerRender().
  */
 public class LegacyEntities {
 
-    // -- Entity Type Definitions --
+    // -- State --
 
-    public static final EntityType<NativeRobotEntity> BUNNY = registerRobot(LovelyConstant.VARIANT_BUNNY, LegacyRobotFamilies.BUNNY);
-    public static final EntityType<NativeRobotEntity> BUNNY2 = registerRobot(LovelyConstant.VARIANT_BUNNY2, LegacyRobotFamilies.BUNNY2);
-    public static final EntityType<NativeRobotEntity> BUNNY3 = registerRobot(LovelyConstant.VARIANT_BUNNY3, LegacyRobotFamilies.BUNNY3);
-    public static final EntityType<NativeRobotEntity> DRAGON = registerRobot(LovelyConstant.VARIANT_DRAGON, LegacyRobotFamilies.DRAGON);
-    public static final EntityType<NativeRobotEntity> HONEY = registerRobot(LovelyConstant.VARIANT_HONEY, LegacyRobotFamilies.HONEY);
-    public static final EntityType<NativeRobotEntity> KITSUNE = registerRobot(LovelyConstant.VARIANT_KITSUNE, LegacyRobotFamilies.KITSUNE);
-    public static final EntityType<NativeRobotEntity> NEKO = registerRobot(LovelyConstant.VARIANT_NEKO, LegacyRobotFamilies.NEKO);
-    public static final EntityType<NativeRobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, LegacyRobotFamilies.VANILLA);
+    private static final Map<RobotVariant, EntityType<NativeRobotEntity>> entityTypes = new HashMap<>();
 
-    // -- Registration Methods --
+    // -- Access --
 
     /**
-     * Registers a robot entity type with NativeRobotEntity implementation.
+     * Returns the EntityType for a Legacy variant.
      * <p>
-     * Type-safe registration that ensures NativeRobotEntity is used consistently
-     * across all robot variants.
+     * On Fabric, types are registered immediately during class-load; this is
+     * safe to call any time after LegacyEntities is initialized.
      *
-     * @param name entity variant name
-     * @param robotType robot configuration data
-     * @return registered entity type
+     * @throws NullPointerException if the variant was never registered for LEGACY
      */
-    private static EntityType<NativeRobotEntity> registerRobot(String name, RobotFamily robotType) {
-        return Registry.register(
-                BuiltInRegistries.ENTITY_TYPE,
-                LegacyIdentifier.getId(name),
-                FabricEntityTypeBuilder.create(MobCategory.CREATURE, (EntityType<NativeRobotEntity> type, Level world) -> new NativeRobotEntity(type, world, robotType))
-                        .dimensions(EntityDimensions.fixed(SharedConfigs.EntityDimensions.DEFAULT_WIDTH, SharedConfigs.EntityDimensions.DEFAULT_HEIGHT))
-                        .build()
-        );
-    } // registerRobot()
+    public static EntityType<NativeRobotEntity> getEntityType(RobotVariant variant) {
+        return Objects.requireNonNull(entityTypes.get(variant),
+            "No entity type registered for Legacy variant: " + variant
+            + ". Was LegacyEntities initialized?");
+    } // getEntityType()
+
+    // -- Registration --
 
     /**
-     * Registers entity attributes.
+     * Registers entity types and attribute sets for all Legacy variants.
+     * Called during Fabric onInitialize().
      */
     public static void register() {
-        FabricDefaultAttributeRegistry.register(BUNNY,   NativeEntityFamily.createAttributes(LegacyRobotFamilies.BUNNY));
-        FabricDefaultAttributeRegistry.register(BUNNY2,  NativeEntityFamily.createAttributes(LegacyRobotFamilies.BUNNY2));
-        FabricDefaultAttributeRegistry.register(BUNNY3,  NativeEntityFamily.createAttributes(LegacyRobotFamilies.BUNNY3));
-        FabricDefaultAttributeRegistry.register(DRAGON,  NativeEntityFamily.createAttributes(LegacyRobotFamilies.DRAGON));
-        FabricDefaultAttributeRegistry.register(HONEY,   NativeEntityFamily.createAttributes(LegacyRobotFamilies.HONEY));
-        FabricDefaultAttributeRegistry.register(KITSUNE, NativeEntityFamily.createAttributes(LegacyRobotFamilies.KITSUNE));
-        FabricDefaultAttributeRegistry.register(NEKO,    NativeEntityFamily.createAttributes(LegacyRobotFamilies.NEKO));
-        FabricDefaultAttributeRegistry.register(VANILLA, NativeEntityFamily.createAttributes(LegacyRobotFamilies.VANILLA));
-    } // register ()
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.LEGACY)) {
+            RobotFamily family = LegacyRobotFamilies.get(def.getVariant());
+            EntityType<NativeRobotEntity> type = Registry.register(
+                BuiltInRegistries.ENTITY_TYPE,
+                LegacyIdentifier.getId(def.getVariantKey()),
+                FabricEntityTypeBuilder.create(MobCategory.CREATURE,
+                        (EntityType<NativeRobotEntity> t, Level w) -> new NativeRobotEntity(t, w, family))
+                    .dimensions(EntityDimensions.fixed(
+                        SharedConfigs.EntityDimensions.DEFAULT_WIDTH,
+                        SharedConfigs.EntityDimensions.DEFAULT_HEIGHT))
+                    .build());
+            entityTypes.put(def.getVariant(), type);
+            FabricDefaultAttributeRegistry.register(type,
+                NativeEntityFamily.createAttributes(family));
+        }
+    } // register()
 
     /**
-     * Registers entity renderers on client side.
+     * Registers client-side renderers. NativeRobotRenderer is the default;
+     * variants with a custom RendererFactory use it via the definition.
      */
+    @SuppressWarnings("unchecked")
     public static void registerRender() {
-        EntityRendererRegistry.register(BUNNY, BunnyRenderer::new);
-        EntityRendererRegistry.register(BUNNY2, NativeRobotRenderer::new);
-        EntityRendererRegistry.register(BUNNY3, NativeRobotRenderer::new);
-        EntityRendererRegistry.register(DRAGON, NativeRobotRenderer::new);
-        EntityRendererRegistry.register(HONEY, NativeRobotRenderer::new);
-        EntityRendererRegistry.register(KITSUNE, KitsuneRenderer::new);
-        EntityRendererRegistry.register(NEKO, NativeRobotRenderer::new);
-        EntityRendererRegistry.register(VANILLA, NativeRobotRenderer::new);
-    } // registerRender ()
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.LEGACY)) {
+            EntityType<NativeRobotEntity> type = getEntityType(def.getVariant());
+            if (def.usesNativeRenderer()) {
+                EntityRendererRegistry.register(type, NativeRobotRenderer::new);
+            } else {
+                EntityRendererRegistry.register(type,
+                    ctx -> (net.minecraft.client.renderer.entity.EntityRenderer<NativeRobotEntity>)
+                        def.getRendererFactory().create(ctx));
+            }
+        }
+    } // registerRender()
 
     /**
-     * Configures robot entity features for all Legacy robot variants.
+     * Attaches PickupFeature and DropFeature to each family.
      * <p>
-     * <b>Architecture:</b> Attaches behavioral features to each robot type using the
-     * feature composition system. Features are registered after entity types but before
-     * world loading to ensure proper initialization order.
-     * <p>
-     * <b>Feature Configuration:</b> Each robot receives standardized feature set:
-     * - PickupFeature: Enables robot to pick up its corresponding spawn item
-     * - DropFeature: Configures robot to drop robot core on death
-     * <p>
-     * <b>Design Decision:</b> Uniform feature application across all variants maintains
-     * consistent behavior while allowing individual customization through feature parameters.
-     * Spawn items are variant-specific, but drop items are standardized.
-     * <p>
-     * <b>Timing:</b> Must be called after LegacyItems registration completes to ensure
-     * item references are available. Typically invoked during mod initialization phase.
-     * <p>
-     * <b>Fabric Specifics:</b> Uses direct item references rather than deferred registry
-     * objects, as Fabric registration is immediate rather than deferred.
-     * <p>
-     * <b>Thread Safety:</b> Not thread-safe. Should only be called from main thread
-     * during mod initialization.
+     * Called after items are registered so item references are valid.
+     * On Fabric this is called directly in onInitialize(); on Forge/NeoForge
+     * it runs in commonSetup via enqueueWork.
      */
     public static void registerNativeRobotFeature() {
-        // BUNNY
-        LegacyRobotFamilies.BUNNY
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY_SPAWN))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
-
-        // BUNNY2
-        LegacyRobotFamilies.BUNNY2
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY2_SPAWN))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
-
-        // BUNNY3
-        LegacyRobotFamilies.BUNNY3
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.BUNNY3_SPAWN))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
-
-        // DRAGON
-        LegacyRobotFamilies.DRAGON
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.DRAGON_SPAWN))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
-
-        // HONEY
-        LegacyRobotFamilies.HONEY
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.HONEY_SPAWN))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
-
-        // KITSUNE
-        LegacyRobotFamilies.KITSUNE
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.KITSUNE_SPAWN))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
-
-        // NEKO
-        LegacyRobotFamilies.NEKO
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.NEKO_SPAWN))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
-
-        // VANILLA
-        LegacyRobotFamilies.VANILLA
-                .withFeature(PickupFeature.class, new PickupFeature(LegacyItems.VANILLA_SPAWN))
-                .withFeature(DropFeature.class, new DropFeature(LegacyItems.ROBOT_CORE));
-    } // registerNativeRobotFeature ()
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.LEGACY)) {
+            LegacyRobotFamilies.get(def.getVariant())
+                .withFeature(PickupFeature.class,
+                    new PickupFeature(LegacyItems.getSpawnItem(def.getVariant())))
+                .withFeature(DropFeature.class,
+                    new DropFeature(LegacyItems.ROBOT_CORE));
+        }
+    } // registerNativeRobotFeature()
 
 } // Class: LegacyEntities

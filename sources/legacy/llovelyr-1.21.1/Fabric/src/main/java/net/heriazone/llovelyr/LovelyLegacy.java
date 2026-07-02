@@ -3,9 +3,8 @@ package net.heriazone.llovelyr;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.llovelyr.source.*;
-import net.heriazone.lovelylib.api.entity.features.PickupFeature;
+import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.hzlib.api.services.*;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
 
@@ -44,6 +43,10 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
      */
     @Override
     public void onInitialize() {
+        // Registry must be sealed before any registration call below.
+        Lovely.onInitialize();
+        LegacyRobotFamilies.initialize();
+
         // Initialize platform services first
         Services.setInstance(new FabricServices());
         //Legacy.LOGGER.info("Initializing Lovely Legacy for Fabric");
@@ -54,11 +57,11 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
         // Register Fabric-specific features here
         LegacyConfigs.register();
         LegacyRobotFamilies.reloadFromConfig();
-        LegacyEntities.registerNativeRobotFeature();
         LegacyGroups.register();
+        LegacyEntities.register();
         LegacyItems.register();
         LegacyEvents.register();
-        LegacyEntities.register();
+        LegacyEntities.registerNativeRobotFeature();
         LegacyRecipes.register();
         LovelyCommandArguments.register();
 

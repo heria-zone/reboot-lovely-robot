@@ -336,7 +336,7 @@ public class LegacyConfigs {
         BUILDER.push("Entity");
 
         // Generate configuration entries for all variants dynamically
-        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
+        for (String variant : net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry.getVariantKeysForMod(net.heriazone.lovelylib.common.entity.definition.ModTarget.LEGACY)) {
             BUILDER.push(variant);
 
             // Generate integer configuration entries
@@ -594,7 +594,7 @@ public class LegacyConfigs {
         ConfigAccessLayer.clearCaches();
         
         // Load dynamic entity configurations from Forge config
-        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
+        for (String variant : net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry.getVariantKeysForMod(net.heriazone.lovelylib.common.entity.definition.ModTarget.LEGACY)) {
             // Load integer configurations
             for (String configType : ConfigKeyGenerator.INT_CONFIG_TYPES) {
                 String key = ConfigKeyGenerator.generateKey(variant, configType);
@@ -623,7 +623,7 @@ public class LegacyConfigs {
         
         // Populate LegacyConfigs.Entities HashMap using ConfigAccessLayer
         net.heriazone.lovelylib.source.legacy.LegacyConfigs.Entities.clear();
-        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
+        for (String variant : net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry.getVariantKeysForMod(net.heriazone.lovelylib.common.entity.definition.ModTarget.LEGACY)) {
             SharedConfigs.EntityConfigData entityConfig = ConfigAccessLayer.getEntityConfig(variant);
             net.heriazone.lovelylib.source.legacy.LegacyConfigs.Entities.put(variant, entityConfig);
         }

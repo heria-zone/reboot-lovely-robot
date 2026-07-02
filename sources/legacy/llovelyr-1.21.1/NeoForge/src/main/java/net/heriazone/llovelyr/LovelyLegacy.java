@@ -1,6 +1,7 @@
 package net.heriazone.llovelyr;
 
 import net.heriazone.llovelyr.source.*;
+import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
 import net.heriazone.hzlib.api.services.*;
 import net.neoforged.bus.api.IEventBus;
@@ -47,6 +48,10 @@ public class LovelyLegacy {
      * @param modContainer mod container for configuration registration
      */
     public LovelyLegacy(IEventBus modEventBus, ModContainer modContainer) {
+        // Registry must be sealed before any DeferredRegister supplier fires.
+        Lovely.onInitialize();
+        LegacyRobotFamilies.initialize();
+
         // Initialize platform services first
         Services.setInstance(new NeoForgeServices());
 

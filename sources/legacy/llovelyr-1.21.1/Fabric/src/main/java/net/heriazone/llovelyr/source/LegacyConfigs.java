@@ -2,6 +2,8 @@ package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
 import net.heriazone.lovelylib.common.configs.*;
+import net.heriazone.lovelylib.common.entity.definition.ModTarget;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.configs.*;
 
@@ -237,7 +239,7 @@ public class LegacyConfigs {
 
         provider.push("Entity");
 
-        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
+        for (String variant : RobotDefinitionRegistry.getVariantKeysForMod(ModTarget.LEGACY)) {
             provider.push(variant);
             provider.comment("Highest level this robot type can reach.", "Higher levels unlock better stats and abilities.", "Range: 1 to no upper limit (does not accept negative values or zero)", "Example: [200]")
                     .define(variant + "-" + LovelyConstant.CONFIG_MAX_LEVEL, getDefaultMaxLevel(variant));
@@ -361,9 +363,8 @@ public class LegacyConfigs {
         net.heriazone.lovelylib.source.legacy.LegacyConfigs.Entities = new HashMap<>();
         //LegacyConfigs.Entities.clear();
 
-        //Legacy.LOGGER.warn("Loading variants '{}'", (long) LegacyRobotFamilies.TYPES.stream().map(NativeEntityFamilyType::getKey).toList().size());
         //for (String variant : LegacyRobotFamilies.TYPES.stream().map(NativeEntityFamilyType::getKey).toList())
-        for (String variant : LovelyConstant.LEGACY_VARIANTS) {
+        for (String variant : RobotDefinitionRegistry.getVariantKeysForMod(ModTarget.LEGACY)) {
 
             try {
                 // Create and validate EntityConfigData

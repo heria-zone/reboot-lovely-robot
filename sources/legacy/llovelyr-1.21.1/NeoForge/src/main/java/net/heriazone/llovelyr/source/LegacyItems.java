@@ -1,9 +1,13 @@
 package net.heriazone.llovelyr.source;
 
 import net.heriazone.llovelyr.Legacy;
-import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.lovelylib.common.entity.definition.ModTarget;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.common.entity.definition.RobotEntityDefinition;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.items.LovelyCoreItem;
 import net.heriazone.lovelylib.common.items.LovelySpawnItem;
+import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.items.InternalItems;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -14,107 +18,95 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
  * Centralizes item registration for Legacy variant robots (NeoForge).
  * <p>
- * <b>Architecture:</b> Uses NeoForge's DeferredRegister pattern to safely register
- * items during mod initialization. Separates robot cores from spawn items while
- * maintaining consistent registration flow.
+ * <b>Architecture:</b> Registry-driven map replaces 8 named static fields.
+ * Adding a new Legacy entity requires no change here.
  * <p>
- * <b>Item Categories:</b> Robot cores (crafting materials) and spawn eggs
- * (entity summoning) with NBT-based customization support.
+ * <b>NeoForge Pattern:</b> DeferredRegister.Items / DeferredItem — same deferred
+ * pattern as Forge but using NeoForge's typed helpers. Map values are DeferredItem
+ * wrappers; call .get() after RegisterEvent fires.
  */
 public class LegacyItems extends InternalItems {
 
-    // -- Variables --
+    // -- State --
 
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Legacy.MODID);
+    public static final DeferredRegister.Items ITEMS =
+        DeferredRegister.createItems(Legacy.MODID);
 
-    // MISCELLANEOUS
-    public static final DeferredItem<Item> ROBOT_CORE = registerItem(LovelyConstant.ROBOT_CORE, Rarity.UNCOMMON, 1);
+    private static final Map<RobotVariant, DeferredItem<Item>> spawnItems = new HashMap<>();
 
-    // SPAWNS
-    public static final DeferredItem<Item> BUNNY_SPAWN = registerItem(LovelyConstant.BUNNY_SPAWN, LegacyEntities.BUNNY::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> BUNNY2_SPAWN = registerItem(LovelyConstant.BUNNY2_SPAWN, LegacyEntities.BUNNY2::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> BUNNY3_SPAWN = registerItem(LovelyConstant.BUNNY3_SPAWN, LegacyEntities.BUNNY3::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> DRAGON_SPAWN = registerItem(LovelyConstant.DRAGON_SPAWN, LegacyEntities.DRAGON::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> HONEY_SPAWN = registerItem(LovelyConstant.HONEY_SPAWN, LegacyEntities.HONEY::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> KITSUNE_SPAWN = registerItem(LovelyConstant.KITSUNE_SPAWN, LegacyEntities.KITSUNE::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> NEKO_SPAWN = registerItem(LovelyConstant.NEKO_SPAWN, LegacyEntities.NEKO::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> VANILLA_SPAWN = registerItem(LovelyConstant.VANILLA_SPAWN, LegacyEntities.VANILLA::get, Rarity.RARE, 1);
+    // -- Static Items --
 
-    // -- Methods --
+    public static final DeferredItem<Item> ROBOT_CORE =
+        ITEMS.register(LovelyConstant.ROBOT_CORE,
+            () -> new LovelyCoreItem(new Item.Properties().rarity(Rarity.UNCOMMON).fireResistant().stacksTo(1)));
+
+    // -- Registration --
 
     /**
-     * Registers robot core item with specified properties.
-     * <p>
-     * <b>Usage:</b> For crafting materials and robot storage items.
-     *
-     * @param name the registry name
-     * @param rarity the item rarity level
-     * @param stack the maximum stack size
-     * @return deferred item wrapping the item
-     */
-    private static DeferredItem<Item> registerItem(String name, Rarity rarity, int stack) {
-        return ITEMS.register(name, () -> new LovelyCoreItem(new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
-    } // registerItem()
-
-    /**
-     * Registers spawn egg item for robot entity.
-     * <p>
-     * <b>NBT Support:</b> Spawn eggs can store robot customization data (color,
-     * level, name) which transfers to spawned entity.
-     *
-     * @param name the registry name
-     * @param entity the entity type supplier
-     * @param rarity the item rarity level
-     * @param stack the maximum stack size
-     * @return deferred item wrapping the spawn egg
-     */
-    private static DeferredItem<Item> registerItem(String name, Supplier<EntityType<? extends Mob>> entity, Rarity rarity, int stack) {
-        return ITEMS.register(name, () -> new LovelySpawnItem(entity, new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
-    } // registerItem()
-
-    /**
-     * Registers all items with NeoForge event bus.
-     * <p>
-     * <b>Timing:</b> Must be called during mod construction before registry events fire.
-     *
-     * @param eventBus the mod event bus
+     * Registers the DeferredRegister with the event bus and populates the spawn
+     * item map. Must be called in the mod constructor before RegisterEvent fires.
      */
     public static void register(IEventBus eventBus) {
+        registerAll();
         ITEMS.register(eventBus);
         Legacy.LOGGER.info("Registering Items: " + Legacy.MODID);
     } // register()
 
+    private static void registerAll() {
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.LEGACY)) {
+            RobotVariant variant = def.getVariant();
+            DeferredItem<Item> item = registerSpawnItem(
+                def.getSpawnItemKey(),
+                () -> LegacyEntities.getEntityType(variant).get(),
+                Rarity.RARE, 1);
+            spawnItems.put(variant, item);
+        }
+    } // registerAll()
+
+    // -- Access --
+
     /**
-     * Registers client-side model predicates for dynamic item appearance.
-     * <p>
-     * <b>Architecture:</b> Enables NBT-based model switching for robot color
-     * variants. Each spawn egg can display different textures based on stored
-     * color value in item NBT.
-     * <p>
-     * <b>Thread Safety:</b> Uses enqueueWork to ensure model registration occurs
-     * on main thread during client setup phase, preventing concurrent modification.
-     * <p>
-     * <b>Timing:</b> Must be called during FMLClientSetupEvent after items are
-     * registered but before client rendering begins.
+     * Returns the DeferredItem for the spawn item of a Legacy variant.
+     * Call .get() only after RegisterEvent has fired.
      *
-     * @param event the client setup event providing thread-safe work queue
+     * @throws NullPointerException if the variant was never registered for LEGACY
+     */
+    public static DeferredItem<Item> getSpawnItem(RobotVariant variant) {
+        return Objects.requireNonNull(spawnItems.get(variant),
+            "No spawn item registered for Legacy variant: " + variant);
+    } // getSpawnItem()
+
+    // -- Client --
+
+    /**
+     * Registers NBT-driven model predicates for all spawn eggs.
+     * Must be enqueued via FMLClientSetupEvent.enqueueWork() to run on the
+     * main thread after items are resolved.
      */
     public static void registerModel(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            registerModel(LegacyItems.BUNNY_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-            registerModel(LegacyItems.BUNNY2_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-            registerModel(LegacyItems.BUNNY3_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-            registerModel(LegacyItems.DRAGON_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-            registerModel(LegacyItems.HONEY_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-            registerModel(LegacyItems.KITSUNE_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-            registerModel(LegacyItems.NEKO_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
-            registerModel(LegacyItems.VANILLA_SPAWN.get(), LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+            for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.LEGACY)) {
+                registerModel(getSpawnItem(def.getVariant()).get(),
+                    LovelyConstant.ITEM_TAG_VARIANT, LovelyConstant.STAT_COLOR);
+            }
         });
     } // registerModel()
+
+    // -- Helpers --
+
+    private static DeferredItem<Item> registerSpawnItem(String name,
+            Supplier<EntityType<? extends Mob>> entity, Rarity rarity, int stack) {
+        return ITEMS.register(name,
+            () -> new LovelySpawnItem(entity,
+                new Item.Properties().rarity(rarity).fireResistant().stacksTo(stack)));
+    } // registerSpawnItem()
 
 } // Class: LegacyItems
