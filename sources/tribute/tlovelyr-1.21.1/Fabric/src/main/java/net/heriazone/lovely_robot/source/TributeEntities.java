@@ -8,6 +8,7 @@ import net.heriazone.lovely_robot.TributeIdentifier;
 import net.heriazone.hzlib.api.entity.features.PickupFeature;
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
 import net.heriazone.lovelylib.common.entity.*;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.entity.features.DropFeature;
 import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
@@ -32,10 +33,10 @@ public class TributeEntities {
 
     // -- Entity Type Definitions --
 
-    public static final EntityType<TributeRobotEntity> BUNNY   = registerRobot(LovelyConstant.VARIANT_BUNNY,   TributeRobotFamilies.BUNNY);
-    public static final EntityType<TributeRobotEntity> BUNNY2  = registerRobot(LovelyConstant.VARIANT_BUNNY2,  TributeRobotFamilies.BUNNY2);
-    public static final EntityType<TributeRobotEntity> HONEY   = registerRobot(LovelyConstant.VARIANT_HONEY,   TributeRobotFamilies.HONEY);
-    public static final EntityType<TributeRobotEntity> VANILLA = registerRobot(LovelyConstant.VARIANT_VANILLA, TributeRobotFamilies.VANILLA);
+    public static final EntityType<TributeRobotEntity> BUNNY   = registerRobot(RobotVariant.Bunny.getName(),   TributeRobotFamilies.BUNNY);
+    public static final EntityType<TributeRobotEntity> BUNNY2  = registerRobot(RobotVariant.Bunny2.getName(),  TributeRobotFamilies.BUNNY2);
+    public static final EntityType<TributeRobotEntity> HONEY   = registerRobot(RobotVariant.Honey.getName(),   TributeRobotFamilies.HONEY);
+    public static final EntityType<TributeRobotEntity> VANILLA = registerRobot(RobotVariant.Vanilla.getName(), TributeRobotFamilies.VANILLA);
 
     // -- Registration Methods --
 

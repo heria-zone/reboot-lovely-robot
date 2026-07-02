@@ -3,6 +3,7 @@ package net.heriazone.lovely_robot.source;
 import net.heriazone.lovely_robot.Tribute;
 import net.heriazone.lovelylib.common.items.LovelyCoreItem;
 import net.heriazone.lovelylib.common.items.LovelySpawnItem;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.hzlib.api.items.InternalItems;
 import net.minecraft.world.entity.EntityType;
@@ -36,10 +37,10 @@ public class TributeItems extends InternalItems {
     public static final DeferredItem<Item> ROBOT_CORE = registerItem(LovelyConstant.ROBOT_CORE, Rarity.UNCOMMON, 1);
 
     // SPAWNS
-    public static final DeferredItem<Item> BUNNY_SPAWN = registerItem(LovelyConstant.BUNNY_SPAWN, TributeEntities.BUNNY::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> BUNNY2_SPAWN = registerItem(LovelyConstant.BUNNY2_SPAWN, TributeEntities.BUNNY2::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> HONEY_SPAWN = registerItem(LovelyConstant.HONEY_SPAWN, TributeEntities.HONEY::get, Rarity.RARE, 1);
-    public static final DeferredItem<Item> VANILLA_SPAWN = registerItem(LovelyConstant.VANILLA_SPAWN, TributeEntities.VANILLA::get, Rarity.RARE, 1);
+    public static final DeferredItem<Item> BUNNY_SPAWN   = registerItem(RobotVariant.Bunny.getName()   + "_spawn", TributeEntities.BUNNY::get,   Rarity.RARE, 1);
+    public static final DeferredItem<Item> BUNNY2_SPAWN  = registerItem(RobotVariant.Bunny2.getName()  + "_spawn", TributeEntities.BUNNY2::get,  Rarity.RARE, 1);
+    public static final DeferredItem<Item> HONEY_SPAWN   = registerItem(RobotVariant.Honey.getName()   + "_spawn", TributeEntities.HONEY::get,   Rarity.RARE, 1);
+    public static final DeferredItem<Item> VANILLA_SPAWN = registerItem(RobotVariant.Vanilla.getName() + "_spawn", TributeEntities.VANILLA::get, Rarity.RARE, 1);
 
     // -- Methods --
 

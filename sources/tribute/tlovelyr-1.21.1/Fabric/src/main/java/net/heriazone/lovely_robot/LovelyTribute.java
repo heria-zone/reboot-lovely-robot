@@ -53,11 +53,11 @@ public class LovelyTribute implements ModInitializer, ClientModInitializer {
         // Register Fabric-specific features here
         TributeConfigs.register();
         TributeRobotFamilies.reloadFromConfig();
-        TributeEntities.registerNativeRobotFeature();
         TributeGroups.register();
+        TributeEntities.register();
         TributeItems.register();
         TributeEvents.register();
-        TributeEntities.register();
+        TributeEntities.registerNativeRobotFeature();
         TributeRecipes.register();
         LovelyCommandArguments.register();
 
