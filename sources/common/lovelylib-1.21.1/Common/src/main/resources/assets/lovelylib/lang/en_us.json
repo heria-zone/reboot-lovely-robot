@@ -7,6 +7,9 @@
   "variant.lovelylib.kitsune": "Kitsune",
   "variant.lovelylib.neko": "Neko",
   "variant.lovelylib.vanilla": "Vanilla",
+  "variant.lovelylib.prime": "Prime",
+  "variant.lovelylib.hyperion": "Hyperion",
+  "variant.lovelylib.empyrium": "Empyrium",
 
   "msg.lovelylib.heal": "Heal",
   "msg.lovelylib.wary": "Wary",
@@ -54,5 +57,14 @@
   "msg.lovelylib.brown": "Brown",
   "msg.lovelylib.green": "Green",
   "msg.lovelylib.red": "Red",
-  "msg.lovelylib.black": "Black"
+  "msg.lovelylib.black": "Black",
+  "msg.lovelylib.dark_matter": "Dark Matter",
+  "msg.lovelylib.supernova": "Supernova",
+  "msg.lovelylib.cold_gold": "Cold Gold",
+  "msg.lovelylib.embryon": "Embryon",
+  "msg.lovelylib.dark_gold": "Dark Gold",
+  "msg.lovelylib.gold_matter": "Gold Matter",
+  "msg.lovelylib.hestia": "Hestia",
+  "msg.lovelylib.commander": "Commander",
+  "msg.lovelylib.valkyrie": "Valkyrie"
 }

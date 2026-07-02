@@ -1,5 +1,6 @@
 {
   "item.rlovelyr.robot_core": "Robot Core",
+  "item.rlovelyr.robot_core_aldarian": "Robot Core Aldarian",
   "item.rlovelyr.bunny_spawn": "Spawn Bunny",
   "item.rlovelyr.bunny2_spawn": "Spawn Bunny 2.0",
   "item.rlovelyr.bunny3_spawn": "Spawn Bunny 3.0",
@@ -8,8 +9,12 @@
   "item.rlovelyr.kitsune_spawn": "Spawn Kitsune",
   "item.rlovelyr.neko_spawn": "Spawn Neko",
   "item.rlovelyr.vanilla_spawn": "Spawn Vanilla",
+  "item.rlovelyr.prime_spawn": "Spawn Prime",
+  "item.rlovelyr.hyperion_spawn": "Spawn Hyperion",
+  "item.rlovelyr.empyrium_spawn": "Spawn Empyrium",
 
   "tab.rlovelyr.lovely_robot": "Lovely Reboot",
+  "tab.rlovelyr.aldarian_tech": "Aldarian Tech",
 
   "entity.rlovelyr.bunny": "Bunny",
   "entity.rlovelyr.bunny2": "Bunny 2.0",
@@ -18,5 +23,8 @@
   "entity.rlovelyr.honey": "Honey",
   "entity.rlovelyr.kitsune": "Kitsune",
   "entity.rlovelyr.neko": "Neko",
-  "entity.rlovelyr.vanilla": "Vanilla"
+  "entity.rlovelyr.vanilla": "Vanilla",
+  "entity.rlovelyr.prime": "Prime",
+  "entity.rlovelyr.hyperion": "Hyperion",
+  "entity.rlovelyr.empyrium": "Empyrium"
 }
