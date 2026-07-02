@@ -39,19 +39,29 @@ public class TooltipUtils {
      */
     public static ChatFormatting getFormattingColor(EntityTexture texture) {
         return switch (texture) {
-            case ORANGE -> ChatFormatting.GOLD;
-            case MAGENTA, PURPLE -> ChatFormatting.DARK_PURPLE;
-            case LIGHT_BLUE, CYAN -> ChatFormatting.AQUA;
-            case YELLOW -> ChatFormatting.YELLOW;
-            case LIME -> ChatFormatting.GREEN;
-            case PINK -> ChatFormatting.LIGHT_PURPLE;
-            case GRAY, BLACK -> ChatFormatting.DARK_GRAY;
-            case LIGHT_GRAY -> ChatFormatting.GRAY;
-            case BLUE -> ChatFormatting.BLUE;
-            case BROWN -> ChatFormatting.GOLD;
-            case GREEN -> ChatFormatting.DARK_GREEN;
-            case RED -> ChatFormatting.RED;
-            default -> ChatFormatting.WHITE;
+            case ORANGE                  -> ChatFormatting.GOLD;
+            case MAGENTA, PURPLE         -> ChatFormatting.DARK_PURPLE;
+            case LIGHT_BLUE, CYAN        -> ChatFormatting.AQUA;
+            case YELLOW                  -> ChatFormatting.YELLOW;
+            case LIME                    -> ChatFormatting.GREEN;
+            case PINK                    -> ChatFormatting.LIGHT_PURPLE;
+            case GRAY, BLACK             -> ChatFormatting.DARK_GRAY;
+            case LIGHT_GRAY              -> ChatFormatting.GRAY;
+            case BLUE                    -> ChatFormatting.BLUE;
+            case BROWN                   -> ChatFormatting.GOLD;
+            case GREEN                   -> ChatFormatting.DARK_GREEN;
+            case RED                     -> ChatFormatting.RED;
+            // Extended Aldarian palette
+            case DARK_MATTER             -> ChatFormatting.DARK_PURPLE;
+            case SUPERNOVA               -> ChatFormatting.YELLOW;
+            case COLD_GOLD               -> ChatFormatting.AQUA;
+            case EMBRYON                 -> ChatFormatting.GREEN;
+            case DARK_GOLD               -> ChatFormatting.GOLD;
+            case GOLD_MATTER             -> ChatFormatting.GOLD;
+            case HESTIA                  -> ChatFormatting.RED;
+            case COMMANDER               -> ChatFormatting.BLUE;
+            case VALKYRIE                -> ChatFormatting.GRAY;
+            default                      -> ChatFormatting.WHITE;
         };
     } // getFormattingColor()
 

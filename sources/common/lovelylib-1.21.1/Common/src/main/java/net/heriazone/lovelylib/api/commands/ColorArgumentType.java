@@ -7,108 +7,118 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.heriazone.hzlib.api.entity.NativeEntityFamily;
+import net.heriazone.lovelylib.common.commands.NativeCommands;
+import net.heriazone.lovelylib.common.entity.RobotEntity;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
+import net.heriazone.lovelylib.api.entity.features.BlazeCycleFeature;
+import net.heriazone.hzlib.api.entity.features.variants.TextureVariantFeature;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Custom argument type for robot color/texture selection in commands.
+ * Custom argument type for robot colour/texture selection in commands.
  * <p>
- * <b>Architecture:</b> Bridges Brigadier command system with EntityTexture enum,
- * enabling type-safe color selection with autocomplete support.
+ * <b>Palette awareness:</b> {@link #listSuggestions} looks up the robot the
+ * player is facing and filters suggestions to that family's registered palette.
+ * Standard 16-colour robots suggest 16 names; restricted-palette robots (Prime,
+ * Hyperion) suggest only their named textures; single-colour robots (Empyrium)
+ * suggest nothing — there is nothing to change.
  * <p>
- * <b>Design Decision:</b> Uses lowercase color names for user-friendly input
- * while maintaining enum compatibility. Excludes RANDOM from suggestions to
- * prevent confusion in command context.
- * <p>
- * <b>Validation:</b> Rejects invalid color names immediately during parsing,
- * providing clear error messages before command execution.
+ * Falls back to the full standard palette if no robot is in range.
  */
 public class ColorArgumentType implements ArgumentType<EntityTexture> {
 
-    // -- Factory Method --
-
-    /**
-     * Creates new color argument type instance.
-     * <p>
-     * <b>Usage:</b> Register in command tree with Commands.argument("color", ColorArgumentType.color())
-     *
-     * @return new ColorArgumentType instance
-     */
     public static ColorArgumentType color() {
         return new ColorArgumentType();
     } // color()
 
-    // -- Parsing --
-
-    /**
-     * Parses color name from command input.
-     * <p>
-     * <b>Behavior:</b> Reads unquoted string, matches against enum constant names
-     * (case-insensitive). Accepts user-friendly names like "purple" or "light_blue".
-     * <p>
-     * <b>Error Handling:</b> Throws CommandSyntaxException with descriptive
-     * message if color name is invalid or not found.
-     *
-     * @param reader string reader positioned at color argument
-     * @return corresponding EntityTexture enum value
-     * @throws CommandSyntaxException if color name is invalid
-     */
     @Override
     public EntityTexture parse(StringReader reader) throws CommandSyntaxException {
         String input = reader.readUnquotedString();
-
-        // Match against enum constant names (case-insensitive)
         for (EntityTexture texture : EntityTexture.VALUES) {
-            if (texture.name().equalsIgnoreCase(input)) {
+            if (texture.name().equalsIgnoreCase(input) || texture.Name().equalsIgnoreCase(input)) {
                 return texture;
             }
         }
-
-        // Build error message with valid colors
-        StringBuilder validColors = new StringBuilder();
-        for (EntityTexture texture : EntityTexture.VALUES) {
-            if (texture != EntityTexture.RANDOM) {
-                if (validColors.length() > 0) {
-                    validColors.append(", ");
-                }
-                validColors.append(texture.name().toLowerCase());
-            }
-        }
-
         throw new SimpleCommandExceptionType(
-                Component.literal("Unknown color: " + input + ". Valid colors: " + validColors)
+                Component.literal("Unknown colour: " + input)
         ).create();
     } // parse()
 
-    // -- Autocomplete --
-
     /**
-     * Provides autocomplete suggestions for color names.
+     * Suggests only the colours available on the robot the player is facing.
      * <p>
-     * <b>Behavior:</b> Lists all EntityTexture enum constant names except RANDOM
-     * in lowercase. Filters suggestions based on partial input for efficient selection.
-     * <p>
-     * <b>User Experience:</b> Lowercase suggestions match typical command input
-     * style, reducing cognitive load during command construction.
-     *
-     * @param context command context (unused but required by interface)
-     * @param builder suggestions builder for adding color options
-     * @return future completing with filtered suggestions
+     * Restricted-palette robots expose their named textures (e.g. {@code dark_matter},
+     * {@code commander}). Standard robots expose the 16 dye colours. Single-colour
+     * robots (Empyrium) expose no suggestions — the Design cannot be changed.
      */
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(
-            CommandContext<S> context,
-            SuggestionsBuilder builder
-    ) {
-        for (EntityTexture texture : EntityTexture.VALUES) {
-            // Exclude RANDOM from command suggestions
-            if (texture != EntityTexture.RANDOM) {
-                builder.suggest(texture.name().toLowerCase());
-            }
+            CommandContext<S> context, SuggestionsBuilder builder) {
+
+        List<String> suggestions = resolveAvailableColours(context);
+        for (String name : suggestions) {
+            builder.suggest(name);
         }
         return builder.buildFuture();
     } // listSuggestions()
+
+    // -- Palette Resolution --
+
+    private <S> List<String> resolveAvailableColours(CommandContext<S> context) {
+        if (context.getSource() instanceof CommandSourceStack source) {
+            try {
+                Player player = source.getPlayerOrException();
+                Object entity = NativeCommands.findEntityInFront(player);
+                if (entity instanceof RobotEntity robot && robot.nativeEntity != null) {
+                    return paletteFromFamily(robot.nativeEntity);
+                }
+            } catch (Exception ignored) {}
+        }
+        return standardPalette();
+    } // resolveAvailableColours()
+
+    /**
+     * Derives colour suggestions from the family's registered features.
+     * <p>
+     * Restricted-palette robots declare a {@link BlazeCycleFeature} whose palette
+     * list is the authoritative source. Single-colour robots (one texture variant)
+     * suggest nothing — there is no alternative to cycle to.
+     * Standard 16-colour robots fall through to the full dye palette.
+     */
+    private List<String> paletteFromFamily(NativeEntityFamily<?> family) {
+        // Restricted palette: use BlazeCycleFeature's ordered list
+        if (family.hasFeature(BlazeCycleFeature.class)) {
+            return family.getFeature(BlazeCycleFeature.class)
+                    .map(f -> f.getPalette().stream()
+                            .map(EntityTexture::Name)
+                            .toList())
+                    .orElseGet(this::standardPalette);
+        }
+        // Single-colour: count variants registered for this family key
+        var variants = family.getFeature(TextureVariantFeature.class)
+                .map(f -> f.getAvailableVariants(family.getKey()))
+                .orElse(java.util.Collections.emptyList());
+        if (variants.size() <= 1) {
+            return java.util.Collections.emptyList();
+        }
+        return standardPalette();
+    } // paletteFromFamily()
+
+    private List<String> standardPalette() {
+        List<String> names = new ArrayList<>(16);
+        for (EntityTexture t : EntityTexture.VALUES) {
+            if (t != EntityTexture.RANDOM && t.getId() <= 15) {
+                names.add(t.Name());
+            }
+        }
+        return names;
+    } // standardPalette()
 
 } // Class: ColorArgumentType
