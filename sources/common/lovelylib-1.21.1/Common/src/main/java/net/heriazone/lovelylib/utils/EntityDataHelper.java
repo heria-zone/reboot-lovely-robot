@@ -164,12 +164,12 @@ public class EntityDataHelper {
         if (colorKey.isEmpty()) {
             // Legacy int path — validate the int value
             int textureId = validatedNbt.getInt(LovelyConstant.STAT_COLOR);
-            // Allow RANDOM (16) as a valid texture ID, only fix invalid values
-            if (textureId < 0 || (textureId > 15 && textureId != EntityTexture.RANDOM.getId())) {
+            // Allow any registered EntityTexture ID, including extended palette (IDs 17–25).
+            // Only fix genuinely invalid values (negative or beyond the full enum range).
+            if (textureId < 0 || textureId >= EntityTexture.values().length) {
                 validatedNbt.putInt(LovelyConstant.STAT_COLOR, EntityTexture.WHITE.getId());
             }
         }
-        // If colorKey is non-empty, it's a valid string tag — leave it untouched
 
         // Validate level (non-negative)
         int level = validatedNbt.getInt(LovelyConstant.STAT_LEVEL);

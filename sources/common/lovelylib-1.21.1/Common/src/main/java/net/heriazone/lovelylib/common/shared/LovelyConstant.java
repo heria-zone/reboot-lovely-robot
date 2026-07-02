@@ -4,12 +4,14 @@ public class LovelyConstant {
 
     // -- Creative Tab --
 
-    public static final String DEFAULT_TAB = "lovely_robot";
+    public static final String DEFAULT_TAB      = "lovely_robot";
+    public static final String ALDARIAN_TECH_TAB = "aldarian_tech";
 
     // -- Items --
 
     // GENERAL
-    public static final String ROBOT_CORE = "robot_core";
+    public static final String ROBOT_CORE          = "robot_core";
+    public static final String ROBOT_CORE_ALDARIAN = "robot_core_aldarian";
 
     // Spawn item key suffix — registry name is built as variant.getName() + "_spawn".
     // LovelyConstant.{VARIANT}_SPAWN string constants are removed; use

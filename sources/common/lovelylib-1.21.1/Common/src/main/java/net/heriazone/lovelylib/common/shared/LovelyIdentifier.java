@@ -112,7 +112,16 @@ public class LovelyIdentifier extends InternalIdentifier {
             case GREEN -> getMessageTranslation(LovelyConstant.TEX_GREEN);
             case RED -> getMessageTranslation(LovelyConstant.TEX_RED);
             case BLACK -> getMessageTranslation(LovelyConstant.TEX_BLACK);
-            default -> getMessageTranslation(LovelyConstant.TEX_PINK);
+            case DARK_MATTER  -> getMessageTranslation(LovelyConstant.TEX_DARK_MATTER);
+            case SUPERNOVA    -> getMessageTranslation(LovelyConstant.TEX_SUPERNOVA);
+            case COLD_GOLD    -> getMessageTranslation(LovelyConstant.TEX_COLD_GOLD);
+            case EMBRYON      -> getMessageTranslation(LovelyConstant.TEX_EMBRYON);
+            case DARK_GOLD    -> getMessageTranslation(LovelyConstant.TEX_DARK_GOLD);
+            case GOLD_MATTER  -> getMessageTranslation(LovelyConstant.TEX_GOLD_MATTER);
+            case HESTIA       -> getMessageTranslation(LovelyConstant.TEX_HESTIA);
+            case COMMANDER    -> getMessageTranslation(LovelyConstant.TEX_COMMANDER);
+            case VALKYRIE     -> getMessageTranslation(LovelyConstant.TEX_VALKYRIE);
+            default -> getMessageTranslation(LovelyConstant.TEX_WHITE);
         };
     } // getTranslation ()
 

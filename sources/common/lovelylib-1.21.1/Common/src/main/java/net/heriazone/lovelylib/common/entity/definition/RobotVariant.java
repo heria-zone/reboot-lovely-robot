@@ -42,6 +42,19 @@ public final class RobotVariant {
     public static final RobotVariant Vanilla = register(6, "vanilla");
     public static final RobotVariant Bunny3  = register(7, "bunny3");
 
+    // -- Reboot-Exclusive Variants (IDs 9-11) --
+    // Aldarian Tech tier — restricted palettes, no standard dye interaction.
+    // IDs 8 is reserved for future shared use; 9-11 assigned here for Reboot.
+
+    /** Prime — 7-colour Aldarian palette, Blaze Rod cycles forward through it. */
+    public static final RobotVariant Prime    = register(9,  "prime");
+
+    /** Hyperion — 2-colour toggle (COMMANDER / VALKYRIE), Blaze Rod switches between them. */
+    public static final RobotVariant Hyperion = register(10, "hyperion");
+
+    /** Empyrium — single COLD_GOLD texture, all item interaction blocked. */
+    public static final RobotVariant Empyrium = register(11, "empyrium");
+
     // -- Fields --
 
     private final int    m_id;

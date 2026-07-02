@@ -18,6 +18,8 @@ import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.common.entity.data.RobotFields;
 import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.utils.EntityDataHelper;
+import net.heriazone.lovelylib.api.entity.features.BlazeCycleFeature;
+import net.heriazone.lovelylib.api.entity.features.BlockAllItemInteractionFeature;
 import net.heriazone.lovelylib.api.entity.features.CombatLevelFeature;
 import net.heriazone.lovelylib.api.entity.features.EnchantmentFeature;
 import net.heriazone.lovelylib.api.entity.features.ProtectionFeature;
@@ -1416,24 +1418,48 @@ public abstract class RobotEntity extends NativeEntity {
     } // getColorForVariant ()
 
     /**
-     * Handles dye-item interactions — routes to {@link #handleTexture}.
-     * Called from {@link #handleSpecificInteractions} when a dye item is used.
-     *
-     * @param stack  dye item stack
-     * @param player interacting player
-     * @return SUCCESS if texture changed, PASS otherwise
+     * Item interaction entry point for owned, tamed robots.
+     * <p>
+     * <b>Dispatch order (first match wins):</b>
+     * <ol>
+     *   <li>{@link BlazeCycleFeature} + Blaze Rod — restricted-palette robots (Prime,
+     *       Hyperion) advance to the next palette entry and consume one rod.</li>
+     *   <li>Default dye handler — standard 16-colour palette robots.</li>
+     * </ol>
+     * Robots with a single-entry palette (Empyrium) have no {@link BlazeCycleFeature}
+     * and reach neither guard — Blaze Rod falls through to {@link #handleInteract}
+     * where {@link #canInteractWithItems} blocks it silently.
      */
     protected InteractionResult handleItemInteraction(ItemStack stack, Player player) {
-        if(handleTexture(stack, player)) return InteractionResult.SUCCESS;
+        // Guard — restricted-palette robots cycle through their palette on Blaze Rod use
+        if (nativeEntity != null && nativeEntity.hasFeature(BlazeCycleFeature.class)
+                && stack.is(Items.BLAZE_ROD)) {
+            BlazeCycleFeature cycleFeature = nativeEntity.getFeature(BlazeCycleFeature.class).orElseThrow();
+            EntityTexture current = EntityDataHelper.resolveTextureFromKey(getTextureVariant());
+            EntityTexture next    = cycleFeature.next(current != null ? current : cycleFeature.getFirstTexture());
+
+            // Derive the full variant key by replacing the color suffix with the next color name.
+            // Variant keys follow the pattern "{robotKey}_{colorName}" (e.g. "prime_dark_matter").
+            String variantKey = nativeEntity.getKey() + "_" + next.Name();
+            setTextureVariant(variantKey);
+
+            if (!player.getAbilities().instabuild) stack.shrink(1);
+            return InteractionResult.SUCCESS;
+        }
+
+        if (handleTexture(stack, player)) return InteractionResult.SUCCESS;
         return InteractionResult.PASS;
     } // handleItemInteraction ()
 
     @Override
     protected boolean canInteractWithItems(ItemStack stack) {
-        if(stack.is(Items.ENCHANTED_BOOK)) return false;
-        if(stack.getItem() instanceof DyeItem) return false;
-        if(stack.getItem() instanceof SwordItem) return false;
-        if(stack.is(Items.BOOK) || stack.is(Items.WRITABLE_BOOK) || stack.is(Items.OAK_BUTTON)) return false;
+        // Blaze Rod is claimed by BlazeCycleFeature — don't let it fall through to sit/state handlers
+        if (stack.is(Items.BLAZE_ROD) && nativeEntity != null
+                && nativeEntity.hasFeature(BlazeCycleFeature.class)) return false;
+        if (stack.is(Items.ENCHANTED_BOOK)) return false;
+        if (stack.getItem() instanceof DyeItem) return false;
+        if (stack.getItem() instanceof SwordItem) return false;
+        if (stack.is(Items.BOOK) || stack.is(Items.WRITABLE_BOOK) || stack.is(Items.OAK_BUTTON)) return false;
         return !stack.is(Items.COMPASS) && !stack.is(Items.RECOVERY_COMPASS);
     } // canInteractWithItems ()
 
@@ -1529,6 +1555,13 @@ public abstract class RobotEntity extends NativeEntity {
         }
 
         if (this.isTame() && this.isOwnedBy(player)) {
+            // Blaze Rod on a BlazeCycleFeature robot — route to handleItemInteraction
+            // before the dye-only gate below, otherwise the rod falls through to handleInteract
+            if (nativeEntity != null && nativeEntity.hasFeature(BlazeCycleFeature.class)
+                    && stack.is(Items.BLAZE_ROD)) {
+                return handleItemInteraction(stack, player);
+            }
+
             if (stack.getItem() instanceof DyeItem) {
                 return handleItemInteraction(stack, player);
             }

@@ -43,6 +43,12 @@ public final class MigrationStep_V1_1204 implements MigrationStep {
         if (root.has("TextureID") && !root.has("TextureVariant")) {
             int textureId    = root.getInt("TextureID", 0);
             EntityTexture tex = EntityTexture.byId(textureId);
+
+            // IDs 17–25 are extended-palette textures for restricted-palette robots
+            // (Prime, Hyperion, Empyrium). byId() resolves them correctly since we
+            // appended the enum entries above ID 16 without shifting existing entries.
+            // COLD_GOLD (ID 19) is shared by both Prime and Empyrium — disambiguate
+            // using the robot key stored in the partial EntityData compound.
             String textureName = (tex != null && tex != EntityTexture.RANDOM)
                     ? tex.Name() : EntityTexture.WHITE.Name();
 

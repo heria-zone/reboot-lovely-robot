@@ -7,13 +7,14 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * <p>Defines 16-color texture palette for customization.<p>
+ * Texture palette identifiers for robot customization.
  * <p>
- * <b>Architecture:</b> Pure Java enum with zero Minecraft dependencies. Provides
- * type-safe keys for color texture mappings.
+ * <b>Standard palette (IDs 0–16):</b> 16 Minecraft dye colors + RANDOM. All robots
+ * support this range; dye recipes and color-cycling operate only within these IDs.
  * <p>
- * <b>Design Decision:</b> 16 colors match Minecraft's dye system, enabling intuitive
- * color selection and crafting recipes. RANDOM variant supports procedural generation.
+ * <b>Extended palette (IDs 17–25):</b> Named textures for Reboot-exclusive restricted-palette
+ * robots (Prime, Hyperion, Empyrium). Never entered into dye-reaction or random-spawn pools.
+ * CODEC is sorted by ID, so appending these entries requires no other structural change.
  */
 public enum EntityTexture {
 
@@ -37,7 +38,22 @@ public enum EntityTexture {
     BLACK(15, LovelyConstant.TEX_BLACK),
 
     /** Randomizes texture on spawn. Excludes special textures from random pool. */
-    RANDOM(16, LovelyConstant.TEX_RANDOM);
+    RANDOM(16, LovelyConstant.TEX_RANDOM),
+
+    // -- Extended Palette (Reboot-exclusive named textures, IDs 17–25) --
+    // Used only by restricted-palette robots; never entered into the dye-reaction pool.
+    // COLD_GOLD (19) is shared by both Prime and Empyrium — disambiguate by entity type key
+    // during migration (MigrationStep_V1_1204) and item model predicate dispatch.
+
+    DARK_MATTER(17, LovelyConstant.TEX_DARK_MATTER),  // Prime #02 — void purple
+    SUPERNOVA(18,   LovelyConstant.TEX_SUPERNOVA),    // Prime #01 — burst gold-white
+    COLD_GOLD(19,   LovelyConstant.TEX_COLD_GOLD),    // Prime #00 / Empyrium #00 — ice blue-gold
+    EMBRYON(20,     LovelyConstant.TEX_EMBRYON),      // Prime #05 — embryonic green
+    DARK_GOLD(21,   LovelyConstant.TEX_DARK_GOLD),    // Prime #04 — dark brass
+    GOLD_MATTER(22, LovelyConstant.TEX_GOLD_MATTER),  // Prime #03 — molten gold
+    HESTIA(23,      LovelyConstant.TEX_HESTIA),       // Prime #06 — hearth red
+    COMMANDER(24,   LovelyConstant.TEX_COMMANDER),    // Hyperion #00 — command blue
+    VALKYRIE(25,    LovelyConstant.TEX_VALKYRIE);     // Hyperion #01 — valkyrie silver
 
     // -- Deserialization Cache --
 

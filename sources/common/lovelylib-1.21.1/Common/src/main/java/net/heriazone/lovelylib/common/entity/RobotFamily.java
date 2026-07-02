@@ -431,11 +431,22 @@ public class RobotFamily extends NativeEntityFamily<RobotFamily> {
         }
         ConditionalAppearanceFeature dyeFeature = dyeBuilder.build();
 
-        for (EntityTexture color : colors) {
+        for (int i = 0; i < colors.size(); i++) {
+            EntityTexture color = colors.get(i);
             // Entity-specific key prevents global registry collisions between robot types.
             // Namespace prefix additionally prevents collisions across mods for the same type+color.
             String colorKey = keyPrefix + key + "_" + color.Name();
-            String colorId  = String.format("%02d", color.getId());
+
+            // File index is palette position, not the global EntityTexture ID.
+            // Standard palette (IDs 0-15): ID == position, so getId() works fine.
+            // Extended palette (IDs 17-25): files are numbered _00, _01... by position
+            // within the restricted list, not by the global ID (19, 24, etc.).
+            // This matches the 1.20.4 NativeEntityType.addTexture() mapping.
+            boolean isExtended = color.getId() > 16;
+            String colorId = isExtended
+                    ? String.format("%02d", i)
+                    : String.format("%02d", color.getId());
+
             ResourceLocation path = ResourceLocation.fromNamespaceAndPath(
                     namespace, basePath + variant.getName() + "_" + colorId + ".png");
 
