@@ -1,0 +1,4 @@
+﻿{
+ "parent": "item/generated",
+ "textures": { "layer0": "lovelylib:item/prime/prime_00" }
+}
