@@ -1,0 +1,18 @@
+{
+  "type": "rlovelyr:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "NIN",
+    "ICI",
+    "NIN"
+  ],
+  "key": {
+    "N": { "item": "minecraft:blaze_rod" },
+    "I": { "item": "minecraft:gold_block" },
+    "C": { "item": "rlovelyr:robot_core" }
+  },
+  "result": {
+    "id": "rlovelyr:prime_spawn",
+    "count": 1
+  }
+}

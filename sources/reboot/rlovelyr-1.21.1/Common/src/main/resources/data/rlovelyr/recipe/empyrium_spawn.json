@@ -1,0 +1,18 @@
+{
+  "type": "rlovelyr:lovely_spawn",
+  "category": "misc",
+  "pattern": [
+    "NIN",
+    "ICI",
+    "NIN"
+  ],
+  "key": {
+    "N": { "item": "minecraft:netherite_scrap" },
+    "I": { "item": "minecraft:ancient_debris" },
+    "C": { "item": "rlovelyr:robot_core" }
+  },
+  "result": {
+    "id": "rlovelyr:empyrium_spawn",
+    "count": 1
+  }
+}
