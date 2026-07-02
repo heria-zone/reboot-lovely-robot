@@ -2,7 +2,7 @@ package net.heriazone.lovelylib.source.tribute;
 
 import net.heriazone.hzlib.api.animation.AnimationProfile;
 import net.heriazone.lovelylib.common.entity.RobotFamily;
-import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 
 /**
  * {@link RobotFamily} subtype for the Tribute source variant.

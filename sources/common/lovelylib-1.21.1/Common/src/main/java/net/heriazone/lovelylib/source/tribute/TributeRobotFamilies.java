@@ -8,8 +8,7 @@ import net.heriazone.lovelylib.common.entity.RobotFamilyRegistry;
 import net.heriazone.lovelylib.common.entity.RobotFamily;
 import net.heriazone.lovelylib.common.entity.combat.LinearAttributeStrategy;
 import net.heriazone.lovelylib.common.entity.enums.EntityTexture;
-import net.heriazone.lovelylib.common.entity.enums.RobotVariant;
-import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.hzlib.api.entity.features.LevelFeature;
 import net.heriazone.hzlib.framework.entity.enchantment.DefaultEnchantmentStrategy;
 import net.heriazone.hzlib.framework.entity.protection.LevelBasedProtectionStrategy;
@@ -143,7 +142,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
                         SharedConfigs.Common.LootEnchantmentLevel);
 
         // Configure BUNNY
-        SharedConfigs.EntityConfigData bunny = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY);
+        SharedConfigs.EntityConfigData bunny = TributeConfigs.getEntityConfig(RobotVariant.Bunny.getName());
         BUNNY.withCombatStats(bunny.baseHp,
                         bunny.baseAttack,
                         bunny.attackSpeed,
@@ -163,7 +162,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure BUNNY2
-        SharedConfigs.EntityConfigData bunny2 = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_BUNNY2);
+        SharedConfigs.EntityConfigData bunny2 = TributeConfigs.getEntityConfig(RobotVariant.Bunny2.getName());
         BUNNY2.withCombatStats(bunny2.baseHp,
                         bunny2.baseAttack,
                         bunny2.attackSpeed,
@@ -183,7 +182,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure HONEY
-        SharedConfigs.EntityConfigData honey = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_HONEY);
+        SharedConfigs.EntityConfigData honey = TributeConfigs.getEntityConfig(RobotVariant.Honey.getName());
         HONEY.withCombatStats(honey.baseHp,
                         honey.baseAttack,
                         honey.attackSpeed,
@@ -203,7 +202,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
                 .withFeature(ProtectionFeature.class, defaultProtection);
 
         // Configure VANILLA
-        SharedConfigs.EntityConfigData vanilla = TributeConfigs.getEntityConfig(LovelyConstant.VARIANT_VANILLA);
+        SharedConfigs.EntityConfigData vanilla = TributeConfigs.getEntityConfig(RobotVariant.Vanilla.getName());
         VANILLA.withCombatStats(vanilla.baseHp,
                         vanilla.baseAttack,
                         vanilla.attackSpeed,

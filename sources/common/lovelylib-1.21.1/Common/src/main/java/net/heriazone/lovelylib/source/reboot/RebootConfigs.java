@@ -1,7 +1,9 @@
 package net.heriazone.lovelylib.source.reboot;
 
-import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import net.heriazone.lovelylib.common.configs.*;
+import net.heriazone.lovelylib.common.entity.definition.ModTarget;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.common.entity.definition.RobotEntityDefinition;
 
 import java.util.HashMap;
 
@@ -9,99 +11,18 @@ public class RebootConfigs {
 
     // -- Variables --
 
-    public static HashMap<String, SharedConfigs.EntityConfigData> Default = new HashMap<>();
+    public static HashMap<String, SharedConfigs.EntityConfigData> Default  = new HashMap<>();
     public static HashMap<String, SharedConfigs.EntityConfigData> Entities = new HashMap<>();
 
     // -- Import --
 
     static {
-        // BUNNY - Balanced all-rounder with moderate stats
-        Default.put(LovelyConstant.VARIANT_BUNNY, new SharedConfigs.EntityConfigData(
-                200,
-                26,
-                5,
-                1.7F,
-                4,
-                0F,
-                0.37F
-        ));
-
-        // BUNNY2 - Enhanced bunny with improved stats
-        Default.put(LovelyConstant.VARIANT_BUNNY2, new SharedConfigs.EntityConfigData(
-                200,
-                27,
-                6,
-                1.8F,
-                5,
-                0F,
-                0.36F
-        ));
-
-        // BUNNY3 - Third-generation bunny, incremental improvement over Bunny2
-        Default.put(LovelyConstant.VARIANT_BUNNY3, new SharedConfigs.EntityConfigData(
-                200,
-                28,
-                7,
-                1.9F,
-                6,
-                0F,
-                0.37F
-        ));
-
-        // DRAGON - Tank with high HP and toughness
-        Default.put(LovelyConstant.VARIANT_DRAGON, new SharedConfigs.EntityConfigData(
-                200,
-                30,
-                8,
-                1.0F,
-                7,
-                0F,
-                0.3F
-        ));
-
-        // HONEY - Support type with healing focus
-        Default.put(LovelyConstant.VARIANT_HONEY, new SharedConfigs.EntityConfigData(
-                200,
-                29,
-                4,
-                1.1F,
-                5,
-                0F,
-                0.31F
-        ));
-
-        // KITSUNE - Agile with balanced offense/defense
-        Default.put(LovelyConstant.VARIANT_KITSUNE, new SharedConfigs.EntityConfigData(
-                200,
-                28,
-                2,
-                1.3F,
-                6,
-                0F,
-                0.33F
-        ));
-
-        // NEKO - High damage glass cannon
-        Default.put(LovelyConstant.VARIANT_NEKO, new SharedConfigs.EntityConfigData(
-                200,
-                28,
-                7,
-                1.4F,
-                5,
-                0F,
-                0.34F
-        ));
-
-        // VANILLA - Original balanced design
-        Default.put(LovelyConstant.VARIANT_VANILLA, new SharedConfigs.EntityConfigData(
-                200,
-                25,
-                5,
-                1.3F,
-                5,
-                0F,
-                0.32F
-        ));
+        // Populated from RobotDefinitionRegistry so no per-entity entries are ever needed here.
+        // RobotDefinitionRegistry.seal() is guaranteed to have run before this class is loaded
+        // because Lovely.onInitialize() is called first in every loader entry point.
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getForMod(ModTarget.REBOOT)) {
+            Default.put(def.getVariantKey(), def.getStats().toEntityConfigData());
+        }
     }
 
     // -- Methods --
@@ -115,15 +36,19 @@ public class RebootConfigs {
     /**
      * Retrieves entity configuration for specified variant with fallback.
      * <p>
-     * <b>Fallback Strategy:</b> Returns default configuration if variant
-     * not found or configuration is invalid.
+     * <b>Fallback Chain:</b> Entities map (runtime-loaded) → Default map
+     * (variant-specific stat definitions) → generic baseline. The middle
+     * tier is the critical one: on Forge/NeoForge, loadDynamicEntityConfigs()
+     * never runs, so Entities is always empty. Without this fallback the
+     * variant falls through to the generic baseline (baseHp=20, attackSpeed=1.5F),
+     * silently ignoring the real per-variant stats. This was Bug 2 from ADR-023.
      *
      * @param variant robot variant identifier
      * @return validated entity configuration
      */
     public static SharedConfigs.EntityConfigData getEntityConfig(String variant) {
         SharedConfigs.EntityConfigData config = Entities.get(variant);
-        if (config == null) return SharedConfigs.EntityConfigData.getDefault();
+        if (config == null) return getDefaultConfig(variant);
         return config.validateOrDefault();
     } // getEntityConfig()
 

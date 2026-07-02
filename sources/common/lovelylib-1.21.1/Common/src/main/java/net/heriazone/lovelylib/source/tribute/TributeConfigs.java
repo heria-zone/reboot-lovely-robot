@@ -1,6 +1,6 @@
 package net.heriazone.lovelylib.source.tribute;
 
-import net.heriazone.lovelylib.common.shared.LovelyConstant;
+import net.heriazone.lovelylib.common.entity.definition.RobotVariant;
 import net.heriazone.lovelylib.common.configs.*;
 
 import java.util.HashMap;
@@ -9,55 +9,22 @@ public class TributeConfigs {
 
     // -- Variables --
 
-    public static HashMap<String, SharedConfigs.EntityConfigData> Default = new HashMap<>();
+    public static HashMap<String, SharedConfigs.EntityConfigData> Default  = new HashMap<>();
     public static HashMap<String, SharedConfigs.EntityConfigData> Entities = new HashMap<>();
 
     // -- Import --
 
     static {
-        // BUNNY - Balanced all-rounder with moderate stats
-        Default.put(LovelyConstant.VARIANT_BUNNY, new SharedConfigs.EntityConfigData(
-                200,
-                30,
-                5,
-                1.2F,
-                5,
-                0F,
-                0.3F
-        ));
-
-        // BUNNY2 - Enhanced bunny with improved stats
-        Default.put(LovelyConstant.VARIANT_BUNNY2, new SharedConfigs.EntityConfigData(
-                200,
-                30,
-                5,
-                1.2F,
-                6,
-                0F,
-                0.3F
-        ));
-
-        // HONEY - Support type with healing focus
-        Default.put(LovelyConstant.VARIANT_HONEY, new SharedConfigs.EntityConfigData(
-                200,
-                30,
-                6,
-                1.2F,
-                5,
-                0F,
-                0.3F
-        ));
-
-        // VANILLA - Original balanced design
-        Default.put(LovelyConstant.VARIANT_VANILLA, new SharedConfigs.EntityConfigData(
-                200,
-                30,
-                5,
-                1.2F,
-                6,
-                0F,
-                0.3F
-        ));
+        // Tribute has a fixed roster excluded from RobotDefinitionRegistry.
+        // Variant keys are sourced from RobotVariant constants directly.
+        Default.put(RobotVariant.Bunny.getName(), new SharedConfigs.EntityConfigData(
+                200, 30, 5, 1.2F, 5, 0F, 0.3F));
+        Default.put(RobotVariant.Bunny2.getName(), new SharedConfigs.EntityConfigData(
+                200, 30, 5, 1.2F, 6, 0F, 0.3F));
+        Default.put(RobotVariant.Honey.getName(), new SharedConfigs.EntityConfigData(
+                200, 30, 6, 1.2F, 5, 0F, 0.3F));
+        Default.put(RobotVariant.Vanilla.getName(), new SharedConfigs.EntityConfigData(
+                200, 30, 5, 1.2F, 6, 0F, 0.3F));
     }
 
     // -- Methods --
@@ -71,27 +38,21 @@ public class TributeConfigs {
     /**
      * Retrieves entity configuration for specified variant with fallback.
      * <p>
-     * <b>Fallback Strategy:</b> Returns default configuration if variant
-     * not found or configuration is invalid.
+     * <b>Fallback Chain:</b> Entities map (runtime-loaded) → Default map → generic
+     * baseline. Mirrors LegacyConfigs / RebootConfigs fallback semantics for Forge
+     * parity — on Forge/NeoForge, Entities is always empty so Default is the active tier.
      *
      * @param variant robot variant identifier
      * @return validated entity configuration
      */
     public static SharedConfigs.EntityConfigData getEntityConfig(String variant) {
         SharedConfigs.EntityConfigData config = Entities.get(variant);
-        if (config == null) return SharedConfigs.EntityConfigData.getDefault();
+        if (config == null) return getDefaultConfig(variant);
         return config.validateOrDefault();
     } // getEntityConfig()
 
-    /**
-     * Reloads entity configurations from current config values.
-     * <p>
-     * <b>Runtime Reload:</b> Called by config system when configurations
-     * change at runtime. Rebuilds entity map with validated configurations.
-     */
     public static void reloadEntityConfigs() {
-        // This will be enhanced when dynamic config loading is implemented
-        // For now, the static initialization handles the configuration
+        // Populated by Fabric-side TributeConfigs.loadDynamicEntityConfigs()
     } // reloadEntityConfigs()
 
-} // Class: RebootConfigs
+} // Class: TributeConfigs
