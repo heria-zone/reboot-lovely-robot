@@ -323,30 +323,9 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 
 ## Current Sprint
 
-### Sprint 11: Entity Data Pipeline — ADR 019 Full Implementation 🔄
+### Sprint 12: Condition Framework & Appearance Architecture — ADR 020 & ADR 021 🔄
 **Status**: 🔄 Active  
-**Dates**: 2026-06-27 to 2026-07-11  
-**Story Points**: 71 (with M&G phase deferrable to Sprint 12 if schedule pressure)  
-**Theme**: Five-layer NBT persistence pipeline — `DataCompound`, typed `DataField<T>` handles, `EntityDataSchema`, `MigrationChain`, full published-save migration coverage  
-**Source ADR**: `docs/development/decisions/ADR_019_Entity_Data_Pipeline.md`  
-**Task File**: `docs/development/sprints/active/SPRINT_11_TASK.md`
-
-**Sprint phases**:
-- **Phase 0** (prerequisite): `DataCompound` interface + `NbtAdapterFactory` + `CompoundTagDataCompound` for 1.21.1 — must publish HZLib snapshot before Phase 1 begins
-- **Phase 1**: Pipeline core in HZLib Common — `DataType`, `DataField<T>`, `EntityDataSchema`, `MigrationStep`/`MigrationChain`, full `NativeEntity` save/load wiring, overlay slot NBT fix, delete superseded NBT classes
-- **Phase 2**: LovelyLib robot schema — `RobotFields` constants, `RobotFamily.configureSchema()`, three migration steps (V0_Fabric, V0_Forge, V1_1204), remove flat-write overrides from `RobotEntity`, delete `EntityDataMigration`
-- **Phase 3** *(can slip to Sprint 12)*: Monsters & Girls schema — `MonsterFields`, `MigrationStep_V1_MG` with belly/texture ID disambiguation, `baseTextureCount` per family
-- **Phase 4**: Full validation — 1.20.4 robot saves, Gen1 saves, overlay slot persistence, belly persistence, corrupt field handling, SynchedEntityData authority, McVersion field
-
-**Build dependency**: Phase 0 → Phase 1 → Phase 2 & 3 (parallel) → Phase 4. Do not begin Phase 2 before Phase 1 is complete and HZLib artifact is available.
-
----
-
-## Next Sprint
-
-### Sprint 12: Condition Framework & Appearance Architecture — ADR 020 & ADR 021 📋
-**Status**: 📋 Planned  
-**Dates**: 2026-07-12 to 2026-07-25  
+**Dates**: 2026-06-28 to 2026-07-25  
 **Story Points**: 60  
 **Theme**: Base condition/context framework (eliminates duplicated combinators and shared factory methods); `ConditionalAppearanceFeature` (replaces `BiomeAppearanceFeature` and hardcoded dye chain); `AbstractVariantFeature<V>` (collapses ~600 lines across three Lane A features); `CompositeAppearanceFeature` rename; two-lane appearance architecture with formal mutual-exclusion enforcement  
 **Source ADRs**: `docs/development/decisions/ADR_020_Conditional_Appearance_Feature.md`, `docs/development/decisions/ADR_021_Composite_Appearance_Feature.md`  
@@ -367,7 +346,7 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 
 ---
 
-## Upcoming Sprints
+## Next Sprint
 
 ### Sprint 13: Animation System Unification — ADR 022 Full Implementation 📋
 **Status**: 📋 Planned  
@@ -387,6 +366,44 @@ This document tracks sprint planning, execution, and outcomes for the LovelyRobo
 - **Change F** — `BoneVisibilityConditions` utility + `BoneVisibilityFeature` on KITSUNE family; `AiTributeReturnToBaseGoal` (original `BunnyFollowPoint` equivalent); `TributeRobotEntity.registerGoals()` override (all 3 loaders)
 
 **Build dependency**: Change A–B (new HZLib types) → Change D (IdleSlot types + AnimationStateManager wiring) → Change C (profiles + idle-slot declarations) → Change F (LovelyLib wiring) → Change E (deletions) → Validation.
+
+---
+
+## Upcoming Sprints
+**Prerequisite**: Sprint 12 complete (`AnimationProfile` builder must accept `idleSlots`)
+
+**Sprint changes**:
+- **Change A** — `BoneVisibilityFeature` in HZLib Common: new `BoneCondition` / `BoneRule` / `BoneVisibilityFeature` types; `NativeModel.setCustomAnimations()` evaluates rules each frame — no reflection, no subclassing
+- **Change B** — Head bone name on `NativeEntityFamily`: `headBoneName` field + fluent setter; `NativeModel.resolveHeadBoneName()` reads from family descriptor; eliminates hardcoded `"head"` string
+- **Change C** — `AnimationProfile` on all robot variants (root fix): `ROBOT_BASE_PROFILE` attached in `RobotFamily.configureVariants()`; `TRIBUTE_PROFILE` (no rest/sit/idle-slots) on Tribute families; `AnimationStateManager.resolveProfile()` returns non-null for every robot
+- **Change D** — `IdleSlot` system + `idleStationaryTicks`: `IdleCondition` + `IdleSlot` in HZLib Common; `idleStationaryTicks` counter on `NativeEntity` replaces `standbyTicks`; `AnimationStateManager.resolveIdleSlot()` with stable threshold comparison; `onIdleSlotChanged()` hook drives `IS_IN_SITTING_POSE` update; `handleStandbyAnimation()` deleted
+- **Change E** — Cleanup: delete `RobotAnimation.java` (×3 loaders), `KitsuneModel.java` (×3 loaders), `EntityAnimation.java`, `EntityModel.java`, `EntityVariantModel.java`, lovelylib `BoneTransformations.java`, `TailAnimationUtils.configureTailVisibility()` reflection method
+- **Change F** — `BoneVisibilityConditions` utility + `BoneVisibilityFeature` on KITSUNE family; `AiTributeReturnToBaseGoal` (original `BunnyFollowPoint` equivalent); `TributeRobotEntity.registerGoals()` override (all 3 loaders)
+
+**Build dependency**: Change A–B (new HZLib types) → Change D (IdleSlot types + AnimationStateManager wiring) → Change C (profiles + idle-slot declarations) → Change F (LovelyLib wiring) → Change E (deletions) → Validation.
+
+---
+
+### Sprint 14: Entity Registration Consolidation — ADR-023 Full Implementation 📋
+**Status**: 📋 Planned  
+**Dates**: 2026-08-09 to 2026-08-22  
+**Story Points**: 67  
+**Theme**: Eliminate the 30-edit scatter required to add a new robot entity; introduce `RobotDefinitionRegistry` as the single source of truth for all variant metadata; migrate `RobotVariant` from enum to final class with runtime-extensible `register(int, String)`; reduce new-entity overhead to 1 static constant + 1 builder call; structurally eliminate all four Bunny3 silent bug classes  
+**Source ADR**: `docs/development/decisions/ADR-023_Entity-Registration-Consolidation.md`  
+**Analysis Notes**: `docs/development/notes/ADR-023_Critical_Analysis_Notes.md`  
+**Task File**: `docs/development/sprints/active/SPRINT_14_TASK.md`  
+**Prerequisite**: Sprint 11 (ADR-019 Entity Data Pipeline) ✅  
+**Prerequisite**: Sprint 12 (ADR-020/021 Condition Framework) ✅  
+**Prerequisite**: Sprint 13 (ADR-022 Animation System) — Phase 3 loader-side work depends on ADR-019 Phase 0 complete
+
+**Sprint phases**:
+- **Phase 0** (pre-migration bug fix, 1 line): Fix `LegacyConfigs.getEntityConfig()` fallback from `EntityConfigData.getDefault()` to `getDefaultConfig(variant)` in both lovelylib-side `LegacyConfigs` and `RebootConfigs` — standalone `FIX:` commit, corrects silent Forge/NeoForge wrong-stats bug
+- **Phase 1** (new infrastructure, no behavior change): Migrate `RobotVariant` enum → final class; create `ModTarget`, `EntityStats`, `RobotEntityDefinition` (with `RendererFactory` + `featureConfigurator`), `RobotDefinitionRegistry`; create `LegacyRobotDefinitions` + `RebootRobotDefinitions`; create and wire `Lovely.onInitialize()` into all 6 loader entry points
+- **Phase 2** (simplify lovelylib consumers): Replace `LovelyIdentifier` switch, `ConfigAccessLayer` switch, `LegacyConfigs`/`RebootConfigs` static blocks, `LegacyRobotFamilies`/`RebootRobotFamilies` static fields + `reloadFromConfig()` bodies; remove deprecated `SharedConfigs.Common` per-entity fields; remove `LovelyConstant` per-entity constants and variant arrays; update Fabric-side config loops
+- **Phase 3** (loader-side consolidation — 12 files × 2 mods): Replace per-entity `RegistryObject`/`Item` fields in `{Mod}Items`, `{Mod}Entities`, `{Mod}Groups` with map pattern + `registerAll()` + getter; Forge/NeoForge maps use `RegistryObject<T>` wrappers; Fabric maps use unwrapped types
+- **Phase 4** (proof of concept): Add + validate + remove a test entity using only the 2-step workflow; update `New_Robot_Family_Guide.md`
+
+**Build dependency**: Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4.
 
 ---
 
