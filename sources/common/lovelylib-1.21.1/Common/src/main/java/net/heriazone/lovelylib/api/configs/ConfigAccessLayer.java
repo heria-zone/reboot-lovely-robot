@@ -1,6 +1,8 @@
 package net.heriazone.lovelylib.api.configs;
 
 import net.heriazone.lovelylib.common.configs.SharedConfigs;
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.common.entity.definition.RobotEntityDefinition;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import java.util.HashMap;
 import java.util.Map;
@@ -144,95 +146,22 @@ public class ConfigAccessLayer {
 
     /**
      * Gets default entity configuration for specified variant.
-     * 
-     * @param variant the robot variant identifier
+     * <p>
+     * Registry-driven: iterates all definitions to match by variant key.
+     * No per-variant case needed — adding a new entity requires no change here.
+     * Falls back to generic baseline only for genuinely unknown variant keys
+     * (not a missing registration, which would have been caught at seal() time).
+     *
+     * @param variant the robot variant identifier key string
      * @return default EntityConfigData instance
      */
     private static SharedConfigs.EntityConfigData getDefaultEntityConfig(String variant) {
-        // Use SharedConfigs defaults based on variant
-        return switch (variant) {
-            case LovelyConstant.VARIANT_BUNNY -> new SharedConfigs.EntityConfigData(
-                SharedConfigs.Common.BunnyMaxLevel,
-                SharedConfigs.Common.BunnyBaseHp,
-                SharedConfigs.Common.BunnyBaseAttack,
-                SharedConfigs.Common.BunnyAttackSpeed,
-                SharedConfigs.Common.BunnyBaseDefense,
-                SharedConfigs.Common.BunnyBaseToughness,
-                SharedConfigs.Common.BunnyMovementSpeed
-            );
-            
-            case LovelyConstant.VARIANT_BUNNY2 -> new SharedConfigs.EntityConfigData(
-                SharedConfigs.Common.Bunny2MaxLevel,
-                SharedConfigs.Common.Bunny2BaseHp,
-                SharedConfigs.Common.Bunny2BaseAttack,
-                SharedConfigs.Common.Bunny2AttackSpeed,
-                SharedConfigs.Common.Bunny2BaseDefense,
-                SharedConfigs.Common.Bunny2BaseToughness,
-                SharedConfigs.Common.Bunny2MovementSpeed
-            );
-
-            case LovelyConstant.VARIANT_BUNNY3 -> new SharedConfigs.EntityConfigData(
-                    SharedConfigs.Common.Bunny3MaxLevel,
-                    SharedConfigs.Common.Bunny3BaseHp,
-                    SharedConfigs.Common.Bunny3BaseAttack,
-                    SharedConfigs.Common.Bunny3AttackSpeed,
-                    SharedConfigs.Common.Bunny3BaseDefense,
-                    SharedConfigs.Common.Bunny3BaseToughness,
-                    SharedConfigs.Common.Bunny3MovementSpeed
-            );
-            
-            case LovelyConstant.VARIANT_DRAGON -> new SharedConfigs.EntityConfigData(
-                SharedConfigs.Common.DragonMaxLevel,
-                SharedConfigs.Common.DragonBaseHp,
-                SharedConfigs.Common.DragonBaseAttack,
-                SharedConfigs.Common.DragonAttackSpeed,
-                SharedConfigs.Common.DragonBaseDefense,
-                SharedConfigs.Common.DragonBaseToughness,
-                SharedConfigs.Common.DragonMovementSpeed
-            );
-            
-            case LovelyConstant.VARIANT_HONEY -> new SharedConfigs.EntityConfigData(
-                SharedConfigs.Common.HoneyMaxLevel,
-                SharedConfigs.Common.HoneyBaseHp,
-                SharedConfigs.Common.HoneyBaseAttack,
-                SharedConfigs.Common.HoneyAttackSpeed,
-                SharedConfigs.Common.HoneyBaseDefense,
-                SharedConfigs.Common.HoneyBaseToughness,
-                SharedConfigs.Common.HoneyMovementSpeed
-            );
-            
-            case LovelyConstant.VARIANT_KITSUNE -> new SharedConfigs.EntityConfigData(
-                SharedConfigs.Common.KitsuneMaxLevel,
-                SharedConfigs.Common.KitsuneBaseHp,
-                SharedConfigs.Common.KitsuneBaseAttack,
-                SharedConfigs.Common.KitsuneAttackSpeed,
-                SharedConfigs.Common.KitsuneBaseDefense,
-                SharedConfigs.Common.KitsuneBaseToughness,
-                SharedConfigs.Common.KitsuneMovementSpeed
-            );
-            
-            case LovelyConstant.VARIANT_NEKO -> new SharedConfigs.EntityConfigData(
-                SharedConfigs.Common.NekoMaxLevel,
-                SharedConfigs.Common.NekoBaseHp,
-                SharedConfigs.Common.NekoBaseAttack,
-                SharedConfigs.Common.NekoAttackSpeed,
-                SharedConfigs.Common.NekoBaseDefense,
-                SharedConfigs.Common.NekoBaseToughness,
-                SharedConfigs.Common.NekoMovementSpeed
-            );
-            
-            case LovelyConstant.VARIANT_VANILLA -> new SharedConfigs.EntityConfigData(
-                SharedConfigs.Common.VanillaMaxLevel,
-                SharedConfigs.Common.VanillaBaseHp,
-                SharedConfigs.Common.VanillaBaseAttack,
-                SharedConfigs.Common.VanillaAttackSpeed,
-                SharedConfigs.Common.VanillaBaseDefense,
-                SharedConfigs.Common.VanillaBaseToughness,
-                SharedConfigs.Common.VanillaMovementSpeed
-            );
-            
-            default -> SharedConfigs.EntityConfigData.getDefault();
-        };
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getAll()) {
+            if (def.getVariantKey().equals(variant)) {
+                return def.getStats().toEntityConfigData();
+            }
+        }
+        return SharedConfigs.EntityConfigData.getDefault();
     } // getDefaultEntityConfig()
 
     /**
@@ -329,27 +258,24 @@ public class ConfigAccessLayer {
     } // getCacheStats()
 
     /**
-     * Validates all cached configurations and reports issues.
-     * 
-     * @return map of variant to validation status
+     * Validates all registered entity configurations.
+     * Registry-driven — variant set comes from RobotDefinitionRegistry, so no
+     * per-variant enumeration is ever needed here.
+     *
+     * @return map of variant key to validation status
      */
-    public static Map<String, Boolean> validateAllConfigs(String[] variants) {
+    public static Map<String, Boolean> validateAllConfigs() {
         Map<String, Boolean> results = new HashMap<>();
-
-        for (String variant : variants) {
+        for (RobotEntityDefinition def : RobotDefinitionRegistry.getAll()) {
+            String key = def.getVariantKey();
             try {
-                SharedConfigs.EntityConfigData config = getEntityConfig(variant);
-                results.put(variant, config != null && config.isValid());
+                SharedConfigs.EntityConfigData config = getEntityConfig(key);
+                results.put(key, config != null && config.isValid());
             } catch (Exception e) {
-                results.put(variant, false);
+                results.put(key, false);
             }
         }
-
         return results;
-    } // validateAllConfigs()
-
-    public static Map<String, Boolean> validateAllConfigs() {
-        return validateAllConfigs(LovelyConstant.ALL_VARIANTS);
     } // validateAllConfigs()
 
 } // Class: ConfigAccessLayer

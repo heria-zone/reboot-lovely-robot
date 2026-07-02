@@ -1,5 +1,7 @@
 package net.heriazone.lovelylib.api.configs;
 
+import net.heriazone.lovelylib.common.entity.definition.RobotDefinitionRegistry;
+import net.heriazone.lovelylib.common.entity.definition.RobotEntityDefinition;
 import net.heriazone.lovelylib.common.shared.LovelyConstant;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,7 +90,8 @@ public class ConfigKeyGenerator {
     } // generateAllKeys()
 
     public static Map<String, String> generateAllKeys() {
-        return generateAllKeys(LovelyConstant.ALL_VARIANTS);
+        return generateAllKeys(RobotDefinitionRegistry.getAll().stream()
+            .map(RobotEntityDefinition::getVariantKey).toArray(String[]::new));
     } // generateAllKeys()
 
     /**
@@ -109,7 +112,8 @@ public class ConfigKeyGenerator {
     } // generateIntKeys()
 
     public static Set<String> generateIntKeys() {
-        return generateIntKeys(LovelyConstant.ALL_VARIANTS);
+        return generateIntKeys(RobotDefinitionRegistry.getAll().stream()
+            .map(RobotEntityDefinition::getVariantKey).toArray(String[]::new));
     } // generateIntKeys()
 
     /**
@@ -130,7 +134,8 @@ public class ConfigKeyGenerator {
     } // generateFloatKeys()
 
     public static Set<String> generateFloatKeys() {
-        return generateFloatKeys(LovelyConstant.ALL_VARIANTS);
+        return generateFloatKeys(RobotDefinitionRegistry.getAll().stream()
+            .map(RobotEntityDefinition::getVariantKey).toArray(String[]::new));
     } // generateFloatKeys()
 
     /**
@@ -178,14 +183,9 @@ public class ConfigKeyGenerator {
         String variant = parts[0];
         String configType = parts[1];
         
-        // Check if variant exists
-        boolean validVariant = false;
-        for (String validVar : LovelyConstant.ALL_VARIANTS) {
-            if (validVar.equals(variant)) {
-                validVariant = true;
-                break;
-            }
-        }
+        // Check if variant exists in the registry
+        boolean validVariant = RobotDefinitionRegistry.getAll().stream()
+            .anyMatch(def -> def.getVariantKey().equals(variant));
         
         if (!validVariant) return false;
         
