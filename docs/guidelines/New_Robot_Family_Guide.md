@@ -1,16 +1,43 @@
 # New Robot Family Implementation Guide
 
-**Applies to:** Legacy (`llovelyr`) and Reboot (`rlovelyr`) variants  
-**Not for:** Tribute (`tlovelyr`) — fixed roster of 4 types, never extended  
-**Last Updated:** 2026-06-28  
-**Reference implementation:** Bunny3 — verified against git diff of all 45 changed files  
-**Related:** `docs/workflow/ARCHITECTURE.md`, `docs/guidelines/Coding Style Enforcer.md`
+> ⚠️ **DEPRECATED — Do not follow this guide for new robot families.**
+>
+> This document describes the pre-ADR-023 scatter-based approach (13+ code locations per entity,
+> manual switch statements, per-entity static config fields). It has been superseded in full.
+>
+> **Current authoritative reference: `docs/development/decisions/ADR-023_Entity-Registration-Consolidation.md`**
+>
+> Under the ADR-023 architecture, adding a new robot requires **exactly two code changes** in
+> `lovelylib` — one `RobotVariant` constant and one `RobotEntityDefinition` builder call. No loader
+> files change. The 13-location scatter problem, all four Bunny3 runtime bugs, and the manual switch
+> statements described in this guide are eliminated.
+>
+> This file is preserved as a **historical reference only** — it accurately documents the bugs that
+> motivated ADR-023 and remains useful for understanding why the current architecture is structured
+> the way it is. Do not use Part 1, Part 2, or Part 3 as implementation instructions.
+>
+> **For an end-to-end example of the current approach, see:**
+> - `docs/development/decisions/ADR_024_Reboot_Exclusive_Robot_Families.md` — Prime, Hyperion, Empyrium port
+> - `sources/common/lovelylib-1.21.1/Common/.../source/SharedRobotDefinitions.java` — live examples
 
 ---
 
-## Overview
+# [ARCHIVED] New Robot Family Implementation Guide
 
-Adding a new robot family touches **four distinct layers**. Every layer must be complete — a gap causes a specific in-game failure listed at the end of this guide.
+**Applies to (historical):** Legacy (`llovelyr`) and Reboot (`rlovelyr`) variants  
+**Not for:** Tribute (`tlovelyr`) — fixed roster of 4 types, never extended  
+**Last Updated:** 2026-06-28  
+**Deprecated:** 2026-07-02 — superseded by ADR-023  
+**Reference implementation (historical):** Bunny3 — verified against git diff of all 45 changed files  
+**Related:** `docs/development/decisions/ADR-023_Entity-Registration-Consolidation.md`
+
+---
+
+## Overview (Historical)
+
+The pre-ADR-023 approach required touching **four distinct layers** across **13 code locations**.
+This section is preserved because Part 4 (the bug catalogue) accurately describes the failure modes
+that drove the redesign and remains the definitive explanation of why each change in ADR-023 was necessary.
 
 ```
 Layer 1 — lovelylib/common/entity        Variant enum, palette, family registration
