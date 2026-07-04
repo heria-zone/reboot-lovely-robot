@@ -65,7 +65,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
      */
     public static final java.util.List<EntityTexture> HONEY_COLORS = java.util.List.of(
             EntityTexture.YELLOW,
-            EntityTexture.BLUE,
+            EntityTexture.LIGHT_BLUE,
             EntityTexture.PINK
     );
 
@@ -78,7 +78,7 @@ public class TributeRobotFamilies extends RobotFamilyRegistry {
     public static final java.util.List<EntityTexture> VANILLA_COLORS = java.util.List.of(
             EntityTexture.PINK,
             EntityTexture.YELLOW,
-            EntityTexture.BLUE,
+            EntityTexture.LIGHT_BLUE,
             EntityTexture.BLACK
     );
 
