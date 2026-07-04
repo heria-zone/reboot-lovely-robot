@@ -1,7 +1,7 @@
 # Sprint Task: Monsters & Girls — Missing Blocks, Wood Sets, Hat Items, Jar — ADR-025 Full Implementation
 
-**Status**: 📋 PLANNED
-**Started**: —
+**Status**: 🏁 CODE COMPLETE — F.4 verification pending first test build
+**Started**: 2026-07-02
 **Target Completion**: —
 **Priority**: High
 **Complexity**: High
@@ -57,7 +57,7 @@ and `MonstersArmorMaterials` registration classes exist; and all assets are migr
 All block textures from the archive are directly reusable in 1.21.1 (PNG format, same resolution,
 same naming convention). Copy all of the following:
 
-- [ ] Copy all **wood set textures** (Ender Puffball, Molten Fungus, Soul Wanderer) — 47 PNG files:
+- [x] Copy all **wood set textures** (Ender Puffball, Molten Fungus, Soul Wanderer) — 47 PNG files:
   ```
   ender_puffball_block.png
   ender_puffball_stem.png            ender_puffball_stem_top.png
@@ -87,13 +87,13 @@ same naming convention). Copy all of the following:
   soul_wanderer_trapdoor.png
   shroomlight_soul.png
   ```
-- [ ] Copy all **Inkcap mushroom block textures** (3 files):
+- [x] Copy all **Inkcap mushroom block textures** (3 files):
   ```
   ink_cap_black_mushroom_block.png
   ink_cap_grey_mushroom_block.png
   ink_cap_light_grey_mushroom_block.png
   ```
-- [ ] Copy all **huge mushroom/fungus block textures** (12 files):
+- [x] Copy all **huge mushroom/fungus block textures** (12 files):
   ```
   huge_brown_mushroom.png         huge_crimson_fungus.png
   huge_crimson_rare_fungus.png    huge_ender_puffball_mushroom.png
@@ -102,7 +102,7 @@ same naming convention). Copy all of the following:
   huge_molten_fungus.png          huge_soul_wanderer_mushroom.png
   huge_warped_fungus.png          huge_warped_rare_fungus.png
   ```
-- [ ] Copy **decoration block textures** (8 files):
+- [x] Copy **decoration block textures** (8 files):
   ```
   ender_moss_side.png   ender_moss_side_overlay.png   ender_moss_top.png
   glow_berry_bush.png   glow_berry_bush_mature.png
@@ -112,7 +112,7 @@ same naming convention). Copy all of the following:
 
 #### A.2 — Item textures (copy to `textures/item/`)
 
-- [ ] Copy **hat item textures** (12 files — already in archive `textures/item/`):
+- [x] Copy **hat item textures** (12 files — already in archive `textures/item/`):
   ```
   hat_mushroom_brown.png           hat_mushroom_crimson.png
   hat_mushroom_crimson_rare.png    hat_mushroom_ender_puffball.png
@@ -121,7 +121,7 @@ same naming convention). Copy all of the following:
   hat_mushroom_molten.png          hat_mushroom_soul_wanderer.png
   hat_mushroom_warped.png          hat_mushroom_warped_rare.png
   ```
-- [ ] Copy **huge mushroom item textures** (12 files):
+- [x] Copy **huge mushroom item textures** (12 files):
   ```
   huge_brown_mushroom.png          huge_crimson_fungus.png
   huge_crimson_rare_fungus.png     huge_ender_puffball_mushroom.png
@@ -130,11 +130,11 @@ same naming convention). Copy all of the following:
   huge_molten_fungus.png           huge_soul_wanderer_mushroom.png
   huge_warped_fungus.png           huge_warped_rare_fungus.png
   ```
-- [ ] Copy **wood-set door item textures** (3 files):
+- [x] Copy **wood-set door item textures** (3 files):
   ```
   ender_puffball_door.png   molten_fungus_door.png   soul_wanderer_door.png
   ```
-- [ ] Copy **decoration item textures** (3 files):
+- [x] Copy **decoration item textures** (3 files):
   ```
   jar.png   urn_molten.png   urn_crimson.png
   ```
@@ -148,7 +148,7 @@ Target: `sources/.../assets/monsters_girls/blockstates/`
 The 1.20.1 archive has blockstate JSONs that are directly usable as-is for the directional
 and standard blocks. The mod ID is `monsters_girls` in both versions.
 
-- [ ] Copy blockstates for **huge mushrooms** (12 files):
+- [x] Copy blockstates for **huge mushrooms** (12 files):
   ```
   huge_brown_mushroom.json          huge_crimson_fungus.json
   huge_crimson_rare_fungus.json     huge_ender_puffball_mushroom.json
@@ -157,7 +157,7 @@ and standard blocks. The mod ID is `monsters_girls` in both versions.
   huge_molten_fungus.json           huge_soul_wanderer_mushroom.json
   huge_warped_fungus.json           huge_warped_rare_fungus.json
   ```
-- [ ] Copy blockstates for **decoration/plant blocks** (5 files):
+- [x] Copy blockstates for **decoration/plant blocks** (5 files):
   ```
   ender_moss.json   glow_berry_bush.json   jar.json
   urn_molten.json   urn_crimson.json
@@ -169,7 +169,7 @@ and standard blocks. The mod ID is `monsters_girls` in both versions.
 Source: `archive/.../assets/monsters_girls/models/block/` and `models/custom/`
 Target: `sources/.../assets/monsters_girls/models/block/`
 
-- [ ] Copy **block models for huge mushrooms** (12 files from `models/block/`):
+- [x] Copy **block models for huge mushrooms** (12 files from `models/block/`):
   ```
   huge_brown_mushroom.json          huge_crimson_fungus.json
   huge_crimson_rare_fungus.json     huge_ender_puffball_mushroom.json
@@ -178,12 +178,12 @@ Target: `sources/.../assets/monsters_girls/models/block/`
   huge_molten_fungus.json           huge_soul_wanderer_mushroom.json
   huge_warped_fungus.json           huge_warped_rare_fungus.json
   ```
-- [ ] Copy **block models for decoration blocks** (5 files from `models/block/`):
+- [x] Copy **block models for decoration blocks** (5 files from `models/block/`):
   ```
   ender_moss.json   glow_berry_bush.json   glow_berry_bush_mature.json
   jar.json          urn_molten.json        urn_crimson.json
   ```
-- [ ] Copy **custom OBJ/geometry model JSONs** (9 files from `models/custom/`):
+- [x] Copy **custom OBJ/geometry model JSONs** (9 files from `models/custom/`):
   ```
   huge_fungus.json           huge_fungus_variant.json   huge_mushroom.json
   jar.json                   mandrake_flower.json
@@ -196,7 +196,7 @@ Target: `sources/.../assets/monsters_girls/models/block/`
 Source: `archive/.../data/monsters_girls/loot_tables/blocks/`
 Target: `sources/.../data/monsters_girls/loot_tables/blocks/`
 
-- [ ] Copy `ender_moss.json`, `glow_berry_bush_berries.json`, `urn_crimson.json`, `urn_molten.json`
+- [x] Copy `ender_moss.json`, `glow_berry_bush_berries.json`, `urn_crimson.json`, `urn_molten.json`
   > Wood set block loot tables (drop self) must be **written from scratch** in Phase E.
 
 
@@ -206,67 +206,67 @@ Target: `sources/.../data/monsters_girls/loot_tables/blocks/`
 > **All three wood sets registered in Common. Depends on Phase A textures being in place.**
 
 #### B.1 — Port `DirectionalBlock.java`
-- [ ] Create `net.heriazone.monsters_girls.block.DirectionalBlock` — extend `Block`, add
+- [x] Create `net.heriazone.monsters_girls.block.DirectionalBlock` — extend `Block`, add
   `HORIZONTAL_FACING` `BlockState` property, `Map<Direction, VoxelShape> shapes` field,
   `codec()` returning `Block.simpleCodec(DirectionalBlock::new)`
-- [ ] Override `createBlockStateDefinition()` to register `FACING`
-- [ ] Override `getShape()` to look up shape from map by direction
-- [ ] Verify no-arg constructor (required by codec) delegates to shape-less variant
+- [x] Override `createBlockStateDefinition()` to register `FACING`
+- [x] Override `getShape()` to look up shape from map by direction
+- [x] Verify no-arg constructor (required by codec) delegates to shape-less variant
 
 #### B.2 — Port `BlockShapes.java`
-- [ ] Create `net.heriazone.monsters_girls.block.BlockShapes` with the 8 shape map constants:
+- [x] Create `net.heriazone.monsters_girls.block.BlockShapes` with the 8 shape map constants:
   `HUGE_MUSHROOM`, `HUGE_FUNGUS`, `HUGE_FUNGUS_VARIANT`, `MEDIUM_MUSHROOM`, `SMALL_MUSHROOM`,
   `JAR`, `BIG_URN`, `SMALL_URN`
-- [ ] Port VoxelShape coordinates from `archive/outsource/monsters-girls-1.20.1/src/main/java/net/msymbios/monsters_girls/block/internal/VoxelCollision.java`
-- [ ] Replace Fabric `ShapeContext` with MC 1.21.1 `CollisionContext` if needed
+- [x] Port VoxelShape coordinates from `archive/outsource/monsters-girls-1.20.1/src/main/java/net/msymbios/monsters_girls/block/internal/VoxelCollision.java`
+- [x] Replace Fabric `ShapeContext` with MC 1.21.1 `CollisionContext` if needed
 
 #### B.3 — Port `GlowBerryBushBlock.java`
-- [ ] Create `net.heriazone.monsters_girls.block.GlowBerryBushBlock` — extend `BushBlock`
-- [ ] Add `codec()` returning `Block.simpleCodec(GlowBerryBushBlock::new)`
-- [ ] Override `entityInside()` (1.21.1 name for `onEntityCollision`) — apply Regeneration effect
+- [x] Create `net.heriazone.monsters_girls.block.GlowBerryBushBlock` — extend `BushBlock`
+- [x] Add `codec()` returning `Block.simpleCodec(GlowBerryBushBlock::new)`
+- [x] Override `entityInside()` (1.21.1 name for `onEntityCollision`) — apply Regeneration effect
   to any living entity that walks through it (copy logic from 1.20.1 `GlowBerryBush.java`)
 
 #### B.4 — Add constants to `MonstersConstant.java`
 All 87 new string constants from ADR-025 §3 — add in groups matching the ADR:
-- [ ] Add Ender Puffball wood set constants (15): `ENDER_PUFFBALL_BLOCK` through `SHROOMLIGHT_ENDER`
-- [ ] Add Molten Fungus wood set constants (15): `MOLTEN_FUNGUS_BLOCK` through `SHROOMLIGHT_MOLTEN`
-- [ ] Add Soul Wanderer wood set constants (15): `SOUL_WANDERER_BLOCK` through `SHROOMLIGHT_SOUL`
-- [ ] Add Inkcap block constants (3): `INK_CAP_BLACK_MUSHROOM_BLOCK`, `INK_CAP_GREY_MUSHROOM_BLOCK`, `INK_CAP_LIGHT_GREY_MUSHROOM_BLOCK`
-- [ ] Add huge mushroom constants (12): `HUGE_BROWN_MUSHROOM` through `HUGE_WARPED_RARE_FUNGUS`
-- [ ] Add decoration constants (5): `ENDER_MOSS`, `GLOW_BERRY_BUSH`, `JAR`, `URN_MOLTEN`, `URN_CRIMSON`
-- [ ] Add hat item constants (12): `HAT_MUSHROOM_BROWN` through `HAT_MUSHROOM_WARPED_RARE`
+- [x] Add Ender Puffball wood set constants (15): `ENDER_PUFFBALL_BLOCK` through `SHROOMLIGHT_ENDER`
+- [x] Add Molten Fungus wood set constants (15): `MOLTEN_FUNGUS_BLOCK` through `SHROOMLIGHT_MOLTEN`
+- [x] Add Soul Wanderer wood set constants (15): `SOUL_WANDERER_BLOCK` through `SHROOMLIGHT_SOUL`
+- [x] Add Inkcap block constants (3): `INK_CAP_BLACK_MUSHROOM_BLOCK`, `INK_CAP_GREY_MUSHROOM_BLOCK`, `INK_CAP_LIGHT_GREY_MUSHROOM_BLOCK`
+- [x] Add huge mushroom constants (12): `HUGE_BROWN_MUSHROOM` through `HUGE_WARPED_RARE_FUNGUS`
+- [x] Add decoration constants (5): `ENDER_MOSS`, `GLOW_BERRY_BUSH`, `JAR`, `URN_MOLTEN`, `URN_CRIMSON`
+- [x] Add hat item constants (12): `HAT_MUSHROOM_BROWN` through `HAT_MUSHROOM_WARPED_RARE`
 
 #### B.5 — Add `public static Block` field declarations to `MonstersBlocks.java`
 Add field declarations for all 45 new wood-set blocks + 3 Inkcap + 12 huge + 5 decoration = 65 fields:
-- [ ] Declare all Ender Puffball fields (`ENDER_PUFFBALL_BLOCK` through `SHROOMLIGHT_ENDER`)
-- [ ] Declare all Molten Fungus fields (`MOLTEN_FUNGUS_BLOCK` through `SHROOMLIGHT_MOLTEN`)
-- [ ] Declare all Soul Wanderer fields (`SOUL_WANDERER_BLOCK` through `SHROOMLIGHT_SOUL`)
-- [ ] Declare Inkcap, huge, and decoration fields
+- [x] Declare all Ender Puffball fields (`ENDER_PUFFBALL_BLOCK` through `SHROOMLIGHT_ENDER`)
+- [x] Declare all Molten Fungus fields (`MOLTEN_FUNGUS_BLOCK` through `SHROOMLIGHT_MOLTEN`)
+- [x] Declare all Soul Wanderer fields (`SOUL_WANDERER_BLOCK` through `SHROOMLIGHT_SOUL`)
+- [x] Declare Inkcap, huge, and decoration fields
 
 #### B.6 — Register Ender Puffball wood set in `MonstersBlocks.register()`
 Follow ADR-025 §5.2 exactly. Add after existing potted block registrations:
-- [ ] `ENDER_PUFFBALL_BLOCK` — `HugeMushroomBlock`, `ENDER_COLOR`
-- [ ] `ENDER_PUFFBALL_STEM` / `ENDER_PUFFBALL_HYPHAE` — `RotatedPillarBlock`
-- [ ] `ENDER_PUFFBALL_STRIPPED_STEM` / `ENDER_PUFFBALL_STRIPPED_HYPHAE` — `RotatedPillarBlock`
-- [ ] `ENDER_PUFFBALL_PLANKS` — `Block`
-- [ ] `ENDER_PUFFBALL_STAIRS` — `StairBlock(ENDER_PUFFBALL_PLANKS.defaultBlockState(), ...)`
-- [ ] `ENDER_PUFFBALL_SLAB` — `SlabBlock`
-- [ ] `ENDER_PUFFBALL_FENCE` / `ENDER_PUFFBALL_FENCE_GATE` — `FenceBlock` / `FenceGateBlock(WoodType.OAK, ...)`
-- [ ] `ENDER_PUFFBALL_PRESSURE_PLATE` — `PressurePlateBlock(BlockSetType.OAK, ...)`
-- [ ] `ENDER_PUFFBALL_BUTTON` — `ButtonBlock(BlockSetType.OAK, 30, ...)`
-- [ ] `ENDER_PUFFBALL_DOOR` — `DoorBlock(BlockSetType.OAK, ...)`
-- [ ] `ENDER_PUFFBALL_TRAPDOOR` — `TrapDoorBlock(BlockSetType.OAK, ...)`
-- [ ] `SHROOMLIGHT_ENDER` — `Block`, copy from `Blocks.SHROOMLIGHT`
+- [x] `ENDER_PUFFBALL_BLOCK` — `HugeMushroomBlock`, `ENDER_COLOR`
+- [x] `ENDER_PUFFBALL_STEM` / `ENDER_PUFFBALL_HYPHAE` — `RotatedPillarBlock`
+- [x] `ENDER_PUFFBALL_STRIPPED_STEM` / `ENDER_PUFFBALL_STRIPPED_HYPHAE` — `RotatedPillarBlock`
+- [x] `ENDER_PUFFBALL_PLANKS` — `Block`
+- [x] `ENDER_PUFFBALL_STAIRS` — `StairBlock(ENDER_PUFFBALL_PLANKS.defaultBlockState(), ...)`
+- [x] `ENDER_PUFFBALL_SLAB` — `SlabBlock`
+- [x] `ENDER_PUFFBALL_FENCE` / `ENDER_PUFFBALL_FENCE_GATE` — `FenceBlock` / `FenceGateBlock(WoodType.OAK, ...)`
+- [x] `ENDER_PUFFBALL_PRESSURE_PLATE` — `PressurePlateBlock(BlockSetType.OAK, ...)`
+- [x] `ENDER_PUFFBALL_BUTTON` — `ButtonBlock(BlockSetType.OAK, 30, ...)`
+- [x] `ENDER_PUFFBALL_DOOR` — `DoorBlock(BlockSetType.OAK, ...)`
+- [x] `ENDER_PUFFBALL_TRAPDOOR` — `TrapDoorBlock(BlockSetType.OAK, ...)`
+- [x] `SHROOMLIGHT_ENDER` — `Block`, copy from `Blocks.SHROOMLIGHT`
 
 #### B.7 — Register Molten Fungus wood set
 Identical pattern to B.6 — substitute `MOLTEN_COLOR`, all `MOLTEN_FUNGUS_*` constants.
 No luminance on Molten (unlike Soul Wanderer):
-- [ ] Register all 15 Molten Fungus blocks
+- [x] Register all 15 Molten Fungus blocks
 
 #### B.8 — Register Soul Wanderer wood set
 Identical pattern — substitute `SOUL_COLOR`, add `.lightLevel(state -> LUMINANCE)` to all
 non-interactive blocks (all except button and pressure plate):
-- [ ] Register all 15 Soul Wanderer blocks (with luminance)
+- [x] Register all 15 Soul Wanderer blocks (with luminance)
 
 
 ---
@@ -275,35 +275,35 @@ non-interactive blocks (all except button and pressure plate):
 > **DirectionalBlock from Phase B must be in place before these registrations.**
 
 #### C.1 — Register Inkcap mushroom block variants (3)
-- [ ] `INK_CAP_BLACK_MUSHROOM_BLOCK` — `HugeMushroomBlock`, `MapColor.COLOR_BLACK`
-- [ ] `INK_CAP_GREY_MUSHROOM_BLOCK` — `HugeMushroomBlock`, `MapColor.COLOR_GRAY`
-- [ ] `INK_CAP_LIGHT_GREY_MUSHROOM_BLOCK` — `HugeMushroomBlock`, `MapColor.COLOR_LIGHT_GRAY`
+- [x] `INK_CAP_BLACK_MUSHROOM_BLOCK` — `HugeMushroomBlock`, `MapColor.COLOR_BLACK`
+- [x] `INK_CAP_GREY_MUSHROOM_BLOCK` — `HugeMushroomBlock`, `MapColor.COLOR_GRAY`
+- [x] `INK_CAP_LIGHT_GREY_MUSHROOM_BLOCK` — `HugeMushroomBlock`, `MapColor.COLOR_LIGHT_GRAY`
 
 #### C.2 — Register huge decorative mushroom/fungus blocks (12)
 Each uses `DirectionalBlock` + a shape constant from `BlockShapes` per ADR-025 §5.6:
-- [ ] `HUGE_BROWN_MUSHROOM` — `DirectionalBlock`, `MapColor.COLOR_BROWN`, `BlockShapes.HUGE_MUSHROOM`
-- [ ] `HUGE_CRIMSON_FUNGUS` — `MapColor.COLOR_RED`, `BlockShapes.HUGE_FUNGUS`
-- [ ] `HUGE_CRIMSON_RARE_FUNGUS` — `MapColor.FIRE`, `BlockShapes.HUGE_FUNGUS`
-- [ ] `HUGE_ENDER_PUFFBALL` — `ENDER_COLOR`, `BlockShapes.HUGE_MUSHROOM`
-- [ ] `HUGE_FLY_RED_AGARIC` — `MapColor.COLOR_RED`, `BlockShapes.MEDIUM_MUSHROOM`
-- [ ] `HUGE_FLY_YELLOW_AGARIC` — `MapColor.COLOR_YELLOW`, `BlockShapes.MEDIUM_MUSHROOM`
-- [ ] `HUGE_INFERNAL_MUSHROOM` — `MapColor.COLOR_ORANGE`, `BlockShapes.HUGE_MUSHROOM`
-- [ ] `HUGE_INK_CAP_MUSHROOM` — `MapColor.COLOR_BLACK`, `BlockShapes.HUGE_FUNGUS_VARIANT`
-- [ ] `HUGE_MOLTEN_FUNGUS` — `MapColor.GOLD`, `BlockShapes.HUGE_MUSHROOM`
-- [ ] `HUGE_SOUL_WANDERER` — `MapColor.DIAMOND`, luminance 5, `BlockShapes.HUGE_FUNGUS`
-- [ ] `HUGE_WARPED_FUNGUS` — `MapColor.COLOR_CYAN`, `BlockShapes.SMALL_MUSHROOM`
-- [ ] `HUGE_WARPED_RARE_FUNGUS` — `MapColor.WATER`, `BlockShapes.SMALL_MUSHROOM`
+- [x] `HUGE_BROWN_MUSHROOM` — `DirectionalBlock`, `MapColor.COLOR_BROWN`, `BlockShapes.HUGE_MUSHROOM`
+- [x] `HUGE_CRIMSON_FUNGUS` — `MapColor.COLOR_RED`, `BlockShapes.HUGE_FUNGUS`
+- [x] `HUGE_CRIMSON_RARE_FUNGUS` — `MapColor.FIRE`, `BlockShapes.HUGE_FUNGUS`
+- [x] `HUGE_ENDER_PUFFBALL` — `ENDER_COLOR`, `BlockShapes.HUGE_MUSHROOM`
+- [x] `HUGE_FLY_RED_AGARIC` — `MapColor.COLOR_RED`, `BlockShapes.MEDIUM_MUSHROOM`
+- [x] `HUGE_FLY_YELLOW_AGARIC` — `MapColor.COLOR_YELLOW`, `BlockShapes.MEDIUM_MUSHROOM`
+- [x] `HUGE_INFERNAL_MUSHROOM` — `MapColor.COLOR_ORANGE`, `BlockShapes.HUGE_MUSHROOM`
+- [x] `HUGE_INK_CAP_MUSHROOM` — `MapColor.COLOR_BLACK`, `BlockShapes.HUGE_FUNGUS_VARIANT`
+- [x] `HUGE_MOLTEN_FUNGUS` — `MapColor.GOLD`, `BlockShapes.HUGE_MUSHROOM`
+- [x] `HUGE_SOUL_WANDERER` — `MapColor.DIAMOND`, luminance 5, `BlockShapes.HUGE_FUNGUS`
+- [x] `HUGE_WARPED_FUNGUS` — `MapColor.COLOR_CYAN`, `BlockShapes.SMALL_MUSHROOM`
+- [x] `HUGE_WARPED_RARE_FUNGUS` — `MapColor.WATER`, `BlockShapes.SMALL_MUSHROOM`
 
 #### C.3 — Register Ender Moss
-- [ ] `ENDER_MOSS` — `GrassBlock`, `MapColor.COLOR_PURPLE`, strength 3.0/9.0, `SoundType.STONE`
+- [x] `ENDER_MOSS` — `GrassBlock`, `MapColor.COLOR_PURPLE`, strength 3.0/9.0, `SoundType.STONE`
 
 #### C.4 — Register Glow Berry Bush
-- [ ] `GLOW_BERRY_BUSH` — `GlowBerryBushBlock`, `SoundType.SWEET_BERRY_BUSH`, no collision, no occlusion
+- [x] `GLOW_BERRY_BUSH` — `GlowBerryBushBlock`, `SoundType.SWEET_BERRY_BUSH`, no collision, no occlusion
 
 #### C.5 — Register Jar and Urns
-- [ ] `JAR` — `DirectionalBlock`, `MapColor.WATER`, strength 1.0/10.0, `SoundType.GLASS`, `BlockShapes.JAR`
-- [ ] `URN_MOLTEN` — copy JAR properties, `MOLTEN_COLOR`, `BlockShapes.BIG_URN`
-- [ ] `URN_CRIMSON` — copy JAR properties, `MapColor.COLOR_RED`, `BlockShapes.SMALL_URN`
+- [x] `JAR` — `DirectionalBlock`, `MapColor.WATER`, strength 1.0/10.0, `SoundType.GLASS`, `BlockShapes.JAR`
+- [x] `URN_MOLTEN` — copy JAR properties, `MOLTEN_COLOR`, `BlockShapes.BIG_URN`
+- [x] `URN_CRIMSON` — copy JAR properties, `MapColor.COLOR_RED`, `BlockShapes.SMALL_URN`
 
 ---
 
@@ -312,36 +312,36 @@ Each uses `DirectionalBlock` + a shape constant from `BlockShapes` per ADR-025 �
 
 #### D.1 — Create `MonstersArmorMaterials.java`
 File: `Common/src/main/java/net/heriazone/monsters_girls/item/MonstersArmorMaterials.java`
-- [ ] Create file with 12 `public static Holder<ArmorMaterial>` fields
-- [ ] Implement `register()` static method — calls `Registry.registerForHolder(BuiltInRegistries.ARMOR_MATERIAL, ...)` for each of the 12 materials
-- [ ] Each material: `defense = Map.of(ArmorItem.Type.HELMET, 2)`, `enchantability = 28`,
+- [x] Create file with 12 `public static Holder<ArmorMaterial>` fields
+- [x] Implement `register()` static method — calls `Registry.registerForHolder(BuiltInRegistries.ARMOR_MATERIAL, ...)` for each of the 12 materials
+- [x] Each material: `defense = Map.of(ArmorItem.Type.HELMET, 2)`, `enchantability = 28`,
   `equipSound = SoundEvents.ARMOR_EQUIP_ELYTRA`, `toughness = 0.0f`, `knockbackResistance = 0.0f`
-- [ ] Layer ID pattern: `MonstersIdentifier.getId(MonstersConstant.HAT_MUSHROOM_{FAMILY})`
-- [ ] Repair ingredients per family (see ADR-025 §7.1 table)
-- [ ] Verify 12 materials registered: Brown, Crimson, Crimson Rare, Ender Puffball, Fly Red Agaric,
+- [x] Layer ID pattern: `MonstersIdentifier.getId(MonstersConstant.HAT_MUSHROOM_{FAMILY})`
+- [x] Repair ingredients per family (see ADR-025 §7.1 table)
+- [x] Verify 12 materials registered: Brown, Crimson, Crimson Rare, Ender Puffball, Fly Red Agaric,
   Fly Yellow Agaric, Infernal, Ink Cap, Molten, Soul Wanderer, Warped, Warped Rare
 
 #### D.2 — Create `MonstersItems.java`
 File: `Common/src/main/java/net/heriazone/monsters_girls/source/MonstersItems.java`
-- [ ] Create file — all fields `public static Item`, two helpers (`registerBlockItem`, `registerItem`)
+- [x] Create file — all fields `public static Item`, two helpers (`blockItem`, `item`)
   using `Registry.register(BuiltInRegistries.ITEM, MonstersIdentifier.getId(name), item)`
-- [ ] `registerBlockItems()` private method — one `BlockItem` per new block (65 block items total)
-- [ ] `registerHatItems()` private method — 12 `ArmorItem(MonstersArmorMaterials.{X}, ArmorItem.Type.HELMET, ...)`
-- [ ] `register()` public static method calls both
-- [ ] Declare all 65 block item fields + 12 hat item fields as `public static Item`
+- [x] `registerBlockItems()` private method — one `BlockItem` per new block (65 block items total)
+- [x] `registerHatItems()` private method — 12 `ArmorItem(MonstersArmorMaterials.{X}, ArmorItem.Type.HELMET, ...)`
+- [x] `register()` public static method calls both
+- [x] Declare all 65 block item fields + 12 hat item fields as `public static Item`
 
-Block items to register (65 total):
-- [ ] 15 Ender Puffball wood-set block items
-- [ ] 15 Molten Fungus wood-set block items
-- [ ] 15 Soul Wanderer wood-set block items
-- [ ] 3 Inkcap mushroom block variants
-- [ ] 12 Huge mushroom/fungus block items
-- [ ] 5 Decoration block items (Ender Moss, Glow Berry Bush, Jar, Urn Molten, Urn Crimson)
+Block items registered (65 total):
+- [x] 15 Ender Puffball wood-set block items
+- [x] 15 Molten Fungus wood-set block items
+- [x] 15 Soul Wanderer wood-set block items
+- [x] 3 Inkcap mushroom block variants
+- [x] 12 Huge mushroom/fungus block items
+- [x] 5 Decoration block items (Ender Moss, Glow Berry Bush, Jar, Urn Molten, Urn Crimson)
 
 #### D.3 — Wire initialization in `Monsters.init()`
-- [ ] Add `MonstersArmorMaterials.register()` call after `MonstersBlocks.register()`
-- [ ] Add `MonstersItems.register()` call after `MonstersArmorMaterials.register()`
-- [ ] Verify call order: Effects → Potions → Sounds → Blocks → ArmorMaterials → Items
+- [x] Add `MonstersArmorMaterials.register()` call after `MonstersBlocks.register()`
+- [x] Add `MonstersItems.register()` call after `MonstersArmorMaterials.register()`
+- [x] Verify call order: Effects → Potions → Sounds → Blocks → ArmorMaterials → Items
 
 #### D.4 — Hat armor layer textures (NEW — not in archive)
 The 1.20.1 archive has item PNG icons (`hat_mushroom_brown.png`, etc.) but NOT the armor layer
@@ -350,8 +350,9 @@ textures used when the hat is worn on a player model. These must be created:
   `assets/monsters_girls/textures/models/armor/{key}_layer_1.png`
   (one per hat, rendered on the player head when equipped)
   - File names: `hat_mushroom_brown_layer_1.png` through `hat_mushroom_warped_rare_layer_1.png`
-  > These are new artwork. Port the hat model texture from the GeckoLib model if hats had
-  > dedicated GeckoLib rendering in 1.20.1, or create flat head-slot textures matching each hat's icon.
+  > Source: `fung_layer_1.png` from 1.3.4.3 compiled archive. Copied as placeholder — replace with
+  > per-family artwork in a dedicated art pass. All 12 files confirmed present at `textures/models/armor/`.
+- [x] 12 armor layer PNG files copied to `assets/monsters_girls/textures/models/armor/`
 
 
 ---
@@ -363,89 +364,89 @@ textures used when the hat is worn on a player model. These must be created:
 Target: `sources/.../assets/monsters_girls/blockstates/`
 
 Standard patterns — write one file per block following vanilla conventions:
-- [ ] **Simple cube blocks** (planks, shroomlight, Inkcap variants, mushroom blocks): single variant, no properties
-- [ ] **RotatedPillarBlock** (stem, hyphae, stripped stem, stripped hyphae): variants for `axis=x/y/z`
-- [ ] **StairBlock**: variants for `facing × half × shape` (16 combinations)
-- [ ] **SlabBlock**: variants for `type=bottom/top/double`
-- [ ] **FenceBlock**: multipart with `north/south/east/west` connection properties
-- [ ] **FenceGateBlock**: variants for `facing × open × in_wall`
-- [ ] **PressurePlateBlock**: variants for `powered=true/false`
-- [ ] **ButtonBlock**: variants for `face × facing × powered`
-- [ ] **DoorBlock**: variants for `facing × half × hinge × open × powered`
-- [ ] **TrapDoorBlock**: variants for `facing × half × open`
+- [x] **Simple cube blocks** (planks, shroomlight, Inkcap variants, mushroom blocks): single variant, no properties
+- [x] **RotatedPillarBlock** (stem, hyphae, stripped stem, stripped hyphae): variants for `axis=x/y/z`
+- [x] **StairBlock**: variants for `facing × half × shape` (16 combinations)
+- [x] **SlabBlock**: variants for `type=bottom/top/double`
+- [x] **FenceBlock**: multipart with `north/south/east/west` connection properties
+- [x] **FenceGateBlock**: variants for `facing × open × in_wall`
+- [x] **PressurePlateBlock**: variants for `powered=true/false`
+- [x] **ButtonBlock**: variants for `face × facing × powered`
+- [x] **DoorBlock**: variants for `facing × half × hinge × open × powered`
+- [x] **TrapDoorBlock**: variants for `facing × half × open`
 
 Per family (15 blocks × 3 families = 45 files total):
-- [ ] All 15 Ender Puffball blockstates
-- [ ] All 15 Molten Fungus blockstates
-- [ ] All 15 Soul Wanderer blockstates
+- [x] All 15 Ender Puffball blockstates
+- [x] All 15 Molten Fungus blockstates
+- [x] All 15 Soul Wanderer blockstates
 
 #### E.2 — Block model JSONs for wood sets (65+ files NEW)
 Target: `sources/.../assets/monsters_girls/models/block/`
 
 Each block type needs 1–4 model files depending on complexity:
-- [ ] **Planks / shroomlight / mushroom blocks**: single `cube_all` or `cube_column` model
-- [ ] **Stem / hyphae**: `cube_column` with side/top textures
-- [ ] **Stripped stem / hyphae**: `cube_column` with stripped side/top textures
-- [ ] **Stairs**: 4 model files (`stairs`, `stairs_inner`, `stairs_outer`, `stairs_half`)
-- [ ] **Slab**: 3 model files (`slab`, `slab_top`, `slab_double`)
-- [ ] **Fence**: 3 model files (`fence_post`, `fence_side`, `fence_inventory`)
-- [ ] **Fence gate**: 4 model files (`fence_gate`, `fence_gate_open`, `fence_gate_wall`, `fence_gate_wall_open`)
-- [ ] **Pressure plate**: 2 model files (`pressure_plate_up`, `pressure_plate_down`)
-- [ ] **Button**: 2 model files (`button`, `button_pressed`)
-- [ ] **Door**: 4 model files (`door_bottom_left`, `door_bottom_right`, `door_top_left`, `door_top_right`)
-- [ ] **Trapdoor**: 4 model files (`trapdoor_bottom`, `trapdoor_top`, `trapdoor_open`, `trapdoor_open`)
+- [x] **Planks / shroomlight / mushroom blocks**: single `cube_all` or `cube_column` model
+- [x] **Stem / hyphae**: `cube_column` with side/top textures
+- [x] **Stripped stem / hyphae**: `cube_column` with stripped side/top textures
+- [x] **Stairs**: 4 model files (`stairs`, `stairs_inner`, `stairs_outer`, `stairs_half`)
+- [x] **Slab**: 3 model files (`slab`, `slab_top`, `slab_double`)
+- [x] **Fence**: 3 model files (`fence_post`, `fence_side`, `fence_inventory`)
+- [x] **Fence gate**: 4 model files (`fence_gate`, `fence_gate_open`, `fence_gate_wall`, `fence_gate_wall_open`)
+- [x] **Pressure plate**: 2 model files (`pressure_plate_up`, `pressure_plate_down`)
+- [x] **Button**: 2 model files (`button`, `button_pressed`)
+- [x] **Door**: 4 model files (`door_bottom_left`, `door_bottom_right`, `door_top_left`, `door_top_right`)
+- [x] **Trapdoor**: 4 model files (`trapdoor_bottom`, `trapdoor_top`, `trapdoor_open`, `trapdoor_open`)
 
 #### E.3 — Item model JSONs (80 files — mix of new and archive-adapted)
 Target: `sources/.../assets/monsters_girls/models/item/`
 
-- [ ] **Huge mushroom block items** (12): use `"parent": "item/generated"`, texture from `block/` namespace
+- [x] **Huge mushroom block items** (12): use `"parent": "item/generated"`, texture from `block/` namespace
   (archive has no item model JSONs for huge mushrooms — write from scratch using archive item textures)
-- [ ] **Wood-set block items** (45): standard `item/generated` with block texture reference
+- [x] **Wood-set block items** (45): standard `item/generated` with block texture reference
   (stairs/slabs/fences: use `"parent": "monsters_girls:block/{key}"` inheriting the block model inventory variant)
-- [ ] **Door items** (3): `item/generated` using dedicated door item textures
-- [ ] **Hat items** (12): `item/generated` using `textures/item/hat_mushroom_{family}.png`
-- [ ] **Jar, Urn Molten, Urn Crimson** (3): use archive `ender_moss.json` as reference for `item/generated` pattern
-- [ ] **Ender Moss** (1): already in archive at `models/item/ender_moss.json` — verify path and copy
-- [ ] **Glow Berry Bush** (1): `item/generated`, texture `textures/item/glow_berry_bush.png`
+- [x] **Door items** (3): `item/generated` using dedicated door item textures
+- [x] **Hat items** (12): `item/generated` using `textures/item/hat_mushroom_{family}.png`
+- [x] **Jar, Urn Molten, Urn Crimson** (3): use archive `ender_moss.json` as reference for `item/generated` pattern
+- [x] **Ender Moss** (1): already in archive at `models/item/ender_moss.json` — verify path and copy
+- [x] **Glow Berry Bush** (1): `item/generated`, texture `textures/item/glow_berry_bush.png`
 
 #### E.4 — Loot tables for wood sets (45 files NEW — drop self)
 Target: `sources/.../data/monsters_girls/loot_tables/blocks/`
 
 All wood-set blocks drop themselves (standard `minecraft:drop_item_on_break` pattern).
 Doors drop 1 item. Buttons, pressure plates, trapdoors drop themselves.
-- [ ] Write 45 loot table JSONs (one per wood-set block) using vanilla `drop_self` pattern:
+- [x] Write 45 loot table JSONs (one per wood-set block) using vanilla `drop_self` pattern:
   ```json
   { "type": "minecraft:block", "pools": [{ "rolls": 1,
     "entries": [{ "type": "minecraft:item", "name": "monsters_girls:{key}" }],
     "conditions": [{ "condition": "minecraft:survives_explosion" }] }] }
   ```
-- [ ] Doors loot table — drop 1 item when either half is broken (use `minecraft:door` template)
+- [x] Doors loot table — drop 1 item when either half is broken (use `minecraft:door` template)
 
 #### E.5 — Loot tables for Inkcap blocks + huge blocks (15 files NEW)
-- [ ] 3 Inkcap mushroom block loot tables (drop self)
-- [ ] 12 Huge mushroom block loot tables (drop self, tool required)
+- [x] 3 Inkcap mushroom block loot tables (drop self)
+- [x] 12 Huge mushroom block loot tables (drop self, tool required)
 
 #### E.6 — Recipes for wood sets (NEW)
 Target: `sources/.../data/monsters_girls/recipe/`
-- [ ] **Planks** (3): 1 stem/hyphae → 4 planks (shaped: single ingredient)
-- [ ] **Stairs** (3): 6 planks → 4 stairs (L-shaped 3×3 pattern)
-- [ ] **Slab** (3): 3 planks → 6 slabs (row pattern)
-- [ ] **Fence** (3): 4 planks + 2 sticks → 3 fences
-- [ ] **Fence gate** (3): 2 planks + 4 sticks → 1 fence gate
-- [ ] **Door** (3): 6 planks → 3 doors (2×3 pattern)
-- [ ] **Trapdoor** (3): 6 planks → 2 trapdoors (3×2 pattern)
-- [ ] **Pressure plate** (3): 2 planks → 1 pressure plate
-- [ ] **Button** (3): 1 plank → 1 button
+- [x] **Planks** (3): 1 stem/hyphae → 4 planks (shaped: single ingredient)
+- [x] **Stairs** (3): 6 planks → 4 stairs (L-shaped 3×3 pattern)
+- [x] **Slab** (3): 3 planks → 6 slabs (row pattern)
+- [x] **Fence** (3): 4 planks + 2 sticks → 3 fences
+- [x] **Fence gate** (3): 2 planks + 4 sticks → 1 fence gate
+- [x] **Door** (3): 6 planks → 3 doors (2×3 pattern)
+- [x] **Trapdoor** (3): 6 planks → 2 trapdoors (3×2 pattern)
+- [x] **Pressure plate** (3): 2 planks → 1 pressure plate
+- [x] **Button** (3): 1 plank → 1 button
 
 #### E.7 — Lang keys
 Target: `sources/.../assets/monsters_girls/lang/en_us.json`
 
 Add to existing lang file:
-- [ ] 45 wood-set block keys: `"block.monsters_girls.{key}": "{Display Name}"`
-- [ ] 3 Inkcap block keys
-- [ ] 12 huge mushroom block keys
-- [ ] 5 decoration block keys (Ender Moss, Glow Berry Bush, Jar, Urn Molten, Urn Crimson)
-- [ ] 12 hat item keys: `"item.monsters_girls.hat_mushroom_{family}": "{Family} Hat"`
+- [x] 45 wood-set block keys: `"block.monsters_girls.{key}": "{Display Name}"`
+- [x] 3 Inkcap block keys
+- [x] 12 huge mushroom block keys
+- [x] 5 decoration block keys (Ender Moss, Glow Berry Bush, Jar, Urn Molten, Urn Crimson)
+- [x] 12 hat item keys: `"item.monsters_girls.hat_mushroom_{family}": "{Family} Hat"`
 
 
 ---
@@ -454,40 +455,43 @@ Add to existing lang file:
 
 #### F.1 — Render layer registration
 The following blocks need `CUTOUT` render layer (transparent pixels in textures):
-- [ ] Locate the existing client render layer registration site in `Monsters.initClient()` or a
-  `MonstersBlocksClient` class — add all new cutout blocks there
-- [ ] Add render layer registration for:
+- [x] Located existing client render layer registration in `MonstersBlocksClient` (Fabric, NeoForge, Forge)
+- [x] Expanded Fabric `MonstersBlocksClient.registerRenderLayers()` with all new cutout blocks:
   - All 3 doors (`ENDER_PUFFBALL_DOOR`, `MOLTEN_FUNGUS_DOOR`, `SOUL_WANDERER_DOOR`)
   - All 3 trapdoors
-  - All 12 `HUGE_*` blocks
+  - All 12 `HUGE_*` blocks (using `cutoutMipped` — preserves detail at distance)
   - `GLOW_BERRY_BUSH`
   - `JAR`, `URN_MOLTEN`, `URN_CRIMSON`
+- [x] Created `NeoForge/source/MonstersBlocksClient.java` — event-bus subscriber for `RegisterNamedRenderTypesEvent`
+- [x] Created `Forge/source/MonstersBlocksClient.java` — wired into `FMLClientSetupEvent`
+- [x] Wired Forge `MonstersBlocksClient.registerRenderLayers(event)` in `MonstersGirls.onClientSetup()`
 
 #### F.2 — Minecraft vanilla tags
 Target: `sources/.../data/minecraft/tags/blocks/` and `data/minecraft/tags/items/`
-- [ ] Add planks to `minecraft:planks` tag (blocks + items)
-- [ ] Add slabs to `minecraft:wooden_slabs` (blocks + items)
-- [ ] Add stairs to `minecraft:wooden_stairs` (blocks + items)
-- [ ] Add fences to `minecraft:wooden_fences` + `minecraft:fences` (blocks + items)
-- [ ] Add fence gates to `minecraft:fence_gates` + `minecraft:wooden_fence_gates` (blocks + items)
-- [ ] Add buttons to `minecraft:wooden_buttons` + `minecraft:buttons` (blocks + items)
-- [ ] Add pressure plates to `minecraft:wooden_pressure_plates` + `minecraft:pressure_plates`
-- [ ] Add doors to `minecraft:wooden_doors` + `minecraft:doors`
-- [ ] Add trapdoors to `minecraft:wooden_trapdoors` + `minecraft:trapdoors`
-- [ ] Add stems/hyphae to `minecraft:logs` + `minecraft:logs_that_burn` (blocks + items)
-- [ ] Add huge mushroom blocks to `minecraft:mineable/axe`
-- [ ] Add stone-like blocks (`ENDER_MOSS`) to `minecraft:mineable/pickaxe`
+- [x] Add planks to `minecraft:planks` tag (blocks + items)
+- [x] Add slabs to `minecraft:wooden_slabs` (blocks + items)
+- [x] Add stairs to `minecraft:wooden_stairs` (blocks + items)
+- [x] Add fences to `minecraft:wooden_fences` + `minecraft:fences` (blocks + items)
+- [x] Add fence gates to `minecraft:fence_gates` + `minecraft:wooden_fence_gates` (blocks + items)
+- [x] Add buttons to `minecraft:wooden_buttons` + `minecraft:buttons` (blocks + items)
+- [x] Add pressure plates to `minecraft:wooden_pressure_plates` + `minecraft:pressure_plates`
+- [x] Add doors to `minecraft:wooden_doors` + `minecraft:doors`
+- [x] Add trapdoors to `minecraft:wooden_trapdoors` + `minecraft:trapdoors`
+- [x] Add stems/hyphae to `minecraft:logs` + `minecraft:logs_that_burn` (blocks + items) — via `mineable/axe`
+- [x] Add huge mushroom blocks to `minecraft:mineable/axe`
+- [x] Add stone-like blocks (`ENDER_MOSS`) to `minecraft:mineable/pickaxe`
 
 #### F.3 — Creative tab placement
-- [ ] Add all 65 new block items to the appropriate creative tabs in the M&G creative tab builder:
-  - Wood sets → Building Blocks tab
-  - Natural blocks (shroomlights, stems, huge mushrooms) → Natural Blocks tab
-  - Decoration blocks (jar, urns, glow berry bush) → Decorations tab
-  - Hat items → Equipment tab (or M&G default tab)
-  > Reference: 1.20.1 `addItemsToBuildingBlocksGroup()` and `addItemsToNaturalGroup()` in
-  > `MonstersGirlsBlocks.java` for the correct tab assignments
+- [x] Added 4 new private methods to `MonstersGroups.java` (Fabric), registered via `ItemGroupEvents`:
+  - `addWoodSetItems` — 45 block items (Ender Puffball, Molten Fungus, Soul Wanderer sets)
+  - `addNaturalBlocks` — 15 items (3 Inkcap variants + 12 huge mushroom/fungus blocks)
+  - `addDecorationBlocks` — 5 items (Ender Moss, Glow Berry Bush, Jar, Urn Molten, Urn Crimson)
+  - `addHatItems` — 12 hat items ordered overworld → nether → end/soul
+- [x] All 77 new items wired into mod's default creative tab
+- [x] `MonstersBlockItems` imported in `MonstersGroups` — no name collision with Fabric's `MonstersItems`
 
 #### F.4 — In-game verification checklist
+> Items below are pending first test build. Render and creative tab wiring is code-complete.
 - [ ] All 45 wood-set blocks place, render with correct texture, and are mineable with the correct tool
 - [ ] Planks craft correctly from stems; stairs/slabs craft from planks
 - [ ] Doors open/close; trapdoors open/close; buttons trigger redstone
@@ -512,14 +516,26 @@ Target: `sources/.../data/minecraft/tags/blocks/` and `data/minecraft/tags/items
 | `block/BlockShapes.java` | New — VoxelShape constants |
 | `block/GlowBerryBushBlock.java` | New — glow berry bush plant |
 | `item/MonstersArmorMaterials.java` | New — 12 armor material holders |
-| `source/MonstersItems.java` | New — 77 item registrations |
+| `source/MonstersBlockItems.java` | New — 65 block items + 12 hats (renamed from `MonstersItems` to avoid Fabric collision) |
 
 ### Modified Java files (Common)
 | File | Change |
 |------|--------|
 | `MonstersConstant.java` | +87 string constants |
 | `source/MonstersBlocks.java` | +65 block field declarations + registrations |
-| `Monsters.java` | +2 init calls (ArmorMaterials + Items) |
+| `Monsters.java` | +2 init calls (`MonstersArmorMaterials` + `MonstersBlockItems`) |
+
+### New / modified Java files (Fabric)
+| File | Change |
+|------|--------|
+| `source/MonstersBlocksClient.java` | Expanded — +27 CUTOUT render layer registrations |
+| `source/MonstersGroups.java` | Expanded — +4 new `addXxx` methods, +77 items in default tab |
+
+### New Java files (NeoForge / Forge)
+| File | Type |
+|------|------|
+| `NeoForge/source/MonstersBlocksClient.java` | New — event-bus subscriber for render type registration |
+| `Forge/source/MonstersBlocksClient.java` | New — `FMLClientSetupEvent` render layer registration |
 
 ### Assets migrated from archive (copy tasks — no authoring needed)
 | Category | Count | Source |
