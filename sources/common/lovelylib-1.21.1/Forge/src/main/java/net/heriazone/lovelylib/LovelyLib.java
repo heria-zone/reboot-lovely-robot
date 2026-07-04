@@ -1,5 +1,7 @@
 package net.heriazone.lovelylib;
 
+import net.heriazone.hzlib.api.services.ForgeServices;
+import net.heriazone.hzlib.api.services.Services;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -35,13 +37,20 @@ public class LovelyLib {
     
     public LovelyLib() {
         LOGGER.info("Lovely Lib {} initializing for Forge", Lovely.VERSION);
-        
-        // Get the mod event bus
+
+        // Register platform services — done here once so all dependent mods
+        // (llovelyr, tlovelyr, rlovelyr) share the same singleton regardless
+        // of how many are loaded together.
+        Services.setInstance(new ForgeServices());
+
+        // Initialize the core library at constructor time, before any
+        // DeferredRegister supplier in dependent mods fires.
+        Lovely.initialize();
+
+        // Get the mod event bus and register setup event for loader-specific features
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        
-        // Register setup event
         modEventBus.addListener(this::onCommonSetup);
-        
+
         LOGGER.info("Lovely Lib Forge constructor complete");
     }
     
@@ -57,15 +66,9 @@ public class LovelyLib {
      */
     private void onCommonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Lovely Lib common setup phase starting");
-        
-        event.enqueueWork(() -> {
-            // Initialize the core library
-            Lovely.initialize();
-            
-            // Initialize Forge-specific features
-            initializeForgeFeatures();
-        });
-        
+
+        event.enqueueWork(this::initializeForgeFeatures);
+
         LOGGER.info("Lovely Lib common setup phase complete");
     }
     

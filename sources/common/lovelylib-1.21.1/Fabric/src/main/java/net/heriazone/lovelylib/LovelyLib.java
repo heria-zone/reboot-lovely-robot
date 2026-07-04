@@ -1,6 +1,8 @@
 package net.heriazone.lovelylib;
 
 import net.fabricmc.api.ModInitializer;
+import net.heriazone.hzlib.api.services.FabricServices;
+import net.heriazone.hzlib.api.services.Services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,11 @@ public class LovelyLib implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("Lovely Lib {} initializing for Fabric", Lovely.VERSION);
         
+        // Register platform services — done here once so all dependent mods
+        // (llovelyr, tlovelyr, rlovelyr) share the same singleton regardless
+        // of how many are loaded together.
+        Services.setInstance(new FabricServices());
+
         // Initialize the core library
         Lovely.initialize();
         

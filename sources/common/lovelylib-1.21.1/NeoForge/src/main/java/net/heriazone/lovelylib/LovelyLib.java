@@ -1,5 +1,7 @@
 package net.heriazone.lovelylib;
 
+import net.heriazone.hzlib.api.services.NeoForgeServices;
+import net.heriazone.hzlib.api.services.Services;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -34,10 +36,19 @@ public class LovelyLib {
     
     public LovelyLib(IEventBus modEventBus) {
         LOGGER.info("Lovely Lib {} initializing for NeoForge", Lovely.VERSION);
-        
-        // Register setup event
+
+        // Register platform services — done here once so all dependent mods
+        // (llovelyr, tlovelyr, rlovelyr) share the same singleton regardless
+        // of how many are loaded together.
+        Services.setInstance(new NeoForgeServices());
+
+        // Initialize the core library at constructor time, before any
+        // DeferredRegister supplier in dependent mods fires.
+        Lovely.initialize();
+
+        // Register setup event for loader-specific features
         modEventBus.addListener(this::onCommonSetup);
-        
+
         LOGGER.info("Lovely Lib NeoForge constructor complete");
     }
     
@@ -53,15 +64,9 @@ public class LovelyLib {
      */
     private void onCommonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Lovely Lib common setup phase starting");
-        
-        event.enqueueWork(() -> {
-            // Initialize the core library
-            Lovely.initialize();
-            
-            // Initialize NeoForge-specific features
-            initializeNeoForgeFeatures();
-        });
-        
+
+        event.enqueueWork(this::initializeNeoForgeFeatures);
+
         LOGGER.info("Lovely Lib common setup phase complete");
     }
     

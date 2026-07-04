@@ -26,16 +26,20 @@ public class Services {
     /**
      * Registers the platform-specific services implementation.
      * <p>
-     * <b>Initialization:</b> Called once during mod loading by each loader's
-     * main class. Must be called before any common code attempts to access
-     * platform services.
+     * <b>Initialization:</b> Called once during mod loading by the shared library
+     * entry point (lovelylib). Safe to call multiple times from dependent mods —
+     * subsequent calls are silently ignored when the same platform is already
+     * registered, allowing any number of hzlib-dependent mods to coexist in the
+     * same instance without crashing.
      * <p>
-     * <b>Error Handling:</b> Throws IllegalStateException if services are
-     * already registered to prevent accidental double-registration.
+     * <b>Mismatch detection:</b> Throws {@link IllegalStateException} if a
+     * different platform is already registered (e.g. attempting to register
+     * {@code ForgeServices} when {@code FabricServices} is already set), which
+     * indicates a genuine environment misconfiguration.
      *
      * @param implementation the platform-specific services implementation
      * @throws IllegalArgumentException if implementation is null
-     * @throws IllegalStateException if services are already registered
+     * @throws IllegalStateException if a different platform is already registered
      */
     public static void setInstance(IPlatformServices implementation) {
         if (implementation == null) {
@@ -43,7 +47,14 @@ public class Services {
         }
 
         if (instance != null) {
-            throw new IllegalStateException("Platform services already registered: " + instance.getPlatformName());
+            if (instance.getClass() == implementation.getClass()) {
+                // Same platform re-registering — safe to ignore. This happens when
+                // multiple mods sharing hzlib each call setInstance on the same loader.
+                return;
+            }
+            throw new IllegalStateException(
+                    "Platform services mismatch: already registered '" + instance.getPlatformName() +
+                    "', attempted to register '" + implementation.getPlatformName() + "'");
         }
 
         instance = implementation;
