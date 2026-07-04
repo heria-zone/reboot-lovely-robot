@@ -4,9 +4,9 @@
     "layer0": "lovely_robot:item/honey/honey04"
   },
   "overrides": [
+    { "predicate": {"variant": 0.15}, "model": "lovelylib:item/honey/honey03" },
     { "predicate": {"variant": 0.21}, "model": "lovely_robot:item/honey/honey04" },
     { "predicate": {"variant": 0.33}, "model": "lovelylib:item/honey/honey06" },
-    { "predicate": {"variant": 0.63}, "model": "lovelylib:item/honey/honey11" },
     { "predicate": {"variant": 0.93}, "model": "lovely_robot:item/honey/honey04" }
   ]
 }
