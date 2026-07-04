@@ -1,8 +1,6 @@
 package net.heriazone.lovely_robot;
 
 import net.heriazone.lovely_robot.source.*;
-import net.heriazone.hzlib.api.services.NeoForgeServices;
-import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -49,14 +47,6 @@ public class LovelyTribute {
      * @param modContainer mod container for configuration registration
      */
     public LovelyTribute(IEventBus modEventBus, ModContainer modContainer) {
-        // Initialize platform services first
-        Services.setInstance(new NeoForgeServices());
-
-        // Test platform services functionality
-        Tribute.LOGGER.info("Platform: {}", Services.get().getPlatformName());
-        Tribute.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
-        Tribute.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
-
         // Register configuration system
         TributeConfigs.register(modContainer);
         TributeConfigs.onLoadCallback(TributeRobotFamilies::reloadFromConfig);

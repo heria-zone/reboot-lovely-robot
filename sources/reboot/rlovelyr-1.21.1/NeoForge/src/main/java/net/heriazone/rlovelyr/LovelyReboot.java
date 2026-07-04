@@ -1,7 +1,5 @@
 package net.heriazone.rlovelyr;
 
-import net.heriazone.hzlib.api.services.NeoForgeServices;
-import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.source.reboot.RebootRobotFamilies;
 import net.heriazone.rlovelyr.source.*;
@@ -52,14 +50,6 @@ public class LovelyReboot {
         // Registry must be sealed before any DeferredRegister supplier fires.
         Lovely.onInitialize();
         RebootRobotFamilies.initialize();
-
-        // Initialize platform services first
-        Services.setInstance(new NeoForgeServices());
-
-        // Test platform services functionality
-        Reboot.LOGGER.info("Platform: {}", Services.get().getPlatformName());
-        Reboot.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
-        Reboot.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
 
         // Register configuration system
         RebootConfigs.register(modContainer);

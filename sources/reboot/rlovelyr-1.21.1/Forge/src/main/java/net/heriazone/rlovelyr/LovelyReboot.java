@@ -41,14 +41,6 @@ public class LovelyReboot {
         Lovely.onInitialize();
         RebootRobotFamilies.initialize();
 
-        // Initialize platform services first
-        Services.setInstance(new ForgeServices());
-
-        // Test platform services functionality
-        Reboot.LOGGER.info("Platform: {}", Services.get().getPlatformName());
-        Reboot.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
-        Reboot.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
-
         RebootConfigs.register(context);
         RebootConfigs.onLoadCallback(RebootRobotFamilies::reloadFromConfig);
 

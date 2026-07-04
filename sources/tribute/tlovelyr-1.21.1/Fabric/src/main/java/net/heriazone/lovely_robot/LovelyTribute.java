@@ -4,8 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.lovely_robot.source.*;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.hzlib.api.services.FabricServices;
-import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
 
 /**
@@ -43,8 +41,6 @@ public class LovelyTribute implements ModInitializer, ClientModInitializer {
      */
     @Override
     public void onInitialize() {
-        // Initialize platform services first
-        Services.setInstance(new FabricServices());
         //Tribute.LOGGER.info("Initializing Lovely Tribute for Fabric");
 
         // Initialize common functionality

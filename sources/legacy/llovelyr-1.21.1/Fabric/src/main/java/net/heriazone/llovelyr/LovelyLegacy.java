@@ -5,7 +5,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.llovelyr.source.*;
 import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.hzlib.api.services.*;
 import net.heriazone.lovelylib.source.legacy.LegacyRobotFamilies;
 
 /**
@@ -47,8 +46,6 @@ public class LovelyLegacy implements ModInitializer, ClientModInitializer {
         Lovely.onInitialize();
         LegacyRobotFamilies.initialize();
 
-        // Initialize platform services first
-        Services.setInstance(new FabricServices());
         //Legacy.LOGGER.info("Initializing Lovely Legacy for Fabric");
         
         // Initialize common functionality

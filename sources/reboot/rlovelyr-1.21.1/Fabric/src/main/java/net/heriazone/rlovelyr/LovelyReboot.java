@@ -4,8 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.heriazone.lovelylib.Lovely;
 import net.heriazone.lovelylib.common.commands.LovelyCommandArguments;
-import net.heriazone.hzlib.api.services.FabricServices;
-import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.reboot.RebootRobotFamilies;
 import net.heriazone.rlovelyr.source.*;
 
@@ -48,8 +46,6 @@ public class LovelyReboot implements ModInitializer, ClientModInitializer {
         Lovely.onInitialize();
         RebootRobotFamilies.initialize();
 
-        // Initialize platform services first
-        Services.setInstance(new FabricServices());
         //Reboot.LOGGER.info("Initializing Lovely Reboot for Fabric");
 
         // Initialize common functionality

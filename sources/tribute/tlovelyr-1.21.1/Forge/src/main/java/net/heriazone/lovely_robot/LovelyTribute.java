@@ -1,8 +1,6 @@
 package net.heriazone.lovely_robot;
 
 import net.heriazone.lovely_robot.source.*;
-import net.heriazone.hzlib.api.services.ForgeServices;
-import net.heriazone.hzlib.api.services.Services;
 import net.heriazone.lovelylib.source.tribute.TributeRobotFamilies;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -36,14 +34,6 @@ public class LovelyTribute {
      */
     public LovelyTribute(FMLJavaModLoadingContext context) {
         IEventBus events = context.getModEventBus();
-
-        // Initialize platform services first
-        Services.setInstance(new ForgeServices());
-
-        // Test platform services functionality
-        Tribute.LOGGER.info("Platform: {}", Services.get().getPlatformName());
-        Tribute.LOGGER.info("Development Environment: {}", Services.get().isDevelopmentEnvironment());
-        Tribute.LOGGER.info("Config Directory: {}", Services.get().getConfigDirectory());
 
         TributeConfigs.register(context);
         TributeConfigs.onLoadCallback(TributeRobotFamilies::reloadFromConfig);
