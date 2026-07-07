@@ -1,5 +1,7 @@
 MIT License
 
+Copyright (c) 2024–2026 MSymbios / Heria Zone
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -7,8 +9,13 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Attribution required: Any redistribution or derivative work must include
+clear credit to the original authors listed below and a link to the original
+projects. Credit must be visible in the project description or documentation.
+
+The above copyright notice, this permission notice, and the attribution
+requirement shall be included in all copies or substantial portions of the
+Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -16,4 +23,25 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+Credits
+
+Original mod: Lovely Robot (https://www.curseforge.com/minecraft/mc-mods/lovelyrobot)
+by lilacx02
+
+Bedrock addon reference: Lovely Robots
+(https://www.curseforge.com/minecraft-bedrock/addons/lovelyrobots)
+by Virtualblack867 & D Flog Flag
+
+Rebuilt and extended by: MSymbios / Heria Zone
+
+-------------------------------------------------------------------------------
+
+Note on dependencies:
+
+LovelyLib and HZLib — the libraries used by this mod — are licensed
+separately under the GNU Lesser General Public License v3 (LGPL v3).
+See their respective LICENSE files.
