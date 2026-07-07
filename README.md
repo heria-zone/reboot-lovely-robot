@@ -182,8 +182,8 @@ See [LICENSE](LICENSE) and [CONTRIBUTORS.md](CONTRIBUTORS.md) for full details.
 
 ## Credits
 
-**Original mod:** [Lovely Robot](https://www.curseforge.com/minecraft/mc-mods/lovelyrobot) by **lilacx02**
+**Original mod:** [Lovely Robot](https://www.curseforge.com/minecraft/mc-mods/lovelyrobot) by `lilacx02`
 
-**Bedrock addon reference:** [Lovely Robots](https://www.curseforge.com/minecraft-bedrock/addons/lovelyrobots) by **Virtualblack867 & D Flog Flag**
+**Bedrock addon reference:** [Lovely Robots](https://www.curseforge.com/minecraft-bedrock/addons/lovelyrobots) by `Virtualblack867` & `D Flog Flag`
 
-**Rebuilt by:** MSymbios / Heria Zone
+**Rebuilt by:** `MSymbios` / Heria Zone
