@@ -1,0 +1,109 @@
+name: Bug Report
+description: Something isn't working as expected. Thanks for taking the time to report it.
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hey, thanks for the report! The more detail you give here, the faster we can track it down.
+        Before submitting — check the [existing issues](../issues) to see if this has already been reported.
+
+  - type: input
+    id: lovelylib-version
+    attributes:
+      label: LovelyLib Version
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: hzlib-version
+    attributes:
+      label: HZLib Version
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      placeholder: "e.g. 1.21.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Mod Loader
+      options:
+        - Fabric
+        - Forge
+        - NeoForge
+    validations:
+      required: true
+
+  - type: dropdown
+    id: variant
+    attributes:
+      label: Affected Robot Variant
+      description: Which Lovely Robot variant(s) are you building on or testing with?
+      multiple: true
+      options:
+        - Lovely Legacy
+        - Lovely Tribute
+        - Lovely Reboot
+        - All variants
+        - Not variant-specific
+    validations:
+      required: true
+
+  - type: textarea
+    id: mods-list
+    attributes:
+      label: Other Mods Installed
+      description: List all mods in your instance. Mod conflicts are the most common source of false bug reports.
+      placeholder: "e.g. HZLib 1.0.0, GeckoLib 4.x, Lovely Legacy 1.0.0, ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What Happened?
+      description: A clear description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What Did You Expect to Happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Register a RobotFamily with...
+        2. Call RobotDefinitionRegistry...
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-snippet
+    attributes:
+      label: Code Snippet
+      description: Show how you're using LovelyLib. Many "bugs" are usage issues — this helps us tell the difference fast.
+      render: java
+
+  - type: textarea
+    id: crash-log
+    attributes:
+      label: Crash Log / latest.log
+      description: Paste relevant log output. Find it in `.minecraft/logs/latest.log`.
+      render: text

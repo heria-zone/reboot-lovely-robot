@@ -1,0 +1,66 @@
+name: Feature Request
+description: Have an idea for the robots? We'd love to hear it.
+title: "[FEATURE] "
+labels: ["enhancement", "needs-discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature ideas are always welcome here. Lead with the **use case** — 
+        "I want to do X but currently can't because Y" lands better than "please add Z."
+        
+        If you just want to chat about an idea first, the [Discord](https://discord.gg/KdZZMj89bU) is a great place to start.
+
+  - type: dropdown
+    id: variant
+    attributes:
+      label: Which Mod Is This For?
+      description: Some features only make sense for certain variants. Legacy is the full-feature mod, Tribute is a preservation build (new robot types won't be added there), Reboot is the forward-looking vision.
+      multiple: true
+      options:
+        - Lovely Robot: Legacy
+        - Lovely Robot: Reboot
+        - Lovely Robot: Tribute
+        - All variants
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: What Are You Trying to Do?
+      description: Describe the experience or gameplay goal, not the implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's Currently Preventing It?
+      description: Why can't you do this right now?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: What Would You Like to See?
+      description: Your idea for how this could work. Rough is fine — this is a starting point for discussion.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives You've Considered
+      description: Any workarounds you've tried, or other approaches that might achieve the same goal.
+
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Would This Affect Existing Saves or Robots?
+      description: Features that change robot behaviour or add new data fields have save compatibility implications.
+      options:
+        - "No — purely additive, no save impact"
+        - "Yes — would affect existing saves or robots"
+        - "Not sure"
+    validations:
+      required: true

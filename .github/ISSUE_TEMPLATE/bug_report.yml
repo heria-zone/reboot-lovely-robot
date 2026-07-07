@@ -1,0 +1,119 @@
+name: Bug Report
+description: Something isn't working as expected. Thanks for taking the time to report it.
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hey, thanks for the report! The more detail you give here, the faster we can track it down.
+        Before submitting — check the [existing issues](../issues) to see if this has already been reported.
+
+  - type: dropdown
+    id: variant
+    attributes:
+      label: Which Mod?
+      options:
+        - Lovely Robot: Legacy
+        - Lovely Robot: Tribute
+        - Lovely Robot: Reboot
+        - All variants
+    validations:
+      required: true
+
+  - type: input
+    id: mod-version
+    attributes:
+      label: Mod Version
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: lovelylib-version
+    attributes:
+      label: LovelyLib Version
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: hzlib-version
+    attributes:
+      label: HZLib Version
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft Version
+      placeholder: "e.g. 1.21.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Mod Loader
+      options:
+        - Fabric
+        - Forge
+        - NeoForge
+    validations:
+      required: true
+
+  - type: dropdown
+    id: singleplayer
+    attributes:
+      label: Singleplayer or Multiplayer?
+      options:
+        - Singleplayer
+        - Multiplayer
+        - Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: mods-list
+    attributes:
+      label: Other Mods Installed
+      description: List all mods in your instance. Most bugs come from mod conflicts — this is the first thing we check.
+      placeholder: "e.g. LovelyLib 1.0.0, HZLib 1.0.0, GeckoLib 4.x, ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What Happened?
+      description: A clear description of the bug. What went wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What Did You Expect to Happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Craft a robot core
+        2. Place it in the world
+        3. ...
+        4. See error / crash / wrong behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: crash-log
+    attributes:
+      label: Crash Log / latest.log
+      description: Paste relevant log output here. Find it in `.minecraft/logs/latest.log`. If there's a crash, the full crash report helps most.
+      render: text

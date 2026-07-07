@@ -1,0 +1,72 @@
+name: Feature Request
+description: Have an idea for something LovelyLib should support? Tell us about it.
+title: "[FEATURE] "
+labels: ["enhancement", "needs-discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests are welcome. Lead with the **use case**, not the solution —
+        "I want to do X but currently can't because Y" is more useful than "please add Z."
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: What Are You Trying to Do?
+      description: Describe the goal. What robot behaviour, family feature, or system would this enable?
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's Currently Preventing It?
+      description: What in LovelyLib's current API makes this difficult or impossible?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: What Would You Like to See?
+      description: A rough idea of the solution — new feature, new API, behaviour change, etc.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives You've Considered
+      description: Workarounds you've tried, or other approaches that might solve the problem.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which Part of LovelyLib Does This Affect?
+      multiple: true
+      options:
+        - Robot family / RobotDefinitionRegistry
+        - Animation profiles
+        - AI goals
+        - Save migration / RobotFields
+        - Config system
+        - Items / commands
+        - Multi-loader support
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Would This Be a Breaking Change?
+      options:
+        - "No — purely additive"
+        - "Yes — changes existing API"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: input
+    id: lovelylib-version
+    attributes:
+      label: LovelyLib Version You're On
+      placeholder: "e.g. 1.0.0"

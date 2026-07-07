@@ -1,0 +1,64 @@
+name: API Question
+description: Not sure how to use part of LovelyLib? Start here — but Discord is faster.
+title: "[QUESTION] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Hey — for a faster answer, try the [Heria Zone Discord](https://discord.gg/KdZZMj89bU) `#dev` channel first.**
+        The issue tracker is better for bugs and feature requests. Questions sometimes get lost here.
+
+        That said, if you prefer async — fill this out and we'll get back to you.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What Are You Trying to Do?
+      description: Describe what you're building. Are you adding a new robot family, modifying AI behaviour, extending the migration system?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What Have You Tried?
+      description: Show the code you've written so far. Saves a lot of back and forth.
+      render: java
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's Going Wrong?
+      description: Error message, unexpected behaviour, or just "it doesn't work and I don't know why".
+    validations:
+      required: true
+
+  - type: input
+    id: lovelylib-version
+    attributes:
+      label: LovelyLib Version
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: hzlib-version
+    attributes:
+      label: HZLib Version
+      placeholder: "e.g. 1.0.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Mod Loader
+      options:
+        - Fabric
+        - Forge
+        - NeoForge
+    validations:
+      required: true
