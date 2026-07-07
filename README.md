@@ -1,121 +1,189 @@
 <p align="center">
-    <img width="461" src="https://i.imgur.com/ibMVt4s.png" alt="title">
+    <img width="461" src="https://i.imgur.com/ibMVt4s.png" alt="Lovely Robot">
 </p>
 
-<p align="center">Recreation of the LovelyRobot mod that adds several robot girls to Minecraft</p>
+<p align="center">
+    Robot companions for Minecraft — three variants, one codebase
+</p>
 
 <p align="center">
-    <a href="https://www.curseforge.com/minecraft/mc-mods/reboot-lovelyrobot">
-        <img alt="CurseForge Downloads" src="https://img.shields.io/curseforge/dt/822853?logo=CurseForge">
-    </a>
-    <a href="https://modrinth.com/mod/reboot-lovelyrobot">
-        <img alt="Modrinth Downloads" src="https://img.shields.io/modrinth/dt/aFZGvBS6?logo=Modrinth">
-    </a>
-    <a href="https://discord.gg/KdZZMj89bU">
+    <a href="https://discord.gg/ZmCPM22FCK">
         <img alt="Discord" src="https://img.shields.io/discord/1156134479149158402?logo=Discord">
     </a>
+    <a href="https://github.com/heria-zone/reboot-lovely-robot/issues">
+        <img alt="GitHub Issues" src="https://img.shields.io/github/issues/heria-zone/reboot-lovely-robot">
+    </a>
+    <a href="LICENSE">
+        <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
+    </a>
 </p>
 
 <p align="center">
-    <a href="https://github.com/heria-zone/reboot-lovely-robot/issues">Issues</a> ·
-    <a href="#">Wiki (Coming...)</a> ·
+    <a href="#lovely-robot-legacy">Legacy</a> ·
+    <a href="#lovely-robot-tribute">Tribute</a> ·
+    <a href="#lovely-robot-reboot">Reboot</a> ·
+    <a href="#dependencies">Dependencies</a> ·
     <a href="#installation">Installation</a> ·
-    <a href="#moving-forward">Roadmap</a>
+    <a href="#contributing">Contributing</a>
 </p>
+
+---
 
 ## About
 
-This is a recreation of the beloved LovelyRobot mod, bringing adorable robot companions to your Minecraft world. This mod adds various robot types with customizable colors and features, maintaining the charm of the original while expanding functionality.
+Lovely Robot is a robot companion mod family for Minecraft. Craft a robot, name her, bring her along — and watch what changes when you actually spend time together.
 
-## Features
+This is a monorepo hosting three parallel variants that share a common codebase via [HZLib](https://github.com/heria-zone/hzlib) and [LovelyLib](https://modrinth.com/mod/lovelylib). Each variant is a separate published mod with its own identity and scope.
 
-- **Multiple Robot Types**: Vanilla, Honey, Bunny, Bunny2, Dragon, Neko, and Kitsune variants
-- **16x Color Variations**: Extensive customization options for each robot type
-- **Smooth Animations**: Powered by GeckoLib for fluid robot movements and interactions
-- **Vanilla-Friendly**: Seamlessly integrates with base Minecraft gameplay
-- **Cross-Platform**: Available on both CurseForge and Modrinth
+---
 
-## Requirements
+## The Three Variants
 
-- **Minecraft Forge**: Required for mod loading
-- **GeckoLib**: Required dependency for animations and rendering
-  - [CurseForge](https://www.curseforge.com/minecraft/mc-mods/geckolib) | [Modrinth](https://modrinth.com/mod/geckolib)
+---
+
+### Lovely Legacy
+
+<p>
+    <a href="https://www.curseforge.com/minecraft/mc-mods/lovely-legacy">
+        <img alt="CurseForge Downloads" src="https://img.shields.io/curseforge/dt/1595115?logo=CurseForge">
+    </a>
+    <a href="https://modrinth.com/mod/NNG8nMth">
+        <img alt="Modrinth Downloads" src="https://img.shields.io/modrinth/dt/NNG8nMth?logo=Modrinth">
+    </a>
+</p>
+
+The current-generation experience. All the robots, all the features, expanded and updated — but still recognisably the mod you remember.
+
+**8 robot types:** Vanilla · Honey · Bunny · Bunny2 · Bunny3 · Dragon · Neko · Kitsune — all in 16 dye colours.
+
+**Features:**
+- Levelling system with type-specific caps and XP bonus for named robots
+- Protection system — fire, fall, blast, projectile resistance with enchantment integration
+- Smart Core Retrieval — core auto-flies to inventory on death
+- Base Defense Scan — 4 patrol patterns (FULL_SCAN, DOUBLE_SWEEP, QUADRANT_CHECK, RANDOM_POINTS)
+- Sitting pose animation with dynamic hitbox and vehicle support
+- Core glow — colour-coded scoreboard team system
+- `/llovely` command tree — list, summon, teleport, stats, config
+
+**Minecraft 1.21.1 · Fabric · Forge · NeoForge**
+
+---
+
+### Lovely Tribute
+
+<p>
+    <a href="https://www.curseforge.com/minecraft/mc-mods/lovely-tribute">
+        <img alt="CurseForge Downloads" src="https://img.shields.io/curseforge/dt/1595114?logo=CurseForge">
+    </a>
+    <a href="https://modrinth.com/mod/ozWMGtmN">
+        <img alt="Modrinth Downloads" src="https://img.shields.io/modrinth/dt/ozWMGtmN?logo=Modrinth">
+    </a>
+</p>
+
+A faithful recreation of lilacx02's original companion mod. The same four robots, their original colours, their original feel — modernised to run on current Minecraft versions. This version exists to preserve what was built.
+
+**4 robot types:** Vanilla · Honey · Bunny · Bunny2 — original colour palettes, no expanded palette.
+
+**Minecraft 1.21.1 · Fabric · Forge · NeoForge**
+
+---
+
+### Lovely Reboot
+
+<p>
+    <a href="https://www.curseforge.com/minecraft/mc-mods/lovely-reboot">
+        <img alt="CurseForge Downloads" src="https://img.shields.io/curseforge/dt/822853?logo=CurseForge">
+    </a>
+    <a href="https://modrinth.com/mod/aFZGvBS6">
+        <img alt="Modrinth Downloads" src="https://img.shields.io/modrinth/dt/aFZGvBS6?logo=Modrinth">
+    </a>
+</p>
+
+The forward-looking branch. Where the vision is being built. New robots, new mechanics, the Assembly Station — more to come.
+
+**Current exclusive robots:**
+- **Empyrium** — cold-gold apex; blocks all item interaction
+- **Hyperion** — toggles Commander / Valkyrie forms with a Blaze Rod
+- **Prime** — seven-colour Aldarian palette cycling with a Blaze Rod
+
+**Minecraft 1.21.1 · Fabric · Forge · NeoForge** *(in active development)*
+
+---
+
+## Dependencies
+
+All three variants require the same three libraries:
+
+| Library | CurseForge | Modrinth |
+|---|---|---|
+| **HZLib** | [1586461](https://www.curseforge.com/minecraft/mc-mods/hzlib) | [KxsiDURd](https://modrinth.com/mod/hzlib) |
+| **LovelyLib** | [1586602](https://www.curseforge.com/minecraft/mc-mods/lovelylib) | [bakhGE6B](https://modrinth.com/mod/lovelylib) |
+| **GeckoLib** | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/geckolib) | [Modrinth](https://modrinth.com/mod/geckolib) |
+
+---
 
 ## Installation
 
-1. Install Minecraft Forge for your version
-2. Download and install **GeckoLib** (required dependency):
-   - [CurseForge](https://www.curseforge.com/minecraft/mc-mods/geckolib) | [Modrinth](https://modrinth.com/mod/geckolib)
-3. Download LovelyRobot Reboot from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/reboot-lovelyrobot) or [Modrinth](https://modrinth.com/mod/reboot-lovelyrobot)
-4. Place both `.jar` files in your `mods` folder
-5. Launch Minecraft and enjoy your robot companions!
+1. Download your chosen variant (Legacy, Tribute, or Reboot) from CurseForge or Modrinth
+2. Download **HZLib**, **LovelyLib**, and **GeckoLib**
+3. Place all `.jar` files in your `mods` folder
+4. Launch Minecraft
 
-## Supported Versions
+---
 
-Currently supports Minecraft versions: 1.12.2, 1.16.2, 1.19.2, 1.19.4, 1.20.1, 1.21.x</p>
+## Monorepo Structure
 
-<parameter name="newStr">
+```
+sources/
+├── legacy/          ← Lovely Robot: Legacy
+├── tribute/         ← Lovely Robot: Tribute
+├── reboot/          ← Lovely Robot: Reboot
+└── common/
+    ├── lovelylib-1.21.1/   ← LovelyLib (robot shared library)
+    └── hzlib-1.21.1/       ← HZLib (general shared library)
+```
 
-## Moving Forward
+Each variant shares the Common module via LovelyLib and HZLib. Loader modules (Fabric/, Forge/, NeoForge/) contain only loader-specific registration code.
 
-We have exciting plans for the future of LovelyRobot with three distinct versions to serve different player preferences:
+---
 
-### 🏆 LovelyRobot: Tribute
+## Version Support
 
-A faithful recreation of the original mod to honor lilacx02's amazing work. This version features:
+| Minecraft | Fabric | Forge | NeoForge |
+|-----------|--------|-------|----------|
+| 1.21.1    | ✅ v1.0.0 | ✅ v1.0.0 | ✅ v1.0.0 |
+| 1.20.1    | Planned | Planned | — |
+| 1.19.4 → 1.16.5 | Planned | Planned | — |
+| 1.12.2    | — | Planned | — |
+| 1.7.10    | — | Planned | — |
 
-- **Pure Nostalgia**: Exact replica of the original mod experience
-- **Classic Robots**: Only the original four robots (Vanilla, Honey, Bunny, Bunny2)
-- **Original Colors**: Authentic color schemes, not the expanded 16x palette
-- **Legacy Support**: Available for older Minecraft versions
-
-**Supported Versions**: 1.7.10, 1.12.2, 1.16.2, 1.19.2, 1.19.4, 1.20.1, 1.21.x
-
-### 🎨 LovelyRobot: Legacy
-
-The current reboot version with enhanced features while maintaining vanilla compatibility:
-
-- **Expanded Roster**: Original 4 robots plus 3 addon types (Dragon, Neko, Kitsune)
-- **16x Color Palette**: Extensive customization options for all robot types
-- **Vanilla-Friendly**: Seamless integration with base Minecraft
-- **Balanced Experience**: Perfect for players who want more without overwhelming complexity
-
-**Supported Versions**: 1.7.10, 1.12.2, 1.16.2, 1.19.2, 1.19.4, 1.20.1, 1.21.x
-
-### 🚀 LovelyRobot: Reboot 2.0
-
-The future of LovelyRobot with advanced features and mechanics:
-
-- **Robot Creator**: Build and customize your own robot companions
-- **Advanced Systems**: Assembly, recall, terminal, and path-finding features
-- **New Elements**: Frames, components, and modular robot construction
-- **Expanded Universe**: Additional robot types and advanced interactions
-
-**Supported Versions**: 1.12.2, 1.16.2, 1.19.2, 1.19.4, 1.20.1, 1.21.x
+---
 
 ## Contributing
 
-We welcome contributions! Please feel free to:
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
-- Report bugs via [Issues](https://github.com/heria-zone/reboot-lovely-robot/issues)
-- Join our [Discord community](https://discord.gg/KdZZMj89bU) for discussions
-- Submit pull requests for improvements
+---
 
-## Support
+## Issues
 
-- 📋 **Issues**: [GitHub Issues](https://github.com/heria-zone/reboot-lovely-robot/issues)
-- 💬 **Discord**: [Join our community](https://discord.gg/KdZZMj89bU)
-- 📖 **Wiki**: Coming soon...
+[GitHub Issues](https://github.com/heria-zone/reboot-lovely-robot/issues)
 
-## Authors
-
-- **Programmer**: `MSymbios!`
-
-## Credits
-
-- **`lilacx02`**: Original creator of [LovelyRobot](https://www.curseforge.com/minecraft/mc-mods/lovelyrobot)
-- **`D Flog Flag` & `VirtualBlack8`**: Creators of the Minecraft Bedrock Edition addon [LovelyRobotsPE Project](https://mcpedl.com/lovelyrobotspe-add-on/)
+---
 
 ## License
 
-This project is licensed under the [MIT License](https://www.mit.edu/~amini/LICENSE.md).
+The **source code** of this project is licensed under the [MIT License](LICENSE).
+Art assets are sourced from the original mods by **lilacx02** and **Virtualblack867 & D Flog Flag**, used under their MIT license with attribution.
+
+See [LICENSE](LICENSE) and [CONTRIBUTORS.md](CONTRIBUTORS.md) for full details.
+
+---
+
+## Credits
+
+**Original mod:** [Lovely Robot](https://www.curseforge.com/minecraft/mc-mods/lovelyrobot) by **lilacx02**
+
+**Bedrock addon reference:** [Lovely Robots](https://www.curseforge.com/minecraft-bedrock/addons/lovelyrobots) by **Virtualblack867 & D Flog Flag**
+
+**Rebuilt by:** MSymbios / Heria Zone
