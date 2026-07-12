@@ -1,0 +1,34 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+
+        maven {
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+    }
+}
+
+// Note: foojay-resolver-convention and exclusiveContent/includeGroupAndSubgroups
+// are not available on Gradle 7.2 — ForgeGradle 5.1.+ requires Gradle 7.x
+// VanillaGradle is NOT used — it requires Gradle 9.2+ and is incompatible with Gradle 7.2
+
+def includeModloader(String name) {
+    // If building with Github Actions, only include loader we want!
+    String targetLoader = System.getenv("CI") ? System.getenv("TARGET_LOADER") : null
+    if (targetLoader == null || targetLoader == name) {
+        include(name)
+    }
+}
+
+rootProject.name = "${mod_name} ${minecraft_version}"
+include("Common")
+includeModloader("Fabric")
+includeModloader("Forge")
+// NeoForge did not exist for Minecraft 1.16.5

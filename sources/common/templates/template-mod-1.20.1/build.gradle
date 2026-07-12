@@ -1,0 +1,174 @@
+plugins {
+    id 'fabric-loom' version "${loom_version}" apply false
+    id 'net.minecraftforge.gradle' version "${gradle_version}" apply false
+}
+
+subprojects {
+    apply plugin: 'java'
+    
+    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+    jar {
+        manifest {
+            attributes([
+                "Specification-Title": "${mod_id}",
+                "Specification-Vendor": "${mod_authors}",
+                "Specification-Version": "1",
+                "Implementation-Title": "${mod_name}",
+                "Implementation-Version": "${mod_version}",
+                "Implementation-Vendor": "${mod_authors}",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            ])
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        
+        maven {
+            name = 'GeckoLib'
+            url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        }
+        
+        maven {
+            url "https://cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+        
+        // Local library dependencies — always resolved from root project
+        flatDir {
+            dirs rootProject.file('libs')
+        }
+        
+        // Development: LovelyLib build output (fallback — per-loader, rooted at project root)
+        if (rootProject.hasProperty('lovelylib_project_path')) {
+            def lovelylibBase = rootProject.file(rootProject.lovelylib_project_path)
+            flatDir {
+                dirs new File(lovelylibBase, 'Common/build/libs')
+                dirs new File(lovelylibBase, 'Fabric/build/libs')
+                dirs new File(lovelylibBase, 'Forge/build/libs')
+            }
+        }
+
+        // Development: HZLib build output (fallback — per-loader, rooted at project root)
+        if (rootProject.hasProperty('hzlib_project_path')) {
+            def hzlibBase = rootProject.file(rootProject.hzlib_project_path)
+            flatDir {
+                dirs new File(hzlibBase, 'Common/build/libs')
+                dirs new File(hzlibBase, 'Fabric/build/libs')
+                dirs new File(hzlibBase, 'Forge/build/libs')
+            }
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = 'UTF-8'
+        it.options.release = 17
+    }
+
+    tasks.withType(GenerateModuleMetadata) {
+        enabled = false
+    }
+    
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+// Task to refresh dependencies from LovelyLib and HZLib
+task refreshDependencies {
+    description = 'Copy latest LovelyLib and HZLib JARs from build output to local libs directory'
+    group = 'dependencies'
+    
+    doLast {
+        def libsDir = file('libs')
+        libsDir.mkdirs()
+
+        // ── LovelyLib ──────────────────────────────────────────────────────────
+        if (project.hasProperty('lovelylib_project_path')) {
+            def lovelyLibProject = file(lovelylib_project_path)
+            if (!lovelyLibProject.exists()) {
+                throw new GradleException("LovelyLib project not found at: ${lovelylib_project_path}")
+            }
+
+            println "Building LovelyLib..."
+            exec {
+                workingDir lovelyLibProject
+                commandLine './gradlew', 'build'
+            }
+
+            // LovelyLib produces per-loader JARs under each loader's build/libs
+            ['Common', 'Fabric', 'Forge'].each { loader ->
+                def buildDir = file("${lovelylib_project_path}/${loader}/build/libs")
+                if (buildDir.exists()) {
+                    copy {
+                        from buildDir
+                        into libsDir
+                        include '*.jar'
+                        exclude '*-sources.jar'
+                        exclude '*-javadoc.jar'
+                        exclude '*-dev.jar'
+                    }
+                }
+            }
+            println "Copied LovelyLib JARs to libs/"
+        }
+
+        // ── HZLib ──────────────────────────────────────────────────────────────
+        if (project.hasProperty('hzlib_project_path')) {
+            def hzLibProject = file(hzlib_project_path)
+            if (!hzLibProject.exists()) {
+                throw new GradleException("HZLib project not found at: ${hzlib_project_path}")
+            }
+
+            println "Building HZLib..."
+            exec {
+                workingDir hzLibProject
+                commandLine './gradlew', 'build'
+            }
+
+            // HZLib produces per-loader JARs under each loader's build/libs
+            ['Common', 'Fabric', 'Forge'].each { loader ->
+                def buildDir = file("${hzlib_project_path}/${loader}/build/libs")
+                if (buildDir.exists()) {
+                    copy {
+                        from buildDir
+                        into libsDir
+                        include '*.jar'
+                        exclude '*-sources.jar'
+                        exclude '*-javadoc.jar'
+                        exclude '*-dev.jar'
+                    }
+                }
+            }
+            println "Copied HZLib JARs to libs/"
+        }
+    }
+}
+
+// Task to build with refreshed dependencies
+task buildWithDeps {
+    description = 'Refresh dependencies and build the project'
+    group = 'build'
+    dependsOn 'refreshDependencies', 'build'
+}
+
+// Task to run client with refreshed dependencies
+task runClientWithDeps {
+    description = 'Refresh dependencies and run client'
+    group = 'application'
+    dependsOn 'refreshDependencies'
+    
+    doLast {
+        if (project.findProject(':Fabric')) {
+            project(':Fabric').tasks.runClient.execute()
+        } else if (project.findProject(':Forge')) {
+            project(':Forge').tasks.runClient.execute()
+        } else {
+            throw new GradleException("No loader subproject found to run client")
+        }
+    }
+}

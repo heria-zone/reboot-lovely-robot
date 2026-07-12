@@ -1,0 +1,70 @@
+plugins {
+    id 'multiloader-common'
+}
+
+// Common module for MC 1.16.5
+// VanillaGradle is NOT used here — it requires Gradle 9.2+ and cannot run on Gradle 7.2.
+// Minecraft classes are provided at compile time through the loader subprojects:
+//   - Forge:  FG5 deobf runtime provides MC classes to compileOnly(project(':Common'))
+//   - Fabric: loom provides MC classes to compileOnly(project(':Common'))
+// Common code must only reference vanilla MC classes that exist in both loaders.
+
+dependencies {
+    // Log4j 2 — provided at runtime by Minecraft (both Forge and Fabric bundle it).
+    // Declared compileOnly so Common can compile; do NOT include in the output JAR.
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.15.0'
+
+    // Add common dependencies here (non-Minecraft).
+    // Minecraft classes are NOT available here directly — write loader-agnostic
+    // code in Common and use MC APIs only inside the Forge/Fabric subprojects.
+    //
+    // If you need MC classes in Common, add them as compileOnly via a local
+    // client jar — see the project README for instructions.
+}
+
+configurations {
+    commonJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    commonResources {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
+
+artifacts {
+    commonJava sourceSets.main.java.sourceDirectories.singleFile
+    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            pom {
+                name = "${mod_name} Common"
+                description = "${mod_description}"
+                url = "${mod_homepage}"
+
+                licenses {
+                    license {
+                        name = "${mod_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = "${mod_authors}"
+                    }
+                }
+
+                scm {
+                    url = "${mod_source}"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,129 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${mod_id}-${project.name.toLowerCase()}"
+}
+
+version = "${minecraft_version}-${mod_version}"
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(java_version))
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+    
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Sponge'
+                url = uri('https://repo.spongepowered.org/repository/maven-public')
+            }
+        }
+        filter {
+            includeGroupAndSubgroups("org.spongepowered")
+        }
+    }
+    
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+    }
+    
+    // Local library dependencies
+    flatDir {
+        dirs rootProject.file('libs')  // Local JARs directory
+    }
+}
+
+dependencies {
+    // Local library dependencies using flatDir - only if JARs exist
+    // Only include common jars for the Common module, not for loader-specific modules
+    if (project.name == 'Common' && project.hasProperty('depends_on_lovelylib') && depends_on_lovelylib.toBoolean()) {
+        def lovelyLibJar = rootProject.file("libs/lovelylib-common-${minecraft_version}-${lovelylib_version}.jar")
+        if (lovelyLibJar.exists()) {
+            api name: "lovelylib-common-${minecraft_version}-${lovelylib_version}", version: ''
+        } else {
+            logger.warn("LovelyLib Common JAR not found: ${lovelyLibJar.path}. Run 'gradle refreshDependencies' first.")
+        }
+    } else if (project.name == 'Common' && project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibJar = rootProject.file("libs/hzlib-common-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibJar.exists()) {
+            api name: "hzlib-common-${minecraft_version}-${hzlib_version}", version: ''
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = Integer.parseInt(java_version)
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
+// Declare capabilities on the outgoing configurations.
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations."$variant".outgoing {
+        capability("$group:$mod_id-${project.name}:$version")
+        capability("$group:$mod_id:$version")
+    }
+    publishing.publications.configureEach {
+        suppressPomMetadataWarningsFor(variant)
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "${mod_id}",
+            "Specification-Vendor": "${mod_authors}",
+            "Specification-Version": "1",
+            "Implementation-Title": "${mod_name}",
+            "Implementation-Version": "${mod_version}",
+            "Implementation-Vendor": "${mod_authors}",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+processResources {
+    // Build the base set of properties all versions share
+    def expandProps = [
+            "group"              : project.group,
+            "version"            : project.version,
+            "minecraft_version"  : minecraft_version,
+            "minecraft_version_range": minecraft_version_range,
+            "fabric_loader_version": fabric_loader_version,
+            "forge_version"      : forge_version,
+            "forge_version_range": forge_version_range,
+            "loader_version_range": loader_version_range,
+            "mod_name"           : mod_name,
+            "mod_version"        : mod_version,
+            "mod_authors"        : mod_authors,
+            "mod_id"             : mod_id,
+            "mod_group"          : mod_group,
+            "mod_license"        : mod_license,
+            "mod_description"    : mod_description,
+            "mod_homepage"       : mod_homepage,
+            "mod_source"         : mod_source,
+            "mod_issues"         : mod_issues,
+            "java_version"       : java_version,
+            // java_level is optional — not present in all gradle.properties
+            "java_level"         : project.hasProperty('java_level') ? java_level : "JAVA_${java_version}",
+            // fabric_api_version is optional for older MC versions
+            "fabric_api_version" : project.hasProperty('fabric_api_version') ? fabric_api_version : ''
+    ]
+
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/mods.toml', '*.mixins.json']) {
+        expand expandProps
+    }
+
+    inputs.properties(expandProps)
+}
