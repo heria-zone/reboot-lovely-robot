@@ -24,8 +24,8 @@ classes
 
 # other
 eclipse
-run
-runs
+**/run/
+**/runs/
 
 # java
 hs_err_*.log
@@ -47,6 +47,7 @@ forge*changelog.txt
 /docs/assessment/
 /temp/
 /sources/monsters/
+/sources/reignitedhud/
 /sources/common/backup/
 
 
