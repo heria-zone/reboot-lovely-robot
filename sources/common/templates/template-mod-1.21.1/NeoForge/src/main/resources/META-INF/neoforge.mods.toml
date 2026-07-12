@@ -1,0 +1,34 @@
+modLoader="javafml"
+loaderVersion="${neoforge_loader_version_range}"
+license="${mod_license}"
+issueTrackerURL="${mod_issues}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+description='''${mod_description}'''
+authors="${mod_authors}"
+displayURL="${mod_homepage}"
+
+[[dependencies.${mod_id}]]
+modId="neoforge"
+type="required"
+versionRange="${neoforge_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="minecraft"
+type="required"
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
+
+# Template dependencies - customize as needed
+# [[dependencies.${mod_id}]]
+# modId="your_dependency"
+# type="required"
+# versionRange="[1.0.0,)"
+# ordering="NONE"
+# side="BOTH"

@@ -1,0 +1,121 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+    
+    // GeckoLib for NeoForge (if needed)
+    if (project.hasProperty('needs_geckolib') && needs_geckolib.toBoolean()) {
+        implementation "software.bernie.geckolib:${neoforge_geckolib}"
+    }
+    
+    // Local library dependencies (NeoForge versions) - only if JARs exist
+    if (project.hasProperty('depends_on_lovelylib') && depends_on_lovelylib.toBoolean()) {
+        def lovelyLibBuildJar = rootProject.hasProperty('lovelylib_project_path')
+                ? new File(rootProject.file(rootProject.lovelylib_project_path), "NeoForge/build/libs/lovelylib-neoforge-${minecraft_version}-${lovelylib_version}.jar")
+                : null
+        def lovelyLibLocalJar = rootProject.file("libs/lovelylib-neoforge-${minecraft_version}-${lovelylib_version}.jar")
+        if (lovelyLibLocalJar.exists() || (lovelyLibBuildJar != null && lovelyLibBuildJar.exists())) {
+            implementation name: "lovelylib-neoforge-${minecraft_version}-${lovelylib_version}", version: ''
+        } else {
+            logger.warn("LovelyLib NeoForge JAR not found. Run 'gradle refreshDependencies' first.")
+        }
+    }
+
+    if (project.hasProperty('depends_on_hzlib') && depends_on_hzlib.toBoolean()) {
+        def hzLibBuildJar = rootProject.hasProperty('hzlib_project_path')
+                ? new File(rootProject.file(rootProject.hzlib_project_path), "NeoForge/build/libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
+                : null
+        def hzLibLocalJar = rootProject.file("libs/hzlib-neoforge-${minecraft_version}-${hzlib_version}.jar")
+        if (hzLibLocalJar.exists() || (hzLibBuildJar != null && hzLibBuildJar.exists())) {
+            implementation name: "hzlib-neoforge-${minecraft_version}-${hzlib_version}", version: ''
+        } else {
+            logger.warn("HZLib NeoForge JAR not found. Run 'gradle refreshDependencies' first.")
+        }
+    }
+    
+
+}
+
+neoForge {
+    version = neoforge_version
+    
+    runs {
+        client {
+            client()
+        }
+        
+        server {
+            server()
+        }
+    }
+    
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+processResources {
+    var replaceProperties = [
+            minecraft_version: minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neoforge_version: neoforge_version,
+            neoforge_version_range: neoforge_version_range,
+            neoforge_loader_version_range: neoforge_loader_version_range,
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_license: mod_license,
+            mod_version: mod_version,
+            mod_authors: mod_authors,
+            mod_description: mod_description,
+            mod_homepage: mod_homepage,
+            mod_source: mod_source,
+            mod_issues: mod_issues,
+            mod_group: mod_group,
+            lovelylib_version: lovelylib_version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
+
+    filesMatching("${mod_id}.mixins.json") {
+        expand replaceProperties
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = "${mod_name} NeoForge"
+                description = "${mod_description} - NeoForge implementation"
+                url = "${mod_homepage}"
+                
+                licenses {
+                    license {
+                        name = "${mod_license}"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                
+                developers {
+                    developer {
+                        name = "${mod_authors}"
+                    }
+                }
+                
+                scm {
+                    url = "${mod_source}"
+                }
+            }
+        }
+    }
+}
