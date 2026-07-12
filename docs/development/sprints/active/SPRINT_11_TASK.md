@@ -245,3 +245,61 @@ Only delete these after Phase 1 and Phase 2 verify successfully. They are supers
 ### Monsters & Girls — modified
 - Each family class — `configureSchema()` + `baseTextureCount` declaration
 - `MonsterEntity.java` — `provideFieldValue` / `consumeFieldValue`, remove legacy flat-write code
+
+---
+
+## Unforeseen Work — Template Environment Setup (1.20.1 & 1.16.5)
+
+**Added**: 2026-07-11  
+**Reason**: The `template-mod-1.20.1` and `template-mod-1.16.5` directories were created by copying `template-mod-1.21.1` but were never updated — every version number, loader plugin, and GeckoLib coordinate still pointed at 1.21.1. Additionally, a comparative audit of all production mods against the base template revealed several deviations that had accumulated in production but were never propagated back to the template.
+
+### Completed Tasks
+
+- [x] **Audit all production mods against template-mod-1.21.1** — identified 4 structural deviations that needed back-propagation
+- [x] **template-mod-1.20.1 — gradle.properties**: Java 17, Forge 47.1.46, FG `[47,)`, official mappings 1.20.1, GeckoLib 4.2.2 (Forge + Fabric), fabric-loom 1.0-SNAPSHOT, fabric-loader 0.14.22, fabric-yarn 1.20.1+build.10, fabric-api 0.83.0+1.20.1. NeoForge properties removed. Added `hzlib_project_path`. Updated `lovelylib_project_path` to `1.20.1`.
+- [x] **template-mod-1.20.1 — build.gradle**: fabric-loom 1.0-SNAPSHOT plugin, FG `[5.1.+,6.0)` plugin, NeoForge plugin removed, Java 17, production-grade `refreshDependencies` handling both HZLib and LovelyLib via per-loader `build/libs` dirs (Common/Fabric/Forge only), excludes `*-dev.jar`. Repository block uses `rootProject.file()` + per-loader flatDir for both libs.
+- [x] **template-mod-1.20.1 — settings.gradle**: NeoForge `exclusiveContent` repo block removed, `includeModloader("NeoForge")` removed, explanatory comment added.
+- [x] **template-mod-1.20.1 — Forge/build.gradle**: FG `[5.1.+,6.0)` plugin, `reobf=false` removed (not valid for FG5), `reobfJar` finalizer added, dual-path dependency resolution for both LovelyLib and HZLib (checks build JAR path OR local libs path).
+- [x] **template-mod-1.20.1 — Fabric/build.gradle**: dual-path dependency resolution for both LovelyLib and HZLib (same pattern as Forge).
+- [x] **template-mod-1.20.1 — NeoForge/**: directory deleted entirely (NeoForge did not exist for MC 1.20.1).
+- [x] **template-mod-1.20.1 — buildSrc/multiloader-common.gradle**: `neoforge_*` properties removed from `processResources` expand map, `fabric_api_version` guarded with `project.hasProperty()`, `java_level` guarded with `project.hasProperty()` fallback to `"JAVA_${java_version}"`, NeoForge `mods.toml` removed from `filesMatching`.
+- [x] **template-mod-1.20.1 — gradle-wrapper.properties**: upgraded to Gradle 8.8.
+- [x] **template-mod-1.16.5 — gradle.properties**: Java 16, Forge 36.2.34, FG `[36,)`, official mappings 1.16.5, GeckoLib 3.0.106 (Forge) / 3.0.107 (Fabric), fabric-loom 0.8-SNAPSHOT, fabric-loader 0.14.21, yarn `1.16.5+build.10:v2`. No `fabric_api_version` (bundled in 1.16.5). NeoForge properties removed. Added `hzlib_project_path`. `lovelylib_project_path` set to `1.16.5`.
+- [x] **template-mod-1.16.5 — build.gradle**: fabric-loom 0.8-SNAPSHOT plugin, FG `5.1.+` plugin, NeoForge plugin removed, Java 16, production-grade `refreshDependencies` for HZLib and LovelyLib (Common/Fabric/Forge dirs), excludes `*-dev.jar`.
+- [x] **template-mod-1.16.5 — settings.gradle**: NeoForge repo + `includeModloader` removed, explanatory comment added.
+- [x] **template-mod-1.16.5 — Forge/build.gradle**: FG `5.1.+` plugin, old-style run configs with `mods {}` block (1.16.5 style), `reobfJar` finalizer, dual-path dependency resolution.
+- [x] **template-mod-1.16.5 — Fabric/build.gradle**: yarn mappings (not `officialMojangMappings()` — not available in loom 0.8), no fabric-api dep, dual-path dependency resolution.
+- [x] **template-mod-1.16.5 — NeoForge/**: directory deleted entirely (NeoForge did not exist for MC 1.16.5).
+- [x] **template-mod-1.16.5 — buildSrc/multiloader-common.gradle**: same optional-property guards as 1.20.1 — `neoforge_*` removed, `fabric_api_version` and `java_level` guarded.
+- [x] **template-mod-1.16.5 — gradle-wrapper.properties**: upgraded to Gradle 8.8.
+
+### Back-Propagated to template-mod-1.21.1
+
+The following deviations from the 1.21.1 base template were found in production mods and back-propagated:
+
+- [x] **build.gradle — repositories block**: changed from naive `flatDir { dirs 'libs' }` to `rootProject.file('libs')` + per-loader build output dirs for both LovelyLib and HZLib via `flatDir` entries (Common/Fabric/Forge/NeoForge).
+- [x] **build.gradle — refreshDependencies task**: extended to handle **both** HZLib and LovelyLib (previously only handled LovelyLib). Now iterates `['Common','Fabric','Forge','NeoForge']` loaders for each library, excludes `*-dev.jar`.
+- [x] **Forge/build.gradle — dependency resolution**: upgraded from single-path `lovelyLibJar.exists()` check to dual-path (`lovelyLibLocalJar.exists() || lovelyLibBuildJar.exists()`). HZLib branch changed from `else if` (mutually exclusive with LovelyLib) to independent `if` block. Same pattern applied.
+- [x] **Fabric/build.gradle — dependency resolution**: same dual-path upgrade and HZLib independence fix as Forge.
+- [x] **NeoForge/build.gradle — dependency resolution**: same dual-path upgrade and HZLib independence fix.
+- [x] **buildSrc/multiloader-common.gradle — processResources**: `java_level` made optional with `project.hasProperty('java_level')` guard to maintain compatibility with library projects (HZLib) that omit this property.
+- [x] **gradle.properties**: added `hzlib_project_path=../../common/hzlib-1.21.1` alongside the existing `lovelylib_project_path`.
+
+### Key Version Reference Table
+
+| Property | 1.16.5 | 1.20.1 | 1.21.1 |
+|---|---|---|---|
+| Java | 8 | 17 | 21 |
+| Forge | 36.2.42 | 47.4.0 | 52.1.0 |
+| ForgeGradle plugin | `5.1.+` | `[6.0,6.2)` via `${gradle_version}` | `[6.0.24,6.2)` via `${gradle_version}` |
+| FG plugin property | hardcoded in `Forge/build.gradle` | `gradle_version=[6.0,6.2)` in `gradle.properties` | `gradle_version=[6.0.24,6.2)` in `gradle.properties` |
+| Gradle wrapper | **7.2** (FG5 cap) | 8.8 | 8.10 |
+| reobfJar | required | required | not needed (`reobf=false`) |
+| NeoForge | — | — | 21.1.214 |
+| fabric-loom | `0.7-SNAPSHOT` | `1.1-SNAPSHOT` via `${loom_version}` | `1.7-SNAPSHOT` via `${loom_version}` |
+| fabric-loader | 0.11.3 | 0.17.3 | 0.16.9 |
+| Fabric mappings | **yarn** `1.16.5+build.9:v2` (officialMojangMappings not in loom 0.7) | `loom.officialMojangMappings()` | `loom.officialMojangMappings()` |
+| fabric-api | `0.34.2+1.16` | `0.92.6+1.20.1` | `0.105.0+1.21.1` |
+| GeckoLib (Forge) | `geckolib-forge-1.16.5:3.0.106` | `geckolib-forge-1.20.1:4.2.2` | `geckolib-forge-1.21.1:4.7.3` |
+| GeckoLib (Fabric) | `geckolib-fabric-1.16.5:3.0.107` | `geckolib-fabric-1.20.1:4.2.2` | `geckolib-fabric-1.21.1:4.7.3` |
+| GeckoLib (NeoForge) | — | — | `geckolib-neoforge-1.21.1:4.7.3` |
