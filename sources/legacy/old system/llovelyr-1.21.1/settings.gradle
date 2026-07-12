@@ -61,7 +61,7 @@ plugins {
 
 def includeModloader(String name) {
     // If building with Github Actions, only include loader we want!
-    String targetLoader = Boolean.getBoolean("CI") ? System.getenv("TARGET_LOADER") : null
+    String targetLoader = System.getenv("CI") ? System.getenv("TARGET_LOADER") : null
     if(targetLoader == null || targetLoader == name) {
         include(name)
     }
