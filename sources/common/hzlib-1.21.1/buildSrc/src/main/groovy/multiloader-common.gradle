@@ -4,7 +4,7 @@ plugins {
 }
 
 base {
-    archivesName = "${lib_id}-${project.name}"
+    archivesName = "${lib_id}-${project.name.toLowerCase()}"
 }
 
 version = "${minecraft_version}-${lib_version}"
